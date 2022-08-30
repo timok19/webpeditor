@@ -27,4 +27,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-        python .\webpeditor\manage.py test
+        cd webpeditor
+        python manage.py test
