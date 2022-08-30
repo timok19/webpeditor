@@ -15,3 +15,7 @@ Add requirements.txt file:
 Install project:
 1) In virtual_env -> pip install django
 2) django-admin startproject name_of_project
+
+Start server:
+1) cd webpeditor
+2) python manage.py runserver
