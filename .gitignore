@@ -1,1 +1,8 @@
-webpeditor/__pycache__
+__pycache__
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media
+
+*.bak
