@@ -3,7 +3,7 @@
 __Steps to create:__
 1. Open a folder with the project
 2. `$ pip install pipenv`
-3. In the same directory run command: `$ pipenv shell`
+3. In the same directory run command: `$ pipenv shell` -> to deactivate `$ exit`
 
 __Install project:__
 1. In *virtualenv* *(pipenv)* -> `$ pip install django`
