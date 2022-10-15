@@ -1,0 +1,56 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "react-app",
+    "prettier"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "root": true,
+  "rules": {
+    "no-var": "error",
+    "prefer-const": "warn",
+    "prefer-template": "warn",
+    "import/order": [
+      "warn",
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ],
+    "no-unused-vars": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "off",
+    "@typescript-eslint/array-type": ["warn", { "type": "array-simple" }],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-member-accessibility": "off",
+    "@typescript-eslint/no-angle-bracket-type-assertion": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "@typescript-eslint/no-use-before-define": [
+      "warn",
+      {
+        "functions": false,
+        "classes": false,
+        "variables": true
+      }
+    ],
+    "@typescript-eslint/prefer-optional-chain": "warn",
+    "no-console": "warn"
+  }
+}

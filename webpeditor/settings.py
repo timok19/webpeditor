@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from traceback import print_tb
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
@@ -37,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'compressor',     
+    'compressor',
 ]
 
 
@@ -124,7 +123,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Compressor settings
+# COMPRESSOR SETTINGS
 COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
