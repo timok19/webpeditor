@@ -12,7 +12,7 @@ dist/
 build/
 _gh_pages/
 
-**/static/CACHE/
+static/CACHE/
 **/static/*.css
 **/static/*.js
 **/static/*.map
