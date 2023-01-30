@@ -6,150 +6,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Django + Tailwind CSS + Flowbite</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebP Editor App</title>
 
-    {% compress css %}
-        <link rel="stylesheet" href="{% static 'src/output.css' %}"/>
-    {% endcompress %}
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}" />
+  {% endcompress %}
+  <link rel="icon" href="../static/img/logo/pixoicon.svg">
 
-    <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-        if (localStorage.getItem('color-theme') === 'dark' ||
-            (!('color-theme' in localStorage) &&
-                window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    </script>
+  <script>
+    // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+    if (localStorage.getItem("color-theme") === "dark" ||
+      (!("color-theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  </script>
 </head>
 
 <body class="bg-green-50">
 <nav
-        class="rounded border-gray-200 bg-green-50 px-2 py-2.5 dark:bg-gray-800 sm:px-4"
+  class="rounded border-gray-200 bg-green-50 px-2 py-2.5 dark:bg-gray-800 sm:px-4"
 >
-    <div
-            class="container mx-auto flex flex-wrap items-center justify-between"
+  <div
+    class="container mx-auto flex flex-wrap items-center justify-between"
+  >
+    <a href="https://flowbite.com/" class="flex items-center">
+      <img
+        src="../static/img/logo/pixoicon.svg"
+        class="mr-3 h-6 sm:h-9"
+        alt="WebP Icon"
+      />
+      <span
+        class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+      >WebP Editor</span
+      >
+    </a>
+    <button
+      data-collapse-toggle="mobile-menu"
+      type="button"
+      class="ml-3 inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 md:hidden"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
     >
-        <a href="https://flowbite.com/" class="flex items-center">
-            <img
-                    src="https://flowbite.com/docs/images/logo.svg"
-                    class="mr-3 h-6 sm:h-9"
-                    alt="Flowbite Logo"
-            />
-            <span
-                    class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
-            >Flowbite Django</span
-            >
-        </a>
-        <button
-                data-collapse-toggle="mobile-menu"
-                type="button"
-                class="ml-3 inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 md:hidden"
-                aria-controls="mobile-menu"
-                aria-expanded="false"
-        >
-            <span class="sr-only">Open main menu</span>
-            <svg
-                    class="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                        fill-rule="evenodd"
-                        d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                        clip-rule="evenodd"
-                ></path>
-            </svg>
-            <svg
-                    class="hidden h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                        fill-rule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clip-rule="evenodd"
-                ></path>
-            </svg>
-        </button>
-        <div class="hidden w-full md:block md:w-auto" id="mobile-menu">
-            <ul
-                    class="mt-4 flex flex-col md:mt-0 md:flex-row md:space-x-8 md:text-sm md:font-medium"
-            >
-                <li>
-                    <a
-                            href="#"
-                            class="block rounded bg-green-700 py-2 pr-4 pl-3 text-white dark:text-white md:bg-transparent md:p-0 md:text-green-700"
-                            aria-current="page"
-                    >Home</a
-                    >
-                </li>
-                <li>
-                    <a
-                            href="#"
-                            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
-                    >About</a
-                    >
-                </li>
-                <li>
-                    <a
-                            href="#"
-                            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
-                    >Services</a
-                    >
-                </li>
-                <li>
-                    <a
-                            href="#"
-                            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
-                    >Pricing</a
-                    >
-                </li>
-                <li>
-                    <a
-                            href="#"
-                            class="block py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
-                    >Contact</a
-                    >
-                </li>
-            </ul>
-        </div>
+      <span class="sr-only">Open main menu</span>
+      <svg
+        class="h-6 w-6"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+          clip-rule="evenodd"
+        ></path>
+      </svg>
+      <svg
+        class="hidden h-6 w-6"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+          clip-rule="evenodd"
+        ></path>
+      </svg>
+    </button>
+    <div class="hidden w-full md:block md:w-auto" id="mobile-menu">
+      <ul
+        class="mt-4 flex flex-col md:mt-0 md:flex-row md:space-x-8 md:text-sm md:font-medium"
+      >
+        <li>
+          <a
+            href="#"
+            class="block rounded bg-green-700 py-2 pr-4 pl-3 text-white dark:text-white md:bg-transparent md:p-0 md:text-green-700"
+            aria-current="page"
+          >Home</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
+          >About</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
+          >Services</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="block border-b border-gray-100 py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
+          >Pricing</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="block py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-green-700 md:dark:hover:bg-transparent md:dark:hover:text-white"
+          >Contact</a
+          >
+        </li>
+      </ul>
     </div>
+  </div>
 </nav>
 <!-- End of new HTML -->
 
 <div class="container mx-auto mt-4">
-    {% block content %}
-    {% endblock content %}
+  {% block content %}
+  {% endblock content %}
 </div>
 
 <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
 </body>
 
-<footer class="fixed bottom-0 left-0 z-20 w-full p-4 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800 dark:border-gray-600">
+<footer
+  class="fixed bottom-0 left-0 z-20 w-full p-4 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800 dark:border-gray-600">
     <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/"
                                                                                     class="hover:underline">Flowbite™</a>. All Rights Reserved.
     </span>
-    <ul class="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
-        <li>
-            <a href="#" class="mr-4 hover:underline md:mr-6 ">About</a>
-        </li>
-        <li>
-            <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
-        </li>
-        <li>
-            <a href="#" class="mr-4 hover:underline md:mr-6">Licensing</a>
-        </li>
-        <li>
-            <a href="#" class="hover:underline">Contact</a>
-        </li>
-    </ul>
+  <ul class="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
+    <li>
+      <a href="#" class="mr-4 hover:underline md:mr-6 ">About</a>
+    </li>
+    <li>
+      <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
+    </li>
+    <li>
+      <a href="#" class="mr-4 hover:underline md:mr-6">Licensing</a>
+    </li>
+    <li>
+      <a href="#" class="hover:underline">Contact</a>
+    </li>
+  </ul>
 </footer>
 
 </html>
