@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from webpeditor_app.models import OriginalImage, EditedImage
+from webpeditor_app.models.database.models import OriginalImage, EditedImage
 
 
 class OriginalImageSerializer(serializers.ModelSerializer):

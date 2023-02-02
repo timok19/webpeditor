@@ -3,8 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
 
-from .models import OriginalImage, EditedImage
-from .serializers import OriginalImageSerializer, EditedImageSerializer
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.models.database.serializers import OriginalImageSerializer
 
 
 def index(request):
