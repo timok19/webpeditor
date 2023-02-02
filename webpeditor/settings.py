@@ -143,3 +143,6 @@ STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 # Static files directory
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Allow slash in url paths
+APPEND_SLASH = False
