@@ -39,4 +39,3 @@ def original_image_api(request, id) -> type(JsonResponse):
         return JsonResponse("Failed to update db", safe=False)
 
     # TODO: add next elif statement to cover DELETE method
-
