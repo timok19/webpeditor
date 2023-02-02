@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "acorn": "^8.8.2",
-    "ajv": "^6.12.6",
     "flowbite": "^1.6.3",
     "webpack": "^5.75.0",
     "workbox-webpack-plugin": "^6.5.4"

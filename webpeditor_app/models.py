@@ -1,23 +1,22 @@
-from djongo import models
+from django.db import models
+from datetime import datetime
 
 
-class Blog(models.Model):
-    name = models.CharField(max_length=100)
-
-    class Meta:
-        abstract = True
-
-
-class Entry(models.Model):
-    blog = models.EmbeddedField(
-        model_container=Blog
-    )
-    headline = models.CharField(max_length=255)
+class OriginalImage(models.Model):
+    image_id = models.AutoField(primary_key=True)
+    file_name = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=255)
+    original_image = models.BinaryField()
+    session_id = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(default=datetime.now)
+    updated_at = models.DateTimeField(default=datetime.now)
 
 
-e = Entry()
-e.blog = {
-    'name': 'Djongo'
-}
-e.headline = 'The Django MongoDB connector'
-e.save()
+class EditedImage(models.Model):
+    edited_image_id = models.AutoField(primary_key=True)
+    original_image = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
+    content_type_edited = models.CharField(max_length=255)
+    edited_image = models.BinaryField()
+    session_id = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(default=datetime.now)
+    updated_at = models.DateTimeField(default=datetime.now)
