@@ -20,3 +20,5 @@ static/CACHE/
 .DS_Store
 yarn-error.log.DS_Store
 /.idea
+
+webpeditor/.env

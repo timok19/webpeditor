@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+
+# Environment variables instance
+env = environ.Env()
+environ.Env().read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-35vvfsdbs$3-@)i2(#j8_87-nkgyukq&9&b2bkh^b1a@d*#m_w'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,9 +89,9 @@ DATABASES = {
         'ENGINE': 'djongo',
         'CLIENT': {
             # Add local env variables to store host string
-            'host': 'mongodb+srv://t_amanzhanov:m3GQFpmwzzz6FkRR@webpeditor-cluster.pksl47m.mongodb.net/?retryWrites'
+            'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
                     '=true&w=majority',
-            'name': 'webpeditor_db',
+            'name': env("DATABASE_NAME"),
             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
         },
     }

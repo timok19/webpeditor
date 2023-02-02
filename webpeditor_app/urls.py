@@ -1,7 +1,7 @@
 from django.urls import re_path
-from webpeditor_app.views.views import original_image_api
 
 from webpeditor_app.views.views import index
+from webpeditor_app.controllers.image_requests.image_api_requests import original_image_api
 
 urlpatterns = [
     re_path(r'^$', index, name='index'),
