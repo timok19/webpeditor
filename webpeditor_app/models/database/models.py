@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import datetime
+from django.utils import timezone
 
 
 class OriginalImage(models.Model):
@@ -8,8 +8,8 @@ class OriginalImage(models.Model):
     content_type = models.CharField(max_length=255)
     original_image = models.BinaryField()
     session_id = models.CharField(max_length=255, null=True)
-    created_at = models.DateTimeField(default=datetime.now)
-    updated_at = models.DateTimeField(default=datetime.now)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
 
 class EditedImage(models.Model):
@@ -18,5 +18,5 @@ class EditedImage(models.Model):
     content_type_edited = models.CharField(max_length=255)
     edited_image = models.BinaryField()
     session_id = models.CharField(max_length=255, null=True)
-    created_at = models.DateTimeField(default=datetime.now)
-    updated_at = models.DateTimeField(default=datetime.now)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)

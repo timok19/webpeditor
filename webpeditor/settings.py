@@ -97,6 +97,11 @@ DATABASES = {
     }
 }
 
+# Path for future migrations
+MIGRATION_MODULES = {
+    'webpeditor_app': 'webpeditor_app.models.database.migrations'
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
