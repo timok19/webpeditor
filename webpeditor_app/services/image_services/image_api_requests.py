@@ -11,6 +11,7 @@ from rest_framework.parsers import JSONParser
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
+from webpeditor_app.services.re_for_file_name import replace_with_underscore
 
 
 @csrf_exempt
@@ -60,8 +61,10 @@ def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
         return JsonResponse("Failed to update db", safe=False)
 
     elif request.method == 'DELETE':
-        original_image = OriginalImage.objects.get(image_id=_id)
-        original_image.delete()
+        original_image_id = OriginalImage.objects.get(image_id=_id)
+
+        default_storage.delete(original_image_id.original_image.name)
+        original_image_id.delete()
 
         return JsonResponse("Deleted successfully", safe=False)
 
@@ -129,20 +132,26 @@ def upload_original_image(request: WSGIRequest) -> JsonResponse:
         json_response: JsonResponse()
 
     """
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    if request.method == 'POST':
+        image: UploadedFile = request.FILES.get('image')
+        if image:
+            try:
+                validate_image_file_size(image)
+            except ValidationError as error:
+                return JsonResponse({'success': False, 'error': str(error)})
 
-    image: UploadedFile = request.FILES.get('original_image')
-    if image:
-        try:
-            validate_image_file_size(image)
-        except ValidationError as error:
-            return JsonResponse({'success': False, 'error': str(error)})
+            new_image_name = replace_with_underscore(image.name)
 
-        file_name: DefaultStorage = default_storage.save(image.name, image)
-        return JsonResponse({'success': True, 'filename': file_name})
-    else:
-        return JsonResponse({'success': False, 'error': 'No image provided'})
+            file_name: DefaultStorage = default_storage.save(new_image_name, image)
+
+            original_image = OriginalImage(file_name=file_name,
+                                           content_type=image.content_type,
+                                           original_image=new_image_name)
+            original_image.save()
+
+            return JsonResponse({'success': True, 'filename': file_name})
+        else:
+            return JsonResponse({'success': False, 'error': 'No image provided'})
 
 
 # TODO: implement this method to reupload edited image to project path

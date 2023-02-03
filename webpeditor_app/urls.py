@@ -16,6 +16,9 @@ urlpatterns = [
     re_path(r'^edited_image/?$', edited_image_api),
     re_path(r'^edited_image/([0-9]+)$', edited_image_api),
 
-    re_path(r'^original_image/upload_original_image/?$', upload_original_image),
-    re_path(r'^edited_image/upload_edited_image/?$', upload_edited_image)
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    re_path(r'^original_image/upload/?$', upload_original_image),
+    re_path(r'^edited_image/upload/?$', upload_edited_image)
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
