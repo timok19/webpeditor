@@ -1,14 +1,20 @@
+from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+from django.core.files.storage import default_storage, DefaultStorage
+from django.core.exceptions import ValidationError
+
 from rest_framework.parsers import JSONParser
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
+from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
 @csrf_exempt
-def original_image_api(request: WSGIRequest, _id=0):
+def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
     """Function implementation of API methods to store original_image into DB
 
     Parameters:
@@ -61,7 +67,7 @@ def original_image_api(request: WSGIRequest, _id=0):
 
 
 @csrf_exempt
-def edited_image_api(request: WSGIRequest, _id=0):
+def edited_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
     """Function implementation of API methods to store edited_image into DB
 
     Parameters:
@@ -111,4 +117,35 @@ def edited_image_api(request: WSGIRequest, _id=0):
 
         return JsonResponse("Deleted edited image successfully", safe=False)
 
-# TODO: test the edited_image_api()
+
+@csrf_exempt
+def upload_original_image(request: WSGIRequest) -> JsonResponse:
+    """Function implementation to upload image to project directory using POST method
+
+    Parameters:
+        request: WSGIRequest
+
+    Return:
+        json_response: JsonResponse()
+
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    image: UploadedFile = request.FILES.get('original_image')
+    if image:
+        try:
+            validate_image_file_size(image)
+        except ValidationError as error:
+            return JsonResponse({'success': False, 'error': str(error)})
+
+        file_name: DefaultStorage = default_storage.save(image.name, image)
+        return JsonResponse({'success': True, 'filename': file_name})
+    else:
+        return JsonResponse({'success': False, 'error': 'No image provided'})
+
+
+# TODO: implement this method to reupload edited image to project path
+@csrf_exempt
+def upload_edited_image(request: WSGIRequest) -> JsonResponse:
+    pass
