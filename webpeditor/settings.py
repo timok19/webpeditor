@@ -162,3 +162,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Allow slash in url paths
 APPEND_SLASH = False
+

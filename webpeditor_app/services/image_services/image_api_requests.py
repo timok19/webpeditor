@@ -37,34 +37,14 @@ def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
 
         return JsonResponse(original_image_serializer.data, safe=False)
 
-    elif request.method == 'POST':
-        original_image_data = JSONParser().parse(request)
-        original_image_serializer = OriginalImageSerializer(data=original_image_data)
-
-        if original_image_serializer.is_valid():
-            original_image_serializer.save()
-
-            return JsonResponse("Added to db successfully", safe=False)
-
-        return JsonResponse("Failed to add into db", safe=False)
-
-    elif request.method == 'PUT':
-        original_image_data = JSONParser().parse(request)
-        original_image = OriginalImage.objects.get(image_id=original_image_data['image_id'])
-        original_image_serializer = OriginalImageSerializer(original_image, data=original_image_data)
-
-        if original_image_serializer.is_valid():
-            original_image_serializer.save()
-
-            return JsonResponse("Updated db successfully", safe=False)
-
-        return JsonResponse("Failed to update db", safe=False)
-
     elif request.method == 'DELETE':
-        original_image_id = OriginalImage.objects.get(image_id=_id)
+        try:
+            original_image_id = OriginalImage.objects.get(image_id=_id)
+        except OriginalImage.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Image not found'})
 
-        default_storage.delete(original_image_id.original_image.name)
         original_image_id.delete()
+        default_storage.delete(original_image_id.original_image_url.name)
 
         return JsonResponse("Deleted successfully", safe=False)
 
@@ -123,7 +103,7 @@ def edited_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
 
 @csrf_exempt
 def upload_original_image(request: WSGIRequest) -> JsonResponse:
-    """Function implementation to upload image to project directory using POST method
+    """Function implementation to upload image to project directory using POST method to add an image
 
     Parameters:
         request: WSGIRequest
@@ -133,21 +113,23 @@ def upload_original_image(request: WSGIRequest) -> JsonResponse:
 
     """
     if request.method == 'POST':
+
         image: UploadedFile = request.FILES.get('image')
+
         if image:
             try:
                 validate_image_file_size(image)
             except ValidationError as error:
                 return JsonResponse({'success': False, 'error': str(error)})
 
-            new_image_name = replace_with_underscore(image.name)
+            image_name_after_re = replace_with_underscore(image.name)
 
-            file_name: DefaultStorage = default_storage.save(new_image_name, image)
+            file_name: DefaultStorage = default_storage.save(image_name_after_re, image)
 
-            original_image = OriginalImage(file_name=file_name,
-                                           content_type=image.content_type,
-                                           original_image=new_image_name)
-            original_image.save()
+            original_image_object = OriginalImage(file_name=file_name,
+                                                  content_type=image.content_type,
+                                                  original_image_url=image_name_after_re)
+            original_image_object.save()
 
             return JsonResponse({'success': True, 'filename': file_name})
         else:

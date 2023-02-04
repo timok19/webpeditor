@@ -8,7 +8,7 @@ class OriginalImageSerializer(serializers.ModelSerializer):
         fields = ('image_id',
                   'file_name',
                   'content_type',
-                  'original_image',
+                  'original_image_url',
                   'session_id',
                   'created_at',
                   'updated_at'
@@ -21,7 +21,7 @@ class EditedImageSerializer(serializers.ModelSerializer):
         fields = ('edited_image_id',
                   'original_image',
                   'content_type_edited',
-                  'edited_image',
+                  'edited_image_url',
                   'session_id',
                   'created_at',
                   'updated_at'
