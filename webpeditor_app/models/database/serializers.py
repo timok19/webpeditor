@@ -11,7 +11,6 @@ class OriginalImageSerializer(serializers.ModelSerializer):
                   'original_image_url',
                   'session_id',
                   'created_at',
-                  'updated_at'
                   )
 
 
@@ -24,5 +23,4 @@ class EditedImageSerializer(serializers.ModelSerializer):
                   'edited_image_url',
                   'session_id',
                   'created_at',
-                  'updated_at'
                   )

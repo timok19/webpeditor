@@ -11,7 +11,7 @@ from rest_framework.parsers import JSONParser
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
-from webpeditor_app.services.re_for_file_name import replace_with_underscore
+from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
 
 
 @csrf_exempt
@@ -21,7 +21,7 @@ def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
     Parameters:
         request: WSGIRequest
 
-            API request (GET, POST, PUT, DELETE)
+            API request (GET, POST, DELETE)
 
         _id: int
 
@@ -56,7 +56,7 @@ def edited_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
     Parameters:
         request: WSGIRequest
 
-            API request (GET, POST, PUT, DELETE)
+            API request (GET, POST, DELETE)
 
         _id: int
 
@@ -128,7 +128,8 @@ def upload_original_image(request: WSGIRequest) -> JsonResponse:
 
             original_image_object = OriginalImage(file_name=file_name,
                                                   content_type=image.content_type,
-                                                  original_image_url=image_name_after_re)
+                                                  original_image_url=image_name_after_re,
+                                                  session_id=request.session.session_key)
             original_image_object.save()
 
             return JsonResponse({'success': True, 'filename': file_name})

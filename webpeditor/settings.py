@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import environ
 
-
 # Environment variables instance
 env = environ.Env()
 environ.Env().read_env()
@@ -50,6 +49,11 @@ INSTALLED_APPS = [
 # In development mode. Delete this in production mode (add domains in white list)
 CORS_ORIGIN_ALLOW_ALL = True
 
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+)
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -82,7 +86,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'webpeditor.wsgi.application'
 
 # Max image file size
-MAX_IMAGE_FILE_SIZE: int = 6 * 1024**2
+MAX_IMAGE_FILE_SIZE: int = 6 * 1024 ** 2
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -133,6 +137,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+###
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -162,4 +168,3 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Allow slash in url paths
 APPEND_SLASH = False
-
