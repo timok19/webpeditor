@@ -6,7 +6,7 @@ class OriginalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OriginalImage
         fields = ('image_id',
-                  'file_name',
+                  'image_file',
                   'content_type',
                   'original_image_url',
                   'session_id',

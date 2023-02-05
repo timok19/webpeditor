@@ -8,7 +8,7 @@ from webpeditor_app.models.database.models import OriginalImage
 
 def set_session_expiry(request: WSGIRequest):
     # Set session_id token expiry to 2 hours
-    request.session.set_expiry(25)
+    request.session.set_expiry(7200)
 
 
 def update_session(request: WSGIRequest, _id: int) -> JsonResponse:
@@ -24,5 +24,5 @@ def update_session(request: WSGIRequest, _id: int) -> JsonResponse:
 
         return JsonResponse("Session has been expired and Image has been deleted")
     else:
-        request.session.set_expiry(25)
-        return JsonResponse("Session has is alive")
+        request.session.set_expiry(7200)
+        return JsonResponse("Session is alive")
