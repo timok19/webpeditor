@@ -1,11 +1,54 @@
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.core.files.storage import DefaultStorage, default_storage
+from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-# from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 
-from webpeditor_app.services.image_services.image_api_requests import upload_original_image
+from webpeditor_app.models.database.forms import OriginalImageForm
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
 from webpeditor_app.services.session_id_to_db import set_session_expiry
+from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
-def index(request: WSGIRequest):
+@csrf_exempt
+def upload_image_view(request: WSGIRequest):
     set_session_expiry(request)
-    # TODO: fix problem with tuple "return value tuple[] -> HttpResponsePermanentRedirect | HttpResponseRedirect"
-    return upload_original_image(request)
+
+    if request.method != 'POST':
+        image_form = OriginalImageForm()
+    else:
+        image_form = OriginalImageForm(request.POST, request.FILES)
+
+        if not image_form.is_valid():
+            messages.error(request=request, message="Error, image did not upload")
+            return redirect('MainPage')
+        else:
+            image: UploadedFile = image_form.cleaned_data['image']
+            try:
+                validate_image_file_size(image)
+            except ValidationError as error:
+                print("Error: " + str(error))
+
+            image_name_after_re: str = replace_with_underscore(image.name)
+
+            image_file: DefaultStorage = default_storage.save(image_name_after_re, image)
+
+            original_image_object = OriginalImage(image_file=image_file,
+                                                  content_type=image.content_type,
+                                                  original_image_url=image_name_after_re,
+                                                  session_id=request.session.session_key)
+            original_image_object.save()
+
+            messages.success(request=request, message="Image uploaded successfully")
+            return redirect('MainPage')
+
+    return render(request,
+                  'index.html',
+                  {
+                      'form': image_form,
+                      'messages': messages,
+                      'request': request
+                  })

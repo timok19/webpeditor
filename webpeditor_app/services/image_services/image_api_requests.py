@@ -1,8 +1,9 @@
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage, DefaultStorage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import JsonResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
@@ -11,6 +12,7 @@ from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
+from webpeditor_app.services.session_id_to_db import set_session_expiry
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
@@ -100,47 +102,6 @@ def edited_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
         edited_image.delete()
 
         return JsonResponse("Deleted edited image successfully", safe=False)
-
-
-@csrf_exempt
-def upload_original_image(request: WSGIRequest) -> JsonResponse | tuple[
-    JsonResponse, HttpResponsePermanentRedirect | HttpResponseRedirect
-]:
-    """Function implementation to upload image to project directory using POST method to add an image
-
-    Parameters:
-        request: WSGIRequest
-
-    Return:
-        json_response: JsonResponse | tuple[JsonResponse, HttpResponsePermanentRedirect | HttpResponseRedirect]
-
-    """
-    if request.method == 'POST':
-        image_form = OriginalImageForm(request.POST, request.FILES)
-
-        if image_form.is_valid():
-            image: UploadedFile = image_form.cleaned_data['image']
-            try:
-                validate_image_file_size(image)
-            except ValidationError as error:
-                return JsonResponse({'success': False, 'error': str(error)})
-
-            image_name_after_re = replace_with_underscore(image.name)
-
-            image_file: DefaultStorage = default_storage.save(image_name_after_re, image)
-
-            original_image_object = OriginalImage(image_file=image_file,
-                                                  content_type=image.content_type,
-                                                  original_image_url=image_name_after_re,
-                                                  session_id=request.session.session_key)
-            original_image_object.save()
-
-            return JsonResponse({'success': True, 'filename': image_file}), redirect('index')
-        else:
-            return JsonResponse({'success': False, 'error': 'No image provided'}), redirect('index')
-    else:
-        image_form = OriginalImageForm()
-    return render(request, "index.html", {'form': image_form})
 
 
 # TODO: implement this method to reupload edited image to project path

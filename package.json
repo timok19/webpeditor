@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "acorn": "^8.8.2",
+    "cropperjs": "^1.5.13",
     "flowbite": "^1.6.3",
     "webpack": "^5.75.0",
     "workbox-webpack-plugin": "^6.5.4"
