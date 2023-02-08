@@ -14,6 +14,7 @@
   {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}" />
   {% endcompress %}
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="icon" href="../static/media/logo/pixoicon.svg">
 
   <script>
@@ -285,7 +286,9 @@
 </div>
 
 <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
-<script src="static/js/services/darkMode.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="../static/js/services/toastifyService.js"></script>
+<script src="../static/js/services/darkModeService.js"></script>
 </body>
 
 <footer
