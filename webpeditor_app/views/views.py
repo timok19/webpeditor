@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.files.storage import DefaultStorage, default_storage
 from django.core.files.uploadedfile import UploadedFile
@@ -23,6 +24,8 @@ def upload_image_view(request: WSGIRequest):
         image_form = OriginalImageForm(request.POST, request.FILES)
 
         if not image_form.is_valid():
+            messages.add_message(request=request, level=messages.ERROR, message="Oops, image hasn't been uploaded")
+
             return redirect('MainPage')
         else:
             image: UploadedFile = image_form.cleaned_data['image']
@@ -40,6 +43,8 @@ def upload_image_view(request: WSGIRequest):
                                                   original_image_url=image_name_after_re,
                                                   session_id=request.session.session_key)
             original_image_object.save()
+
+            messages.add_message(request=request, level=messages.SUCCESS, message="Image has been uploaded")
 
             return redirect('MainPage')
 
