@@ -10,7 +10,7 @@ from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-from webpeditor_app.services.session_id_to_db import set_session_expiry
+from webpeditor_app.services.session_id_to_db import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
@@ -28,6 +28,11 @@ def upload_image_view(request: WSGIRequest):
 
             return redirect('MainPage')
         else:
+            previous_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
+            if previous_image:
+                default_storage.delete(previous_image.original_image_url.name)
+                previous_image.delete()
+
             image: UploadedFile = image_form.cleaned_data['image']
 
             try:
@@ -45,6 +50,8 @@ def upload_image_view(request: WSGIRequest):
             original_image_object.save()
 
             messages.add_message(request=request, level=messages.SUCCESS, message="Image has been uploaded")
+
+            update_session(request, request.session.session_key)
 
             return redirect('MainPage')
 
