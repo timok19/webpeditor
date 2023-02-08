@@ -11,18 +11,18 @@ def set_session_expiry(request: WSGIRequest):
     request.session.set_expiry(7200)
 
 
-def update_session(request: WSGIRequest, _id: int) -> JsonResponse:
+def update_session(request: WSGIRequest, session_id: str) -> JsonResponse:
     if timezone.now().second > request.session.get_expiry_age():
         request.session.clear_expired()
         try:
-            original_image_id = OriginalImage.objects.get(image_id=_id)
+            original_image_session_id = OriginalImage.objects.get(session_id=session_id)
         except OriginalImage.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Image not found'})
+            return JsonResponse({'success': False, 'error': 'Image not found'}, status=404)
 
-        original_image_id.delete()
-        default_storage.delete(original_image_id.original_image_url.name)
+        original_image_session_id.delete()
+        default_storage.delete(original_image_session_id.original_image_url.name)
 
-        return JsonResponse("Session has been expired and Image has been deleted")
+        return JsonResponse("Session has been expired and Image has been deleted", status=204)
     else:
         request.session.set_expiry(7200)
-        return JsonResponse("Session is alive")
+        return JsonResponse("Session is alive", status=200)
