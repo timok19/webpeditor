@@ -24,8 +24,6 @@ def upload_image_view(request: WSGIRequest):
         image_form = OriginalImageForm(request.POST, request.FILES)
 
         if not image_form.is_valid():
-            messages.add_message(request=request, level=messages.ERROR, message="Oops, image hasn't been uploaded")
-
             return redirect('MainPage')
         else:
             previous_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
@@ -48,8 +46,6 @@ def upload_image_view(request: WSGIRequest):
                                                   original_image_url=image_name_after_re,
                                                   session_id=request.session.session_key)
             original_image_object.save()
-
-            messages.add_message(request=request, level=messages.SUCCESS, message="Image has been uploaded")
 
             update_session(request, request.session.session_key)
 

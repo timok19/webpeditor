@@ -2,53 +2,67 @@
 {% extends '_base.html' %}
 {% block content %}
 
-  <span class="whitespace-nowrap flex justify-center font-extralight" style="font-size: xxx-large; color: white;">Welcome to&nbsp;<span
-    class="self-center font-semibold dark:text-white flex justify-center"
-    style="font-size: xxx-large">WebP Editor</span>!</span>
+    <span class="whitespace-nowrap flex justify-center font-extralight" style="font-size: xxx-large; color: white;">Welcome to&nbsp;<span
+            class="self-center font-semibold dark:text-white flex justify-center"
+            style="font-size: xxx-large">WebP Editor</span>!</span>
 
-  <p class="font-light whitespace-pre-line text-gray-500 dark:text-gray-400 text-center">Track work across the
-    enterprise through an open, collaborative platform.
-    <span
-      class="font-semibold text-gray-900 underline dark:text-white decoration-indigo-500">Link issues across Jira</span>
-    and ingest data from other
-    <span class="font-semibold text-gray-900 underline dark:text-white decoration-blue-500">software development</span>
-    tools, so your IT support and operations teams have richer contextual information to rapidly respond to <span
-      class="font-semibold text-gray-900 underline dark:text-white decoration-green-500">requests</span>,<span
-      class="font-semibold text-gray-900 underline dark:text-white decoration-red-500">incidents</span>, and <span
-      class="font-semibold text-gray-900 underline dark:text-white decoration-sky-500">changes</span>.
-  </p>
+    <p class="font-light whitespace-pre-line text-gray-500 dark:text-gray-400 text-center">Track work across the
+        enterprise through an open, collaborative platform.
+        <span
+                class="font-semibold text-gray-900 underline dark:text-white decoration-indigo-500">Link issues across Jira</span>
+        and ingest data from other
+        <span class="font-semibold text-gray-900 underline dark:text-white decoration-blue-500">software development</span>
+        tools, so your IT support and operations teams have richer contextual information to rapidly respond to <span
+                class="font-semibold text-gray-900 underline dark:text-white decoration-green-500">requests</span>,<span
+                class="font-semibold text-gray-900 underline dark:text-white decoration-red-500">incidents</span>, and
+        <span
+                class="font-semibold text-gray-900 underline dark:text-white decoration-sky-500">changes</span>.
+    </p>
 
-  <div class="flex justify-center">
-    <div
-      class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-      {% if form.is_multipart %}
-        <form method="post" enctype="multipart/form-data">
-      {% else %}
-        <form method="post">
-      {% endif %}
+    <div class="flex justify-center">
+        <div
+                class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            {% if form.is_multipart %}
+                <form method="post" enctype="multipart/form-data">
+            {% else %}
+                <form method="post">
+            {% endif %}
 
-      {% csrf_token %}
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="{{ form.auto_id }}">Upload
-        your image:</label>
+            {% csrf_token %}
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="{{ form.auto_id }}">Upload
+                your image:</label>
 
-      <input
-        class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-        type="file" name="image" required accept=".jpeg,.png,.webp,.raw,.jfif,.ico" id="{{ form.auto_id }}">
+            <input
+                    class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                    type="file" name="image" required accept=".jpeg,.png,.webp,.raw,.jfif,.ico" id="{{ form.auto_id }}">
 
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-300 font-light">Support .JPEG, .PNG, .WEBP, .RAW, .JFIF,
-        .ICO</p>
-      <br />
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-300 font-light">Support .JPEG, .PNG, .WEBP, .RAW, .JFIF,
+                .ICO</p>
+            <br/>
 
-      <button type="submit"
-              class="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
-              <span
-                class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+            <button type="submit"
+                    onclick="Toastify({
+                          text: 'Image has been uploaded',
+                          duration: 3000,
+                          gravity: 'top',
+                          close: true,
+                          position: 'right',
+                          stopOnFocus: true,
+                          style: {
+                            background: 'linear-gradient(to right, #00b09b, #96c93d)',
+                          },
+                        }).showToast()"
+                    id="upload-image"
+                    class="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
+                    disabled>
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                   Upload
               </span>
-      </button>
-      </form>
-    </div>
-  <a id="submit-uploading-image" class="text-white">Test</a>
-  </div>
+            </button>
 
+            <script src="../static/js/services/enableUploadButtonService.js"></script>
+
+            </form>
+        </div>
+    </div>
 {% endblock content %}
