@@ -1807,12 +1807,12 @@ input:checked + .toggle-bg {
   cursor: pointer;
 }
 
-.cursor-default {
-  cursor: default;
-}
-
 .cursor-not-allowed {
   cursor: not-allowed;
+}
+
+.cursor-default {
+  cursor: default;
 }
 
 .resize {
@@ -2169,18 +2169,6 @@ input:checked + .toggle-bg {
   text-decoration-color: #3F83F8;
 }
 
-.decoration-green-500 {
-  text-decoration-color: #0E9F6E;
-}
-
-.decoration-red-500 {
-  text-decoration-color: #F05252;
-}
-
-.decoration-sky-500 {
-  text-decoration-color: #0ea5e9;
-}
-
 .opacity-0 {
   opacity: 0;
 }
@@ -2256,6 +2244,27 @@ input:checked + .toggle-bg {
 
 .ease-out {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+body {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  height: 100vh;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 .hover\:border-gray-300:hover {
