@@ -5,14 +5,12 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
 
-from webpeditor import settings
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.folder_name_with_session_id import create_folder_name_with_session_id
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-from webpeditor_app.services.session_id_to_db import set_session_expiry, update_session
+from webpeditor_app.services.image_services.session_id_to_db import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
@@ -54,15 +52,13 @@ def upload_image_view(request: WSGIRequest):
 
             original_image_object.save()
 
-            update_session(request, request.session.session_key)
+            update_session(request.session.session_key)
 
             return redirect('ImageInfoView')
 
     return render(request, 'imageUpload.html', {'form': image_form})
 
 
-# TODO: add page with binding (image_info/) for getting information about added image (image itself, size in KB,
-#  resolution, ratio, format)
 def show_image_view(request: WSGIRequest):
     if request.method != 'GET':
         uploaded_image_url = None
@@ -73,6 +69,7 @@ def show_image_view(request: WSGIRequest):
         if uploaded_image:
             uploaded_image_url = uploaded_image.original_image_url.url
 
-        update_session(request, request.session.session_key)
+        update_session(request.session.session_key)
 
+    # TODO: add information about added image (image itself, size in KB, resolution, ratio, format)
     return render(request, 'imageInfo.html', {'uploaded_image_url': uploaded_image_url})

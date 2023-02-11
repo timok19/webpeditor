@@ -32,8 +32,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
-
+# In development mode. Delete this in production mode (add domains in white list)
 INSTALLED_APPS = [
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,10 +44,9 @@ INSTALLED_APPS = [
     'compressor',
     'rest_framework',
     'corsheaders',
-    'webpeditor_app.apps.WebpeditorAppConfig'
+    'webpeditor_app.apps.WebpeditorAppConfig',
 ]
 
-# In development mode. Delete this in production mode (add domains in white list)
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
@@ -147,7 +147,7 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'static'
 
-MEDIA_URL = 'media/uploaded_images/'
+MEDIA_URL = 'media/'
 
 MEDIA_ROOT = BASE_DIR / 'static' / 'media' / 'uploaded_images'
 

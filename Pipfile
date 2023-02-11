@@ -36,6 +36,9 @@ wrapt = "*"
 django-cors-headers = "*"
 pymongo = "==3.12.1"
 django-environ = "*"
+django-extensions = "*"
+requests = "*"
+webob = "*"
 
 [dev-packages]
 autopep8 = "*"

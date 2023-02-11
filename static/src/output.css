@@ -1713,6 +1713,10 @@ input:checked + .toggle-bg {
   display: none;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .h-6 {
   height: 1.5rem;
 }
@@ -1723,10 +1727,6 @@ input:checked + .toggle-bg {
 
 .h-4 {
   height: 1rem;
-}
-
-.h-auto {
-  height: auto;
 }
 
 .w-full {
@@ -1757,12 +1757,12 @@ input:checked + .toggle-bg {
   width: 16rem;
 }
 
-.max-w-sm {
-  max-width: 24rem;
-}
-
 .max-w-lg {
   max-width: 32rem;
+}
+
+.max-w-sm {
+  max-width: 24rem;
 }
 
 .flex-1 {

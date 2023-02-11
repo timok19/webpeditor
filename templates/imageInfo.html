@@ -1,6 +1,5 @@
 {% extends "_base.html" %}
-{% load static %}
 
 {% block content %}
-  <img class="h-auto max-w-lg rounded-lg" src="{% static uploaded_image_url %}" alt="image description">
+  <img class="h-auto max-w-lg rounded-lg" src="{{ uploaded_image_url }}" alt="Image description">
 {% endblock content %}

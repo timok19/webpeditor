@@ -1,19 +1,11 @@
-from django.contrib import messages
-from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage, DefaultStorage
-from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import default_storage
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
-from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
-from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-from webpeditor_app.services.session_id_to_db import set_session_expiry
-from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
 @csrf_exempt
