@@ -33,6 +33,12 @@ def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
         json_response: JsonResponse()
     """
 
+    if request.method == 'GET':
+        original_images = OriginalImage.objects.all()
+        original_image_serializer = OriginalImageSerializer(original_images, many=True)
+
+        return JsonResponse(original_image_serializer.data, safe=False)
+
     if request.method == 'DELETE':
         try:
             original_image_id = OriginalImage.objects.get(image_id=_id)
