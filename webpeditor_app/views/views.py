@@ -72,4 +72,5 @@ def show_image_view(request: WSGIRequest):
         update_session(request.session.session_key)
 
     # TODO: add information about added image (image itself, size in KB, resolution, ratio, format)
-    return render(request, 'imageInfo.html', {'uploaded_image_url': uploaded_image_url})
+    return render(request, 'imageInfo.html', {'uploaded_image_url': uploaded_image_url,
+                                              'session_id': request.session.session_key})
