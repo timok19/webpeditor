@@ -41,7 +41,7 @@ def upload_image_view(request: WSGIRequest):
             try:
                 validate_image_file_size(image)
             except ValidationError as error:
-                print("Error: " + str(error))
+                return render(request, 'imageUpload.html', {'form': image_form, 'validation_error': error})
 
             image_name_after_re: str = replace_with_underscore(image.name)
 
@@ -75,7 +75,7 @@ def show_image_info_view(request: WSGIRequest):
         uploaded_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
 
         if not uploaded_image:
-            return redirect("ImageDoesNotExist")
+            return redirect("ImageDoesNotExistView")
 
         uploaded_image_url = uploaded_image.original_image_url.url
         path_to_local_image: Path = settings.MEDIA_ROOT / request.session.session_key / uploaded_image.image_file

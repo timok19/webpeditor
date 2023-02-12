@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from webpeditor import settings
+from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
 class OriginalImage(models.Model):
@@ -9,7 +9,7 @@ class OriginalImage(models.Model):
     image_file = models.CharField(max_length=255)
     content_type = models.CharField(max_length=255)
     original_image_url = models.ImageField(upload_to="",
-                                           max_length=settings.MAX_IMAGE_FILE_SIZE,
+                                           validators=[validate_image_file_size],
                                            default=None,
                                            null=False,
                                            blank=False)
@@ -25,7 +25,7 @@ class EditedImage(models.Model):
     original_image_file = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
     content_type_edited = models.CharField(max_length=255)
     edited_image_url = models.ImageField(upload_to="",
-                                         max_length=settings.MAX_IMAGE_FILE_SIZE,
+                                         validators=[validate_image_file_size],
                                          default=None,
                                          null=False,
                                          blank=False)

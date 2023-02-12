@@ -2241,6 +2241,10 @@ input:checked + .toggle-bg {
   font-weight: 800;
 }
 
+.font-thin {
+  font-weight: 100;
+}
+
 .leading-9 {
   line-height: 2.25rem;
 }
