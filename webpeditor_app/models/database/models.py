@@ -22,7 +22,7 @@ class OriginalImage(models.Model):
 
 class EditedImage(models.Model):
     edited_image_id = models.AutoField(primary_key=True)
-    original_image = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
+    original_image_file = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
     content_type_edited = models.CharField(max_length=255)
     edited_image_url = models.ImageField(upload_to="",
                                          max_length=settings.MAX_IMAGE_FILE_SIZE,
