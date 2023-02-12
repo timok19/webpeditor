@@ -41,7 +41,11 @@ def upload_image_view(request: WSGIRequest):
             try:
                 validate_image_file_size(image)
             except ValidationError as error:
-                return render(request, 'imageUpload.html', {'form': image_form, 'validation_error': error})
+                error_str = ""
+                for error_one in error:
+                    error_str += str(error_one)
+
+                return render(request, 'imageUpload.html', {'form': image_form, 'validation_error': error_str})
 
             image_name_after_re: str = replace_with_underscore(image.name)
 
