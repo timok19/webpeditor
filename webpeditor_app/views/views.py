@@ -1,11 +1,15 @@
 from pathlib import Path
+from PIL import Image
+import os
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
+from webpeditor import settings
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.folder_name_with_session_id import create_folder_name_with_session_id
@@ -59,18 +63,61 @@ def upload_image_view(request: WSGIRequest):
     return render(request, 'imageUpload.html', {'form': image_form})
 
 
-def show_image_view(request: WSGIRequest):
-    if request.method != 'GET':
-        uploaded_image_url = None
-    else:
-        uploaded_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
-        uploaded_image_url = None
+def show_image_info_view(request: WSGIRequest):
+    uploaded_image_url = None
+    uploaded_image_resolution = None
+    uploaded_image_format = None
+    uploaded_image_image_name = None
+    uploaded_image_aspect_ratio = None
+    uploaded_image_size = None
 
-        if uploaded_image:
-            uploaded_image_url = uploaded_image.original_image_url.url
+    if request.method == 'GET':
+        uploaded_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
+
+        if not uploaded_image:
+            return redirect("ImageDoesNotExist")
+
+        uploaded_image_url = uploaded_image.original_image_url.url
+        path_to_local_image: Path = settings.MEDIA_ROOT / request.session.session_key / uploaded_image.image_file
+
+        image_local_file = Image.open(path_to_local_image)
+
+        # Image format
+        uploaded_image_format = ".{}".format(image_local_file.format)
+
+        # Image size
+        uploaded_image_resolution = "{}px * {}px".format(image_local_file.size[0], image_local_file.size[1])
+
+        # Image name
+        basename, ext = os.path.splitext(uploaded_image.image_file)
+        if len(basename) > 20:
+            basename = basename[:17] + "..."
+            uploaded_image_image_name = basename + ext
+        else:
+            uploaded_image_image_name = uploaded_image.image_file
+
+        # Image aspect ratio
+        uploaded_image_aspect_ratio = round(image_local_file.width / image_local_file.height, 1)
+
+        # Image size
+        size = round(os.path.getsize(path_to_local_image) / 1024)
+        uploaded_image_size = "{} KB".format(size)
+
+        if size > 1000:
+            size /= 1024
+            uploaded_image_size = "{} MB".format(round(size))
 
         update_session(request.session.session_key)
 
-    # TODO: add information about added image (image itself, size in KB, resolution, ratio, format)
     return render(request, 'imageInfo.html', {'uploaded_image_url': uploaded_image_url,
-                                              'session_id': request.session.session_key})
+                                              'session_id': request.session.session_key,
+                                              'image_format': uploaded_image_format,
+                                              'image_resolution': uploaded_image_resolution,
+                                              'image_name': uploaded_image_image_name,
+                                              'aspect_ratio': uploaded_image_aspect_ratio,
+                                              'image_size': uploaded_image_size})
+
+
+def image_does_not_exist_view(request: WSGIRequest):
+    response = HttpResponse(status=404)
+    return render(request, 'imageDoesNotExist.html', {'status_code': response.status_code})
