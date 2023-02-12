@@ -4,7 +4,11 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.utils import timezone
 
+from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
+
+from pathlib import Path
+import shutil
 
 
 def set_session_expiry(request: WSGIRequest):
@@ -29,6 +33,11 @@ def update_session(session_id: str) -> JsonResponse:
 
         original_image.delete()
         default_storage.delete(original_image.original_image_url.name)
+
+        path_to_old_image_folder = Path(settings.MEDIA_ROOT) / session_id
+        if path_to_old_image_folder.exists():
+            shutil.rmtree(str(path_to_old_image_folder))
+
         session.delete()
 
         return JsonResponse({'success': True,
@@ -38,4 +47,8 @@ def update_session(session_id: str) -> JsonResponse:
     else:
         session.expire_date = timezone.now() + timezone.timedelta(seconds=7200)
         session.save()
-        return JsonResponse({'success': True, 'info': 'Session is alive'}, status=200)
+        print(f"\nSession will expire at {session.expire_date}")
+        return JsonResponse({'success': True,
+                             'info': 'Session is alive',
+                             'estimated_time_of_session_id': str(session.expire_date)},
+                            status=200)

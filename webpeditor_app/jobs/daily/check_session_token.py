@@ -1,4 +1,4 @@
-from django_extensions.management.jobs import HourlyJob
+from django_extensions.management.jobs import DailyJob
 from webob import Request
 from webpeditor_app.services.image_services.session_id_to_db import update_session
 from webpeditor.settings import CORS_ORIGIN_WHITELIST
@@ -6,7 +6,7 @@ from webpeditor.settings import CORS_ORIGIN_WHITELIST
 import json
 
 
-class Job(HourlyJob):
+class Job(DailyJob):
     help = "Checks the estimated time of the session ID token and delete expired session, image from db and local"
 
     request: Request = None
@@ -25,7 +25,7 @@ class Job(HourlyJob):
 
         if status_code == 200:
             deserialized_data = json.loads(response_body)
-            print(deserialized_data)
             self.session_id = str(deserialized_data[0]["session_id"])
+            print(f"JSON object in db:\n{json.dumps(deserialized_data, indent=4)}")
 
             update_session(self.session_id)
