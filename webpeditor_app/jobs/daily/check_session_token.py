@@ -25,7 +25,9 @@ class Job(DailyJob):
 
         if status_code == 200:
             deserialized_data = json.loads(response_body)
-            self.session_id = str(deserialized_data[0]["session_id"])
+
             print(f"JSON object in db:\n{json.dumps(deserialized_data, indent=4)}")
 
-            update_session(self.session_id)
+            for data in deserialized_data:
+                self.session_id = str(data["session_id"])
+                update_session(self.session_id)

@@ -21,9 +21,7 @@ from webpeditor_app.services.validators.image_size_validator import validate_ima
 def upload_image_view(request: WSGIRequest):
     set_session_expiry(request)
 
-    if request.method != 'POST':
-        image_form = OriginalImageForm()
-    else:
+    if request.method == 'POST':
         image_form = OriginalImageForm(request.POST, request.FILES)
 
         if not image_form.is_valid():
@@ -63,8 +61,11 @@ def upload_image_view(request: WSGIRequest):
             update_session(request.session.session_key)
 
             return redirect('ImageInfoView')
+    else:
+        image_form = OriginalImageForm()
+        original_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
 
-    return render(request, 'imageUpload.html', {'form': image_form})
+    return render(request, 'imageUpload.html', {'form': image_form, 'original_image': original_image})
 
 
 def show_image_info_view(request: WSGIRequest):
@@ -90,7 +91,7 @@ def show_image_info_view(request: WSGIRequest):
         uploaded_image_format = ".{}".format(image_local_file.format)
 
         # Image size
-        uploaded_image_resolution = "{}px * {}px".format(image_local_file.size[0], image_local_file.size[1])
+        uploaded_image_resolution = "{}px ⨯ {}px".format(image_local_file.size[0], image_local_file.size[1])
 
         # Image name
         basename, ext = os.path.splitext(uploaded_image.image_file)
@@ -104,12 +105,12 @@ def show_image_info_view(request: WSGIRequest):
         uploaded_image_aspect_ratio = round(image_local_file.width / image_local_file.height, 1)
 
         # Image size
-        size = round(os.path.getsize(path_to_local_image) / 1024)
+        size = round(os.path.getsize(path_to_local_image) / 1024, 2)
         uploaded_image_size = "{} KB".format(size)
 
         if size > 1000:
             size /= 1024
-            uploaded_image_size = "{} MB".format(round(size))
+            uploaded_image_size = "{} MB".format(round(size, 2))
 
         update_session(request.session.session_key)
 
@@ -124,4 +125,6 @@ def show_image_info_view(request: WSGIRequest):
 
 def image_does_not_exist_view(request: WSGIRequest):
     response = HttpResponse(status=404)
-    return render(request, 'imageDoesNotExist.html', {'status_code': response.status_code})
+    response_message = 'Image not found'
+    return render(request, 'imageDoesNotExist.html', {'status_code': response.status_code,
+                                                      'response_message': response_message})

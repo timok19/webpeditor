@@ -7,4 +7,4 @@ def validate_image_file_size(uploaded_file: UploadedFile):
     file_size = uploaded_file.size
 
     if file_size > settings.MAX_IMAGE_FILE_SIZE:
-        raise ValidationError("File size should not exceed 6 MB.")
+        raise ValidationError("Image size should not exceed 6 MB.")

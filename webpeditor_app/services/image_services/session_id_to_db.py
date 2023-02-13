@@ -1,5 +1,4 @@
 from django.contrib.sessions.models import Session
-from django.core.files.storage import default_storage
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.utils import timezone
@@ -22,9 +21,6 @@ def update_session(session_id: str) -> JsonResponse:
     except Session.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Session not found'}, status=404)
 
-    if not session.session_key or not session.expire_date:
-        return JsonResponse({'success': False, 'error': 'Session key or session expire date not found'}, status=404)
-
     if timezone.now() > session.expire_date:
         try:
             original_image = OriginalImage.objects.filter(session_id=session_id).first()
@@ -32,11 +28,10 @@ def update_session(session_id: str) -> JsonResponse:
             return JsonResponse({'success': False, 'error': 'Image not found'}, status=404)
 
         original_image.delete()
-        default_storage.delete(original_image.original_image_url.name)
 
         path_to_old_image_folder = Path(settings.MEDIA_ROOT) / session_id
         if path_to_old_image_folder.exists():
-            shutil.rmtree(str(path_to_old_image_folder))
+            shutil.rmtree(path_to_old_image_folder)
 
         session.delete()
 
@@ -48,6 +43,7 @@ def update_session(session_id: str) -> JsonResponse:
         session.expire_date = timezone.now() + timezone.timedelta(seconds=7200)
         session.save()
         print(f"\nSession will expire at {session.expire_date}")
+
         return JsonResponse({'success': True,
                              'info': 'Session is alive',
                              'estimated_time_of_session_id': str(session.expire_date)},

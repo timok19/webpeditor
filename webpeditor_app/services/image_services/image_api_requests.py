@@ -15,7 +15,7 @@ def original_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
     Parameters:
         request: WSGIRequest
 
-            API request (GET, POST, DELETE)
+            API request (GET, DELETE)
 
         _id: int
 
@@ -100,6 +100,3 @@ def edited_image_api(request: WSGIRequest, _id=0) -> JsonResponse:
 @csrf_exempt
 def upload_edited_image(request: WSGIRequest) -> JsonResponse:
     pass
-
-# TODO: Get image id from DB and update session token on each user POST, GET, PUT, DELETE requests
-# update_session(request, _id=)

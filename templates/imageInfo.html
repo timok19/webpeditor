@@ -2,35 +2,50 @@
 
 {% block content %}
 
-  <div class="md:container md:mx-auto flex justify-center items-center">
-    <div role="status"
-       class="max-w-sm p-4 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700">
-      <div class="flex items-center justify-center h-48 mb-4 bg-gray-300 rounded dark:bg-gray-700">
-        {% if uploaded_image_url and session_id %}
-          <img class="h-auto max-w-lg rounded-lg" src="{{ uploaded_image_url }}" alt="Uploaded Image">
-        {% else %}
-          <svg class="w-12 h-12 text-gray-200 dark:text-gray-600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-               fill="currentColor" viewBox="0 0 640 512">
-            <path
-              d="M480 80C480 35.82 515.8 0 560 0C604.2 0 640 35.82 640 80C640 124.2 604.2 160 560 160C515.8 160 480 124.2 480 80zM0 456.1C0 445.6 2.964 435.3 8.551 426.4L225.3 81.01C231.9 70.42 243.5 64 256 64C268.5 64 280.1 70.42 286.8 81.01L412.7 281.7L460.9 202.7C464.1 196.1 472.2 192 480 192C487.8 192 495 196.1 499.1 202.7L631.1 419.1C636.9 428.6 640 439.7 640 450.9C640 484.6 612.6 512 578.9 512H55.91C25.03 512 .0006 486.1 .0006 456.1L0 456.1z"></path>
-          </svg>
-        {% endif %}
-      </div>
-      <div class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
-      <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-      <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-      <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
-      <div class="flex items-center mt-4 space-x-3">
+  <div class="flex items-center justify-evenly pt-20">
 
+    <div class="bg-white max-w-screen-md border max-w-6xl border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+      <div class="flex flex-row items-center justify-center">
+
+        <img class="h-[calc(60vh-5rem)] rounded-t-lg" src="{{ uploaded_image_url }}" alt="Uploaded Image" style="object-fit: contain" />
+
+        <div class="text-left flex flex-col p-5">
+
+          <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Image properties:</h5>
+          <p class="font-bold text-gray-700 dark:text-gray-200">Name: &nbsp;<span class="font-normal dark:text-gray-400"
+                                                                                  style="font-family: Consolas, monospace">{{ image_name }}</span>
+          </p>
+          <p class="font-bold text-gray-700 dark:text-gray-200">Format: &nbsp;<span class="font-normal dark:text-gray-400"
+                                                                                    style="font-family: Consolas, monospace">{{ image_format }}</span>
+          </p>
+          <p class="font-bold text-gray-700 dark:text-gray-200">Resolution: &nbsp;<span
+            class="font-normal dark:text-gray-400" style="font-family: Consolas, monospace">{{ image_resolution }}</span>
+          </p>
+          <p class="font-bold text-gray-700 dark:text-gray-200">Size: &nbsp;<span class="font-normal dark:text-gray-400"
+                                                                                  style="font-family: Consolas, monospace">{{ image_size }}</span>
+          </p>
+          <p class="mb-4 font-bold text-gray-700 dark:text-gray-200">Aspect ratio: &nbsp;<span
+            class="font-normal dark:text-gray-400" style="font-family: Consolas, monospace">{{ aspect_ratio }}</span></p>
+
+          <div class="flex inline-flex items-center justify-center">
+            <button onclick="location.href='/'"
+                    type="button"
+                    class="mb-2 mr-4 text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+                  Choose another image
+            </button>
+            <button onclick="location.href='/image_edit'"
+                    type="button"
+                    class="relative inline-flex items-center justify-center p-0.5 mb-2 ml-4 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                Edit image
+              </span>
+              <svg aria-hidden="true" class="w-5 h-5 ml-2 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+
+          </div>
+        </div>
       </div>
-      <span class="sr-only">Loading...</span>
     </div>
   </div>
-
-  <p class="dark:text-white">Format: {{ image_format }}</p>
-  <p class="dark:text-white">Size: {{ image_resolution }}</p>
-  <p class="dark:text-white">Aspect ratio: {{ aspect_ratio }}</p>
-  <p class="dark:text-white">Image name: {{ image_name }}</p>
-  <p class="dark:text-white">Image size: {{ image_size }}</p>
 
 {% endblock content %}
