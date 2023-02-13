@@ -13,7 +13,7 @@ class OriginalImage(models.Model):
                                            default=None,
                                            null=False,
                                            blank=False)
-    session_id = models.CharField(max_length=1023, null=True)
+    user_token = models.CharField(max_length=1023, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -29,7 +29,7 @@ class EditedImage(models.Model):
                                          default=None,
                                          null=False,
                                          blank=False)
-    session_id = models.CharField(max_length=1023, null=True)
+    user_token = models.CharField(max_length=1023, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
