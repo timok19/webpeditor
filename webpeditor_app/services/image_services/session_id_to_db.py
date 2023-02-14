@@ -15,11 +15,22 @@ def set_session_expiry(request: WSGIRequest):
     request.session.set_expiry(7200)
 
 
+# Please refactor this function, make the code shorter and more readable (if possible) and add docstrings
 def update_session(session_id: str) -> JsonResponse:
+    """
+    Update session_id token expiry to 2 hours if it is not expired yet.
+    If session_id token is expired, delete the image and the folder with the image.
+
+    Parameters:
+        session_id: session_id token
+    Return:
+        JsonResponse with information about the session_id token
+    """
     session: Session = Session.objects.filter(session_key=session_id).first()
     original_image: OriginalImage = OriginalImage.objects.filter(session_id=session_id).first()
     path_to_old_image_folder: Path = Path(settings.MEDIA_ROOT) / session_id
 
+    # optimize this code
     if original_image:
         if timezone.now() > original_image.session_id_expiration_date:
             original_image.delete()

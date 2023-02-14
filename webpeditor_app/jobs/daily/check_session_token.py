@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 from django_extensions.management.jobs import DailyJob
 from webob import Request
 from webpeditor_app.services.image_services.session_id_to_db import update_session
@@ -15,6 +16,7 @@ class Job(DailyJob):
     # Change from CORS_ORIGIN_WHITELIST to domain name
     base_url = CORS_ORIGIN_WHITELIST[0] or CORS_ORIGIN_WHITELIST[1]
 
+    @csrf_exempt
     def execute(self):
         request = Request.blank(path='/original_image', base_url=self.base_url)
         request.method = 'GET'
