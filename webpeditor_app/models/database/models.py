@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.sessions.models import Session
 
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
@@ -13,7 +14,8 @@ class OriginalImage(models.Model):
                                            default=None,
                                            null=False,
                                            blank=False)
-    session_id = models.CharField(max_length=1023, null=True)
+    session_id = models.CharField(max_length=120, null=True)
+    session_id_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -29,7 +31,8 @@ class EditedImage(models.Model):
                                          default=None,
                                          null=False,
                                          blank=False)
-    session_id = models.CharField(max_length=1023, null=True)
+    session_id = models.CharField(max_length=120, null=True)
+    session_id_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

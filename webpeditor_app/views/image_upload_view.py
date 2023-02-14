@@ -4,8 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
@@ -15,6 +15,7 @@ from webpeditor_app.services.image_services.session_id_to_db import set_session_
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
+@require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
     set_session_expiry(request)
 
@@ -23,7 +24,6 @@ def image_upload_view(request: WSGIRequest):
         if previous_image:
             default_storage.delete(previous_image.original_image_url.name)
             previous_image.delete()
-
 
         image_form = OriginalImageForm(request.POST, request.FILES)
         user_folder: Path = create_folder_name_with_session_id(session_id=request.session.session_key)
@@ -51,6 +51,7 @@ def image_upload_view(request: WSGIRequest):
         original_image_object = OriginalImage(image_file=image_name_after_re,
                                               content_type=image.content_type,
                                               original_image_url=uploaded_image_path_to_db,
+                                              session_id_expiration_date=request.session.get_expiry_date(),
                                               session_id=request.session.session_key)
 
         original_image_object.save()

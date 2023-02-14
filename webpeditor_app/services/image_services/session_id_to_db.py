@@ -21,7 +21,7 @@ def update_session(session_id: str) -> JsonResponse:
     path_to_old_image_folder: Path = Path(settings.MEDIA_ROOT) / session_id
 
     if original_image:
-        if timezone.now() > original_image.created_at:
+        if timezone.now() > original_image.session_id_expiration_date:
             original_image.delete()
             if path_to_old_image_folder.exists():
                 shutil.rmtree(path_to_old_image_folder)
