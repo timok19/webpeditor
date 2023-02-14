@@ -16,24 +16,20 @@ def set_session_expiry(request: WSGIRequest):
 
 
 def update_session(session_id: str) -> JsonResponse:
-    try:
-        session = Session.objects.filter(session_key=session_id).first()
-    except Session.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Session not found'}, status=404)
+    session = Session.objects.filter(session_key=session_id).first()
+    original_image = OriginalImage.objects.filter(session_id=session_id).first()
 
     if timezone.now() > session.expire_date:
-        try:
-            original_image = OriginalImage.objects.filter(session_id=session_id).first()
-        except OriginalImage.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Image not found'}, status=404)
 
-        original_image.delete()
+        if original_image:
+            original_image.delete()
+            path_to_old_image_folder = Path(settings.MEDIA_ROOT) / session_id
 
-        path_to_old_image_folder = Path(settings.MEDIA_ROOT) / session_id
-        if path_to_old_image_folder.exists():
-            shutil.rmtree(path_to_old_image_folder)
+            if path_to_old_image_folder.exists():
+                shutil.rmtree(path_to_old_image_folder)
 
-        session.delete()
+        if session:
+            session.delete()
 
         return JsonResponse({'success': True,
                              'info': 'Session has been expired and image has been deleted'},

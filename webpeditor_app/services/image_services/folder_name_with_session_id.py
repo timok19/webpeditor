@@ -15,4 +15,4 @@ def create_folder_name_with_session_id(session_id: str) -> Path:
     folder_path_with_uploaded_images = media_root / session_id
     folder_path_with_uploaded_images.mkdir(parents=True, exist_ok=True)
 
-    return folder_path_with_uploaded_images
+    return Path(folder_path_with_uploaded_images)
