@@ -1,11 +1,13 @@
 from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.models.database.serializers import OriginalImageSerializer
 
 
 def get_deserialized_data_from_db():
     try:
-        data = OriginalImage.objects.all().values('user_id')
+        original_images = OriginalImage.objects.all()
     except OriginalImage.DoesNotExist as error:
         raise error
 
-    deserialized_data = [dict(d) for d in data]
-    return deserialized_data
+    original_image_serializer = OriginalImageSerializer(original_images, many=True)
+
+    return original_image_serializer.data

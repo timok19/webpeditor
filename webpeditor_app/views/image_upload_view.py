@@ -10,9 +10,10 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.user_folder_name_with_user_id import create_folder_name_with_user_id
+from webpeditor_app.services.image_services.session_expiry import set_session_expiry
+from webpeditor_app.services.image_services.user_folder import create_folder_name_with_user_id
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-from webpeditor_app.services.image_services.session_id_to_db import set_session_expiry, update_session
+from webpeditor_app.services.image_services.session_update import update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 

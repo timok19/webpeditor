@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.session_id_to_db import update_session
+from webpeditor_app.services.image_services.session_update import update_session
 
 
 @require_http_methods(['GET'])
