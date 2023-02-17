@@ -1,7 +1,7 @@
+from django.contrib.sessions.models import Session
 from django_extensions.management.jobs import DailyJob
-from webob import Request
 from webpeditor_app.services.image_services.session_id_to_db import update_session
-from webpeditor.settings import CORS_ORIGIN_WHITELIST
+from webpeditor_app.services.other_services.deserialized_data_from_db import get_deserialized_data_from_db
 
 import json
 
@@ -9,25 +9,20 @@ import json
 class Job(DailyJob):
     help = "Checks the estimated time of the session ID token and delete expired session, image from db and local"
 
-    request: Request = None
-    session_id: str = None
-
-    # Change from CORS_ORIGIN_WHITELIST to domain name
-    base_url = CORS_ORIGIN_WHITELIST[0] or CORS_ORIGIN_WHITELIST[1]
+    user_id: str
+    session_id: str
 
     def execute(self):
-        request = Request.blank(path='/original_image', base_url=self.base_url)
-        request.method = 'GET'
+        deserialized_data = get_deserialized_data_from_db()
+        try:
+            session_store = Session.objects.all()
+        except Session.DoesNotExist as error:
+            raise error
 
-        response = request.get_response()
-        response_body: bytes = response.body
-        status_code: int = response.status_code
+        print(f"JSON object in db:\n{json.dumps(deserialized_data, indent=4)}")
 
-        if status_code == 200:
-            deserialized_data = json.loads(response_body)
-
-            print(f"JSON object in db:\n{json.dumps(deserialized_data, indent=4)}")
-
-            for data in deserialized_data:
-                self.session_id = str(data["session_id"])
-                update_session(self.session_id)
+        for data in deserialized_data:
+            self.user_id = str(data["user_id"])
+            for session in session_store:
+                self.session_id = session.session_key
+            update_session(self.session_id, self.user_id)

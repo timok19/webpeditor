@@ -13,7 +13,7 @@ from webpeditor_app.services.image_services.user_folder import delete_empty_fold
 
 def set_session_expiry(request: WSGIRequest):
     # Set session_id token expiry to 15 minutes
-    request.session.set_expiry(15 * 60)
+    request.session.set_expiry(30 * 60)
 
 
 def update_session(session_id: str, user_id: str) -> JsonResponse:
