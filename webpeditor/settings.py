@@ -141,11 +141,19 @@ USE_TZ = True
 # Session handling
 SESSION_SAVE_EVERY_REQUEST = True
 
-SESSION_COOKIE_HTTPONLY = True
-
-SESSION_COOKIE_SECURE = True
-
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# SESSION_COOKIE_SAMESITE = 'Strict'
+
+# CSRF_COOKIE_SAMESITE = 'Strict'
+
+# SESSION_COOKIE_HTTPONLY = True
+
+# CSRF_COOKIE_HTTPONLY = True
+
+# PROD ONLY
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

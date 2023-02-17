@@ -1,4 +1,3 @@
-from django.views.decorators.csrf import csrf_exempt
 from django_extensions.management.jobs import DailyJob
 from webob import Request
 from webpeditor_app.services.image_services.session_id_to_db import update_session

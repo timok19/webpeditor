@@ -8,11 +8,11 @@
       <div class="contents">
         <img
 
-          class="z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
+          class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
           src="{{ uploaded_image_url }}" alt="Uploaded Image"
           onclick="showModal('{{ uploaded_image_url }}')" />
 
-        {# sm:-translate-y-10 #}
+{#                 sm:-translate-y-10#}
         <div class="text-left flex flex-col pt-14 pb-5 pl-5 overscroll-contain ">
 
           <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Image properties:</h5>
@@ -63,15 +63,21 @@
 
   <!-- The Modal -->
   <div id="modal"
-      class="hidden fixed top-0 left-0 z-80 w-screen h-screen bg-black/70 flex justify-center items-center">
+       class="hidden fixed top-0 left-0 z-80 w-screen h-screen bg-black/70 flex justify-center items-center">
 
-      <!-- The close button -->
-      <a class="fixed z-90 top-6 right-8 text-white text-5xl font-bold" href="javascript:void(0)"
-          onclick="closeModal()">&times;</a>
+    <!-- The close button -->
+    <a class="fixed z-90 top-6 right-8 text-white text-5xl font-bold" href="javascript:void(0)"
+       onclick="closeModal()">&times;</a>
 
-      <!-- A big image will be displayed here -->
-      <img id="modal-img" class="max-w-[800px] max-h-[600px] object-cover"  alt="Image Modal"  src=""/>
+    <!-- A big image will be displayed here -->
+    <img id="modal-img" class="max-w-[800px] max-h-[600px] object-cover" alt="Image Modal" src="" />
   </div>
+
+  <style>
+    .change-cursor {
+        cursor: url("{{ uploaded_image_url }}") 25 25, pointer;
+    }
+  </style>
 
   <script type="text/javascript">
     // Get the modal by id
@@ -82,13 +88,13 @@
 
     // this function is called when a small image is clicked
     function showModal(src) {
-        modal.classList.remove('hidden');
-        modalImg.src = src;
+      modal.classList.remove("hidden");
+      modalImg.src = src;
     }
 
     // this function is called when the close button is clicked
     function closeModal() {
-        modal.classList.add('hidden');
+      modal.classList.add("hidden");
     }
   </script>
 {% endblock content %}
