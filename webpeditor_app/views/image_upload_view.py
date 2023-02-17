@@ -5,6 +5,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
@@ -18,6 +19,7 @@ from webpeditor_app.services.validators.image_size_validator import validate_ima
 from django.utils.crypto import get_random_string
 
 
+@csrf_protect
 @require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
     set_session_expiry(request)
