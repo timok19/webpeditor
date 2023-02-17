@@ -9,10 +9,13 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.folder_name_with_session_id import create_folder_name_with_session_id
+from webpeditor_app.services.image_services.user_folder_name_with_user_id import create_folder_name_with_user_id
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
 from webpeditor_app.services.image_services.session_id_to_db import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
+
+
+from django.utils.crypto import get_random_string
 
 
 @require_http_methods(['POST', 'GET'])
@@ -20,13 +23,18 @@ def image_upload_view(request: WSGIRequest):
     set_session_expiry(request)
 
     if request.method == 'POST':
-        previous_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
+        created_user_id = request.session.get('user_id')
+        if created_user_id is None:
+            request.session['user_id'] = get_random_string(length=32)
+            created_user_id = request.session.get('user_id')
+
+        previous_image = OriginalImage.objects.filter(user_id=created_user_id).first()
         if previous_image:
             default_storage.delete(previous_image.original_image_url.name)
             previous_image.delete()
 
         image_form = OriginalImageForm(request.POST, request.FILES)
-        user_folder: Path = create_folder_name_with_session_id(session_id=request.session.session_key)
+        user_folder: Path = create_folder_name_with_user_id(user_id=created_user_id)
 
         if not image_form.is_valid():
             return redirect('UploadImageView')
@@ -47,21 +55,22 @@ def image_upload_view(request: WSGIRequest):
         uploaded_image_path_to_local = user_folder / image_name_after_re
         default_storage.save(uploaded_image_path_to_local, image)
 
-        uploaded_image_path_to_db = str(request.session.session_key + '/' + image_name_after_re)
+        uploaded_image_path_to_db = str(created_user_id + '/' + image_name_after_re)
         original_image_object = OriginalImage(image_file=image_name_after_re,
                                               content_type=image.content_type,
                                               original_image_url=uploaded_image_path_to_db,
                                               session_id_expiration_date=request.session.get_expiry_date(),
-                                              session_id=request.session.session_key)
+                                              user_id=created_user_id)
 
         original_image_object.save()
 
-        update_session(request.session.session_key)
+        update_session(session_id=request.session.session_key, user_id=created_user_id)
 
         return redirect('ImageInfoView')
 
     else:
         image_form = OriginalImageForm()
-        original_image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
+        created_user_id = request.session.get('user_id')
+        original_image = OriginalImage.objects.filter(user_id=created_user_id).first()
 
     return render(request, 'imageUpload.html', {'form': image_form, 'original_image': original_image})

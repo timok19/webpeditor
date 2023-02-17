@@ -9,7 +9,9 @@ from webpeditor_app.models.database.models import OriginalImage
 def image_edit_view(request: WSGIRequest):
     uploaded_image_url = None
     if request.method == 'GET':
-        image = OriginalImage.objects.filter(session_id=request.session.session_key).first()
+        user_id = request.session.get('user_id')
+
+        image = OriginalImage.objects.filter(user_id=user_id).first()
         if not image:
             return redirect("ImageDoesNotExistView")
 

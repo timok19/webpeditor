@@ -9,7 +9,7 @@ class OriginalImageSerializer(serializers.ModelSerializer):
                   'image_file',
                   'content_type',
                   'original_image_url',
-                  'session_id',
+                  'user_id',
                   'session_id_expiration_date',
                   'created_at',
                   )
@@ -22,7 +22,7 @@ class EditedImageSerializer(serializers.ModelSerializer):
                   'original_image_file',
                   'content_type_edited',
                   'edited_image_url',
-                  'session_id',
+                  'user_id',
                   'session_id_expiration_date',
                   'created_at',
                   )
