@@ -1,7 +1,7 @@
 from django.contrib.sessions.models import Session
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.image_services.image_session import delete_expired_image_session
+from webpeditor_app.services.image_services.image_in_db_and_local import delete_old_image_in_db_and_local
 from webpeditor_app.services.image_services.session_update import update_session
 from webpeditor_app.services.other_services.deserialized_data_from_db import get_deserialized_data_from_db
 
@@ -27,8 +27,10 @@ class Job(DailyJob):
             self.user_id = str(data["user_id"])
 
             for session in session_store:
-                if not session.session_key and self.user_id:
-                    delete_expired_image_session(self.user_id)
+                if session is None and self.user_id:
+                    delete_old_image_in_db_and_local(self.user_id)
+                elif self.user_id is None and session:
+                    session.delete()
 
                 self.session_id = session.session_key
 

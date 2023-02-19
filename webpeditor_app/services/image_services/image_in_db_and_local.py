@@ -8,7 +8,7 @@ from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
 
 
-def delete_expired_image_session(user_id: str):
+def delete_old_image_in_db_and_local(user_id: str):
     """
     Deletes the expired image session and the corresponding image from the user's media folder.
 
