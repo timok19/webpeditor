@@ -1,4 +1,5 @@
 from pathlib import Path
+import base64
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -23,6 +24,8 @@ from django.utils.crypto import get_random_string
 @csrf_protect
 @require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
+    image_is_exist: bool = True
+
     set_session_expiry(request)
 
     if request.method == 'POST':
@@ -76,4 +79,16 @@ def image_upload_view(request: WSGIRequest):
         created_user_id = request.session.get('user_id')
         original_image = OriginalImage.objects.filter(user_id=created_user_id).first()
 
-    return render(request, 'imageUpload.html', {'form': image_form, 'original_image': original_image})
+        try:
+            with open(original_image.original_image_url.path, 'rb') as file:
+                original_image_data = file.read()
+        except FileNotFoundError or FileExistsError:
+            image_is_exist = False
+
+        original_image_base64_data = base64.b64encode(original_image_data)
+        uploaded_image_url = f"data:{original_image.content_type};base64,{original_image_base64_data.decode('utf-8')}"
+
+    return render(request, 'imageUpload.html', {'form': image_form,
+                                                'original_image': original_image,
+                                                'uploaded_image_url': uploaded_image_url,
+                                                'image_is_exist': image_is_exist})

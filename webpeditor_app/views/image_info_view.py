@@ -1,7 +1,9 @@
 import os
+import base64
 from pathlib import Path
 
 from PIL import Image
+from django.core.exceptions import PermissionDenied
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import redirect, render
@@ -14,6 +16,7 @@ from webpeditor_app.services.image_services.session_update import update_session
 
 @require_http_methods(['GET'])
 def image_info_view(request: WSGIRequest):
+    # uploaded_image_url = None
     uploaded_image_url = None
     uploaded_image_resolution = None
     uploaded_image_format = None
@@ -28,9 +31,19 @@ def image_info_view(request: WSGIRequest):
         if not uploaded_image:
             return redirect("ImageDoesNotExistView")
 
-        uploaded_image_url = uploaded_image.original_image_url.url
-        path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
+        if uploaded_image.user_id != user_id:
+            raise PermissionDenied("You do not have permission to view this image.")
 
+        # uploaded_image_url = uploaded_image.original_image_url.url
+        try:
+            with open(uploaded_image.original_image_url.path, 'rb') as file:
+                image_data = file.read()
+            uploaded_image_base64_data = base64.b64encode(image_data)
+            uploaded_image_url = f"data:{uploaded_image.content_type};base64,{uploaded_image_base64_data.decode('utf-8')}"
+        except FileNotFoundError:
+            return redirect("ImageDoesNotExistView")
+
+        path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
         image_local_file = Image.open(path_to_local_image)
 
         # Image format
