@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'compressor',
     'rest_framework',
     'corsheaders',
+    'imagekit',
     'webpeditor_app.apps.WebpeditorAppConfig',
 ]
 

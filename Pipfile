@@ -40,6 +40,8 @@ django-extensions = "*"
 requests = "*"
 webob = "*"
 localstoragepy = "*"
+django-imagekit = "*"
+cython = "*"
 
 [dev-packages]
 autopep8 = "*"
