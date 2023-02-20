@@ -3,6 +3,7 @@ import base64
 from pathlib import Path
 
 from PIL import Image
+from _sqlite3 import Error
 from django.core.exceptions import PermissionDenied
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -12,17 +13,18 @@ from django.views.decorators.http import require_http_methods
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.session_update import update_session
+from webpeditor_app.services.other_services.local_storage import initialize_local_storage
 
 
 @require_http_methods(['GET'])
 def image_info_view(request: WSGIRequest):
-    # uploaded_image_url = None
     uploaded_image_url = None
     uploaded_image_resolution = None
     uploaded_image_format = None
     uploaded_image_image_name = None
     uploaded_image_aspect_ratio = None
     uploaded_image_size = None
+    local_storage = initialize_local_storage()
 
     if request.method == 'GET':
         user_id = request.session.get('user_id')
@@ -30,18 +32,10 @@ def image_info_view(request: WSGIRequest):
 
         if not uploaded_image:
             return redirect("ImageDoesNotExistView")
-
         if uploaded_image.user_id != user_id:
             raise PermissionDenied("You do not have permission to view this image.")
 
-        # uploaded_image_url = uploaded_image.original_image_url.url
-        try:
-            with open(uploaded_image.original_image_url.path, 'rb') as file:
-                image_data = file.read()
-            uploaded_image_base64_data = base64.b64encode(image_data)
-            uploaded_image_url = f"data:{uploaded_image.content_type};base64,{uploaded_image_base64_data.decode('utf-8')}"
-        except FileNotFoundError:
-            return redirect("ImageDoesNotExistView")
+        uploaded_image_url = local_storage.getItem("image_url")
 
         path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
         image_local_file = Image.open(path_to_local_image)

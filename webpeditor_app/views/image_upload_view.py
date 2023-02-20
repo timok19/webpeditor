@@ -1,5 +1,4 @@
 from pathlib import Path
-import base64
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -11,10 +10,12 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
 from webpeditor_app.services.image_services.session_expiry import set_session_expiry
 from webpeditor_app.services.image_services.user_folder import create_folder_name_with_user_id
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
 from webpeditor_app.services.image_services.session_update import update_session
+from webpeditor_app.services.other_services.local_storage import initialize_local_storage, save_to_local_storage
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
@@ -25,6 +26,8 @@ from django.utils.crypto import get_random_string
 @require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
     image_is_exist: bool = True
+    image_url_in_local_storage: str = ""
+    local_storage = initialize_local_storage()
 
     set_session_expiry(request)
 
@@ -62,13 +65,17 @@ def image_upload_view(request: WSGIRequest):
         default_storage.save(uploaded_image_path_to_local, image)
 
         uploaded_image_path_to_db = str(created_user_id + '/' + image_name_after_re)
-        original_image_object = OriginalImage(image_file=image_name_after_re,
-                                              content_type=image.content_type,
-                                              original_image_url=uploaded_image_path_to_db,
-                                              session_id_expiration_date=request.session.get_expiry_date(),
-                                              user_id=created_user_id)
+        original_image = OriginalImage(image_file=image_name_after_re,
+                                       content_type=image.content_type,
+                                       original_image_url=uploaded_image_path_to_db,
+                                       session_id_expiration_date=request.session.get_expiry_date(),
+                                       user_id=created_user_id)
 
-        original_image_object.save()
+        original_image.save()
+
+        if original_image:
+            image_is_exist, uploaded_image_url = convert_url_to_base64(image_is_exist, original_image)
+            save_to_local_storage(local_storage, uploaded_image_url)
 
         update_session(session_id=request.session.session_key, user_id=created_user_id)
 
@@ -79,16 +86,10 @@ def image_upload_view(request: WSGIRequest):
         created_user_id = request.session.get('user_id')
         original_image = OriginalImage.objects.filter(user_id=created_user_id).first()
 
-        try:
-            with open(original_image.original_image_url.path, 'rb') as file:
-                original_image_data = file.read()
-        except FileNotFoundError or FileExistsError:
-            image_is_exist = False
-
-        original_image_base64_data = base64.b64encode(original_image_data)
-        uploaded_image_url = f"data:{original_image.content_type};base64,{original_image_base64_data.decode('utf-8')}"
+        if original_image:
+            image_url_in_local_storage = local_storage.getItem("image_url")
 
     return render(request, 'imageUpload.html', {'form': image_form,
                                                 'original_image': original_image,
-                                                'uploaded_image_url': uploaded_image_url,
+                                                'image_url_in_local_storage': image_url_in_local_storage,
                                                 'image_is_exist': image_is_exist})

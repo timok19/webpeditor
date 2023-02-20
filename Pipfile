@@ -39,6 +39,7 @@ django-environ = "*"
 django-extensions = "*"
 requests = "*"
 webob = "*"
+localstoragepy = "*"
 
 [dev-packages]
 autopep8 = "*"
