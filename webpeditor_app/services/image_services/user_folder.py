@@ -42,17 +42,23 @@ def find_empty_folders(folder: Path) -> Tuple:
     return tuple(empty_folders)
 
 
-def create_folder_name_with_user_id(user_id: str) -> Path:
+def create_new_folder(user_id: str, uploaded_image_folder_status: bool) -> Path:
     """Create a folder named as user_id within the media root directory.
 
     Parameters:
         user_id (str): Session ID of the current session.
+        uploaded_image_folder_status (bool): Create folder for newly uploaded image
 
     Returns:
         Path: Path to the folder named as session_id.
     """
     media_root = Path(settings.MEDIA_ROOT)
-    folder_path_with_uploaded_images = media_root / user_id
-    folder_path_with_uploaded_images.mkdir(parents=True, exist_ok=True)
+    folder_path_with_uploaded_images: Path = media_root / user_id
+    folder_path_with_edited_images: Path = folder_path_with_uploaded_images / 'edited'
 
-    return Path(folder_path_with_uploaded_images)
+    if uploaded_image_folder_status is True:
+        folder_path_with_uploaded_images.mkdir(parents=True, exist_ok=True)
+        return folder_path_with_uploaded_images
+    else:
+        folder_path_with_edited_images.mkdir(parents=True, exist_ok=True)
+        return folder_path_with_edited_images

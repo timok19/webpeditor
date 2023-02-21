@@ -67,7 +67,7 @@ def image_info_view(request: WSGIRequest):
 
         update_session(session_id=request.session.session_key, user_id=user_id)
 
-    return render(request, 'imageInfo.html', {'uploaded_image_url': uploaded_image_url,
+    return render(request, 'imageInfoView/imageInfo.html', {'uploaded_image_url': uploaded_image_url,
                                               'image_format': uploaded_image_format,
                                               'image_resolution': uploaded_image_resolution,
                                               'image_name': uploaded_image_image_name,

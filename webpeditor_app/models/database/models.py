@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.sessions.models import Session
+from django_extensions.db.fields.json import JSONField
+
+from imagekit.models import ProcessedImageField
 
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
@@ -25,15 +27,44 @@ class OriginalImage(models.Model):
 class EditedImage(models.Model):
     edited_image_id = models.AutoField(primary_key=True)
     original_image_file = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
+    edited_image_file = models.CharField(max_length=255, default=str(OriginalImage.image_file))
     content_type_edited = models.CharField(max_length=255)
-    edited_image_url = models.ImageField(upload_to="",
-                                         validators=[validate_image_file_size],
-                                         default=None,
-                                         null=False,
-                                         blank=False)
+    steps = JSONField(default=list, null=True, editable=True, blank=True, max_length=50, validators=[])
+    current_step = models.IntegerField(default=0, max_length=50)
+    edited_image_url = ProcessedImageField(upload_to="edited",
+                                           validators=[validate_image_file_size],
+                                           null=False,
+                                           blank=False,
+                                           default=None)
     user_id = models.CharField(max_length=120, null=True)
     session_id_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.edited_image_id
+
+    def add_step(self, step_number, description, params, created_at):
+        self.steps.append({
+            "step_number": step_number,
+            "description": description,
+            "params": params,
+            "created_at": created_at
+        })
+        self.current_step = step_number
+        self.save()
+
+    def get_previous_step(self):
+        if self.current_step > 0:
+            self.current_step -= 1
+            self.save()
+            return self.steps[self.current_step]
+        else:
+            return None
+
+    def get_next_step(self):
+        if self.current_step < len(self.steps) - 1:
+            self.current_step += 1
+            self.save()
+            return self.steps[self.current_step]
+        else:
+            return None

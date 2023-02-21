@@ -20,6 +20,7 @@ class EditedImageSerializer(serializers.ModelSerializer):
         model = EditedImage
         fields = ('edited_image_id',
                   'original_image_file',
+                  'edited_image_file',
                   'content_type_edited',
                   'edited_image_url',
                   'user_id',

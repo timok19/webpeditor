@@ -1,4 +1,5 @@
 {% extends '_base.html' %}
+{% load static %}
 {% block content %}
 
   <span class="whitespace-nowrap flex justify-center font-extralight text-gray-900 dark:text-white"
@@ -67,7 +68,7 @@
         </button>
       </div>
 
-      <script src="../static/js/services/enableUploadButtonService.js"></script>
+      <script src="{% static 'js/services/enableUploadButtonService.js' %}"></script>
       </form>
     </div>
   </div>

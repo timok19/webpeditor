@@ -33,12 +33,16 @@ class Job(DailyJob):
             for data in deserialized_data:
                 user_id = str(data["user_id"])
 
-                if user_id and [session.session_data.get("user_id") for session in session_store] is None:
+                users_id_in_session_store = [session.get_decoded() for session in session_store]
+                user_id_to_delete = [user_id_in_session_store["user_id"] for user_id_in_session_store in
+                                     users_id_in_session_store]
+
+                if user_id and len(user_id_to_delete) == 0 or user_id_to_delete[0] is None:
                     delete_old_image_in_db_and_local(user_id)
 
                 if len(session_store) > 0:
                     for session in session_store:
-                        if user_id is None and session.session_data.get("user_id"):
+                        if user_id is None and user_id_to_delete[0]:
                             session.delete()
 
                         session_id = str(session.session_key)

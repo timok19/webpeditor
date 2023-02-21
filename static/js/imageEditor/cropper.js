@@ -1,15 +1,20 @@
-import Cropper from 'cropperjs'
+const image = document.getElementById("image-edit");
+let cropper = null;
 
-const image = document.getElementById('image-edit');
-const cropper = new Cropper(image, {
-  aspectRatio: 16 / 9,
-  crop(event) {
-    console.log(event.detail.x);
-    console.log(event.detail.y);
-    console.log(event.detail.width);
-    console.log(event.detail.height);
-    console.log(event.detail.rotate);
-    console.log(event.detail.scaleX);
-    console.log(event.detail.scaleY);
-  },
+document.getElementById("crop-image")
+        .addEventListener("click", function() {
+  cropper = new Cropper(image, {
+    aspectRatio: 1,
+    viewMode: 1
+  });
+});
+
+document.getElementById("apply-crop")
+        .addEventListener("click", function() {
+  const croppedCanvas = cropper.getCroppedCanvas();
+  const croppedImage = new Image();
+  croppedImage.src = croppedCanvas.toDataURL();
+  image.parentNode.replaceChild(croppedImage, image);
+  cropper.destroy();
+  cropper = null;
 });

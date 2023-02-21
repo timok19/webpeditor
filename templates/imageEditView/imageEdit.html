@@ -1,7 +1,7 @@
 {% extends '_base.html' %}
+{% load static %}
 
 {% block content %}
-
   <div class="flex items-center">
     <div
       class="w-48 text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -52,28 +52,6 @@
       <img src="{{ uploaded_image_url }}" class="max-w-[700px] max-h-[500px] object-cover" alt="Image To Edit"
            id="image-edit">
     </div>
-
-    <script>
-      const image = document.getElementById("image-edit");
-      let cropper = null;
-
-      document.getElementById("crop-image").addEventListener("click", function() {
-        cropper = new Cropper(image, {
-          aspectRatio: 1,
-          viewMode: 1
-        });
-      });
-    </script>
-
-    <script>
-      document.getElementById("apply-crop").addEventListener("click", function() {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        const croppedImage = new Image();
-        croppedImage.src = croppedCanvas.toDataURL();
-        image.parentNode.replaceChild(croppedImage, image);
-        cropper.destroy();
-        cropper = null;
-      });
-    </script>
+    <script src="{% static 'js/imageEditor/cropper.js'%}"></script>
   </div>
 {% endblock content %}
