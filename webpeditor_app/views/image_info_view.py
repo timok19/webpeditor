@@ -1,9 +1,7 @@
 import os
-import base64
 from pathlib import Path
 
 from PIL import Image
-from _sqlite3 import Error
 from django.core.exceptions import PermissionDenied
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -36,9 +34,12 @@ def image_info_view(request: WSGIRequest):
             raise PermissionDenied("You do not have permission to view this image.")
 
         uploaded_image_url = local_storage.getItem("image_url")
-
         path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
-        image_local_file = Image.open(path_to_local_image)
+
+        try:
+            image_local_file = Image.open(path_to_local_image)
+        except FileExistsError or FileNotFoundError:
+            return redirect("ImageDoesNotExistView")
 
         # Image format
         uploaded_image_format = ".{}".format(image_local_file.format)
@@ -67,9 +68,12 @@ def image_info_view(request: WSGIRequest):
 
         update_session(session_id=request.session.session_key, user_id=user_id)
 
-    return render(request, 'imageInfoView/imageInfo.html', {'uploaded_image_url': uploaded_image_url,
-                                              'image_format': uploaded_image_format,
-                                              'image_resolution': uploaded_image_resolution,
-                                              'image_name': uploaded_image_image_name,
-                                              'aspect_ratio': uploaded_image_aspect_ratio,
-                                              'image_size': uploaded_image_size})
+    return render(request, 'imageInfo.html',
+                  {
+                      'uploaded_image_url': uploaded_image_url,
+                      'image_format': uploaded_image_format,
+                      'image_resolution': uploaded_image_resolution,
+                      'image_name': uploaded_image_image_name,
+                      'aspect_ratio': uploaded_image_aspect_ratio,
+                      'image_size': uploaded_image_size
+                   })

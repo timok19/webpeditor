@@ -53,12 +53,12 @@ def create_new_folder(user_id: str, uploaded_image_folder_status: bool) -> Path:
         Path: Path to the folder named as session_id.
     """
     media_root = Path(settings.MEDIA_ROOT)
-    folder_path_with_uploaded_images: Path = media_root / user_id
-    folder_path_with_edited_images: Path = folder_path_with_uploaded_images / 'edited'
+    folder_path_with_uploaded_image: Path = media_root / user_id
+    folder_path_with_edited_image: Path = folder_path_with_uploaded_image / 'edited'
 
     if uploaded_image_folder_status is True:
-        folder_path_with_uploaded_images.mkdir(parents=True, exist_ok=True)
-        return folder_path_with_uploaded_images
+        folder_path_with_uploaded_image.mkdir(parents=True, exist_ok=True)
+        return folder_path_with_uploaded_image
     else:
-        folder_path_with_edited_images.mkdir(parents=True, exist_ok=True)
-        return folder_path_with_edited_images
+        folder_path_with_edited_image.mkdir(parents=True, exist_ok=True)
+        return folder_path_with_edited_image

@@ -21,6 +21,7 @@ class Job(DailyJob):
         user_id: str
         session_id = str()
         media_root: Path = settings.MEDIA_ROOT
+        user_id_to_delete = list()
 
         try:
             session_store = Session.objects.all()
@@ -33,11 +34,14 @@ class Job(DailyJob):
             for data in deserialized_data:
                 user_id = str(data["user_id"])
 
-                users_id_in_session_store = [session.get_decoded() for session in session_store]
-                user_id_to_delete = [user_id_in_session_store["user_id"] for user_id_in_session_store in
-                                     users_id_in_session_store]
+                session_store_decoded = [session.get_decoded() for session in session_store]
+                try:
+                    user_id_to_delete = [user_id_in_session_store["user_id"] for user_id_in_session_store in
+                                         session_store_decoded]
+                except KeyError as e:
+                    print(f"{e} -> in session store does not exist")
 
-                if user_id and len(user_id_to_delete) == 0 or user_id_to_delete[0] is None:
+                if user_id and (len(user_id_to_delete) == 0 or user_id_to_delete[0] is None):
                     delete_old_image_in_db_and_local(user_id)
 
                 if len(session_store) > 0:

@@ -41,6 +41,14 @@ def image_upload_view(request: WSGIRequest):
         if previous_image:
             default_storage.delete(previous_image.original_image_url.name)
             previous_image.delete()
+            try:
+                # Delete image in "edited" folder if user is uploading a new one
+                path_to_edited_image = user_folder / 'edited' / previous_image.image_file
+                if path_to_edited_image.exists():
+                    default_storage.delete(path_to_edited_image)
+            except Exception as e:
+                print(e)
+                pass
 
         image_form = OriginalImageForm(request.POST, request.FILES)
 
@@ -56,12 +64,16 @@ def image_upload_view(request: WSGIRequest):
             for error in errors:
                 error_str += str(error)
 
-            return render(request, 'imageUploadView/imageUpload.html', {'form': image_form, 'validation_error': error_str})
+            return render(request, 'imageUpload.html',
+                          {
+                              'form': image_form,
+                              'validation_error': error_str
+                          })
 
         image_name_after_re: str = replace_with_underscore(image.name)
 
         uploaded_image_path_to_local = user_folder / image_name_after_re
-        default_storage.save()
+        default_storage.save(uploaded_image_path_to_local, image)
 
         uploaded_image_path_to_db = str(created_user_id + '/' + image_name_after_re)
         original_image = OriginalImage(image_file=image_name_after_re,
@@ -88,11 +100,10 @@ def image_upload_view(request: WSGIRequest):
         if original_image:
             image_url_in_local_storage = local_storage.getItem("image_url")
 
-    return render(request, 'imageUploadView/imageUpload.html',
+    return render(request, 'imageUpload.html',
                   {
                       'form': image_form,
                       'original_image': original_image,
                       'image_url_in_local_storage': image_url_in_local_storage,
                       'image_is_exist': image_is_exist
                   })
-
