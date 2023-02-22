@@ -28,8 +28,9 @@ class Job(DailyJob):
         except Session.DoesNotExist as error:
             raise error
 
-        print(f"\n--- JSON object in db ---\n{json.dumps(deserialized_data, indent=4)}")
+        print(f"\n--- JSON object(s) in db ---\n{json.dumps(deserialized_data, indent=4)}")
 
+        counter = 0
         if len(deserialized_data) > 0:
             for data in deserialized_data:
                 user_id = str(data["user_id"])
@@ -43,15 +44,18 @@ class Job(DailyJob):
 
                 if user_id and (len(user_id_to_delete) == 0 or user_id_to_delete[0] is None):
                     delete_old_image_in_db_and_local(user_id)
+                    counter += 1
 
                 if len(session_store) > 0:
                     for session in session_store:
                         if user_id is None and user_id_to_delete[0]:
                             session.delete()
-
+                            counter += 1
                         session_id = str(session.session_key)
 
                     update_session(session_id, user_id)
+
+            print(f"Deleted collections in db: {counter}")
 
         # In case of session store is empty or if database data list is empty
         if len(session_store) == 0:

@@ -100,6 +100,8 @@ def image_upload_view(request: WSGIRequest):
         if original_image:
             image_url_in_local_storage = local_storage.getItem("image_url")
 
+        update_session(session_id=request.session.session_key, user_id=created_user_id)
+
     return render(request, 'imageUpload.html',
                   {
                       'form': image_form,

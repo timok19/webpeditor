@@ -48,12 +48,15 @@ INSTALLED_APPS = [
     'webpeditor_app.apps.WebpeditorAppConfig',
 ]
 
+# Delete in production
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 )
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

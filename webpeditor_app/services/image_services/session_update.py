@@ -31,7 +31,7 @@ def update_session(session_id: str, user_id: str) -> JsonResponse:
 
     total_time_expiration: int = round((session.expire_date - timezone.now()).seconds / 60)
 
-    print(f"\nSession will expire in {total_time_expiration} minute(s)")
+    print(f"\nSession will expire in {total_time_expiration} minute(s)\n")
     return JsonResponse(
         {'success': True, 'info': 'Session is alive', 'estimated_time_of_session_id': str(session.expire_date)},
         status=200)
