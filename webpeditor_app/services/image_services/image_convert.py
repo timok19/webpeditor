@@ -1,28 +1,28 @@
 import base64
 
-from webpeditor_app.models.database.models import OriginalImage
+from pathlib import Path
 
 
-def convert_url_to_base64(image_is_exist: bool, original_image: OriginalImage) -> tuple:
+def convert_url_to_base64(original_image_path: Path, image_content_type: str) -> str:
     """
 
     Args:
-        image_is_exist: status for image on image_upload_view
-        original_image: image object from db
+        original_image_path (Path): image object from local
+        image_content_type (str): image content type
 
     Returns:
-        uploaded_image_url: uploaded_image_url is an url for the image
-
-                            image_is_exist is an output status
+        uploaded_image_url: uploaded_image_url is an url for image
     """
-    try:
-        with open(original_image.original_image_url.path, 'rb') as file:
-            original_image_data = file.read()
-    except FileNotFoundError or FileExistsError:
-        image_is_exist = False
+    image_file: bytes = bytes()
 
-    original_image_base64_data = base64.b64encode(original_image_data)
-    uploaded_image_url = (f"data:{original_image.content_type};base64,"
+    try:
+        with open(original_image_path, "rb") as f:
+            image_file = f.read()
+    except FileNotFoundError or FileExistsError as e:
+        print(e)
+
+    original_image_base64_data = base64.b64encode(image_file)
+    uploaded_image_url = (f"data:{image_content_type};base64,"
                           f"{original_image_base64_data.decode('utf-8')}")
 
-    return image_is_exist, uploaded_image_url
+    return uploaded_image_url

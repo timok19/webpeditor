@@ -66,7 +66,7 @@ def image_info_view(request: WSGIRequest):
             size /= 1024
             uploaded_image_size = "{} MB".format(round(size, 2))
 
-        update_session(session_id=request.session.session_key, user_id=user_id)
+        # update_session(session_id=request.session.session_key, user_id=user_id)
 
     return render(request, 'imageInfo.html',
                   {

@@ -4,11 +4,12 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, HttpResponse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from django.utils.crypto import get_random_string
 
+from webpeditor import settings
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
@@ -39,7 +40,7 @@ def image_upload_view(request: WSGIRequest):
 
         previous_image = OriginalImage.objects.filter(user_id=created_user_id).first()
         if previous_image:
-            default_storage.delete(previous_image.original_image_url.name)
+            default_storage.delete(user_folder / previous_image.image_file)
             previous_image.delete()
             try:
                 # Delete image in "edited" folder if user is uploading a new one
@@ -75,20 +76,27 @@ def image_upload_view(request: WSGIRequest):
         uploaded_image_path_to_local = user_folder / image_name_after_re
         default_storage.save(uploaded_image_path_to_local, image)
 
-        uploaded_image_path_to_db = str(created_user_id + '/' + image_name_after_re)
+        uploaded_image_path_to_db = str(created_user_id + "/" + image_name_after_re)
         original_image = OriginalImage(image_file=image_name_after_re,
                                        content_type=image.content_type,
                                        original_image_url=uploaded_image_path_to_db,
                                        session_id_expiration_date=request.session.get_expiry_date(),
                                        user_id=created_user_id)
-
         original_image.save()
 
-        if original_image:
-            image_is_exist, uploaded_image_url = convert_url_to_base64(image_is_exist, original_image)
-            save_to_local_storage(local_storage, uploaded_image_url)
+        uploaded_image_path_to_fe = convert_url_to_base64(uploaded_image_path_to_local, image.content_type)
+        save_to_local_storage(local_storage, uploaded_image_path_to_fe)
 
-        update_session(session_id=request.session.session_key, user_id=created_user_id)
+        response = HttpResponse()
+        response.set_signed_cookie(key='sessionid',
+                                   value=created_user_id,
+                                   salt=settings.SECRET_KEY,
+                                   expires=True,
+                                   max_age=1800,
+                                   secure=True,
+                                   httponly=True)
+
+        update_session(request=request, user_id=created_user_id)
 
         return redirect('ImageInfoView')
 
@@ -100,7 +108,7 @@ def image_upload_view(request: WSGIRequest):
         if original_image:
             image_url_in_local_storage = local_storage.getItem("image_url")
 
-        update_session(session_id=request.session.session_key, user_id=created_user_id)
+        # update_session(session_id=request.session.session_key, user_id=created_user_id)
 
     return render(request, 'imageUpload.html',
                   {

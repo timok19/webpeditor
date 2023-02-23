@@ -50,12 +50,10 @@ class Job(DailyJob):
                     for session in session_store:
                         if user_id is None and user_id_to_delete[0]:
                             session.delete()
-                            counter += 1
                         session_id = str(session.session_key)
 
                     update_session(session_id, user_id)
-
-            print(f"Deleted collections in db: {counter}")
+                print(f"Deleted collections in db: {counter}")
 
         # In case of session store is empty or if database data list is empty
         if len(session_store) == 0:

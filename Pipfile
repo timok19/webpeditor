@@ -40,8 +40,12 @@ django-extensions = "*"
 requests = "*"
 webob = "*"
 localstoragepy = "*"
-django-imagekit = "*"
 cython = "*"
+ipython = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+djangorestframework-jwt = "*"
+pyjwt = "==2.4.0"
+django-imagekit = "*"
 
 [dev-packages]
 autopep8 = "*"

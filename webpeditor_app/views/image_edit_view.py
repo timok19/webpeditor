@@ -25,7 +25,18 @@ def image_edit_view(request: WSGIRequest):
     original_image_path_to_local = settings.MEDIA_ROOT / user_id
     edited_image_path_to_local = original_image_path_to_local / 'edited'
 
-    if request.method == 'GET':
+    if request.method == 'POST':
+        if user_id is None:
+            return redirect('ImageDoesNotExistView')
+
+        edited_image_form = EditedImageForm(request.POST, request.FILES)
+        if edited_image_form.is_valid():
+            edited_image_form.save()
+            return redirect('ImageEditView')
+
+        # update_session(request=request, user_id=user_id)
+
+    else:
         if user_id is None:
             return redirect('ImageDoesNotExistView')
 
@@ -53,21 +64,12 @@ def image_edit_view(request: WSGIRequest):
         except EditedImage.DoesNotExist as e:
             print(e)
 
-        update_session(session_id=request.session.session_key, user_id=user_id)
-
-    if request.method == 'POST':
-        if user_id is None:
-            return redirect('ImageDoesNotExistView')
-
-        edited_image_form = EditedImageForm(request.POST, request.FILES)
-        if edited_image_form.is_valid():
-            edited_image_form.save()
-            return redirect('ImageEditView')
-
-        update_session(session_id=request.session.session_key, user_id=user_id)
+        # update_session(session_id=request.session.session_key, user_id=user_id)
+        edited_image_form = EditedImageForm()
 
     return render(request, 'imageEdit.html',
                   {
+                      'edited_image_form': edited_image_form,
                       'uploaded_image_url': uploaded_image_url,
                       'edited_image_url': edited_image_url
                   })
