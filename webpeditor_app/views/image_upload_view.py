@@ -28,9 +28,8 @@ def image_upload_view(request: WSGIRequest):
     image_url_in_local_storage: str = ""
     local_storage = initialize_local_storage()
 
-    set_session_expiry(request)
-
     if request.method == 'POST':
+        # set_session_expiry(request)
         created_user_id = request.session.get('user_id')
         if created_user_id is None:
             request.session['user_id'] = get_random_string(length=32)
@@ -86,15 +85,6 @@ def image_upload_view(request: WSGIRequest):
 
         uploaded_image_path_to_fe = convert_url_to_base64(uploaded_image_path_to_local, image.content_type)
         save_to_local_storage(local_storage, uploaded_image_path_to_fe)
-
-        response = HttpResponse()
-        response.set_signed_cookie(key='sessionid',
-                                   value=created_user_id,
-                                   salt=settings.SECRET_KEY,
-                                   expires=True,
-                                   max_age=1800,
-                                   secure=True,
-                                   httponly=True)
 
         update_session(request=request, user_id=created_user_id)
 

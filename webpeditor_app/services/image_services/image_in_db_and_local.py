@@ -2,7 +2,6 @@ import shutil
 from pathlib import Path
 
 from django.http import JsonResponse
-from django.utils import timezone
 
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
@@ -20,14 +19,29 @@ def delete_old_image_in_db_and_local(user_id: str):
         A JSON response with success status and information message.
     """
 
-    original_image = OriginalImage.objects.filter(user_id=user_id).first()
+    original_image = OriginalImage()
+
+    try:
+        original_image = OriginalImage.objects.filter(user_id=user_id).first()
+    except OriginalImage.DoesNotExist as e:
+        print(e)
+
     path_to_old_image_folder = Path(settings.MEDIA_ROOT) / user_id
     local_storage = initialize_local_storage()
 
-    if original_image and timezone.now() > original_image.session_id_expiration_date:
+    if original_image:
         local_storage.clear()
         original_image.delete()
         if path_to_old_image_folder.exists():
             shutil.rmtree(path_to_old_image_folder)
-        return JsonResponse({'success': True, 'info': 'Session has been expired and image has been deleted'},
+        return JsonResponse({
+                                'success': True,
+                                'info': 'Session has been expired and image has been deleted'
+                            },
+                            status=204)
+    else:
+        return JsonResponse({
+                                'success': False,
+                                'info': 'There is no image in db and local'
+                            },
                             status=204)
