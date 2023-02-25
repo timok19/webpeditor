@@ -4,12 +4,11 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.shortcuts import redirect, render, HttpResponse
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from django.utils.crypto import get_random_string
 
-from webpeditor import settings
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
@@ -27,9 +26,9 @@ def image_upload_view(request: WSGIRequest):
     image_is_exist: bool = True
     image_url_in_local_storage: str = ""
     local_storage = initialize_local_storage()
+    set_session_expiry(request)
 
     if request.method == 'POST':
-        # set_session_expiry(request)
         created_user_id = request.session.get('user_id')
         if created_user_id is None:
             request.session['user_id'] = get_random_string(length=32)
@@ -98,7 +97,7 @@ def image_upload_view(request: WSGIRequest):
         if original_image:
             image_url_in_local_storage = local_storage.getItem("image_url")
 
-        # update_session(session_id=request.session.session_key, user_id=created_user_id)
+        update_session(request=request, user_id=created_user_id)
 
     return render(request, 'imageUpload.html',
                   {

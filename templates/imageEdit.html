@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block content %}
-  <div class="flex items-center">
-    <div
+  <div
       class="w-48 text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
       <button type="button"
               id="crop-image"
@@ -48,10 +47,10 @@
       </button>
     </div>
 
-    <div class="flex justify-center items-center">
-      <img src="{{ uploaded_image_url }}" class="max-w-[700px] max-h-[500px] object-cover" alt="Image To Edit"
-           id="image-edit">
-    </div>
-    <script src="{% static 'js/imageEditor/cropper.js' %}"></script>
+  <div class="flex justify-center items-center">
+    <img src="{{ uploaded_image_url }}" class="max-w-[700px] max-h-[500px] object-cover" alt="Image To Edit"
+         id="image-edit">
   </div>
+  <script src="{% static 'js/imageEditor/cropper.js' %}"></script>
+
 {% endblock content %}

@@ -34,7 +34,7 @@ def image_edit_view(request: WSGIRequest):
             edited_image_form.save()
             return redirect('ImageEditView')
 
-        # update_session(request=request, user_id=user_id)
+        update_session(request=request, user_id=user_id)
 
     else:
         if user_id is None:
@@ -66,6 +66,7 @@ def image_edit_view(request: WSGIRequest):
 
         # update_session(session_id=request.session.session_key, user_id=user_id)
         edited_image_form = EditedImageForm()
+        update_session(request=request, user_id=user_id)
 
     return render(request, 'imageEdit.html',
                   {
