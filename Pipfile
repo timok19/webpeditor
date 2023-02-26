@@ -46,6 +46,8 @@ python-jose = {extras = ["cryptography"], version = "*"}
 djangorestframework-jwt = "*"
 pyjwt = "==2.4.0"
 django-imagekit = "*"
+django-cropperjs = "*"
+opencv-python = "*"
 
 [dev-packages]
 autopep8 = "*"

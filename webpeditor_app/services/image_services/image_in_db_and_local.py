@@ -4,8 +4,12 @@ from pathlib import Path
 from django.http import JsonResponse
 
 from webpeditor import settings
-from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.other_services.local_storage import initialize_local_storage
+
+from rest_framework.utils.serializer_helpers import ReturnDict
+
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.models.database.serializers import OriginalImageSerializer
 
 
 def delete_old_image_in_db_and_local(user_id: str):
@@ -35,13 +39,33 @@ def delete_old_image_in_db_and_local(user_id: str):
         if path_to_old_image_folder.exists():
             shutil.rmtree(path_to_old_image_folder)
         return JsonResponse({
-                                'success': True,
-                                'info': 'Session has been expired and image has been deleted'
-                            },
-                            status=204)
+            'success': True,
+            'info': 'Session has been expired and image has been deleted'
+        },
+            status=204)
     else:
         return JsonResponse({
-                                'success': False,
-                                'info': 'There is no image in db and local'
-                            },
-                            status=204)
+            'success': False,
+            'info': 'There is no image in db and local'
+        },
+            status=204)
+
+
+def get_deserialized_data_from_db() -> ReturnDict:
+    try:
+        original_images = OriginalImage.objects.all()
+    except OriginalImage.DoesNotExist as error:
+        raise error
+
+    original_image_serializer = OriginalImageSerializer(original_images, many=True)
+
+    return original_image_serializer.data
+
+
+def get_data_from_db() -> OriginalImage:
+    try:
+        original_images = OriginalImage.objects.all()
+    except OriginalImage.DoesNotExist as error:
+        raise error
+
+    return original_images

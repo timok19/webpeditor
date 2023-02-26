@@ -5,9 +5,9 @@ from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
 from webpeditor import settings
-from webpeditor_app.services.image_services.image_in_db_and_local import delete_old_image_in_db_and_local
+from webpeditor_app.services.image_services.image_in_db_and_local import delete_old_image_in_db_and_local, \
+                                                                         get_deserialized_data_from_db
 from webpeditor_app.services.image_services.user_folder import delete_expire_users_folder
-from webpeditor_app.services.other_services.data_from_db import get_deserialized_data_from_db
 
 import json
 

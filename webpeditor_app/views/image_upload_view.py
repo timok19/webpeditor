@@ -12,7 +12,6 @@ from django.utils.crypto import get_random_string
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.image_services.session_expiry import set_session_expiry
 from webpeditor_app.services.image_services.user_folder import create_new_folder
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
 from webpeditor_app.services.image_services.session_update import update_session
@@ -26,7 +25,6 @@ def image_upload_view(request: WSGIRequest):
     image_is_exist: bool = True
     image_url_in_local_storage: str = ""
     local_storage = initialize_local_storage()
-    set_session_expiry(request)
 
     if request.method == 'POST':
         created_user_id = request.session.get('user_id')

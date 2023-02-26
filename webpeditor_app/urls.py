@@ -16,9 +16,10 @@ from webpeditor_app.services.image_services.image_api_requests \
 urlpatterns = [
     re_path(r'^$', image_upload_view, name='UploadImageView'),
     re_path(r'^image_info/?$', image_info_view, name='ImageInfoView'),
-    re_path(r'^image_does_not_exit/$', image_does_not_exist_view, name='ImageDoesNotExistView'),
+    re_path(r'^image_does_not_exist/?$', image_does_not_exist_view, name='ImageDoesNotExistView'),
     re_path(r'^image_edit/?$', image_edit_view, name='ImageEditView'),
 
+    ###
     re_path(r'^original_image/?$', original_image_api),
     re_path(r'^original_image/([0-9]+)$', original_image_api),
 
