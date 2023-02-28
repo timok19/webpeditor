@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.session_update import update_session
+from webpeditor_app.services.other_services.session_services import update_session
 from webpeditor_app.services.other_services.local_storage import initialize_local_storage
 
 

@@ -11,6 +11,21 @@ from webpeditor_app.services.image_services.image_in_db_and_local import delete_
 from webpeditor_app.services.image_services.user_folder import delete_empty_folders
 
 
+def set_session_expiry(request: WSGIRequest):
+    # Set session_id token expiry to 30 minutes
+    request.session.set_expiry(30 * 60)
+
+
+def get_session_id(request: WSGIRequest) -> str | None:
+    try:
+        session_id = request.COOKIES.get('sessionid')
+        if session_id:
+            return session_id
+    except TypeError as e:
+        print(e)
+        return None
+
+
 def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     """
     Update session_id token expiry to 30 minutes if it is not expired yet.
@@ -22,8 +37,8 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     Return:
         Response about session status and estimated time of sessionid
     """
-    # TODO: does not get the sessionid -> fix it
-    session_key = request.session.get('sessionid')
+
+    session_key = get_session_id(request)
     total_time_expiration_minutes = 0
     try:
         session_store = SessionStore(session_key=session_key)
@@ -51,10 +66,11 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
             delete_old_image_in_db_and_local(user_id)
             session_store.clear_expired()
 
-        total_time_expiration_minutes = expiry_date.minute
-
         session_store.encode(session_dict={'user_id': user_id})
         updated_expiration = timezone.now() + timezone.timedelta(seconds=900)
+
+        total_time_expiration_minutes = updated_expiration.minute - timezone.now().minute
+
         session_store.set_expiry(value=updated_expiration)
         session_store.save()
 

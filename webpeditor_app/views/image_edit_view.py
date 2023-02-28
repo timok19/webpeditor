@@ -11,7 +11,7 @@ from webpeditor import settings
 from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.image_services.session_update import update_session
+from webpeditor_app.services.other_services.session_services import update_session
 from webpeditor_app.services.image_services.user_folder import create_new_folder
 from webpeditor_app.services.other_services.local_storage import initialize_local_storage
 
@@ -26,7 +26,7 @@ def image_edit_view(request: WSGIRequest):
     try:
         session_store = SessionStore(session_key=session_key)
     except Exception as e:
-        print(e)
+        raise e
 
     session_store.set_expiry(900)
 
