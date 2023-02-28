@@ -65,14 +65,14 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         if now > expiry_date:
             delete_old_image_in_db_and_local(user_id)
             session_store.clear_expired()
+        else:
+            session_store.encode(session_dict={'user_id': user_id})
+            updated_expiration = timezone.now() + timezone.timedelta(seconds=900)
 
-        session_store.encode(session_dict={'user_id': user_id})
-        updated_expiration = timezone.now() + timezone.timedelta(seconds=900)
+            total_time_expiration_minutes = session_store.get_expiry_date().minute - timezone.now().minute
 
-        total_time_expiration_minutes = session_store.get_expiry_date().minute - timezone.now().minute
-
-        session_store.set_expiry(value=updated_expiration)
-        session_store.save()
+            session_store.set_expiry(value=updated_expiration)
+            session_store.save()
 
     if original_image:
         original_image.session_id_expiration_date = session_store.get_expiry_date()
