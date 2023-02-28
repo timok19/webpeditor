@@ -11,9 +11,8 @@ from webpeditor import settings
 from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.other_services.session_services import update_session
+from webpeditor_app.services.other_services.session_service import update_session
 from webpeditor_app.services.image_services.user_folder import create_new_folder
-from webpeditor_app.services.other_services.local_storage import initialize_local_storage
 
 
 @csrf_protect
@@ -21,7 +20,6 @@ from webpeditor_app.services.other_services.local_storage import initialize_loca
 def image_edit_view(request: WSGIRequest):
     user_id = request.session.get('user_id')
     session_key = request.session.get('sessionid')
-    session_store = SessionStore()
 
     try:
         session_store = SessionStore(session_key=session_key)
@@ -30,7 +28,6 @@ def image_edit_view(request: WSGIRequest):
 
     session_store.set_expiry(900)
 
-    local_storage = initialize_local_storage()
     uploaded_image_url = ""
     edited_image_url = ""
     edited_image_form = EditedImageForm()
@@ -62,30 +59,25 @@ def image_edit_view(request: WSGIRequest):
         if not edited_image_path_to_local.exists():
             edited_image_path_to_local = create_new_folder(user_id=user_id, uploaded_image_folder_status=False)
 
-            # Copy original image and paste it into "edited" folder
-            original_image_file_path = original_image_path_to_local / uploaded_image.image_file
-            edited_image_file_path = edited_image_path_to_local / uploaded_image.image_file
-            shutil.copy2(original_image_file_path, edited_image_file_path)
+        # Copy original image and paste it into "edited" folder
+        original_image_file_path = original_image_path_to_local / uploaded_image.image_file
+        edited_image_file_path = edited_image_path_to_local / uploaded_image.image_file
+        shutil.copy2(original_image_file_path, edited_image_file_path)
 
-            uploaded_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
-            local_storage.setItem('edited_image_url', uploaded_image_path_to_fe)
+        uploaded_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
 
-            uploaded_image_path_to_db = f"{user_id}/edited/{uploaded_image.image_file}"
-            edited_image = EditedImage(user_id=user_id,
-                                       edited_image_url=uploaded_image_path_to_db,
-                                       edited_image_file=uploaded_image.image_file,
-                                       content_type_edited=uploaded_image.content_type,
-                                       session_id_expiration_date=request.session.get_expiry_date(),
-                                       original_image_file_id=uploaded_image.image_id
-                                       )
-            edited_image.save()
+        uploaded_image_path_to_db = f"{user_id}/edited/{uploaded_image.image_file}"
+        edited_image = EditedImage(user_id=user_id,
+                                   edited_image_url=uploaded_image_path_to_db,
+                                   edited_image_file=uploaded_image.image_file,
+                                   content_type_edited=uploaded_image.content_type,
+                                   session_id_expiration_date=request.session.get_expiry_date(),
+                                   original_image_file_id=uploaded_image.image_id
+                                   )
+        edited_image.save()
 
         try:
             edited_image = EditedImage.objects.filter(user_id=user_id).first()
-            if edited_image:
-                edited_image_url = local_storage.getItem("edited_image_url")
-            else:
-                uploaded_image_url = local_storage.getItem("image_url")
 
         except EditedImage.DoesNotExist as e:
             print(e)

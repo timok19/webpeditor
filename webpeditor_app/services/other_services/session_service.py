@@ -42,6 +42,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     total_time_expiration_minutes = 0
     try:
         session_store = SessionStore(session_key=session_key)
+        session_store.set_expiry(900)
     except Session.DoesNotExist as e:
         delete_empty_folders(settings.MEDIA_ROOT)
         return JsonResponse({'success': False, 'error': f'Something went wrong: {e}'}, status=404)
@@ -58,21 +59,20 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
 
     if session_store:
         # Set cookie expiration time to 15 minutes
-        session_store.set_expiry(900)
 
         expiry_date = timezone.localtime(session_store.get_expiry_date())
         now = timezone.localtime(timezone.now())
         if now > expiry_date:
             delete_old_image_in_db_and_local(user_id)
             session_store.clear_expired()
-        else:
-            session_store.encode(session_dict={'user_id': user_id})
-            updated_expiration = timezone.now() + timezone.timedelta(seconds=900)
 
-            total_time_expiration_minutes = session_store.get_expiry_date().minute - timezone.now().minute
+        session_store.encode(session_dict={'user_id': user_id})
+        updated_expiration = timezone.now() + timezone.timedelta(seconds=900)
 
-            session_store.set_expiry(value=updated_expiration)
-            session_store.save()
+        total_time_expiration_minutes = session_store.get_expiry_date().minute - timezone.now().minute
+
+        session_store.set_expiry(value=updated_expiration)
+        session_store.save()
 
     if original_image:
         original_image.session_id_expiration_date = session_store.get_expiry_date()

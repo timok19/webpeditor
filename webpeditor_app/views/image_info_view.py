@@ -10,8 +10,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.other_services.session_services import update_session
-from webpeditor_app.services.other_services.local_storage import initialize_local_storage
+from webpeditor_app.services.other_services.session_service import update_session
 
 
 @require_http_methods(['GET'])
@@ -22,7 +21,6 @@ def image_info_view(request: WSGIRequest):
     uploaded_image_image_name = None
     uploaded_image_aspect_ratio = None
     uploaded_image_size = None
-    local_storage = initialize_local_storage()
 
     if request.method == 'GET':
         user_id = request.session.get('user_id')
@@ -33,7 +31,6 @@ def image_info_view(request: WSGIRequest):
         if uploaded_image.user_id != user_id:
             raise PermissionDenied("You do not have permission to view this image.")
 
-        uploaded_image_url = local_storage.getItem("image_url")
         path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
 
         try:

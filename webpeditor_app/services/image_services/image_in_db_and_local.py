@@ -4,11 +4,10 @@ from pathlib import Path
 from django.http import JsonResponse
 
 from webpeditor import settings
-from webpeditor_app.services.other_services.local_storage import initialize_local_storage
 
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer
 
 
@@ -24,29 +23,27 @@ def delete_old_image_in_db_and_local(user_id: str):
     """
 
     original_image = OriginalImage()
+    edited_image = EditedImage()
 
     try:
         original_image = OriginalImage.objects.filter(user_id=user_id).first()
     except OriginalImage.DoesNotExist as e:
         print(e)
 
-    path_to_old_image_folder = Path(settings.MEDIA_ROOT) / user_id
-    local_storage = initialize_local_storage()
+    try:
+        edited_image = EditedImage.objects.filter(user_id=user_id).first()
+    except EditedImage.DoesNotExist as e:
+        print(e)
 
-    if original_image:
-        local_storage.clear()
-        original_image.delete()
-        if path_to_old_image_folder.exists():
-            shutil.rmtree(path_to_old_image_folder)
+    path_to_old_image_folder = Path(settings.MEDIA_ROOT) / user_id
+    path_to_old_edited_image_folder = path_to_old_image_folder / 'edited'
+
+    if path_to_old_image_folder.exists():
+        shutil.rmtree(path_to_old_image_folder)
+    if edited_image or original_image:
         return JsonResponse({
             'success': True,
             'info': 'Session has been expired and image has been deleted'
-        },
-            status=204)
-    else:
-        return JsonResponse({
-            'success': False,
-            'info': 'There is no image in db and local'
         },
             status=204)
 

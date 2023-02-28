@@ -12,10 +12,10 @@ from django.utils.crypto import get_random_string
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.other_services.session_services import set_session_expiry, update_session
+from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
 from webpeditor_app.services.image_services.user_folder import create_new_folder
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-from webpeditor_app.services.other_services.local_storage import initialize_local_storage, save_to_local_storage
+
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
@@ -23,8 +23,7 @@ from webpeditor_app.services.validators.image_size_validator import validate_ima
 @require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
     image_is_exist: bool = True
-    image_url_in_local_storage: str = ""
-    local_storage = initialize_local_storage()
+    uploaded_image_path_to_fe = ""
     set_session_expiry(request)
 
     if request.method == 'POST':
@@ -82,7 +81,6 @@ def image_upload_view(request: WSGIRequest):
         original_image.save()
 
         uploaded_image_path_to_fe = convert_url_to_base64(uploaded_image_path_to_local, image.content_type)
-        save_to_local_storage(local_storage, uploaded_image_path_to_fe)
 
         update_session(request=request, user_id=created_user_id)
 
@@ -93,15 +91,12 @@ def image_upload_view(request: WSGIRequest):
         created_user_id = request.session.get('user_id')
         original_image = OriginalImage.objects.filter(user_id=created_user_id).first()
 
-        if original_image:
-            image_url_in_local_storage = local_storage.getItem("image_url")
-
         update_session(request=request, user_id=created_user_id)
 
     return render(request, 'imageUpload.html',
                   {
                       'form': image_form,
                       'original_image': original_image,
-                      'image_url_in_local_storage': image_url_in_local_storage,
+                      'image_url_in_local_storage': uploaded_image_path_to_fe,
                       'image_is_exist': image_is_exist
                   })

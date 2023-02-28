@@ -39,7 +39,6 @@ django-environ = "*"
 django-extensions = "*"
 requests = "*"
 webob = "*"
-localstoragepy = "*"
 cython = "*"
 ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
