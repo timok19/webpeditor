@@ -17,6 +17,7 @@ class OriginalImage(models.Model):
                                            null=False,
                                            blank=False)
     user_id = models.CharField(max_length=120, null=True)
+    session_id = models.CharField(max_length=120, null=True)
     session_id_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -37,6 +38,7 @@ class EditedImage(models.Model):
                                          blank=False,
                                          default=None)
     user_id = models.CharField(max_length=120, null=True)
+    session_id = models.CharField(max_length=120, null=True)
     session_id_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 

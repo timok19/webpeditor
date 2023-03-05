@@ -1,5 +1,4 @@
 import os
-import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -33,16 +32,15 @@ class Job(DailyJob):
                     "%Y-%m-%dT%H:%M:%S.%f%z"
                 )
 
-                if user_id and timezone.now() > session_id_expiration_date:
+                if user_id and (timezone.now() > session_id_expiration_date):
                     delete_old_image_in_db_and_local(user_id)
                     counter += 1
 
-                uploaded_images_subfolders = next(os.walk(media_root))[1]
-                if user_id not in uploaded_images_subfolders:
-                    for folder in os.listdir(media_root):
-                        if os.path.isdir(os.path.join(media_root, folder)) and folder != user_id:
-                            print(f"Deleting folder: {folder}")
-                            shutil.rmtree(os.path.join(media_root, folder))
+                if not user_id:
+                    delete_expire_users_folder(media_root)
+
+                if user_id and not(user_id in os.listdir(media_root)):
+                    delete_old_image_in_db_and_local(user_id)
 
             print(f"Deleted collections in db: {counter}")
 

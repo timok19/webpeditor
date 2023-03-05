@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
@@ -7,30 +8,32 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-from django.utils.crypto import get_random_string
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
-from webpeditor_app.services.image_services.user_folder import create_new_folder
 from webpeditor_app.services.image_services.re_for_file_name import replace_with_underscore
-
+from webpeditor_app.services.image_services.user_folder import create_new_folder
+from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 
 @csrf_protect
 @require_http_methods(['POST', 'GET'])
 def image_upload_view(request: WSGIRequest):
-    image_is_exist: bool = True
-    uploaded_image_path_to_fe = ""
+    image_is_exist = True
+    image_form = None
+    uploaded_image_url = None
+    original_image = None
     set_session_expiry(request)
 
     if request.method == 'POST':
-        created_user_id = request.session.get('user_id')
-        if created_user_id is None:
-            request.session['user_id'] = get_random_string(length=32)
-            created_user_id = request.session.get('user_id')
+        try:
+            created_user_id = request.session['user_id']
+        except KeyError as e:
+            print(e)
+            request.session['user_id'] = str(uuid.uuid4())
+            created_user_id = request.session['user_id']
 
         user_folder: Path = create_new_folder(user_id=created_user_id, uploaded_image_folder_status=True)
 
@@ -68,35 +71,44 @@ def image_upload_view(request: WSGIRequest):
                           })
 
         image_name_after_re: str = replace_with_underscore(image.name)
-
         uploaded_image_path_to_local = user_folder / image_name_after_re
-        default_storage.save(uploaded_image_path_to_local, image)
 
+        # Save image to local storage
+        default_storage.save(uploaded_image_path_to_local, image)
+        # Convert image to base64
+        uploaded_image_url = convert_url_to_base64(uploaded_image_path_to_local, image.content_type)
+        # Save image url to session
+        request.session['uploaded_image_url'] = uploaded_image_url
         uploaded_image_path_to_db = str(created_user_id + "/" + image_name_after_re)
         original_image = OriginalImage(image_file=image_name_after_re,
                                        content_type=image.content_type,
                                        original_image_url=uploaded_image_path_to_db,
+                                       session_id=request.session.session_key,
                                        session_id_expiration_date=request.session.get_expiry_date(),
                                        user_id=created_user_id)
         original_image.save()
-
-        uploaded_image_path_to_fe = convert_url_to_base64(uploaded_image_path_to_local, image.content_type)
-
+        # Update session
         update_session(request=request, user_id=created_user_id)
-
         return redirect('ImageInfoView')
 
-    else:
+    elif request.method == 'GET':
         image_form = OriginalImageForm()
-        created_user_id = request.session.get('user_id')
-        original_image = OriginalImage.objects.filter(user_id=created_user_id).first()
+        user_id = None
 
-        update_session(request=request, user_id=created_user_id)
+        try:
+            user_id = request.session['user_id']
+        except KeyError:
+            image_is_exist = False
+
+        try:
+            original_image = OriginalImage.objects.filter(user_id=user_id).first()
+        except OriginalImage.DoesNotExist:
+            image_is_exist = False
 
     return render(request, 'imageUpload.html',
                   {
                       'form': image_form,
                       'original_image': original_image,
-                      'image_url_in_local_storage': uploaded_image_path_to_fe,
+                      'uploaded_image_path_to_fe': uploaded_image_url,
                       'image_is_exist': image_is_exist
                   })

@@ -23,11 +23,22 @@ def image_info_view(request: WSGIRequest):
     uploaded_image_size = None
 
     if request.method == 'GET':
-        user_id = request.session.get('user_id')
-        uploaded_image = OriginalImage.objects.filter(user_id=user_id).first()
+        try:
+            user_id = request.session['user_id']
+        except Exception as e:
+            print(e)
+            return redirect('UploadImageView')
 
-        if not uploaded_image:
+        try:
+            uploaded_image = OriginalImage.objects.filter(user_id=user_id).first()
+        except OriginalImage.DoesNotExist:
             return redirect("ImageDoesNotExistView")
+
+        try:
+            uploaded_image_url = request.session.get('uploaded_image_url')
+        except Exception as e:
+            raise e
+
         if uploaded_image.user_id != user_id:
             raise PermissionDenied("You do not have permission to view this image.")
 

@@ -1,6 +1,5 @@
 import shutil
 
-from django.contrib.sessions.backends.signed_cookies import SessionStore
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render, redirect
@@ -19,16 +18,7 @@ from webpeditor_app.services.image_services.user_folder import create_new_folder
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
     user_id = request.session.get('user_id')
-    session_key = request.session.get('sessionid')
-
-    try:
-        session_store = SessionStore(session_key=session_key)
-    except Exception as e:
-        raise e
-
-    session_store.set_expiry(900)
-
-    uploaded_image_url = ""
+    session_key = request.session.session_key
     edited_image_url = ""
     edited_image_form = EditedImageForm()
 
@@ -44,15 +34,20 @@ def image_edit_view(request: WSGIRequest):
             edited_image_form.save()
             return redirect('ImageEditView')
 
+        # edited_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
+        # request.session['edited_image_url'] = edited_image_path_to_fe
+
         update_session(request=request, user_id=user_id)
 
     elif request.method == 'GET':
         if user_id is None:
             return redirect('ImageDoesNotExistView')
 
-        uploaded_image = OriginalImage.objects.filter(user_id=user_id).first()
-        if not uploaded_image:
+        try:
+            uploaded_image = OriginalImage.objects.filter(user_id=user_id).first()
+        except OriginalImage.DoesNotExist:
             return redirect("ImageDoesNotExistView")
+
         if uploaded_image.user_id != user_id:
             raise PermissionDenied("You do not have permission to view this image.")
 
@@ -64,13 +59,18 @@ def image_edit_view(request: WSGIRequest):
         edited_image_file_path = edited_image_path_to_local / uploaded_image.image_file
         shutil.copy2(original_image_file_path, edited_image_file_path)
 
-        uploaded_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
+        # Convert edited image to base64
+        if edited_image_file_path:
+            edited_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
+            request.session['edited_image_url'] = edited_image_path_to_fe
+            edited_image_url = request.session.get('edited_image_url')
 
         uploaded_image_path_to_db = f"{user_id}/edited/{uploaded_image.image_file}"
         edited_image = EditedImage(user_id=user_id,
                                    edited_image_url=uploaded_image_path_to_db,
                                    edited_image_file=uploaded_image.image_file,
                                    content_type_edited=uploaded_image.content_type,
+                                   session_id=session_key,
                                    session_id_expiration_date=request.session.get_expiry_date(),
                                    original_image_file_id=uploaded_image.image_id
                                    )
@@ -78,7 +78,6 @@ def image_edit_view(request: WSGIRequest):
 
         try:
             edited_image = EditedImage.objects.filter(user_id=user_id).first()
-
         except EditedImage.DoesNotExist as e:
             print(e)
 
@@ -88,6 +87,5 @@ def image_edit_view(request: WSGIRequest):
     return render(request, 'imageEdit.html',
                   {
                       'edited_image_form': edited_image_form,
-                      'uploaded_image_url': uploaded_image_url,
                       'edited_image_url': edited_image_url
                   })

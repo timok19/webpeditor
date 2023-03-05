@@ -3,22 +3,22 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.utils import timezone
 
-from django.contrib.sessions.backends.signed_cookies import SessionStore
+from django.contrib.sessions.backends.db import SessionStore
+from django.conf import settings
 
-from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_in_db_and_local import delete_old_image_in_db_and_local
 from webpeditor_app.services.image_services.user_folder import delete_empty_folders
 
 
 def set_session_expiry(request: WSGIRequest):
-    # Set session_id token expiry to 30 minutes
-    request.session.set_expiry(30 * 60)
+    # Set session_id token expiry to 15 minutes
+    request.session.set_expiry(900)
 
 
 def get_session_id(request: WSGIRequest) -> str | None:
     try:
-        session_id = request.COOKIES.get('sessionid')
+        session_id = request.session.session_key
         if session_id:
             return session_id
     except TypeError as e:
@@ -85,7 +85,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     print(f"\nSession will expire in {total_time_expiration_minutes} minute(s)\n")
 
     return JsonResponse({
-                            'success': True, 'info': 'Session is alive',
-                            'estimated_time_of_session_id': total_time_expiration_minutes
-                        },
-                        status=200)
+        'success': True, 'info': 'Session is alive',
+        'estimated_time_of_session_id': total_time_expiration_minutes
+    },
+        status=200)
