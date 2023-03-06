@@ -17,7 +17,13 @@ from webpeditor_app.services.image_services.user_folder import create_new_folder
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
-    user_id = request.session.get('user_id')
+
+    try:
+        user_id = request.session['user_id']
+    except Exception as e:
+        print(e)
+        return redirect('UploadImageView')
+
     session_key = request.session.session_key
     edited_image_url = ""
     edited_image_form = EditedImageForm()
@@ -26,6 +32,9 @@ def image_edit_view(request: WSGIRequest):
     edited_image_path_to_local = original_image_path_to_local / 'edited'
 
     if request.method == 'POST':
+        if request.session.get_expiry_age() == 0:
+            return redirect('ImageDoesNotExistView')
+
         if user_id is None:
             return redirect('ImageDoesNotExistView')
 
@@ -34,8 +43,7 @@ def image_edit_view(request: WSGIRequest):
             edited_image_form.save()
             return redirect('ImageEditView')
 
-        # edited_image_path_to_fe = convert_url_to_base64(edited_image_file_path, uploaded_image.content_type)
-        # request.session['edited_image_url'] = edited_image_path_to_fe
+        edited_image_path_to_fe = request.session.get('edited_image_url')
 
         update_session(request=request, user_id=user_id)
 

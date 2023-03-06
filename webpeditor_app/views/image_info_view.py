@@ -37,7 +37,8 @@ def image_info_view(request: WSGIRequest):
         try:
             uploaded_image_url = request.session.get('uploaded_image_url')
         except Exception as e:
-            raise e
+            print(e)
+            return redirect("ImageDoesNotExistView")
 
         if uploaded_image.user_id != user_id:
             raise PermissionDenied("You do not have permission to view this image.")
@@ -84,4 +85,4 @@ def image_info_view(request: WSGIRequest):
                       'image_name': uploaded_image_image_name,
                       'aspect_ratio': uploaded_image_aspect_ratio,
                       'image_size': uploaded_image_size
-                   })
+                  })

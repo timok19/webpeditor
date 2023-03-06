@@ -8,12 +8,10 @@ def validate_image_file_type(uploaded_file: UploadedFile):
     try:
         # Open the uploaded image using Pillow
         with Image.open(uploaded_file) as img:
-
             valid_image_formats = ['WEBP', 'JPEG', 'JPG', 'PNG', 'RAW', 'JFIF', 'ICO']
             if img.format not in valid_image_formats:
                 raise ValidationError('Invalid file format. Only JPEG, PNG, and GIF files are allowed.')
     except OSError:
-
         raise ValidationError('Invalid file type. Only image files are allowed.')
 
 

@@ -1,11 +1,9 @@
 import shutil
 from pathlib import Path
 
-from django.contrib.sessions.backends.db import SessionStore
 from django.http import JsonResponse
-
-from webpeditor import settings
-
+from django.conf import settings
+from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
@@ -22,10 +20,14 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     Returns:
         A JSON response with success status and information message.
     """
-
-    original_image = OriginalImage.objects.filter(user_id=user_id).first()
-    session_store = SessionStore(session_key=original_image.session_id)
-    edited_image = EditedImage.objects.filter(user_id=user_id).first()
+    try:
+        original_image = OriginalImage.objects.filter(user_id=user_id).first()
+    except OriginalImage.DoesNotExist as error:
+        raise error
+    try:
+        edited_image = EditedImage.objects.filter(user_id=user_id).first()
+    except EditedImage.DoesNotExist as error:
+        raise error
 
     path_to_old_user_folder = Path(settings.MEDIA_ROOT) / user_id
 
@@ -33,11 +35,12 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
         shutil.rmtree(path_to_old_user_folder)
 
     if original_image:
+        session_store = SessionStore(session_key=original_image.session_id)
+        session_store.delete()
         original_image.delete()
+
     if edited_image:
         edited_image.delete()
-    if session_store:
-        session_store.delete()
 
     return JsonResponse({
         'success': True,
@@ -46,7 +49,7 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
         status=204)
 
 
-def get_deserialized_data_from_db() -> ReturnDict:
+def get_serialized_data_original_image() -> ReturnDict:
     try:
         original_images = OriginalImage.objects.all()
     except OriginalImage.DoesNotExist as error:
@@ -55,3 +58,4 @@ def get_deserialized_data_from_db() -> ReturnDict:
     original_image_serializer = OriginalImageSerializer(original_images, many=True)
 
     return original_image_serializer.data
+

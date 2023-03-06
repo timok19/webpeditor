@@ -14,6 +14,9 @@ document.getElementById("apply-crop")
   const croppedCanvas = cropper.getCroppedCanvas();
   const croppedImage = new Image();
   croppedImage.src = croppedCanvas.toDataURL();
+  // croppedCanvas.
+
+
   image.parentNode.replaceChild(croppedImage, image);
   cropper.destroy();
   cropper = null;

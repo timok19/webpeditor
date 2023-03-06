@@ -7,13 +7,23 @@
     <button type="button"
             id="crop-image"
             class="relative inline-flex items-center w-full px-4 py-2 text-sm font-medium border-b border-gray-200 rounded-t-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white">
-      <svg aria-hidden="true" class="w-4 h-4 mr-2 fill-current" fill="currentColor" viewBox="0 0 20 20"
-           xmlns="http://www.w3.org/2000/svg">
-        <path fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-              clip-rule="evenodd"></path>
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Icons" viewBox="0 0 32 32" xml:space="preserve">
+      <style type="text/css">
+        .st0{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+        .st1{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+        .st2{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:6,6;}
+        .st3{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:4,4;}
+        .st4{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;}
+        .st5{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-dasharray:3.1081,3.1081;}
+        .st6{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:4,3;}
+      </style>
+      <circle class="st0" cx="13" cy="13" r="1"></circle>
+      <polyline class="st0" points="7,21 16,16 20,19 25,16 "></polyline>
+      <polyline class="st0" points="30,25 7,25 7,2 "></polyline>
+      <polyline class="st0" points="7,7 25,7 25,25 "></polyline>
+      <line class="st0" x1="7" y1="7" x2="2" y2="7"></line>
+      <line class="st0" x1="25" y1="30" x2="25" y2="25"></line>
       </svg>
-      Crop
     </button>
     <button type="button"
             id="apply-crop"
@@ -47,43 +57,37 @@
     </button>
   </div>
 
+
+  <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Dropdown radio <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+
+  <!-- Dropdown menu -->
+  <div id="dropdownRadioBgHover" class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
+      <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioBgHoverButton">
+        <li>
+          <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+              <input id="default-radio-4" type="radio" value="" name="default-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+              <label for="default-radio-4" class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Default radio</label>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+              <input checked id="default-radio-5" type="radio" value="" name="default-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+              <label for="default-radio-5" class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Checked state</label>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+              <input id="default-radio-6" type="radio" value="" name="default-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+              <label for="default-radio-6" class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Default radio</label>
+          </div>
+        </li>
+      </ul>
+  </div>
+
+
   <div class="flex justify-center items-center">
     <img src="{{ edited_image_url }}" class="max-w-[700px] max-h-[500px] object-cover" alt="Image To Edit"
          id="image-edit">
   </div>
-{#  <script src="{% static 'js/imageEditor/cropper.js' %}"></script>#}
+  <script src="{% static 'js/imageEditor/cropper.js' %}"></script>
 {% endblock content %}
-
-{% block sccript %}
-  <script>
-    const image = document.getElementById("image-edit");
-    const cropButton = document.getElementById("crop-image");
-
-    const cropper = new Cropper(image, {
-      aspectRatio: 16 / 9,
-      crop(event) {
-        console.log(event.detail.x);
-        console.log(event.detail.y);
-        console.log(event.detail.width);
-        console.log(event.detail.height);
-        console.log(event.detail.rotate);
-        console.log(event.detail.scaleX);
-        console.log(event.detail.scaleY);
-      }
-    });
-
-    cropButton.addEventListener("click", () => {
-      const canvas = cropper.getCroppedCanvas();
-      canvas.toBlob((blob) => {
-        const formData = new FormData();
-        formData.append("csrfmiddlewaretoken", '{{ csrf_token }}');
-        formData.append("cropped_image", blob);
-
-        fetch("/image_edit", {
-          method: "POST",
-          body: formData
-        });
-      });
-    });
-  </script>
-{% endblock %}
