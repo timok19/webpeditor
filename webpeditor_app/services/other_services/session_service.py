@@ -61,7 +61,8 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
         print(
             f"\nCurrent session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
-            f"{current_time_expiration_minutes} minute(s)")
+            f"{current_time_expiration_minutes} minute(s)"
+        )
 
         expiry_date = timezone.localtime(session_store.get_expiry_date())
         now = timezone.localtime(timezone.now())
@@ -78,7 +79,8 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
         print(
             f"Updated session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
-            f"{new_time_expiration_minutes} minute(s)\n")
+            f"{new_time_expiration_minutes} minute(s)\n"
+        )
 
     if original_image:
         original_image.session_id_expiration_date = session_store.get_expiry_date()
