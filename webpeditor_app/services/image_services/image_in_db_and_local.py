@@ -20,27 +20,36 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     Returns:
         A JSON response with success status and information message.
     """
+    path_to_old_user_folder = Path(settings.MEDIA_ROOT) / user_id
+
     try:
         original_image = OriginalImage.objects.filter(user_id=user_id).first()
     except OriginalImage.DoesNotExist as error:
+        print("No original image in db. Deleting user folder...")
+        if path_to_old_user_folder.exists():
+            shutil.rmtree(path_to_old_user_folder)
         raise error
+
     try:
         edited_image = EditedImage.objects.filter(user_id=user_id).first()
     except EditedImage.DoesNotExist as error:
+        if path_to_old_user_folder.exists():
+            shutil.rmtree(path_to_old_user_folder)
+        print("No edited image in db. Deleting user folder...")
         raise error
-
-    path_to_old_user_folder = Path(settings.MEDIA_ROOT) / user_id
-
-    if path_to_old_user_folder.exists():
-        shutil.rmtree(path_to_old_user_folder)
 
     if original_image:
         session_store = SessionStore(session_key=original_image.session_id)
-        session_store.delete()
+        session_store.clear_expired()
         original_image.delete()
+        print("Original image has been deleted from db.\nClearing session...")
 
     if edited_image:
         edited_image.delete()
+        print("Edited image has been deleted from db.")
+
+    if path_to_old_user_folder.exists():
+        shutil.rmtree(path_to_old_user_folder)
 
     return JsonResponse({
         'success': True,
@@ -58,4 +67,3 @@ def get_serialized_data_original_image() -> ReturnDict:
     original_image_serializer = OriginalImageSerializer(original_images, many=True)
 
     return original_image_serializer.data
-
