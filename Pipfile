@@ -47,6 +47,7 @@ pyjwt = "==2.4.0"
 django-imagekit = "*"
 django-cropperjs = "*"
 opencv-python = "*"
+django-crispy-forms = "*"
 
 [dev-packages]
 autopep8 = "*"

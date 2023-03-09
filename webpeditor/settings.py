@@ -89,7 +89,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'webpeditor.wsgi.application'
 
 # Max image file size
-MAX_IMAGE_FILE_SIZE: int = (6 * 1024) ** 2
+MAX_IMAGE_FILE_SIZE: int = 6_000_000
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
