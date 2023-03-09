@@ -2,6 +2,7 @@ import shutil
 
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
@@ -26,7 +27,6 @@ def image_edit_view(request: WSGIRequest):
 
     session_key = request.session.session_key
     edited_image_url = ""
-    edited_image_form = EditedImageForm()
 
     original_image_path_to_local = settings.MEDIA_ROOT / user_id
     edited_image_path_to_local = original_image_path_to_local / 'edited'
@@ -38,10 +38,15 @@ def image_edit_view(request: WSGIRequest):
         if user_id is None:
             return redirect('ImageDoesNotExistView')
 
-        edited_image_form = EditedImageForm(request.POST, request.FILES)
+        edited_image_form = EditedImageForm(request.POST or None, request.FILES or None)
+
         if edited_image_form.is_valid():
             edited_image_form.save()
-            return redirect('ImageEditView')
+            return JsonResponse({"message": "Image cropped and saved successfully"})
+
+        image = edited_image_form.cleaned_data.get("image")
+
+        print(image.content_type)
 
         edited_image_path_to_fe = request.session.get('edited_image_url')
 
@@ -91,6 +96,9 @@ def image_edit_view(request: WSGIRequest):
 
         edited_image_form = EditedImageForm()
         update_session(request=request, user_id=user_id)
+
+    else:
+        edited_image_form = EditedImageForm()
 
     return render(request, 'imageEdit.html',
                   {

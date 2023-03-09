@@ -22,7 +22,7 @@ class OriginalImage(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.image_id}"
+        return str(self.image_id)
 
 
 class EditedImage(models.Model):
@@ -43,7 +43,7 @@ class EditedImage(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.edited_image_id}"
+        return str(self.edited_image_id)
 
     def add_step(self, step_number, description, params, created_at):
         self.steps.append({
