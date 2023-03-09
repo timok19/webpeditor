@@ -11,14 +11,13 @@ from webpeditor import settings
 from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_convert import convert_url_to_base64
-from webpeditor_app.services.other_services.session_service import update_session
 from webpeditor_app.services.image_services.user_folder import create_new_folder
+from webpeditor_app.services.other_services.session_service import update_session
 
 
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
-
     try:
         user_id = request.session['user_id']
     except Exception as e:
@@ -38,15 +37,14 @@ def image_edit_view(request: WSGIRequest):
         if user_id is None:
             return redirect('ImageDoesNotExistView')
 
-        edited_image_form = EditedImageForm(request.POST or None, request.FILES or None)
+        edited_image_form = EditedImageForm(request.POST)
 
-        if edited_image_form.is_valid():
-            edited_image_form.save()
-            return JsonResponse({"message": "Image cropped and saved successfully"})
+        if not edited_image_form.is_valid():
+            return JsonResponse({"message": "Image not cropped and saved",
+                                 "error": edited_image_form.errors})
 
-        image = edited_image_form.cleaned_data.get("image")
-
-        print(image.content_type)
+        edited_image = edited_image_form.cleaned_data.get('image')
+        print(edited_image)
 
         edited_image_path_to_fe = request.session.get('edited_image_url')
 
