@@ -8,9 +8,9 @@
                 <div class="contents">
                     <img
 
-                            class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
-                            src="{{ uploaded_image_url }}" alt="Uploaded Image"
-                            onclick="showModal('{{ uploaded_image_url }}')"/>
+                      class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
+                      src="{{ uploaded_image_url_to_fe }}" alt="Uploaded Image"
+                      onclick="showModal('{{ uploaded_image_url_to_fe }}')"/>
 
 
                     <div class="text-left flex flex-col justify-center pt-5 pb-5 pl-5 overscroll-contain md:h-[calc(50vh)]">
@@ -82,7 +82,7 @@
 
     <style>
         .change-cursor {
-            cursor: url("{{ uploaded_image_url }}") 25 25, pointer;
+            cursor: url("{{ uploaded_image_url_to_fe }}") 25 25, pointer;
         }
     </style>
 

@@ -6,9 +6,9 @@ from django_extensions.management.jobs import DailyJob
 
 from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_in_db_and_local import delete_old_image_in_db_and_local, \
-    get_serialized_data_original_image
-from webpeditor_app.services.image_services.user_folder import delete_expire_users_folder
+from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local, \
+    get_serialized_data_original_image, get_serialized_data_edited_image
+from webpeditor_app.services.image_services.user_folder_service import delete_expire_users_folder
 
 import json
 
@@ -17,7 +17,9 @@ class Job(DailyJob):
     help = "Checks the estimated time of the session ID token and delete expired session, image from db and local"
 
     def execute(self):
-        deserialized_data_from_db = get_serialized_data_original_image()
+        deserialized_data_original_image = get_serialized_data_original_image()
+        deserialized_data_edited_image = get_serialized_data_edited_image()
+
         try:
             original_images = OriginalImage.objects.all()
         except OriginalImage.DoesNotExist as error:
@@ -25,7 +27,8 @@ class Job(DailyJob):
 
         media_root: Path = settings.MEDIA_ROOT
 
-        print(f"\n--- JSON object(s) in db ---\n{json.dumps(deserialized_data_from_db, indent=4)}")
+        print(f"\n--- Original Image object(s) in db ---\n{json.dumps(deserialized_data_original_image, indent=4)}")
+        print(f"\n--- Edited Image object(s) in db ---\n{json.dumps(deserialized_data_edited_image, indent=4)}")
 
         counter = 0
         if len(original_images) > 0:
@@ -45,5 +48,5 @@ class Job(DailyJob):
 
             print(f"Deleted collections in db: {counter}")
 
-        elif len(deserialized_data_from_db) == 0:
+        elif len(deserialized_data_original_image) == 0 or len(deserialized_data_edited_image) == 0:
             delete_expire_users_folder(media_root)

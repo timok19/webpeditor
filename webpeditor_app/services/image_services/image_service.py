@@ -1,13 +1,14 @@
 import shutil
 from pathlib import Path
 
-from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
+from django.db.models import Max
+from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.models.database.serializers import OriginalImageSerializer
+from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
 
 
 def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
@@ -31,7 +32,7 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
         raise error
 
     try:
-        edited_image = EditedImage.objects.filter(user_id=user_id).first()
+        edited_image = EditedImage.objects.filter(user_id=user_id).all()
     except EditedImage.DoesNotExist as error:
         if path_to_old_user_folder.exists():
             shutil.rmtree(path_to_old_user_folder)
@@ -67,3 +68,22 @@ def get_serialized_data_original_image() -> ReturnDict:
     original_image_serializer = OriginalImageSerializer(original_images, many=True)
 
     return original_image_serializer.data
+
+
+def get_serialized_data_edited_image() -> ReturnDict:
+    try:
+        edited_images = EditedImage.objects.all()
+    except OriginalImage.DoesNotExist as error:
+        raise error
+
+    edited_image_serializer = EditedImageSerializer(edited_images, many=True)
+
+    return edited_image_serializer.data
+
+
+def get_last_edited_image_for_user(user_id: str) -> EditedImage | None:
+    # Find the maximum step_number for a specific user
+    currently_editing_image = EditedImage.objects.filter(user_id=user_id, is_currently_editing=True).first()
+
+    return currently_editing_image
+

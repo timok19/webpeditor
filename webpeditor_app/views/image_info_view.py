@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image as PilImage
+from PIL.Image import Image as ImageClass
 from django.core.exceptions import PermissionDenied
-
 from django.core.handlers.wsgi import WSGIRequest
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -13,76 +14,61 @@ from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.other_services.session_service import update_session
 
 
+def get_uploaded_image(user_id: str) -> OriginalImage | None:
+    try:
+        return OriginalImage.objects.filter(user_id=user_id).first()
+    except OriginalImage.DoesNotExist:
+        return None
+
+
+def get_image_local_file(path_to_local_image: Path) -> ImageClass | None:
+    try:
+        return PilImage.open(path_to_local_image)
+    except (FileExistsError, FileNotFoundError):
+        return None
+
+
+def format_image_name(image_name: str) -> str:
+    basename, ext = os.path.splitext(image_name)
+    if len(basename) > 20:
+        basename = basename[:17] + "..."
+    return basename + ext
+
+
+def format_image_size(path_to_local_image: Path) -> str:
+    size = round(os.path.getsize(path_to_local_image) / 1024, 2)
+    if size > 1000:
+        size /= 1024
+        return "{} MB".format(round(size, 2))
+    return "{} KB".format(size)
+
+
 @require_http_methods(['GET'])
-def image_info_view(request: WSGIRequest):
-    uploaded_image_url = None
-    uploaded_image_resolution = None
-    uploaded_image_format = None
-    uploaded_image_image_name = None
-    uploaded_image_aspect_ratio = None
-    uploaded_image_size = None
+def image_info_view(request: WSGIRequest) -> HttpResponse:
+    user_id = request.session.get('user_id')
+    if user_id is None:
+        return redirect('UploadImageView')
 
-    if request.method == 'GET':
-        try:
-            user_id = request.session['user_id']
-        except Exception as e:
-            print(e)
-            return redirect('UploadImageView')
+    uploaded_image = get_uploaded_image(user_id)
+    if uploaded_image is None:
+        return redirect("ImageDoesNotExistView")
 
-        try:
-            uploaded_image = OriginalImage.objects.filter(user_id=user_id).first()
-        except OriginalImage.DoesNotExist:
-            return redirect("ImageDoesNotExistView")
+    if uploaded_image.user_id != user_id:
+        raise PermissionDenied("You do not have permission to view this image.")
 
-        try:
-            uploaded_image_url = request.session.get('uploaded_image_url')
-        except Exception as e:
-            print(e)
-            return redirect("ImageDoesNotExistView")
+    path_to_local_image = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_name
+    image_local_file = get_image_local_file(path_to_local_image)
+    if image_local_file is None:
+        return redirect("ImageDoesNotExistView")
 
-        if uploaded_image.user_id != user_id:
-            raise PermissionDenied("You do not have permission to view this image.")
+    context: dict = {
+        'uploaded_image_url_to_fe': uploaded_image.original_image_url.url,
+        'image_format': f".{image_local_file.format}",
+        'image_resolution': f"{image_local_file.width}px ⨯ {image_local_file.height}px",
+        'image_name': format_image_name(uploaded_image.image_name),
+        'aspect_ratio': round(image_local_file.width / image_local_file.height, 1),
+        'image_size': format_image_size(path_to_local_image),
+    }
 
-        path_to_local_image: Path = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_file
-
-        try:
-            image_local_file = Image.open(path_to_local_image)
-        except FileExistsError or FileNotFoundError:
-            return redirect("ImageDoesNotExistView")
-
-        # Image format
-        uploaded_image_format = ".{}".format(image_local_file.format)
-
-        # Image resolution
-        uploaded_image_resolution = "{}px ⨯ {}px".format(image_local_file.size[0], image_local_file.size[1])
-
-        # Image name
-        basename, ext = os.path.splitext(uploaded_image.image_file)
-        if len(basename) > 20:
-            basename = basename[:17] + "..."
-            uploaded_image_image_name = basename + ext
-        else:
-            uploaded_image_image_name = uploaded_image.image_file
-
-        # Image aspect ratio
-        uploaded_image_aspect_ratio = round(image_local_file.width / image_local_file.height, 1)
-
-        # Image size
-        size = round(os.path.getsize(path_to_local_image) / 1024, 2)
-        uploaded_image_size = "{} KB".format(size)
-
-        if size > 1000:
-            size /= 1024
-            uploaded_image_size = "{} MB".format(round(size, 2))
-
-        update_session(request=request, user_id=user_id)
-
-    return render(request, 'imageInfo.html',
-                  {
-                      'uploaded_image_url': uploaded_image_url,
-                      'image_format': uploaded_image_format,
-                      'image_resolution': uploaded_image_resolution,
-                      'image_name': uploaded_image_image_name,
-                      'aspect_ratio': uploaded_image_aspect_ratio,
-                      'image_size': uploaded_image_size
-                  })
+    update_session(request=request, user_id=user_id)
+    return render(request, 'imageInfo.html', context)
