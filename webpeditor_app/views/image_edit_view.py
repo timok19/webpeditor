@@ -2,6 +2,7 @@ import shutil
 
 from django.core.files.storage import FileSystemStorage
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.models.fields.files import ImageFieldFile
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
@@ -122,7 +123,10 @@ def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
         return redirect("ImageDoesNotExistView")
 
     edited_image = get_edited_image(user_id)
-    if edited_image is None and original_image.user_id == user_id:
+    if (edited_image is None or edited_image is not None) and original_image.user_id != user_id:
+        return redirect("ImageDoesNotExistView")
+
+    elif edited_image is None and original_image.user_id == user_id:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
         if not copy_original_image_to_edited_folder(user_id, original_image, edited_image):
@@ -130,7 +134,7 @@ def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
 
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
     else:
-        return redirect('ImageDoesNotExistView')
+        edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
     update_session(request=request, user_id=user_id)
 
@@ -149,8 +153,8 @@ def image_edit_view(request: WSGIRequest):
         response = handle_post_request(request, user_id, session_key)
         if isinstance(response, EditedImageForm):
             edited_image_form = response
-            edited_image_url = edited_image_form.data.get("edited_image_url")
-            edited_image_url_to_fe = f"/media/{edited_image_url}"
+            edited_image_url: ImageFieldFile = edited_image_form.data.get("edited_image_url")
+            edited_image_url_to_fe = edited_image_url.url
     else:
         response = handle_get_request(request, user_id, session_key)
         if isinstance(response, HttpResponsePermanentRedirect) or isinstance(response, HttpResponseRedirect):
@@ -158,8 +162,8 @@ def image_edit_view(request: WSGIRequest):
 
         if isinstance(response, EditedImageForm):
             edited_image_form = response
-            edited_image_url = edited_image_form.data.get("edited_image_url")
-            edited_image_url_to_fe = f"/media/{edited_image_url}"
+            edited_image_url: ImageFieldFile = edited_image_form.data.get("edited_image_url")
+            edited_image_url_to_fe = edited_image_url.url
 
     context: dict = {
         'edited_image_form': edited_image_form,
