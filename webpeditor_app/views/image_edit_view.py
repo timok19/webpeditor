@@ -1,5 +1,8 @@
+import io
 import shutil
 
+from PIL import Image
+from PIL.Image import Image as ImageClass
 from django.core.files.storage import FileSystemStorage
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.fields.files import ImageFieldFile
@@ -91,9 +94,8 @@ def create_edited_image_form(edited_image: EditedImage | None):
         return EditedImageForm(data=data)
 
 
-def handle_post_request(request: WSGIRequest, user_id: str, session_key: str):
+def handle_post_request(request: WSGIRequest, user_id: str):
     ###
-    print(session_key)
     if request.session.get_expiry_age() == 0:
         return redirect('ImageDoesNotExistView')
 
@@ -141,6 +143,25 @@ def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
     return edited_image_form
 
 
+def open_image_with_pil(edited_image_url: ImageFieldFile) -> ImageClass:
+    return Image.open(edited_image_url)
+
+
+def get_image_size_in_mb(image: ImageClass) -> str:
+    buffer = io.BytesIO()
+    image.save(buffer, format=image.format)
+
+    size_in_bytes = buffer.tell()
+    size_in_kb = size_in_bytes / 1024
+
+    if size_in_kb >= 1024:
+        # Calculate the size in megabytes
+        size_in_mb = size_in_kb / 1024
+        return f"{size_in_mb:.1f} MB"
+    else:
+        return f"{size_in_kb:.1f} KB"
+
+
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
@@ -148,13 +169,22 @@ def image_edit_view(request: WSGIRequest):
     session_key = get_session_id(request=request)
     edited_image_url_to_fe = ""
     edited_image_form: EditedImageForm = EditedImageForm()
+    edited_image_format: str = ""
+    edited_image_size: str = ""
+    edited_image_resolution: str = ""
+    edited_image_name: str = ""
 
     if request.method == 'POST':
-        response = handle_post_request(request, user_id, session_key)
+        response = handle_post_request(request, user_id)
         if isinstance(response, EditedImageForm):
             edited_image_form = response
             edited_image_url: ImageFieldFile = edited_image_form.data.get("edited_image_url")
             edited_image_url_to_fe = edited_image_url.url
+            edited_image_file = open_image_with_pil(edited_image_url)
+            edited_image_format = edited_image_file.format
+            edited_image_size = get_image_size_in_mb(edited_image_file)
+            edited_image_resolution = f"{edited_image_file.width}px ⨯ {edited_image_file.height}px"
+            edited_image_name = edited_image_url.name
     else:
         response = handle_get_request(request, user_id, session_key)
         if isinstance(response, HttpResponsePermanentRedirect) or isinstance(response, HttpResponseRedirect):
@@ -164,10 +194,19 @@ def image_edit_view(request: WSGIRequest):
             edited_image_form = response
             edited_image_url: ImageFieldFile = edited_image_form.data.get("edited_image_url")
             edited_image_url_to_fe = edited_image_url.url
+            edited_image_file = open_image_with_pil(edited_image_url)
+            edited_image_format = edited_image_file.format
+            edited_image_size = get_image_size_in_mb(edited_image_file)
+            edited_image_resolution = f"{edited_image_file.width}px ⨯ {edited_image_file.height}px"
+            edited_image_name = edited_image_url.name
 
     context: dict = {
         'edited_image_form': edited_image_form,
-        'edited_image_url_to_fe': edited_image_url_to_fe
+        'edited_image_url_to_fe': edited_image_url_to_fe,
+        'edited_image_format': edited_image_format,
+        'edited_image_size': edited_image_size,
+        'edited_image_resolution': edited_image_resolution,
+        'edited_image_name': edited_image_name
     }
 
     return render(request, 'imageEdit.html', context)

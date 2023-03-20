@@ -213,31 +213,35 @@
 
           <div class="col-span-2 flex flex-col justify-center">
             <div class="flex flex-col justify-center pr-[3rem]">
-              <div class="rounded-md bg-gray-50 px-6 py-8">
-                <h3 class="text-lg font-medium leading-6 text-gray-900">
-                  Image Info
-                </h3>
-                <div class="mt-6">
-                  <dl>
-                    <div
-                      class="flex items-center justify-between border-b border-gray-100 py-2"
-                    >
-                      <dt class="text-sm font-medium text-gray-500">File Size</dt>
-                      <dd class="text-sm text-gray-900">2.1 MB</dd>
-                    </div>
-                    <div
-                      class="flex items-center justify-between border-b border-gray-100 py-2"
-                    >
-                      <dt class="text-sm font-medium text-gray-500">Dimensions</dt>
-                      <dd class="text-sm text-gray-900">800 x 600</dd>
-                    </div>
-                    <div
-                      class="flex items-center justify-between border-b border-gray-100 py-2"
-                    >
-                      <dt class="text-sm font-medium text-gray-500">File Format</dt>
-                      <dd class="text-sm text-gray-900">JPG</dd>
-                    </div>
-                  </dl>
+              <div
+                class="p-5 bg-white max-w-screen-md border max-w-6xl border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <div class="contents">
+                  <div
+                    class="text-left flex flex-col justify-center pt-5 pb-5 pl-5 overscroll-contain md:h-[calc(50vh)]">
+
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Image
+                      properties:</h5>
+                    <p class="font-bold text-gray-700 dark:text-gray-200">Name: &nbsp;<span
+                      class="font-normal dark:text-gray-400"
+                      style="font-family: Consolas, monospace">{{ edited_image_name }}</span>
+                    </p>
+                    <p class="font-bold text-gray-700 dark:text-gray-200">Format: &nbsp;<span
+                      class="font-normal dark:text-gray-400"
+                      style="font-family: Consolas, monospace">{{ edited_image_format }}</span>
+                    </p>
+                    <p class="font-bold text-gray-700 dark:text-gray-200">Resolution: &nbsp;<span
+                      class="font-normal dark:text-gray-400"
+                      style="font-family: Consolas, monospace">{{ edited_image_resolution }}</span>
+                    </p>
+                    <p class="font-bold text-gray-700 dark:text-gray-200">Size: &nbsp;<span
+                      class="font-normal dark:text-gray-400"
+                      style="font-family: Consolas, monospace">{{ edited_image_size }}</span>
+                    </p>
+                    <p class="mb-4 font-bold text-gray-700 dark:text-gray-200">Aspect ratio: &nbsp;<span
+                      class="font-normal dark:text-gray-400"
+                      style="font-family: Consolas, monospace">{{ aspect_ratio }}</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

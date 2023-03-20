@@ -65,7 +65,7 @@ def create_and_save_original_image(image: UploadedFile, image_url: str, request:
 
 @csrf_protect
 @require_http_methods(['POST', 'GET'])
-def image_upload_view(request):
+def image_upload_view(request: WSGIRequest):
     uploaded_image_url_to_fe = ""
     original_image = None
     set_session_expiry(request)

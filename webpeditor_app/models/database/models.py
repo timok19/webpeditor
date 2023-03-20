@@ -52,11 +52,6 @@ class EditedImage(models.Model):
     def __str__(self):
         return str(self.edited_image_id)
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     if not self.steps:
-    #         self.add_step(1, "Initial step", {"test_param": "test_value"}, self.created_at)
-
     def add_step(self, step_number: int, description: str, params: dict, created_at: timezone.datetime):
         new_step = {
             "step_number": step_number,
