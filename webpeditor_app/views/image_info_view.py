@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal, ROUND_UP
 from pathlib import Path
 
 from PIL import Image as PilImage
@@ -61,12 +62,15 @@ def image_info_view(request: WSGIRequest) -> HttpResponse:
     if image_local_file is None:
         return redirect("ImageDoesNotExistView")
 
+    aspect_ratio: Decimal = Decimal(image_local_file.width / image_local_file.height) \
+        .quantize(Decimal('.1'), rounding=ROUND_UP)
+
     context: dict = {
         'uploaded_image_url_to_fe': uploaded_image.original_image_url.url,
-        'image_format': f".{image_local_file.format}",
+        'image_format': image_local_file.format,
         'image_resolution': f"{image_local_file.width}px ⨯ {image_local_file.height}px",
         'image_name': format_image_name(uploaded_image.image_name),
-        'aspect_ratio': round(image_local_file.width / image_local_file.height, 1),
+        'aspect_ratio': aspect_ratio,
         'image_size': format_image_size(path_to_local_image),
     }
 

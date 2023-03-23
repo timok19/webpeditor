@@ -1,17 +1,18 @@
 import uuid
+import shutil
 
+from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
-from django.core.files.uploadedfile import UploadedFile
 
 from webpeditor_app.models.database.forms import OriginalImageForm
-from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_name_service import replace_with_underscore
-from webpeditor_app.services.image_services.user_folder_service import create_new_folder
+from webpeditor_app.services.image_services.user_folder_service import create_new_folder, get_media_root_paths
 from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
@@ -25,29 +26,42 @@ def handle_request_user_id(request: WSGIRequest) -> str:
 
 
 def handle_previous_image_deletion(user_id: str):
-    previous_image = OriginalImage.objects.filter(user_id=user_id).first()
-    if not previous_image:
+    original_image_folder_path, edited_images_folder_path = get_media_root_paths(user_id)
+
+    previous_original_image = OriginalImage.objects.filter(user_id=user_id).first()
+    if not previous_original_image:
         return
 
-    user_folder = create_new_folder(user_id=user_id, uploaded_image_folder_status=True)
-    default_storage.delete(user_folder / previous_image.image_name)
-    previous_image.delete()
+    previous_edited_image = EditedImage.objects.filter(user_id=user_id).all()
+    if not previous_original_image:
+        return
 
     try:
-        # Delete image in "edited" folder if user is uploading a new one
-        path_to_edited_image = user_folder / 'edited' / previous_image.image_name
-        if path_to_edited_image.exists():
-            default_storage.delete(path_to_edited_image)
+        if original_image_folder_path.exists():
+            default_storage.delete(original_image_folder_path / previous_original_image.image_name)
+        previous_original_image.delete()
     except Exception as e:
         print(e)
-        pass
+
+    try:
+        if edited_images_folder_path.exists():
+            shutil.rmtree(edited_images_folder_path)
+        previous_edited_image.delete()
+    except Exception as e:
+        print(e)
 
 
 def save_uploaded_image(image: UploadedFile, user_id: str) -> str:
-    user_folder = create_new_folder(user_id=user_id, uploaded_image_folder_status=True)
+    original_user_folder, _ = get_media_root_paths(user_id)
+    if not original_user_folder.exists():
+        user_folder = create_new_folder(user_id=user_id, uploaded_image_folder_status=True)
+    else:
+        user_folder = original_user_folder
+
     image_name_after_re = replace_with_underscore(image.name)
     uploaded_image_path_to_local = user_folder / image_name_after_re
     default_storage.save(uploaded_image_path_to_local, image)
+
     return f"{user_id}/{image_name_after_re}"
 
 

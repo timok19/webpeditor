@@ -239,7 +239,7 @@
                     </p>
                     <p class="mb-4 font-bold text-gray-700 dark:text-gray-200">Aspect ratio: &nbsp;<span
                       class="font-normal dark:text-gray-400"
-                      style="font-family: Consolas, monospace">{{ aspect_ratio }}</span>
+                      style="font-family: Consolas, monospace">{{ edited_image_aspect_ratio }}</span>
                     </p>
                   </div>
                 </div>
@@ -276,6 +276,19 @@
         cropper.destroy();
         cropper = null;
       });
+
+      document.getElementById("apply-crop").onclick = () => {
+        const request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+          if (this.status === 200 && this.readyState === 4) {
+            console.log(this.responseText);
+          }
+        }
+
+        request.open("POST", "/edit_image")
+        request.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+        request.send()
+      }
     </script>
   {% endblock cropperjs %}
 

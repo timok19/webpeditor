@@ -50,15 +50,21 @@ def create_new_folder(user_id: str, uploaded_image_folder_status: bool) -> Path:
         uploaded_image_folder_status (bool): Create folder for newly uploaded image
 
     Returns:
-        Path: Path to the folder named as session_id.
+        Path(s): Path to the folder named as session_id.
     """
+    uploaded_image_folder_path, edited_image_folder_path = get_media_root_paths(user_id)
+
+    if uploaded_image_folder_status is True and not uploaded_image_folder_path.exists():
+        uploaded_image_folder_path.mkdir(parents=True, exist_ok=True)
+        return uploaded_image_folder_path
+    elif uploaded_image_folder_status is False and not edited_image_folder_path.exists():
+        edited_image_folder_path.mkdir(parents=True, exist_ok=True)
+        return edited_image_folder_path
+
+
+def get_media_root_paths(user_id: str) -> tuple[Path, Path]:
     media_root = Path(settings.MEDIA_ROOT)
     folder_path_with_uploaded_image: Path = media_root / user_id
-    folder_path_with_edited_image: Path = folder_path_with_uploaded_image / 'edited'
+    folder_path_with_edited_images: Path = folder_path_with_uploaded_image / 'edited'
 
-    if uploaded_image_folder_status is True:
-        folder_path_with_uploaded_image.mkdir(parents=True, exist_ok=True)
-        return folder_path_with_uploaded_image
-    else:
-        folder_path_with_edited_image.mkdir(parents=True, exist_ok=True)
-        return folder_path_with_edited_image
+    return folder_path_with_uploaded_image, folder_path_with_edited_images
