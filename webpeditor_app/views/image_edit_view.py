@@ -17,12 +17,12 @@ from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.user_folder_service import create_new_folder, get_media_root_paths
 from webpeditor_app.services.other_services.session_service import update_session, get_session_id
-from webpeditor_app.views.image_info_view import format_image_name
+from webpeditor_app.views.image_info_view import ImageInfoView
 
 
 def get_user_id(request: WSGIRequest) -> str | None:
     try:
-        user_id = request.session['user_id']
+        user_id = request.session.get('user_id')
     except Exception as e:
         print(e)
         return None
@@ -69,7 +69,6 @@ def create_and_save_edited_image(user_id: str,
 def copy_original_image_to_edited_folder(user_id: str,
                                          original_image: OriginalImage,
                                          edited_image: EditedImage) -> bool:
-
     original_image_folder_path, edited_image_folder_path = get_media_root_paths(user_id)
     storage = FileSystemStorage()
 
@@ -168,7 +167,7 @@ def get_image_size_in_mb(image: ImageClass) -> str:
 def image_edit_view(request: WSGIRequest):
     def process_edited_image_form(image_form: EditedImageForm):
         image: ImageFieldFile = image_form.data.get("edited_image_url")
-        image_name = format_image_name(image.name)
+        image_name = ImageInfoView.format_image_name(image.name)
         image_file = open_image_with_pil(image.path)
         image_size = get_image_size_in_mb(image_file)
         image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"

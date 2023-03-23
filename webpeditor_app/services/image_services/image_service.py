@@ -3,7 +3,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
-from django.db.models import Max
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -86,4 +85,3 @@ def get_last_edited_image_for_user(user_id: str) -> EditedImage | None:
     currently_editing_image = EditedImage.objects.filter(user_id=user_id, is_currently_editing=True).first()
 
     return currently_editing_image
-
