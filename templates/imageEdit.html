@@ -258,42 +258,37 @@
     <script type="text/javascript">
       let cropper = null;
       const image = document.getElementById("image-edit");
-      const cropImage = document.getElementById("crop-image");
-      const applyCrop = document.getElementById("apply-crop");
 
-      cropImage.onclick = function() {
+      document.getElementById("crop-image").addEventListener("click", () => {
         cropper = new Cropper(image, {
           aspectRatio: 1,
           viewMode: 1
         });
-      };
+      });
 
-      applyCrop.onclick = () => {
+      document.getElementById("apply-crop").addEventListener("click", () => {
         const croppedCanvas = cropper.getCroppedCanvas();
         const croppedImage = new Image();
-        croppedCanvas.toBlob((blob) => {
-          const data = new FormData();
-          data.append("edited_image_url", blob);
-
-          const request = new XMLHttpRequest();
-          request.onreadystatechange = function() {
-            if (this.status === 200 && this.readyState === 4) {
-              console.log(this.responseText);
-            }
-          };
-          request.open("POST", "/edit_image");
-          request.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-          request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-          request.onload = function() {
-            console.log(this.responseText);
-          };
-          request.send(data);
-        });
+        croppedImage.src = croppedCanvas.toDataURL();
 
         image.parentNode.replaceChild(croppedImage, image);
+        // TODO: change logic
         cropper.destroy();
         cropper = null;
-      };
+      });
+
+      document.getElementById("apply-crop").onclick = () => {
+        const request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+          if (this.status === 200 && this.readyState === 4) {
+            console.log(this.responseText);
+          }
+        }
+
+        request.open("POST", "/edit_image")
+        request.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+        request.send()
+      }
     </script>
   {% endblock cropperjs %}
 

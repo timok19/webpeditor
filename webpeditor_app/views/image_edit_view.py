@@ -87,7 +87,7 @@ def copy_original_image_to_edited_folder(user_id: str,
     return True
 
 
-def create_edited_image_form(edited_image: EditedImage | None) -> EditedImageForm:
+def create_edited_image_form(edited_image: EditedImage | None):
     data = {"edited_image_url": edited_image.edited_image_url}
     if edited_image is None:
         return EditedImageForm()
