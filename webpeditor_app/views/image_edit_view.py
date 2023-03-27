@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
+from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.user_folder_service import create_new_folder, get_media_root_paths
 from webpeditor_app.services.other_services.session_service import update_session, get_session_id
@@ -86,9 +87,15 @@ def copy_original_image_to_edited_folder(user_id: str,
     return True
 
 
-def handle_post_request(request: WSGIRequest, user_id: str):
-    image_data = request.POST.get('image_data')
+def create_edited_image_form(edited_image: EditedImage | None) -> EditedImageForm:
+    data = {"edited_image_url": edited_image.edited_image_url}
+    if edited_image is None:
+        return EditedImageForm()
+    else:
+        return EditedImageForm(data=data)
 
+
+def handle_post_request(request: WSGIRequest, user_id: str):
     if request.session.get_expiry_age() == 0:
         return redirect('ImageDoesNotExistView')
 
@@ -103,7 +110,10 @@ def handle_post_request(request: WSGIRequest, user_id: str):
     if edited_image is None:
         return redirect("ImageDoesNotExistView")
 
-    update_session(request=request, user_id=user_id)
+    edited_image_form = create_edited_image_form(edited_image)
+    if edited_image_form.is_valid():
+        update_session(request=request, user_id=user_id)
+        return edited_image_form
 
 
 def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
@@ -124,7 +134,13 @@ def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
         if not copy_original_image_to_edited_folder(user_id, original_image, edited_image):
             return redirect("ImageDoesNotExistView")
 
+        edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
+    else:
+        edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
+
     update_session(request=request, user_id=user_id)
+
+    return edited_image_form
 
 
 def open_image_with_pil(edited_image_url: ImageFieldFile) -> ImageClass:
@@ -149,22 +165,24 @@ def get_image_size_in_mb(image: ImageClass) -> str:
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
-
-    # image: ImageFieldFile = image_form.data.get("edited_image_url")
-    # image_name = ImageInfoView.format_image_name(image.name)
-    # image_file = open_image_with_pil(image.path)
-    # image_size = get_image_size_in_mb(image_file)
-    # image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
-    # image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
-    #     .quantize(Decimal('.1'), rounding=ROUND_UP)
+    def process_edited_image_form(image_form: EditedImageForm):
+        image: ImageFieldFile = image_form.data.get("edited_image_url")
+        image_name = ImageInfoView.format_image_name(image.name)
+        image_file = open_image_with_pil(image.path)
+        image_size = get_image_size_in_mb(image_file)
+        image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
+        image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
+            .quantize(Decimal('.1'), rounding=ROUND_UP)
+        return image.url, image_file.format, image_size, image_resolution, image_name, image_aspect_ratio
 
     user_id = get_user_id(request)
     session_key = get_session_id(request=request)
+    edited_image_form: EditedImageForm = EditedImageForm()
     edited_image_format: str = ""
     edited_image_size: str = ""
     edited_image_resolution: str = ""
     edited_image_name: str = ""
-    edited_image_url_to_fe: str = OriginalImage.objects.filter(user_id=user_id).first().original_image_url.url
+    edited_image_url_to_fe: str = ""
     edited_image_aspect_ratio: Decimal = Decimal()
 
     if request.method == 'POST':
@@ -175,7 +193,14 @@ def image_edit_view(request: WSGIRequest):
     if isinstance(response, HttpResponsePermanentRedirect) or isinstance(response, HttpResponseRedirect):
         return response
 
+    if isinstance(response, EditedImageForm):
+        edited_image_form = response
+        edited_image_url_to_fe, edited_image_format, \
+            edited_image_size, edited_image_resolution, \
+            edited_image_name, edited_image_aspect_ratio = process_edited_image_form(edited_image_form)
+
     context: dict = {
+        'edited_image_form': edited_image_form,
         'edited_image_url_to_fe': edited_image_url_to_fe,
         'edited_image_format': edited_image_format,
         'edited_image_size': edited_image_size,
