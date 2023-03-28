@@ -78,10 +78,3 @@ def get_serialized_data_edited_image() -> ReturnDict:
     edited_image_serializer = EditedImageSerializer(edited_images, many=True)
 
     return edited_image_serializer.data
-
-
-def get_last_edited_image_for_user(user_id: str) -> EditedImage | None:
-    # Find the maximum step_number for a specific user
-    currently_editing_image = EditedImage.objects.filter(user_id=user_id, is_currently_editing=True).first()
-
-    return currently_editing_image

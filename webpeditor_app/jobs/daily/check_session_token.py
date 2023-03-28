@@ -8,7 +8,7 @@ from webpeditor import settings
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local, \
     get_serialized_data_original_image, get_serialized_data_edited_image
-from webpeditor_app.services.image_services.user_folder_service import delete_expire_users_folder
+from webpeditor_app.services.image_services.folder_service import delete_folder_by_expiry
 
 import json
 
@@ -41,7 +41,7 @@ class Job(DailyJob):
                     counter += 1
 
                 if not user_id:
-                    delete_expire_users_folder(media_root)
+                    delete_folder_by_expiry(media_root)
 
                 if user_id and not(user_id in os.listdir(media_root)):
                     delete_old_image_in_db_and_local(user_id)
@@ -49,4 +49,4 @@ class Job(DailyJob):
             print(f"Deleted collections in db: {counter}")
 
         elif len(deserialized_data_original_image) == 0 or len(deserialized_data_edited_image) == 0:
-            delete_expire_users_folder(media_root)
+            delete_folder_by_expiry(media_root)

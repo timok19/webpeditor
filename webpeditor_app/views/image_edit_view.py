@@ -15,9 +15,9 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.user_folder_service import create_new_folder, get_media_root_paths
+from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
 from webpeditor_app.services.other_services.session_service import update_session, get_session_id
-from webpeditor_app.views.image_info_view import ImageInfoView
+from webpeditor_app.views.image_info_view import format_image_name
 
 
 def get_user_id(request: WSGIRequest) -> str | None:
@@ -73,7 +73,7 @@ def copy_original_image_to_edited_folder(user_id: str,
     storage = FileSystemStorage()
 
     if not edited_image_folder_path.exists():
-        edited_image_folder_path = create_new_folder(user_id=user_id, uploaded_image_folder_status=False)
+        edited_image_folder_path = create_folder(user_id=user_id, is_original_image=False)
 
     original_image_file_path = original_image_folder_path / original_image.image_name
     edited_image_file_path = edited_image_folder_path / edited_image.edited_image_name
@@ -162,19 +162,20 @@ def get_image_size_in_mb(image: ImageClass) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
+def process_edited_image_form(image_form: EditedImageForm):
+    image: ImageFieldFile = image_form.data.get("edited_image_url")
+    image_name = format_image_name(image.name)
+    image_file = open_image_with_pil(image.path)
+    image_size = get_image_size_in_mb(image_file)
+    image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
+    image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
+        .quantize(Decimal('.1'), rounding=ROUND_UP)
+    return image.url, image_file.format, image_size, image_resolution, image_name, image_aspect_ratio
+
+
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest):
-    def process_edited_image_form(image_form: EditedImageForm):
-        image: ImageFieldFile = image_form.data.get("edited_image_url")
-        image_name = ImageInfoView.format_image_name(image.name)
-        image_file = open_image_with_pil(image.path)
-        image_size = get_image_size_in_mb(image_file)
-        image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
-        image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
-            .quantize(Decimal('.1'), rounding=ROUND_UP)
-        return image.url, image_file.format, image_size, image_resolution, image_name, image_aspect_ratio
-
     user_id = get_user_id(request)
     session_key = get_session_id(request=request)
     edited_image_form: EditedImageForm = EditedImageForm()

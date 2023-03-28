@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
-from webpeditor_app.services.image_services.user_folder_service import delete_empty_folders
+from webpeditor_app.services.image_services.folder_service import delete_empty_folders
 
 
 def set_session_expiry(request: WSGIRequest):
