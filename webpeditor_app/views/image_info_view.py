@@ -44,12 +44,12 @@ def format_image_size(path_to_local_image: Path) -> str:
 
 
 @require_http_methods(['GET'])
-def get(self, request) -> HttpResponse:
+def image_info_view(request) -> HttpResponse:
     user_id = request.session.get('user_id')
     if user_id is None:
         return redirect('UploadImageView')
 
-    uploaded_image = self.get_original_image(user_id)
+    uploaded_image = get_original_image(user_id)
     if uploaded_image is None:
         return redirect("ImageDoesNotExistView")
 
@@ -57,7 +57,7 @@ def get(self, request) -> HttpResponse:
         raise PermissionDenied("You do not have permission to view this image.")
 
     path_to_local_image = settings.MEDIA_ROOT / uploaded_image.user_id / uploaded_image.image_name
-    image_local_file = self.get_image_local_file(path_to_local_image)
+    image_local_file = get_image_local_file(path_to_local_image)
     if image_local_file is None:
         return redirect("ImageDoesNotExistView")
 
@@ -68,9 +68,9 @@ def get(self, request) -> HttpResponse:
         'uploaded_image_url_to_fe': uploaded_image.original_image_url.url,
         'image_format': image_local_file.format,
         'image_resolution': f"{image_local_file.width}px ⨯ {image_local_file.height}px",
-        'image_name': self.format_image_name(uploaded_image.image_name),
+        'image_name': format_image_name(uploaded_image.image_name),
         'aspect_ratio': aspect_ratio,
-        'image_size': self.format_image_size(path_to_local_image),
+        'image_size': format_image_size(path_to_local_image),
     }
 
     update_session(request=request, user_id=user_id)
