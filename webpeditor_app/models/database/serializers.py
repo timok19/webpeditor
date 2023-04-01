@@ -10,7 +10,7 @@ class OriginalImageSerializer(serializers.ModelSerializer):
             'image_id',
             'image_name',
             'content_type',
-            'original_image_url',
+            'original_image',
             'user_id',
             'session_id',
             'session_id_expiration_date',
@@ -23,12 +23,10 @@ class EditedImageSerializer(serializers.ModelSerializer):
         model = EditedImage
         fields = (
             'edited_image_id',
-            'original_image_file',
+            'original_image',
             'edited_image_name',
             'content_type_edited',
-            'steps',
-            'current_step',
-            'edited_image_url',
+            'edited_image',
             'user_id',
             'session_id',
             'session_id_expiration_date',

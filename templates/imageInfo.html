@@ -51,7 +51,7 @@
                 class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                 Edit image
               </span>
-                <svg aria-hidden="true" class="w-5 h-5 ml-2 mr-2" fill="currentColor"
+                <svg aria-hidden="true" class="w-5 h-5 ml-1 mr-1" fill="currentColor" stroke-width="2"
                      viewBox="0 0 20 20"
                      xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd"
@@ -72,31 +72,26 @@
   <div id="modal"
        class="hidden fixed top-0 left-0 z-80 w-screen h-screen bg-black/70 flex justify-center items-center">
 
-    <!-- The close button -->
-    <a class="fixed z-90 top-6 right-8 text-white text-5xl font-bold" href="javascript:void(0)"
-       onclick="closeModal()">&times;</a>
 
     <!-- A big image will be displayed here -->
     <img id="modal-img" class="max-w-[800px] max-h-[600px] object-cover" alt="Image Modal" src="" />
+
+    <!-- The close button -->
+    <a class="flex z-90 pb-[22rem] text-white"
+       onclick="closeModal()">
+      <svg class="w-12 h-12 ml-1 mr-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+           xmlns="http://www.w3.org/2000/svg"
+           aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </a>
   </div>
 
   <style>
-    .change-cursor {
-      cursor: url("{{ uploaded_image_url_to_fe }}") 25 25, pointer;
-    }
+      .change-cursor {
+          cursor: url("{{ uploaded_image_url_to_fe }}") 25 25, pointer;
+      }
   </style>
 
-  <script type="text/javascript">
-    const modal = document.getElementById("modal");
-    const modalImg = document.getElementById("modal-img");
-
-    function showModal(src) {
-      modal.classList.remove("hidden");
-      modalImg.src = src;
-    }
-
-    function closeModal() {
-      modal.classList.add("hidden");
-    }
-  </script>
+  <script src="{% static 'js/services/openImageModal.js' %}"></script>
 {% endblock content %}

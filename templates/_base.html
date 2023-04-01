@@ -40,7 +40,7 @@
 <body class="bg-[#F5F5F5] dark:bg-gray-900">
 
 <nav class="bg-[#F5F5F5] dark:bg-gray-900 fixed w-full z-20 top-0 left-0">
-  <div class="max-w-screen-xl flex flex-wrap items-center justify-evenly mx-auto p-4">
+  <div class="flex flex-wrap items-center justify-between mx-auto p-4">
     <a href="/" class="flex items-center">
       <img
         src="../static/media/logo/pixoicon.svg"
@@ -105,8 +105,9 @@
              aria-current="page">Home</a>
         </li>
         <li>
-          <a href="#"
-             class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">About</a>
+          <a href="/image_edit"
+             class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
+            Edit</a>
         </li>
         <li>
           <a href="#"
@@ -130,7 +131,8 @@
   type="text/javascript"
   src="https://cdn.jsdelivr.net/npm/toastify-js"
 ></script>
-<script src="{% static 'js/services/darkModeService.js' %}"></script>
+<script src="{% static 'js/services/darkMode.js' %}"></script>
+<script src="{% static 'js/services/changeActiveButtonStatus.js' %}"></script>
 </body>
 
 

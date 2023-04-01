@@ -10,12 +10,10 @@ document.addEventListener("DOMContentLoaded", function() {
       loadImage: {
         path: imageUrl,
         name: imageName
-      },
-      theme: {
+      }, theme: {
         "common.backgroundImage": "none",
         "common.backgroundColor": "transparent"
-      },
-      menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
+      }, menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
         width: "50rem",
         height: "39rem"
@@ -24,56 +22,74 @@ document.addEventListener("DOMContentLoaded", function() {
     },
     cssMaxWidth: 700,
     cssMaxHeight: 500,
-    usageStatistics: false
+    usageStatistics: false,
+    selectionStyle: {
+      cornerSize: 20,
+      rotatingPointOffset: 70
+    }
   });
 
   // Delete Upload button
   document.querySelector(".tui-image-editor-header-buttons div").remove();
 
-  // Save Icon svg (Save button)
+  // Icon svg (Download button)
+  const svgDownloadIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svgDownloadIcon.setAttribute("fill", "none");
+  svgDownloadIcon.setAttribute("stroke-width", "1.5");
+  svgDownloadIcon.setAttribute("viewBox", "0 0 24 24");
+  svgDownloadIcon.setAttribute("stroke", "currentColor");
+  svgDownloadIcon.setAttribute("aria-hidden", "true");
+  svgDownloadIcon.setAttribute("class", "w-6 h-6 ml-1 mr-1");
+
+  // Path icon (Download button)
+  const svgDownloadPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  svgDownloadPath.setAttribute("stroke-linecap", "round");
+  svgDownloadPath.setAttribute("stroke-linejoin", "round");
+  svgDownloadPath.setAttribute("fill-rule", "evenodd");
+  svgDownloadPath.setAttribute("clip-rule", "evenodd");
+  svgDownloadPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " + "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " + "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
+  svgDownloadIcon.appendChild(svgDownloadPath);
+
+  // Icon svg (Save button)
   const svgSaveIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svgSaveIcon.setAttribute("fill", "none");
-  svgSaveIcon.setAttribute("stroke-width", "1.5");
+  svgSaveIcon.setAttribute("stroke-width", "2");
   svgSaveIcon.setAttribute("viewBox", "0 0 24 24");
   svgSaveIcon.setAttribute("stroke", "currentColor");
   svgSaveIcon.setAttribute("aria-hidden", "true");
-  svgSaveIcon.setAttribute("class", "w-6 h-6");
+  svgSaveIcon.setAttribute("class", "w-6 h-6 ml-1 mr-1");
 
   // Path icon (Save button)
-  const svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  svgPath.setAttribute("stroke-linecap", "round");
-  svgPath.setAttribute("stroke-linejoin", "round");
-  svgPath.setAttribute("fill-rule", "evenodd");
-  svgPath.setAttribute("clip-rule", "evenodd");
-  svgPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
-    "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
-    "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
-  svgSaveIcon.appendChild(svgPath);
+  const svgSavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  svgSavePath.setAttribute("stroke-linecap", "round");
+  svgSavePath.setAttribute("stroke-linejoin", "round");
+  svgSavePath.setAttribute("d", "M4.5 12.75l6 6 9-13.5");
+  svgSaveIcon.appendChild(svgSavePath);
 
-  // Span with text and icon (Save button)
-  const spanText = document.createElement("span");
-  spanText.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " +
-    "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
-  spanText.textContent = "Save image" + String.fromCharCode(160);
-  spanText.appendChild(svgSaveIcon);
+  const oldDownloadButton = document.querySelector(".tui-image-editor-header-buttons button");
+  oldDownloadButton.style.display = "none";
+
+  let downloadButton = document.createElement("button");
+  downloadButton.addEventListener("click", () => saveImageHandler("image/png", 1, "test.png"));
+  downloadButton.id = "tuiDownloadButton";
+  downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  downloadButton.appendChild(addSpanTextToButton("Download image"));
+  downloadButton.appendChild(svgDownloadIcon);
 
   // Save button
-  let downloadButton = document.querySelector(".tui-image-editor-header-buttons button");
-  downloadButton.removeAttribute("style");
-  downloadButton.id = "tuiSaveButton";
-  downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
-  downloadButton.textContent = "";
-  downloadButton.appendChild(spanText);
+  let saveButton = document.createElement("button");
+  saveButton.id = "tuiSaveButton";
+  saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  saveButton.appendChild(addSpanTextToButton("Save image"));
+  saveButton.appendChild(svgSaveIcon);
 
   // Div with Save button
   const newDiv = document.createElement("div");
-  downloadButton.parentNode.insertBefore(newDiv, downloadButton);
+  oldDownloadButton.parentNode.insertBefore(newDiv, oldDownloadButton);
   newDiv.appendChild(downloadButton);
+  newDiv.appendChild(saveButton);
   newDiv.style.display = "flex";
-  newDiv.style.justifyContent = "space-around";
+  newDiv.style.justifyContent = "center";
   newDiv.style.paddingTop = "0.5rem";
   newDiv.style.paddingRight = "0.5rem";
 
@@ -128,10 +144,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const submenuEl = document.querySelector(".tui-image-editor-submenu");
   submenuEl.style.height = "600px";
 
-  // const svgSubMenuIcon = document.querySelector(".svg_ic-submenu");
-  // svgSubMenuIcon.style.display = "inline";
-  // svgSubMenuIcon.className = ""
-
   // Deleting logo
   document.querySelector(".tui-image-editor-header-logo").remove();
 
@@ -147,26 +159,33 @@ document.addEventListener("DOMContentLoaded", function() {
   helpMenu.style.marginTop = "0.1rem";
   helpMenu.style.borderRadius = "0.4rem";
   helpMenu.style.background = "transparent";
-  helpMenu.style.position = "fixed";
+  helpMenu.style.position = "absolute";
 
-  function saveImageHandler() {
+  const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
+  imageEditorMainContainer.style.width = "calc(100% - 100px)";
 
-    // Generate the data URL of the edited image
-    const dataURL = editor.toDataURL();
+  // Span with text and icon
+  function addSpanTextToButton(textOnButton) {
+    const spanText = document.createElement("span");
+    spanText.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " + "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
+    spanText.textContent = textOnButton + String.fromCharCode(160);
+    return spanText;
+  }
 
-    // Convert base64 data URL to a Blob
+  function saveImageHandler(mimeType, quality, filename) {
+    const dataURL = editor.toDataURL({
+      format: mimeType,
+      quality: quality
+    });
+
     const data = atob(dataURL.split(",")[1]);
     const arrayBuffer = new ArrayBuffer(data.length);
     const view = new Uint8Array(arrayBuffer);
     for (let i = 0; i < data.length; i++) {
       view[i] = data.charCodeAt(i) & 0xff;
     }
-    const blob = new Blob([arrayBuffer], { type: "image/png" });
+    const blob = new Blob([arrayBuffer], { type: mimeType });
 
-    // Use the FileSaver library's saveAs function to download the image
-    saveAs(blob, "edited-image.png");
+    saveAs(blob, filename);
   }
-
-  // Click event to save image
-  downloadButton.addEventListener("click", saveImageHandler);
 });

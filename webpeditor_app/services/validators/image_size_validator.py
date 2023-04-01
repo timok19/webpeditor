@@ -10,7 +10,7 @@ def validate_image_file_type(uploaded_file: UploadedFile):
         with Image.open(uploaded_file) as img:
             valid_image_formats = ['WEBP', 'JPEG', 'JPG', 'PNG', 'RAW', 'JFIF', 'ICO']
             if img.format not in valid_image_formats:
-                raise ValidationError('Invalid file format. Only JPEG, PNG, and GIF files are allowed.')
+                raise ValidationError(f'Invalid file format. {str(valid_image_formats)} files are allowed.')
     except OSError:
         raise ValidationError('Invalid file type. Only image files are allowed.')
 

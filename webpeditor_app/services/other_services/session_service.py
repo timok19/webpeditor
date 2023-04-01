@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
@@ -21,7 +23,7 @@ def get_session_id(request: WSGIRequest) -> str | None:
         if session_id:
             return session_id
     except TypeError as e:
-        print(e)
+        logging.error(e)
         return None
 
 
@@ -59,7 +61,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     if session_store:
         # Set cookie expiration time to 15 minutes
         current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
-        print(
+        logging.info(
             f"\nCurrent session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
             f"{current_time_expiration_minutes} minute(s)"
         )
@@ -77,7 +79,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         session_store.save()
 
         new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
-        print(
+        logging.info(
             f"Updated session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
             f"{new_time_expiration_minutes} minute(s)\n"
         )

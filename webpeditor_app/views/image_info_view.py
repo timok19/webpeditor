@@ -65,7 +65,7 @@ def image_info_view(request) -> HttpResponse:
         .quantize(Decimal('.1'), rounding=ROUND_UP)
 
     context: dict = {
-        'uploaded_image_url_to_fe': uploaded_image.original_image_url.url,
+        'uploaded_image_url_to_fe': uploaded_image.original_image.url,
         'image_format': image_local_file.format,
         'image_resolution': f"{image_local_file.width}px ⨯ {image_local_file.height}px",
         'image_name': format_image_name(uploaded_image.image_name),

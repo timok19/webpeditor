@@ -1,5 +1,6 @@
 import shutil
 import os
+import logging
 from pathlib import Path
 from typing import Tuple
 
@@ -10,7 +11,7 @@ def delete_empty_folders(media_root: Path):
     empty_folders = find_empty_folders(media_root)
     for folder in empty_folders:
         shutil.rmtree(folder)
-        print(f"Deleted empty folder: {folder}")
+        logging.info(f"Deleted empty folder: {folder}")
 
 
 def delete_folder_by_expiry(media_root: Path):
@@ -20,9 +21,9 @@ def delete_folder_by_expiry(media_root: Path):
         try:
             if os.path.isdir(folder_path):
                 shutil.rmtree(folder_path)
-                print("- User's folder deleted successfully\n")
+                logging.info("- User's folder deleted successfully\n")
         except Exception as e:
-            print(e)
+            logging.error(e)
 
 
 def find_empty_folders(folder: Path) -> Tuple:

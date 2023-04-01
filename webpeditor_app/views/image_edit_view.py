@@ -1,5 +1,6 @@
 import io
 import shutil
+import logging
 from decimal import Decimal
 
 from PIL import Image
@@ -24,7 +25,7 @@ def get_user_id(request: WSGIRequest) -> str | None:
     try:
         user_id = request.session.get('user_id')
     except Exception as e:
-        print(e)
+        logging.error(e)
         return None
     return user_id
 
@@ -33,7 +34,7 @@ def get_original_image(user_id: str) -> OriginalImage | None:
     try:
         original_image = OriginalImage.objects.filter(user_id=user_id).first()
     except OriginalImage.DoesNotExist as e:
-        print(e)
+        logging.error(e)
         return None
     return original_image
 
@@ -42,7 +43,7 @@ def get_edited_image(user_id: str) -> EditedImage | None:
     try:
         edited_image = EditedImage.objects.filter(user_id=user_id).first()
     except EditedImage.DoesNotExist as e:
-        print(e)
+        logging.error(e)
         return None
     return edited_image
 
@@ -51,25 +52,31 @@ def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
+
     new_edited_image_name = f"webpeditor_1_{original_image.image_name}"
-    edited_image_url = f"{user_id}/edited/{new_edited_image_name}"
+
+    edited_image = f"{user_id}/edited/{new_edited_image_name}"
+
     edited_image_init = EditedImage(
         user_id=user_id,
-        edited_image_url=edited_image_url,
+        edited_image=edited_image,
         edited_image_name=new_edited_image_name,
         content_type_edited=original_image.content_type,
         session_id=session_key,
         session_id_expiration_date=request.session.get_expiry_date(),
-        original_image_file=original_image
+        original_image=original_image
     )
     edited_image_init.save()
+
     return edited_image_init
 
 
 def copy_original_image_to_edited_folder(user_id: str,
                                          original_image: OriginalImage,
                                          edited_image: EditedImage) -> bool:
+
     original_image_folder_path, edited_image_folder_path = get_media_root_paths(user_id)
+
     storage = FileSystemStorage()
 
     if not edited_image_folder_path.exists():
@@ -77,6 +84,7 @@ def copy_original_image_to_edited_folder(user_id: str,
 
     original_image_file_path = original_image_folder_path / original_image.image_name
     edited_image_file_path = edited_image_folder_path / edited_image.edited_image_name
+
     shutil.copy2(original_image_file_path, edited_image_file_path)
 
     file = storage.open(
@@ -84,18 +92,19 @@ def copy_original_image_to_edited_folder(user_id: str,
     )
     if not file:
         return False
+
     return True
 
 
 def create_edited_image_form(edited_image: EditedImage | None):
-    data = {"edited_image_url": edited_image.edited_image_url}
+    data = {"edited_image_url": edited_image.edited_image}
     if edited_image is None:
         return EditedImageForm()
     else:
         return EditedImageForm(data=data)
 
 
-def handle_post_request(request: WSGIRequest, user_id: str):
+def post(request: WSGIRequest, user_id: str) -> EditedImageForm:
     if request.session.get_expiry_age() == 0:
         return redirect('ImageDoesNotExistView')
 
@@ -116,7 +125,7 @@ def handle_post_request(request: WSGIRequest, user_id: str):
         return edited_image_form
 
 
-def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
+def get(request: WSGIRequest, user_id: str, session_key: str) -> EditedImageForm:
     if user_id is None:
         return redirect('ImageDoesNotExistView')
 
@@ -135,6 +144,7 @@ def handle_get_request(request: WSGIRequest, user_id: str, session_key: str):
             return redirect("ImageDoesNotExistView")
 
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
+
     else:
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
@@ -170,7 +180,7 @@ def process_edited_image_form(image_form: EditedImageForm):
     image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
     image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
         .quantize(Decimal('.1'), rounding=ROUND_UP)
-    return image.url, image_file.format, image_size, image_resolution, image_name, image_aspect_ratio
+    return str(image.url), image_file.format, image_size, image_resolution, image_name, image_aspect_ratio
 
 
 @csrf_protect
@@ -187,9 +197,9 @@ def image_edit_view(request: WSGIRequest):
     edited_image_aspect_ratio: Decimal = Decimal()
 
     if request.method == 'POST':
-        response = handle_post_request(request, user_id)
+        response = post(request, user_id)
     else:
-        response = handle_get_request(request, user_id, session_key)
+        response = get(request, user_id, session_key)
 
     if isinstance(response, HttpResponsePermanentRedirect) or isinstance(response, HttpResponseRedirect):
         return response

@@ -68,11 +68,11 @@ def save_image_locally(image: UploadedFile, user_id: str) -> str:
     return f"{user_id}/{image_name_after_re}"
 
 
-def save_image_to_db(image: UploadedFile, image_url: str, request: WSGIRequest, user_id: str):
+def save_image_to_db(image: UploadedFile, original_image: str, request: WSGIRequest, user_id: str):
     original_image = OriginalImage(
         image_name=replace_with_underscore(image.name),
         content_type=image.content_type,
-        original_image_url=image_url,
+        original_image=original_image,
         session_id=request.session.session_key,
         session_id_expiration_date=request.session.get_expiry_date(),
         user_id=user_id
