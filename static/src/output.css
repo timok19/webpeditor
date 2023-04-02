@@ -2832,6 +2832,11 @@ body {
     background-color: transparent;
   }
 
+  .md\:bg-\[\#F5F5F5\] {
+    --tw-bg-opacity: 1;
+    background-color: rgb(245 245 245 / var(--tw-bg-opacity));
+  }
+
   .md\:p-0 {
     padding: 0px;
   }
