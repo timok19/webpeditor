@@ -5,16 +5,14 @@
     <main class="mx-auto">
       <div class="px-4 py-4 sm:px-0">
         {% if edited_image_form.is_multipart %}
-          <form method="post" enctype="multipart/form-data">
+          <form method="post" enctype="multipart/form-data" id="editedImageFormId">
         {% else %}
-          <form method="post">
+          <form method="post" id="editedImageFormId">
         {% endif %}
 
         {% csrf_token %}
 
-        {{ edited_image_form.auto_id|json_script:'editedImageFormId' }}
         <input type="file" id="{{ edited_image_form.auto_id }}" name="image" style="display: none">
-
 
         <div class="grid grid-cols-9 gap-4">
           <div class="col-span-2 flex flex-col justify-center">
@@ -24,7 +22,7 @@
                 properties:</h5>
               <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Name: &nbsp;<span
                 class="font-normal dark:text-gray-400 whitespace-pre-line"
-                style="font-family: Consolas, monospace">{{ edited_image_name }}</span>
+                style="font-family: Consolas, monospace">{{ edited_image_name_short_version }}</span>
               </p>
               <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Format: &nbsp;<span
                 class="font-normal dark:text-gray-400 whitespace-pre-line"
@@ -49,6 +47,8 @@
           <div class="col-span-7 flex items-center justify-center mr-[12rem]">
             {{ edited_image_url_to_fe|json_script:'imageUrl' }}
             {{ csrf_token_value|json_script:'csrfToken' }}
+            {{ edited_image_name|json_script:'imageName' }}
+            {{ edited_image_content_type|json_script:'imageContentType' }}
             <div id="tui-image-editor"></div>
           </div>
 
@@ -63,7 +63,6 @@
   <script src="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.min.js"></script>
   <script src="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="{% static 'js/services/saveImageIntoDb.js' %}"></script>
   <script src="{% static 'js/services/ToastUI.js' %}"></script>
 
 {% endblock content %}

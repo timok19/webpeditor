@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const container = document.querySelector("#tui-image-editor");
 
   const imageUrl = JSON.parse(document.getElementById("imageUrl").textContent);
-  const imageName = "ImageResult";
+  const imageContentType = JSON.parse(document.getElementById("imageContentType").textContent);
+  const imageName = JSON.parse(document.getElementById("imageName").textContent);
 
   const editor = new ImageEditor(container, {
     includeUI: {
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
   oldDownloadButton.style.display = "none";
 
   let downloadButton = document.createElement("button");
-  downloadButton.addEventListener("click", () => saveImageHandler("image/png", 1, "test.png"));
+  downloadButton.addEventListener("click", () => downloadImage(imageContentType, 1, imageName));
   downloadButton.id = "tuiDownloadButton";
   downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   downloadButton.appendChild(addSpanTextToButton("Download image"));
@@ -78,6 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Save button
   let saveButton = document.createElement("button");
+  saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
   saveButton.id = "tuiSaveButton";
   saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   saveButton.appendChild(addSpanTextToButton("Save image"));
@@ -152,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function() {
     return spanText;
   }
 
-  function editCanvasSize (queryClass) {
+  function editCanvasSize(queryClass) {
     const canvas = document.querySelector(queryClass);
     canvas.style.position = "absolute";
     canvas.style.width = "400px";
@@ -164,12 +166,12 @@ document.addEventListener("DOMContentLoaded", function() {
     canvas.style.maxWidth = "480px";
     canvas.style.maxHeight = "550px";
 
-    if (queryClass === ".upper-canvas"){
+    if (queryClass === ".upper-canvas") {
       canvas.style.cursor = "zoom-in";
     }
   }
 
-  function saveImageHandler(mimeType, quality, filename) {
+  function dataURLtoBlob(mimeType, quality) {
     const dataURL = editor.toDataURL({
       format: mimeType,
       quality: quality
@@ -181,8 +183,44 @@ document.addEventListener("DOMContentLoaded", function() {
     for (let i = 0; i < data.length; i++) {
       view[i] = data.charCodeAt(i) & 0xff;
     }
-    const blob = new Blob([arrayBuffer], { type: mimeType });
+    return new Blob([arrayBuffer], { type: mimeType });
+  }
 
+  function downloadImage(mimeType, quality, filename) {
+    const editedImageForm = document.getElementById("editedImageFormId");
+    editedImageForm.addEventListener("submit", (event) => event.preventDefault());
+
+    const blob = dataURLtoBlob(mimeType, quality);
+    console.log(blob);
     saveAs(blob, filename);
+  }
+
+  function saveImage(mimeType, quality, fileName) {
+    const csrfToken = JSON.parse(document.getElementById("csrfToken").textContent);
+    // const csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").val();
+    console.log(csrfToken)
+
+    const editedImageForm = document.getElementById("editedImageFormId");
+    editedImageForm.addEventListener("submit", (event) => event.preventDefault());
+
+    const imageBlob = dataURLtoBlob(mimeType, quality);
+
+    const formData = new FormData();
+    formData.append("edited_image_file", imageBlob, fileName);
+
+    fetch("/image_edit/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken
+      },
+      body: formData
+    }).then((response) => {
+      console.log(response)
+      if (response.ok) {
+        console.log("Success");
+      } else {
+        console.error("Error");
+      }
+    });
   }
 });
