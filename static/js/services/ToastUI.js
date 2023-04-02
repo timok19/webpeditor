@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }, menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
         width: "50rem",
-        height: "39rem"
+        height: "40rem"
       },
       menuBarPosition: "left"
     },
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
   imageEditorWrap.style.width = "85%";
 
   const imageEditor = document.querySelector("#tui-image-editor");
-  imageEditor.style.width = "50rem";
+  imageEditor.style.width = "52rem";
   imageEditor.style.height = "36rem";
 
   const subItemMaskChoice = document.querySelector(".tui-image-editor-menu-mask ul.tui-image-editor-submenu-item");
@@ -115,28 +115,8 @@ document.addEventListener("DOMContentLoaded", function() {
   imageEditorContainer.style.borderRadius = "1rem";
   imageEditorContainer.style.background = "#1F2937";
 
-  const lowerCanvas = document.querySelector(".lower-canvas");
-  lowerCanvas.style.position = "absolute";
-  lowerCanvas.style.width = "400px";
-  lowerCanvas.style.height = "400px";
-  lowerCanvas.style.left = "-20px";
-  lowerCanvas.style.top = "0";
-  lowerCanvas.style.touchAction = "none";
-  lowerCanvas.style.userSelect = "none";
-  lowerCanvas.style.maxWidth = "480px";
-  lowerCanvas.style.maxHeight = "550px";
-
-  const upperCanvas = document.querySelector(".upper-canvas");
-  upperCanvas.style.position = "absolute";
-  upperCanvas.style.width = "400px";
-  upperCanvas.style.height = "400px";
-  upperCanvas.style.left = "-20px";
-  upperCanvas.style.top = "0";
-  upperCanvas.style.touchAction = "none";
-  upperCanvas.style.userSelect = "none";
-  upperCanvas.style.maxWidth = "480px";
-  upperCanvas.style.maxHeight = "550px";
-  upperCanvas.style.cursor = "zoom-in";
+  editCanvasSize(".lower-canvas");
+  editCanvasSize(".upper-canvas");
 
   const submenuStyle = document.querySelector(".tui-image-editor-submenu-style");
   submenuStyle.style.backgroundColor = "#1e1e1e";
@@ -162,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
   helpMenu.style.position = "absolute";
 
   const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
-  imageEditorMainContainer.style.width = "calc(100% - 100px)";
+  imageEditorMainContainer.style.width = "calc(100% - 120px)";
 
   // Span with text and icon
   function addSpanTextToButton(textOnButton) {
@@ -170,6 +150,23 @@ document.addEventListener("DOMContentLoaded", function() {
     spanText.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " + "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
     spanText.textContent = textOnButton + String.fromCharCode(160);
     return spanText;
+  }
+
+  function editCanvasSize (queryClass) {
+    const canvas = document.querySelector(queryClass);
+    canvas.style.position = "absolute";
+    canvas.style.width = "400px";
+    canvas.style.height = "400px";
+    canvas.style.left = "-20px";
+    canvas.style.top = "0";
+    canvas.style.touchAction = "none";
+    canvas.style.userSelect = "none";
+    canvas.style.maxWidth = "480px";
+    canvas.style.maxHeight = "550px";
+
+    if (queryClass === ".upper-canvas"){
+      canvas.style.cursor = "zoom-in";
+    }
   }
 
   function saveImageHandler(mimeType, quality, filename) {

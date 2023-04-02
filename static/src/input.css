@@ -5,31 +5,4 @@
 body {
     height: 100%;
     margin: 0;
-    overflow: hidden;
-}
-
-.glow1 {
-    transform: translate(16.5%, 16.5%);
-    position: absolute;
-    content: "";
-    border-radius: 50%;
-    z-index: -1;
-    height: 110%;
-    width: 110%;
-    opacity: 0.5;
-    background-color: #00ffff;
-    filter: blur(60px);
-}
-
-.glow2 {
-    transform: translate(-16.5%, -16.5%);
-    position: absolute;
-    content: "";
-    border-radius: 50%;
-    z-index: -2;
-    height: 110%;
-    width: 110%;
-    opacity: 0.5;
-    background-color: #ff0072;
-    filter: blur(60px);
 }
