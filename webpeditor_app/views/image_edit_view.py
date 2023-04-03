@@ -251,7 +251,7 @@ def image_edit_view(request: WSGIRequest):
             edited_image_name_short_version, edited_image_aspect_ratio = process_edited_image_form(edited_image_form)
 
     context: dict = {
-        'edited_image_form': edited_image_form,
+        'image_form': edited_image_form,
         'edited_image_url_to_fe': edited_image_url_to_fe,
         'edited_image_format': edited_image_format,
         'edited_image_size': edited_image_size,

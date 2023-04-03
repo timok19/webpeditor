@@ -1,6 +1,7 @@
 {% extends '_base.html' %}
 {% load static %}
 {% block content %}
+
   <div class="flex justify-center items-center h-[calc(80vh)]">
     <main class="mx-auto">
       <div class="px-4 py-4 sm:px-0">
@@ -11,8 +12,7 @@
         {% endif %}
 
         {% csrf_token %}
-
-        <input type="file" id="{{ edited_image_form.auto_id }}" name="image" style="display: none">
+        <input type="file" id="{{ image_form.edited_image_form.auto_id }}" name="image" style="display: none">
 
         <div class="grid grid-cols-9 gap-4">
           <div class="col-span-2 flex flex-col justify-center">

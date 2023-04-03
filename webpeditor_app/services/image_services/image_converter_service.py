@@ -1,17 +1,21 @@
 import base64
 from io import BytesIO
+from typing import List, Tuple
 
 from PIL import Image
 from django.core.files.uploadedfile import UploadedFile
 
 
-def convert_images(images_files: list[UploadedFile], output_format: str) -> list[tuple[str, str]]:
+def convert_images(images_files: list[UploadedFile], output_format: str) -> str | List[Tuple]:
     converted_images = []
 
     for image_file in images_files:
-        img = Image.open(image_file)
-        buffer = BytesIO()
-        img.save(buffer, format=output_format)
+        try:
+            img = Image.open(image_file)
+            buffer = BytesIO()
+            img.save(buffer, format=output_format)
+        except Exception as e:
+            return str(e)
 
         converted_image = base64.b64encode(buffer.getvalue()).decode()
         img_data = f'data:image/{output_format.lower()};base64,{converted_image}'

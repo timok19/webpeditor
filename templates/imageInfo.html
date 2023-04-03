@@ -10,7 +10,7 @@
 
             class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
             src="{{ uploaded_image_url_to_fe }}" alt="Uploaded Image"
-            onclick="showModal('{{ uploaded_image_url_to_fe }}')" />
+            onclick="showImageModal('{{ uploaded_image_url_to_fe }}')" />
 
 
           <div class="text-left flex flex-col justify-center pt-5 pb-5 pl-5 overscroll-contain md:h-[calc(50vh)]">
@@ -78,7 +78,7 @@
 
     <!-- The close button -->
     <a class="flex z-90 pb-[22rem] text-white"
-       onclick="closeModal()">
+       onclick="closeImageModal()">
       <svg class="w-12 h-12 ml-1 mr-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
            xmlns="http://www.w3.org/2000/svg"
            aria-hidden="true">

@@ -27,7 +27,10 @@ def image_convert_view(request: WSGIRequest):
             return render(request, 'imageConvert.html', {'form': image_form, 'validation_error': error_str})
 
         output_format = image_form.cleaned_data['output_format']
+
         converted_images = convert_images(images_files, output_format)
+        if isinstance(converted_images, str):
+            return render(request, 'imageConvert.html', {'form': image_form, 'image_format_error': converted_images})
 
     else:
         image_form = ImagesToConvertForm()

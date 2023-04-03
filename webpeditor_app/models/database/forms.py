@@ -26,7 +26,13 @@ class ImagesToConvertForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
     )
     output_format = forms.ChoiceField(
-        choices=[('JPEG', 'JPEG'), ('PNG', 'PNG'), ('GIF', 'GIF')],
+        choices=[('JPEG', 'JPEG'),
+                 ('PNG', 'PNG'),
+                 ('GIF', 'GIF'),
+                 ('WEBP', 'WEBP'),
+                 ('RAW', 'RAW'),
+                 ('JFIF', 'JFIF'),
+                 ('ICO', 'ICO')],
         required=True,
         initial='JPEG'
     )
