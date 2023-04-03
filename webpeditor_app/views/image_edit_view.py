@@ -23,6 +23,8 @@ from webpeditor_app.services.other_services.session_service import update_sessio
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 from webpeditor_app.views.image_info_view import format_image_name
 
+logging.basicConfig(level=logging.INFO)
+
 
 def get_user_id(request: WSGIRequest) -> str | None:
     try:
@@ -55,6 +57,7 @@ def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
+
     new_edited_image_name = f"webpeditor_1_{original_image.image_name}"
 
     edited_image = f"{user_id}/edited/{new_edited_image_name}"
@@ -138,7 +141,7 @@ def post(request: WSGIRequest, user_id: str) -> EditedImageForm:
     # image = open_image_with_pil(edited_image_path)
     edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"
 
-    edited_image: EditedImage = EditedImage.objects.filter(user_id=user_id).update(
+    EditedImage.objects.filter(user_id=user_id).update(
         edited_image=edited_image_path_to_db,
         edited_image_name=image_file.name,
         content_type_edited=image_file.content_type,
@@ -146,7 +149,6 @@ def post(request: WSGIRequest, user_id: str) -> EditedImageForm:
     )
 
     update_session(request=request, user_id=user_id)
-    return EditedImageForm({"edited_image_file": edited_image})
 
 
 def get(request: WSGIRequest, user_id: str, session_key: str) -> EditedImageForm:
@@ -158,7 +160,7 @@ def get(request: WSGIRequest, user_id: str, session_key: str) -> EditedImageForm
         return redirect("ImageDoesNotExistView")
 
     edited_image = get_edited_image(user_id)
-    if (edited_image is None or edited_image is not None) and original_image.user_id != user_id:
+    if edited_image is not None and original_image.user_id != user_id:
         return redirect("ImageDoesNotExistView")
 
     elif edited_image is None and original_image.user_id == user_id:
@@ -204,6 +206,7 @@ def process_edited_image_form(image_form: EditedImageForm):
     image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
     image_aspect_ratio: Decimal = Decimal(image_file.width / image_file.height) \
         .quantize(Decimal('.1'), rounding=ROUND_UP)
+    # image_format =
 
     return str(image.edited_image.url), \
         image_file.format, \
@@ -226,14 +229,14 @@ def image_edit_view(request: WSGIRequest):
     edited_image_name: str = ""
     edited_image_url_to_fe: str = ""
     edited_image_aspect_ratio: Decimal = Decimal()
-    edited_image = get_edited_image(user_id)
     edited_image_content_type: str = ""
 
     if request.method == 'POST':
         response = post(request, user_id)
     else:
         response = get(request, user_id, session_key)
-        if edited_image.content_type_edited is not None:
+        edited_image = get_edited_image(user_id)
+        if edited_image is not None and edited_image.content_type_edited is not None:
             edited_image_content_type = edited_image.content_type_edited
             edited_image_name = edited_image.edited_image_name
 

@@ -28,13 +28,13 @@
         {% endif %}
 
         {% csrf_token %}
-        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="{{ form.auto_id }}">Upload
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="{{ form.original_image_form.auto_id }}">Upload
           your image:</label>
 
         <input
           class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
           type="file" name="original_image_form" required accept=".jpeg,.jpg,.png,.webp,.raw,.jfif,.ico"
-          id="{{ form.auto_id }}"
+          id="{{ form.original_image_form.auto_id }}"
           size="image">
         {% if validation_error %}
           <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ validation_error }}</p>
@@ -59,18 +59,8 @@
           {% endif %}
           <button type="submit"
                   id="upload-image"
-                  onclick="Toastify({
-                    text: 'Image has been uploaded',
-                    duration: 3000,
-                    gravity: 'top',
-                    close: true,
-                    position: 'right',
-                    stopOnFocus: true,
-                    style: {
-                      background: 'linear-gradient(to right, #e74694, #ff8a4c)',
-                    },
-                  }).showToast()"
-                  class="relative inline-flex items-center justify-center p-0.5 mb-2 ml-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
+                  onclick="toastifyMessage('Image has been uploaded')"
+                  class="relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
                   disabled>
                 <span
                   class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
@@ -88,6 +78,7 @@
     </div>
 
     <script src="{% static 'js/services/enableUploadButton.js' %}"></script>
+    <script src="{% static 'js/services/Toastify.js' %}"></script>
   </div>
 
 

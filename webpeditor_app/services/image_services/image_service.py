@@ -1,5 +1,5 @@
-import shutil
 import logging
+import shutil
 from pathlib import Path
 
 from django.conf import settings
@@ -9,6 +9,8 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
+
+logging.basicConfig(level=logging.INFO)
 
 
 def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:

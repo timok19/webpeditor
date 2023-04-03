@@ -6,6 +6,8 @@ from typing import Tuple
 
 from webpeditor import settings
 
+logging.basicConfig(level=logging.INFO)
+
 
 def delete_empty_folders(media_root: Path):
     empty_folders = find_empty_folders(media_root)

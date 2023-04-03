@@ -11,6 +11,8 @@ from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
 from webpeditor_app.services.image_services.folder_service import delete_empty_folders
 
+logging.basicConfig(level=logging.INFO)
+
 
 def set_session_expiry(request: WSGIRequest):
     # Set session_id token expiry to 15 minutes

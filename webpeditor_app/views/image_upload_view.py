@@ -12,8 +12,8 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
+from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
@@ -93,7 +93,7 @@ def image_upload_view(request: WSGIRequest):
 
         image_form = OriginalImageForm(request.POST, request.FILES)
         if not image_form.is_valid():
-            return redirect('UploadImageView')
+            return redirect('ImageUploadView')
 
         image: UploadedFile = image_form.cleaned_data.get('original_image_form')
 

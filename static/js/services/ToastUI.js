@@ -186,22 +186,21 @@ document.addEventListener("DOMContentLoaded", function() {
     return new Blob([arrayBuffer], { type: mimeType });
   }
 
-  function downloadImage(mimeType, quality, filename) {
+  function preventFormFromDefaultAction () {
     const editedImageForm = document.getElementById("editedImageFormId");
     editedImageForm.addEventListener("submit", (event) => event.preventDefault());
+  }
 
+  function downloadImage(mimeType, quality, filename) {
+    preventFormFromDefaultAction()
     const blob = dataURLtoBlob(mimeType, quality);
     console.log(blob);
     saveAs(blob, filename);
   }
 
   function saveImage(mimeType, quality, fileName) {
+    preventFormFromDefaultAction()
     const csrfToken = JSON.parse(document.getElementById("csrfToken").textContent);
-    // const csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").val();
-    console.log(csrfToken)
-
-    const editedImageForm = document.getElementById("editedImageFormId");
-    editedImageForm.addEventListener("submit", (event) => event.preventDefault());
 
     const imageBlob = dataURLtoBlob(mimeType, quality);
 
@@ -222,5 +221,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.error("Error");
       }
     });
+
+    location.reload()
   }
 });

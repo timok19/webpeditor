@@ -47,7 +47,7 @@ def format_image_size(path_to_local_image: Path) -> str:
 def image_info_view(request) -> HttpResponse:
     user_id = request.session.get('user_id')
     if user_id is None:
-        return redirect('UploadImageView')
+        return redirect('ImageUploadView')
 
     uploaded_image = get_original_image(user_id)
     if uploaded_image is None:
