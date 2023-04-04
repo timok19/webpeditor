@@ -17,8 +17,6 @@ from webpeditor_app.services.image_services.text_utils import replace_with_under
 from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
 from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
-uploaded_image_url_to_fe: str = ""
-
 
 def get_or_create_user_id(request: WSGIRequest) -> str:
     try:
@@ -83,7 +81,7 @@ def save_image_to_db(image: UploadedFile, original_image: str, request: WSGIRequ
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_upload_view(request: WSGIRequest):
-    global uploaded_image_url_to_fe
+    uploaded_image_url_to_fe: str = ""
 
     if request.method == 'POST':
         set_session_expiry(request)
