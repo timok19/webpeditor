@@ -1,7 +1,6 @@
 import shutil
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
@@ -15,7 +14,6 @@ from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
-from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
 
 uploaded_image_url_to_fe: str = ""
 
@@ -93,15 +91,9 @@ def image_upload_view(request: WSGIRequest):
 
         image_form = OriginalImageForm(request.POST, request.FILES)
         if not image_form.is_valid():
-            return redirect('ImageUploadView')
+            return render(request, 'imageUpload.html', {'form': image_form})
 
         image: UploadedFile = image_form.cleaned_data.get('original_image_form')
-
-        try:
-            validate_image_file_size(image)
-        except ValidationError as errors:
-            error_str = "".join(str(error) for error in errors)
-            return render(request, 'imageUpload.html', {'form': image_form, 'validation_error': error_str})
 
         uploaded_image_url_to_fe = save_image_locally(image, user_id)
 
