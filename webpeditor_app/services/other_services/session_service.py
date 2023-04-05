@@ -3,13 +3,10 @@ import uuid
 
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
-from django.contrib.sessions.models import Session
 from django.core.handlers.wsgi import WSGIRequest
-from django.core.signing import Signer
 from django.http import JsonResponse
 from django.utils import timezone
 
-from webpeditor.settings import USER_ID_COOKIE
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.folder_service import delete_empty_folders
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
@@ -33,22 +30,24 @@ def get_session_id(request: WSGIRequest) -> str | None:
 
 
 def create_user_id() -> str:
-    signer = Signer()
-
-    return signer.sign(str(uuid.uuid4()))
+    return str(uuid.uuid4())
 
 
-def get_user_id(request: WSGIRequest) -> str | None:
-    signer = Signer()
+def add_user_id_into_session_store(request: WSGIRequest) -> str:
+    if "user_id" not in request.session:
+        request.session["user_id"] = create_user_id()
+    return request.session["user_id"]
+
+
+def get_user_id_from_session_store(request: WSGIRequest) -> str | None:
     try:
-        signed_user_id = request.get_signed_cookie(USER_ID_COOKIE)
-        return str(signer.unsign(signed_user_id))
+        return request.session.get("user_id")
     except Exception as e:
         logging.error(e)
         return None
 
 
-def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
+def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     """
     Update session_id token expiry to 30 minutes if it is not expired yet.
     If session_id token is expired, delete the image and the folder with the image.
@@ -60,50 +59,18 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         Response about session status and estimated time of sessionid
     """
 
-    session_key = get_session_id(request)
-    current_time_expiration_minutes = 0
+    session_store, \
+        current_time_expiration_minutes, \
+        new_time_expiration_minutes, \
+        _ = update_session(request=request, user_id=user_id)
 
-    try:
-        session_store = SessionStore(session_key=session_key)
-    except Session.DoesNotExist as e:
-        delete_empty_folders(settings.MEDIA_ROOT)
-        return JsonResponse({'success': False, 'error': f'Something went wrong: {e}'}, status=404)
+    original_image: OriginalImage = OriginalImage.objects.filter(user_id=user_id).first()
+    if original_image is None:
+        return JsonResponse({'success': False, 'error': 'Original image was not found'}, status=404)
 
-    try:
-        original_image = OriginalImage.objects.filter(user_id=user_id).first()
-    except OriginalImage.DoesNotExist as e:
-        return JsonResponse({'success': False, 'error': f'Something went wrong: {e}'}, status=404)
-
-    try:
-        edited_image = EditedImage.objects.filter(user_id=user_id).first()
-    except EditedImage.DoesNotExist as e:
-        return JsonResponse({'success': False, 'error': f'Something went wrong: {e}'}, status=404)
-
-    if session_store:
-        # Set cookie expiration time to 15 minutes
-        current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
-        logging.info(
-            f"\nCurrent session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
-            f"{current_time_expiration_minutes} minute(s)"
-        )
-
-        expiry_date = timezone.localtime(session_store.get_expiry_date())
-        now = timezone.localtime(timezone.now())
-        if now > expiry_date:
-            delete_old_image_in_db_and_local(user_id)
-            session_store.clear_expired()
-
-        # session_store.encode(session_dict={'user_id': user_id})
-        update_expiration = timezone.now() + timezone.timedelta(seconds=900)
-
-        session_store.set_expiry(value=update_expiration)
-        session_store.save()
-
-        new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
-        logging.info(
-            f"Updated session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
-            f"{new_time_expiration_minutes} minute(s)\n"
-        )
+    edited_image: EditedImage = EditedImage.objects.filter(user_id=user_id).first()
+    if edited_image is None:
+        return JsonResponse({'success': False, 'error': 'Edited image was not found'}, status=404)
 
     if original_image:
         original_image.session_id_expiration_date = session_store.get_expiry_date()
@@ -113,8 +80,61 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         edited_image.session_id_expiration_date = session_store.get_expiry_date()
         edited_image.save()
 
-    return JsonResponse({
-        'success': True, 'info': 'Session is alive',
-        'estimated_time_of_session_id': current_time_expiration_minutes
-    },
-        status=200)
+    logging.info(
+        f"\nCurrent session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
+        f"{current_time_expiration_minutes} minute(s)"
+    )
+
+    logging.info(
+        f"Updated session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
+        f"{new_time_expiration_minutes} minute(s)\n"
+    )
+
+
+def update_session(request: WSGIRequest, user_id: str) \
+        -> JsonResponse | tuple[SessionStore, int, int, JsonResponse]:
+
+    session_key = get_session_id(request)
+    current_time_expiration_minutes = 0
+    new_time_expiration_minutes = 0
+
+    session_store = SessionStore(session_key=session_key)
+    if session_store is None:
+        delete_empty_folders(settings.MEDIA_ROOT)
+        return JsonResponse({'success': False, 'error': f'Session store does not exist'}, status=404)
+
+    if session_store:
+        # Set cookie expiration time to 15 minutes
+        current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+
+        expiry_date = timezone.localtime(session_store.get_expiry_date())
+        now = timezone.localtime(timezone.now())
+        if now > expiry_date:
+            delete_old_image_in_db_and_local(user_id)
+            session_store.clear_expired()
+
+        session_store.encode(session_dict={'user_id': user_id})
+        update_expiration = timezone.now() + timezone.timedelta(seconds=900)
+
+        session_store.set_expiry(value=update_expiration)
+        session_store.save()
+
+        new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+
+        logging.info(
+            f"\nCurrent session expiration time of anonymous user: "
+            f"{current_time_expiration_minutes} minute(s)"
+        )
+
+        logging.info(
+            f"Updated session expiration time of anonymous user: "
+            f"{new_time_expiration_minutes} minute(s)\n"
+        )
+
+    return session_store, \
+        current_time_expiration_minutes, \
+        new_time_expiration_minutes, \
+        JsonResponse({
+            'success': True, 'info': 'Session is alive',
+            'estimated_time_of_session_id': current_time_expiration_minutes
+        }, status=200)

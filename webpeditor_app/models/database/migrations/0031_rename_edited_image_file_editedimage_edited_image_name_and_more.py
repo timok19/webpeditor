@@ -2,7 +2,7 @@
 
 import cropperjs.models
 from django.db import migrations, models
-import webpeditor_app.services.validators.image_size_validator
+import webpeditor_app.services.validators.image_file_validator
 
 
 class Migration(migrations.Migration):
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='editedimage',
             name='edited_image_url',
-            field=cropperjs.models.CropperImageField(blank=True, null=True, upload_to='edited/', validators=[webpeditor_app.services.validators.image_size_validator.validate_image_file_size]),
+            field=cropperjs.models.CropperImageField(blank=True, null=True, upload_to='edited/', validators=[webpeditor_app.services.validators.image_file_validator.validate_image_file_size]),
         ),
         migrations.AlterField(
             model_name='editedimage',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='originalimage',
             name='original_image_url',
-            field=cropperjs.models.CropperImageField(blank=True, null=True, upload_to='', validators=[webpeditor_app.services.validators.image_size_validator.validate_image_file_size]),
+            field=cropperjs.models.CropperImageField(blank=True, null=True, upload_to='', validators=[webpeditor_app.services.validators.image_file_validator.validate_image_file_size]),
         ),
         migrations.AlterField(
             model_name='originalimage',

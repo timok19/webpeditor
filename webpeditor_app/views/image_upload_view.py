@@ -9,7 +9,6 @@ from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
-from webpeditor.settings import USER_ID_COOKIE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
@@ -17,8 +16,9 @@ from webpeditor_app.services.image_services.image_service import get_original_im
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     set_session_expiry, \
-    update_session, \
-    create_user_id, get_user_id
+    update_image_editor_session, \
+    get_user_id_from_session_store, \
+    add_user_id_into_session_store
 
 logging.basicConfig(level=logging.INFO)
 
@@ -78,13 +78,7 @@ def save_uploaded_image_to_db(image: UploadedFile, original_image: str, request:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    response = redirect('ImageInfoView')
-
-    if get_user_id(request) is None:
-        user_id_signed = create_user_id()
-        response.set_signed_cookie(USER_ID_COOKIE, user_id_signed, max_age=72000)
-
-    user_id = get_user_id(request)
+    user_id = add_user_id_into_session_store(request)
 
     set_session_expiry(request)
 
@@ -99,16 +93,16 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
     uploaded_image_url = save_uploaded_image_locally(image_file, user_id)
     save_uploaded_image_to_db(image_file, uploaded_image_url, request, user_id)
 
-    update_session(request=request, user_id=user_id)
+    update_image_editor_session(request=request, user_id=user_id)
 
-    return response
+    return redirect('ImageInfoView')
 
 
 def get(request: WSGIRequest) -> HttpResponse:
     form = OriginalImageForm()
     is_image_exist = True
 
-    user_id = get_user_id(request)
+    user_id = get_user_id_from_session_store(request)
 
     if get_original_image(user_id) is None:
         is_image_exist = False

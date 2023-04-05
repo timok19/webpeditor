@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import HiddenInput
 
-from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
+from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 
 
 class OriginalImageForm(forms.Form):
@@ -23,7 +23,7 @@ class EditedImageForm(forms.Form):
 class ImagesToConvertForm(forms.Form):
     images_to_convert = forms.ImageField(
         required=True,
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        widget=forms.ClearableFileInput(attrs={'multiple': True})
     )
     output_format = forms.ChoiceField(
         choices=[('JPEG', 'JPEG'),
@@ -34,5 +34,4 @@ class ImagesToConvertForm(forms.Form):
                  ('JFIF', 'JFIF'),
                  ('ICO', 'ICO')],
         required=True,
-        initial='JPEG'
     )

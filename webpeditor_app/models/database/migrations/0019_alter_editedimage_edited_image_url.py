@@ -2,7 +2,7 @@
 
 from django.db import migrations
 import imagekit.models.fields
-import webpeditor_app.services.validators.image_size_validator
+import webpeditor_app.services.validators.image_file_validator
 
 
 class Migration(migrations.Migration):
@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='editedimage',
             name='edited_image_url',
-            field=imagekit.models.fields.ProcessedImageField(default=None, upload_to='edited', validators=[webpeditor_app.services.validators.image_size_validator.validate_image_file_size]),
+            field=imagekit.models.fields.ProcessedImageField(default=None, upload_to='edited', validators=[webpeditor_app.services.validators.image_file_validator.validate_image_file_size]),
         ),
     ]

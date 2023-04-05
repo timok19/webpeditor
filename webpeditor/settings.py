@@ -88,8 +88,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'webpeditor.wsgi.application'
 
-# Max image file size
-MAX_IMAGE_FILE_SIZE: int = 6_000_000
+MAX_IMAGE_FILE_SIZE = 6_000_000
+
+MAX_SIZE_OF_IMAGE_FILES = 50_000_000
+
+DATA_UPLOAD_MAX_NUMBER_FILES = 20
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -154,8 +157,6 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_HTTPONLY = True
-
-USER_ID_COOKIE = "UI"
 
 # PROD ONLY
 # CSRF_COOKIE_SECURE = True

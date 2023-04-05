@@ -20,8 +20,11 @@ from webpeditor_app.services.image_services.image_service import \
     get_edited_image_file_path, \
     get_image_file_instance, \
     get_image_aspect_ratio
-from webpeditor_app.services.other_services.session_service import update_session, get_session_id, get_user_id
-from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
+from webpeditor_app.services.other_services.session_service import \
+    update_image_editor_session, \
+    get_session_id, \
+    get_user_id_from_session_store
+from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 from webpeditor_app.views.image_info_view import format_image_file_name
 
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +34,7 @@ def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
-    new_edited_image_name = f"webpeditor_1_{original_image.image_name}"
+    new_edited_image_name = f"webpeditor_{original_image.image_name}"
 
     edited_image = f"{user_id}/edited/{new_edited_image_name}"
 
@@ -68,18 +71,19 @@ def process_edited_image_form(image_form: EditedImageForm):
     # TODO: make sure, that on FE will be shown image with original format
 
     return str(image.edited_image.url), \
-        image_file.format, \
         image_size, \
         image_resolution, \
         image_name, \
         image_aspect_ratio
 
 
-def post(request: WSGIRequest, user_id: str) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    if request.session.get_expiry_age() == 0:
-        return redirect('ImageDoesNotExistView')
+def post(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+    user_id = get_user_id_from_session_store(request)
 
     if user_id is None:
+        return redirect('ImageDoesNotExistView')
+
+    if request.session.get_expiry_age() == 0:
         return redirect('ImageDoesNotExistView')
 
     original_image = get_original_image(user_id)
@@ -114,16 +118,14 @@ def post(request: WSGIRequest, user_id: str) -> HttpResponsePermanentRedirect | 
     EditedImage.objects.filter(user_id=user_id).update(
         edited_image=edited_image_path_to_db,
         edited_image_name=image_file.name,
-        content_type_edited=image_file.content_type,
         session_id_expiration_date=request.session.get_expiry_date()
     )
 
-    update_session(request=request, user_id=user_id)
+    update_image_editor_session(request=request, user_id=user_id)
 
 
-def get(request: WSGIRequest,
-        user_id: str,
-        session_key: str) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+    user_id = get_user_id_from_session_store(request)
     if user_id is None:
         return redirect('ImageDoesNotExistView')
 
@@ -133,6 +135,10 @@ def get(request: WSGIRequest,
 
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
+
+    original_image_file = get_image_file_instance(original_image.original_image.path)
+
+    session_key = get_session_id(request)
 
     edited_image = get_edited_image(user_id)
     if edited_image and original_image.user_id != user_id:
@@ -149,30 +155,25 @@ def get(request: WSGIRequest,
     else:
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
-    update_session(request=request, user_id=user_id)
+    update_image_editor_session(request=request, user_id=user_id)
 
     edited_image_url, \
-        edited_image_format, \
         edited_image_size, \
         edited_image_resolution, \
         edited_image_name_short_version, \
         edited_image_aspect_ratio = process_edited_image_form(edited_image_form)
 
-    edited_image = get_edited_image(user_id)
-    edited_image_content_type = edited_image.content_type_edited
-    edited_image_name = edited_image.edited_image_name
-
     context: dict = {
         'image_form': edited_image_form,
         'edited_image_url': edited_image_url,
-        'edited_image_format': edited_image_format,
+        'edited_image_format': original_image_file.format,
         'edited_image_size': edited_image_size,
         'edited_image_resolution': edited_image_resolution,
         'edited_image_name_short_version': edited_image_name_short_version,
-        'edited_image_name': edited_image_name,
+        'edited_image_name': edited_image.edited_image_name,
         'edited_image_aspect_ratio': edited_image_aspect_ratio,
         'csrf_token_value': get_token(request),
-        'edited_image_content_type': edited_image_content_type
+        'edited_image_content_type': edited_image.content_type_edited
     }
 
     return render(request, 'imageEdit.html', context)
@@ -181,15 +182,12 @@ def get(request: WSGIRequest,
 @requires_csrf_token
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    user_id = get_user_id(request)
-    session_key = get_session_id(request)
-
     if request.method == 'POST':
-        response = post(request, user_id)
+        response = post(request)
         return response
 
     elif request.method == "GET":
-        response = get(request, user_id, session_key)
+        response = get(request)
         return response
 
     else:

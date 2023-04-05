@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from webpeditor_app.services.validators.image_size_validator import validate_image_file_size
+from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 
 
 class OriginalImage(models.Model):

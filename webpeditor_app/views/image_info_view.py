@@ -9,13 +9,15 @@ from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_image_file_instance, \
     format_image_file_name, \
-    get_image_file_size, get_image_aspect_ratio, get_original_image_file_path
-from webpeditor_app.services.other_services.session_service import update_session, get_user_id
+    get_image_file_size, \
+    get_image_aspect_ratio, \
+    get_original_image_file_path
+from webpeditor_app.services.other_services.session_service import update_image_editor_session, get_user_id_from_session_store
 
 
 @require_http_methods(['GET'])
 def image_info_view(request) -> HttpResponse:
-    user_id = get_user_id(request)
+    user_id = get_user_id_from_session_store(request)
     if user_id is None:
         return redirect('ImageUploadView')
 
@@ -41,6 +43,6 @@ def image_info_view(request) -> HttpResponse:
         'image_size': get_image_file_size(image_local_file),
     }
 
-    update_session(request=request, user_id=user_id)
+    update_image_editor_session(request=request, user_id=user_id)
 
     return render(request, 'imageInfo.html', context)

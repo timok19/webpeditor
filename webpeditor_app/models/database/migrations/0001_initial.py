@@ -4,7 +4,7 @@ import django.core.validators
 import django.utils.timezone
 from django.db import migrations, models
 
-import webpeditor_app.services.validators.image_size_validator
+import webpeditor_app.services.validators.image_file_validator
 
 
 class Migration(migrations.Migration):
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('content_type', models.CharField(max_length=255)),
                 ('original_image', models.ImageField(upload_to='media/',
                                                      validators=[django.core.validators.MaxLengthValidator(6291456),
-                                                                 webpeditor_app.services.validators.image_size_validator.validate_image_file_size])),
+                                                                 webpeditor_app.services.validators.image_file_validator.validate_image_file_size])),
                 ('session_id', models.CharField(max_length=255, null=True)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('updated_at', models.DateTimeField(default=django.utils.timezone.now)),
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ('content_type_edited', models.CharField(max_length=255)),
                 ('edited_image', models.ImageField(upload_to='media/',
                                                    validators=[django.core.validators.MaxLengthValidator(6291456),
-                                                               webpeditor_app.services.validators.image_size_validator.validate_image_file_size])),
+                                                               webpeditor_app.services.validators.image_file_validator.validate_image_file_size])),
                 ('session_id', models.CharField(max_length=255, null=True)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('updated_at', models.DateTimeField(default=django.utils.timezone.now)),
