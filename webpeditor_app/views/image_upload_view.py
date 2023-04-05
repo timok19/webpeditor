@@ -1,38 +1,37 @@
+import logging
 import shutil
-import uuid
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
+from webpeditor.settings import USER_ID_COOKIE
 from webpeditor_app.models.database.forms import OriginalImageForm
-from webpeditor_app.models.database.models import OriginalImage, EditedImage
+from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
+from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
-from webpeditor_app.services.other_services.session_service import set_session_expiry, update_session
+from webpeditor_app.services.other_services.session_service import \
+    set_session_expiry, \
+    update_session, \
+    create_user_id, get_user_id
+
+logging.basicConfig(level=logging.INFO)
 
 
-def get_or_create_user_id(request: WSGIRequest) -> str:
-    try:
-        return request.session['user_id']
-    except KeyError:
-        request.session['user_id'] = str(uuid.uuid4())
-        return request.session['user_id']
-
-
-def validate_previous_image(user_id: str):
+def clean_up_previous_images(user_id: str) -> HttpResponse | None:
     original_image_folder_path, edited_images_folder_path = get_media_root_paths(user_id)
 
-    previous_original_image = OriginalImage.objects.filter(user_id=user_id).first()
-    if not previous_original_image:
+    previous_original_image = get_original_image(user_id)
+    if previous_original_image is None:
         return
 
-    previous_edited_image = EditedImage.objects.filter(user_id=user_id).all()
-    if not previous_original_image:
+    previous_edited_image = get_edited_image(user_id)
+    if previous_edited_image is None:
         return
 
     try:
@@ -40,17 +39,19 @@ def validate_previous_image(user_id: str):
             default_storage.delete(original_image_folder_path / previous_original_image.image_name)
         previous_original_image.delete()
     except Exception as e:
-        print(e)
+        logging.error(e)
 
     try:
         if edited_images_folder_path.exists():
             shutil.rmtree(edited_images_folder_path)
         previous_edited_image.delete()
     except Exception as e:
-        print(e)
+        logging.error(e)
+
+    return None
 
 
-def save_image_locally(image: UploadedFile, user_id: str) -> str:
+def save_uploaded_image_locally(image: UploadedFile, user_id: str) -> str:
     original_user_folder, _ = get_media_root_paths(user_id)
     if not original_user_folder.exists():
         user_folder = create_folder(user_id=user_id, is_original_image=True)
@@ -58,13 +59,13 @@ def save_image_locally(image: UploadedFile, user_id: str) -> str:
         user_folder = original_user_folder
 
     image_name_after_re = replace_with_underscore(image.name)
-    uploaded_image_path_to_local = user_folder / image_name_after_re
-    default_storage.save(uploaded_image_path_to_local, image)
+    uploaded_image_file_path = user_folder / image_name_after_re
+    default_storage.save(uploaded_image_file_path, image)
 
     return f"{user_id}/{image_name_after_re}"
 
 
-def save_image_to_db(image: UploadedFile, original_image: str, request: WSGIRequest, user_id: str):
+def save_uploaded_image_to_db(image: UploadedFile, original_image: str, request: WSGIRequest, user_id: str):
     original_image = OriginalImage(
         image_name=replace_with_underscore(image.name),
         content_type=image.content_type,
@@ -76,55 +77,60 @@ def save_image_to_db(image: UploadedFile, original_image: str, request: WSGIRequ
     original_image.save()
 
 
+def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
+    response = redirect('ImageInfoView')
+
+    if get_user_id(request) is None:
+        user_id_signed = create_user_id()
+        response.set_signed_cookie(USER_ID_COOKIE, user_id_signed, max_age=72000)
+
+    user_id = get_user_id(request)
+
+    set_session_expiry(request)
+
+    clean_up_previous_images(user_id)
+
+    form = OriginalImageForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return render(request, 'imageUpload.html', {'form': form})
+
+    image_file: UploadedFile = form.cleaned_data.get('original_image_form')
+
+    uploaded_image_url = save_uploaded_image_locally(image_file, user_id)
+    save_uploaded_image_to_db(image_file, uploaded_image_url, request, user_id)
+
+    update_session(request=request, user_id=user_id)
+
+    return response
+
+
+def get(request: WSGIRequest) -> HttpResponse:
+    form = OriginalImageForm()
+    is_image_exist = True
+
+    user_id = get_user_id(request)
+
+    if get_original_image(user_id) is None:
+        is_image_exist = False
+
+    context: dict = {
+        'form': form,
+        'is_image_exist': is_image_exist
+    }
+
+    return render(request, 'imageUpload.html', context)
+
+
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
-def image_upload_view(request: WSGIRequest):
-    uploaded_image_url_to_fe: str = ""
-
+def image_upload_view(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     if request.method == 'POST':
-        set_session_expiry(request)
-
-        user_id = get_or_create_user_id(request)
-        validate_previous_image(user_id)
-
-        image_form = OriginalImageForm(request.POST, request.FILES)
-        if not image_form.is_valid():
-            return render(request, 'imageUpload.html', {'form': image_form})
-
-        image: UploadedFile = image_form.cleaned_data.get('original_image_form')
-
-        uploaded_image_url_to_fe = save_image_locally(image, user_id)
-
-        save_image_to_db(image, uploaded_image_url_to_fe, request, user_id)
-
-        update_session(request=request, user_id=user_id)
-
-        return redirect('ImageInfoView')
+        response = post(request)
+        return response
 
     elif request.method == 'GET':
-        image_form = OriginalImageForm()
-        original_image = None
-        user_id = None
-        image_is_exist = True
-
-        try:
-            user_id = request.session.get('user_id')
-        except KeyError:
-            image_is_exist = False
-
-        try:
-            original_image = OriginalImage.objects.filter(user_id=user_id).first()
-        except OriginalImage.DoesNotExist:
-            image_is_exist = False
-
-        context: dict = {
-            'form': image_form,
-            'original_image': original_image,
-            'uploaded_image_url_to_fe': uploaded_image_url_to_fe,
-            'image_is_exist': image_is_exist
-        }
-
-        return render(request, 'imageUpload.html', context)
+        response = get(request)
+        return response
 
     else:
         return HttpResponse(status=405)

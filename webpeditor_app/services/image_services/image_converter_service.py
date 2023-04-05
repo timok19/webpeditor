@@ -7,6 +7,16 @@ from django.core.files.uploadedfile import UploadedFile
 
 
 def convert_images(images_files: list[UploadedFile], output_format: str) -> str | List[Tuple]:
+    """
+
+    Args:
+        images_files (list[UploadedFile]):
+        output_format (str):
+
+    Returns:
+        Returns exception message about incorrect image format or list of images with converted format
+    """
+
     converted_images = []
 
     for image_file in images_files:

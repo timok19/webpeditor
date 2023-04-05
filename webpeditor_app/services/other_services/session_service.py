@@ -1,15 +1,18 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
 from django.core.handlers.wsgi import WSGIRequest
+from django.core.signing import Signer
 from django.http import JsonResponse
 from django.utils import timezone
 
+from webpeditor.settings import USER_ID_COOKIE
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
 from webpeditor_app.services.image_services.folder_service import delete_empty_folders
+from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +28,22 @@ def get_session_id(request: WSGIRequest) -> str | None:
         if session_id:
             return session_id
     except TypeError as e:
+        logging.error(e)
+        return None
+
+
+def create_user_id() -> str:
+    signer = Signer()
+
+    return signer.sign(str(uuid.uuid4()))
+
+
+def get_user_id(request: WSGIRequest) -> str | None:
+    signer = Signer()
+    try:
+        signed_user_id = request.get_signed_cookie(USER_ID_COOKIE)
+        return str(signer.unsign(signed_user_id))
+    except Exception as e:
         logging.error(e)
         return None
 
@@ -74,7 +93,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
             delete_old_image_in_db_and_local(user_id)
             session_store.clear_expired()
 
-        session_store.encode(session_dict={'user_id': user_id})
+        # session_store.encode(session_dict={'user_id': user_id})
         update_expiration = timezone.now() + timezone.timedelta(seconds=900)
 
         session_store.set_expiry(value=update_expiration)

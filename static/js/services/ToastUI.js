@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const imageBlob = dataURLtoBlob(mimeType, quality);
 
     const formData = new FormData();
-    formData.append("edited_image_file", imageBlob, fileName);
+    formData.append("edited_image", imageBlob, fileName);
 
     fetch("/image_edit/", {
       method: "POST",
