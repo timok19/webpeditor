@@ -90,10 +90,8 @@ document.addEventListener("DOMContentLoaded", function() {
   oldDownloadButton.parentNode.insertBefore(newDiv, oldDownloadButton);
   newDiv.appendChild(downloadButton);
   newDiv.appendChild(saveButton);
-  newDiv.style.display = "flex";
-  newDiv.style.justifyContent = "center";
-  newDiv.style.paddingTop = "0.5rem";
-  newDiv.style.paddingRight = "0.5rem";
+  newDiv.className = "flex justify-center items-center space-x-2 pt-[0.5rem] pr-[0.5rem]"
+
 
   const imageEditorWrap = document.querySelector(".tui-image-editor-wrap");
   imageEditorWrap.style.bottom = "0";
@@ -145,6 +143,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
   imageEditorMainContainer.style.width = "calc(100% - 120px)";
+
+  const colorPickerPalettePreview = document.querySelector(".tui-colorpicker-palette-preview");
+  colorPickerPalettePreview.textContent = ""
+
+  const tieDrawColor = document.querySelector(".tie-draw-color .tui-image-editor-button")
+  tieDrawColor.addEventListener('click', changeSizeOfColorInputsInColorPicker)
+
+
+  function changeSizeOfColorInputsInColorPicker() {
+    const colorPicker = document.querySelector(".tui-colorpicker-clearfix");
+    for (let i = 0; i < colorPicker.children.length; i++) {
+      colorPicker.children[i].children[0].style.height = "1rem"
+      colorPicker.children[i].children[0].style.width = "1rem"
+    }
+  }
 
   // Span with text and icon
   function addSpanTextToButton(textOnButton) {
