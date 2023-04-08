@@ -20,6 +20,7 @@ from webpeditor_app.services.other_services.session_service import \
     get_user_id_from_session_store, \
     get_or_add_user_id
 
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -34,21 +35,15 @@ def clean_up_previous_images(user_id: str) -> HttpResponse | None:
     if previous_edited_image is None:
         return
 
-    try:
-        if original_image_folder_path.exists():
-            default_storage.delete(original_image_folder_path / previous_original_image.image_name)
-        previous_original_image.delete()
-    except Exception as e:
-        logging.error(e)
+    if original_image_folder_path.exists():
+        default_storage.delete(original_image_folder_path / previous_original_image.image_name)
+    previous_original_image.delete()
 
-    try:
-        if edited_images_folder_path.exists():
-            shutil.rmtree(edited_images_folder_path)
-        previous_edited_image.delete()
-    except Exception as e:
-        logging.error(e)
+    if edited_images_folder_path.exists():
+        shutil.rmtree(edited_images_folder_path)
+    previous_edited_image.delete()
 
-    return None
+    return
 
 
 def save_uploaded_image_locally(image: UploadedFile, user_id: str) -> str:
