@@ -1,8 +1,8 @@
 const imageFormatErrorElement = document.getElementById("imageFormatError");
 const imageFormatError = imageFormatErrorElement ? JSON.parse(imageFormatErrorElement.textContent) : null;
 
-function toastifyMessage(message) {
-  if (imageFormatError != null) {
+function toastifyMessage(message, success) {
+  if (imageFormatError != null || success === false) {
     Toastify({
       text: message,
       duration: 3000,
@@ -11,7 +11,7 @@ function toastifyMessage(message) {
       position: "right",
       stopOnFocus: true,
       style: {
-        background: "linear-gradient(111.3deg, rgb(252, 56, 56) 11.7%, rgb(237, 13, 81) 81.7%)"
+        background: "#FF0000"
       }
     }).showToast();
   } else {
@@ -23,7 +23,7 @@ function toastifyMessage(message) {
       position: "right",
       stopOnFocus: true,
       style: {
-        background: "linear-gradient(to right, #e74694, #ff8a4c)"
+        background: "linear-gradient(110.1deg, rgb(34, 126, 34) 2.9%, rgb(168, 251, 60) 90.3%)",
       }
     }).showToast();
   }

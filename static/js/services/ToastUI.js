@@ -160,6 +160,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
   imageEditorMainContainer.style.width = "calc(100% - 120px)";
 
+
+
   // Span with text and icon
   function addSpanTextToButton(textOnButton) {
     const spanText = document.createElement("span");
@@ -207,38 +209,39 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function downloadImage(mimeType, quality, fileName) {
     preventFormFromDefaultAction();
-    const dataURL = editor.toDataURL({
-      format: mimeType,
-      quality: quality
-    });
 
-    fetch("/image_download/", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrfToken,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        dataURL: dataURL,
-        mimeType: mimeType,
-        fileName: fileName
-      })
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+    const imageBlob = dataURLtoBlob(mimeType, quality);
 
-        return response.blob();
-      })
-      .then((convertedBlob) => {
-        saveAs(convertedBlob, fileName);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
+    if (imageBlob.size > maxImageBlobSize) {
+      toastifyMessage("Failed to download. Image size cannot be more than 6 MB", false);
+    } else {
+      const formData = new FormData();
+      formData.append("image_file", imageBlob, fileName);
+      formData.append("mime_type", mimeType);
 
-    toastifyMessage("Image has been downloaded");
+      fetch("/image_download/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+        body: formData
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          return response.blob();
+        })
+        .then((convertedBlob) => {
+          saveAs(convertedBlob, fileName);
+        })
+        .catch((error) => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
+
+      toastifyMessage("Image has been downloaded", true);
+    }
   }
 
   function saveImage(mimeType, quality, fileName) {
@@ -246,8 +249,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const imageBlob = dataURLtoBlob(mimeType, quality);
 
-    if (imageBlob.size > maxImageBlobSize){
-      toastifyMessage("Image size cannot be more than 6 MB");
+    if (imageBlob.size > maxImageBlobSize) {
+      toastifyMessage("Image size cannot be more than 6 MB", false);
     } else {
       const formData = new FormData();
       formData.append("edited_image", imageBlob, fileName);
@@ -267,8 +270,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
 
-      toastifyMessage("Image has been saved successfully");
-
+      toastifyMessage("Image has been saved successfully", true);
       location.reload();
     }
   }

@@ -1,9 +1,8 @@
-import base64
 import io
-import json
 import os
 
 from PIL import Image
+from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import requires_csrf_token
@@ -19,13 +18,11 @@ def image_download_view(request: WSGIRequest):
     if request.method == 'POST':
         user_id: str = get_or_add_user_id(request)
 
-        data = json.loads(request.body)
-        data_url: str = data.get('dataURL')
-        mime_type: str = data.get('mimeType')
-        file_name: str = data.get('fileName')
+        edited_image: UploadedFile = request.FILES.get('image_file', None)
+        mime_type: str = request.POST['mime_type']
+        file_name: str = edited_image.name
 
-        image_data: bytes = base64.b64decode(data_url.split(',')[1])
-        image_file = Image.open(io.BytesIO(image_data))
+        image_file = Image.open(edited_image)
 
         file_extension: str = get_extension_in_upper_case(file_name)
         if file_extension == 'JPG':
