@@ -2,9 +2,19 @@ document.addEventListener("DOMContentLoaded", function() {
   const ImageEditor = tui.ImageEditor;
   const container = document.querySelector("#tui-image-editor");
 
-  const imageUrl = JSON.parse(document.getElementById("imageUrl").textContent);
-  const imageContentType = JSON.parse(document.getElementById("imageContentType").textContent);
-  const imageName = JSON.parse(document.getElementById("imageName").textContent);
+  const csrfTokenElement = document.getElementById("csrfToken");
+  const csrfToken = csrfTokenElement ? JSON.parse(csrfTokenElement.textContent) : null;
+
+  const imageUrlElement = document.getElementById("imageUrl");
+  const imageUrl = imageUrlElement ? JSON.parse(imageUrlElement.textContent) : null;
+
+  const imageContentTypeElement = document.getElementById("imageContentType");
+  const imageContentType = imageContentTypeElement ? JSON.parse(imageContentTypeElement.textContent) : null;
+
+  const imageNameElement = document.getElementById("imageName");
+  const imageName = imageNameElement ? JSON.parse(imageNameElement.textContent) : null;
+
+  const maxImageBlobSize = 6291456;
 
   const editor = new ImageEditor(container, {
     includeUI: {
@@ -14,15 +24,26 @@ document.addEventListener("DOMContentLoaded", function() {
       }, theme: {
         "common.backgroundImage": "none",
         "common.backgroundColor": "transparent"
-      }, menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
+      }, menu: [
+        "resize",
+        "crop",
+        "flip",
+        "rotate",
+        "draw",
+        "shape",
+        "icon",
+        "text",
+        "mask",
+        "filter"
+      ],
       uiSize: {
-        width: "50rem",
-        height: "40rem"
+        width: "52rem",
+        height: "36rem"
       },
       menuBarPosition: "left"
     },
-    cssMaxWidth: 700,
-    cssMaxHeight: 500,
+    cssMaxWidth: "700",
+    cssMaxHeight: "500",
     usageStatistics: false,
     selectionStyle: {
       cornerSize: 20,
@@ -90,20 +111,13 @@ document.addEventListener("DOMContentLoaded", function() {
   oldDownloadButton.parentNode.insertBefore(newDiv, oldDownloadButton);
   newDiv.appendChild(downloadButton);
   newDiv.appendChild(saveButton);
-  newDiv.style.display = "flex";
-  newDiv.style.justifyContent = "center";
-  newDiv.style.paddingTop = "0.5rem";
-  newDiv.style.paddingRight = "0.5rem";
+  newDiv.className = "flex justify-center items-center pt-[1rem] pr-[0.5rem] space-x-2";
 
   const imageEditorWrap = document.querySelector(".tui-image-editor-wrap");
   imageEditorWrap.style.bottom = "0";
   imageEditorWrap.style.top = "0";
   imageEditorWrap.style.left = "0";
   imageEditorWrap.style.width = "85%";
-
-  const imageEditor = document.querySelector("#tui-image-editor");
-  imageEditor.style.width = "52rem";
-  imageEditor.style.height = "36rem";
 
   const subItemMaskChoice = document.querySelector(".tui-image-editor-menu-mask ul.tui-image-editor-submenu-item");
   subItemMaskChoice.style.marginTop = "0.5rem";
@@ -186,42 +200,76 @@ document.addEventListener("DOMContentLoaded", function() {
     return new Blob([arrayBuffer], { type: mimeType });
   }
 
-  function preventFormFromDefaultAction () {
+  function preventFormFromDefaultAction() {
     const editedImageForm = document.getElementById("editedImageFormId");
     editedImageForm.addEventListener("submit", (event) => event.preventDefault());
   }
 
-  function downloadImage(mimeType, quality, filename) {
-    preventFormFromDefaultAction()
-    const blob = dataURLtoBlob(mimeType, quality);
-    console.log(blob);
-    saveAs(blob, filename);
+  function downloadImage(mimeType, quality, fileName) {
+    preventFormFromDefaultAction();
+    const dataURL = editor.toDataURL({
+      format: mimeType,
+      quality: quality
+    });
+
+    fetch("/image_download/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        dataURL: dataURL,
+        mimeType: mimeType,
+        fileName: fileName
+      })
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        return response.blob();
+      })
+      .then((convertedBlob) => {
+        saveAs(convertedBlob, fileName);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+
+    toastifyMessage("Image has been downloaded");
   }
 
   function saveImage(mimeType, quality, fileName) {
-    preventFormFromDefaultAction()
-    const csrfToken = JSON.parse(document.getElementById("csrfToken").textContent);
+    preventFormFromDefaultAction();
 
     const imageBlob = dataURLtoBlob(mimeType, quality);
 
-    const formData = new FormData();
-    formData.append("edited_image", imageBlob, fileName);
+    if (imageBlob.size > maxImageBlobSize){
+      toastifyMessage("Image size cannot be more than 6 MB");
+    } else {
+      const formData = new FormData();
+      formData.append("edited_image", imageBlob, fileName);
 
-    fetch("/image_edit/", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrfToken
-      },
-      body: formData
-    }).then((response) => {
-      console.log(response)
-      if (response.ok) {
-        console.log("Success");
-      } else {
-        console.error("Error");
-      }
-    });
+      fetch("/image_save/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken
+        },
+        body: formData
+      }).then((response) => {
+        console.log(response);
+        if (response.ok) {
+          console.log("Success");
+        } else {
+          console.error("Error");
+        }
+      });
 
-    location.reload()
+      toastifyMessage("Image has been saved successfully");
+
+      location.reload();
+    }
   }
 });

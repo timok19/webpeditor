@@ -1,8 +1,8 @@
-const imageFormatError = JSON.parse(document.getElementById("imageFormatError").textContent);
+const imageFormatErrorElement = document.getElementById("imageFormatError");
+const imageFormatError = imageFormatErrorElement ? JSON.parse(imageFormatErrorElement.textContent) : null;
 
 function toastifyMessage(message) {
-
-  if (imageFormatError) {
+  if (imageFormatError != null) {
     Toastify({
       text: message,
       duration: 3000,

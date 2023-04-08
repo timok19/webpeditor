@@ -94,6 +94,9 @@ MAX_SIZE_OF_IMAGE_FILES = 50_000_000
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 20
 
+# Bigger memory size for images with size max 6 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6_291_456
+
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 

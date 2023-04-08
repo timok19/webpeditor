@@ -18,7 +18,7 @@ from webpeditor_app.services.other_services.session_service import \
     set_session_expiry, \
     update_image_editor_session, \
     get_user_id_from_session_store, \
-    add_user_id_into_session_store
+    get_or_add_user_id
 
 logging.basicConfig(level=logging.INFO)
 
@@ -78,7 +78,7 @@ def save_uploaded_image_to_db(image: UploadedFile, original_image: str, request:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    user_id = add_user_id_into_session_store(request)
+    user_id = get_or_add_user_id(request)
 
     set_session_expiry(request)
 

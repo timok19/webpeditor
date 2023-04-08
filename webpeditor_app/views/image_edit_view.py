@@ -77,53 +77,6 @@ def process_edited_image_form(image_form: EditedImageForm):
         image_aspect_ratio
 
 
-def post(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    user_id = get_user_id_from_session_store(request)
-
-    if user_id is None:
-        return redirect('ImageDoesNotExistView')
-
-    if request.session.get_expiry_age() == 0:
-        return redirect('ImageDoesNotExistView')
-
-    original_image = get_original_image(user_id)
-    if original_image is None or original_image.user_id != user_id:
-        return redirect("ImageDoesNotExistView")
-
-    edited_image = get_edited_image(user_id)
-    if edited_image is None:
-        return redirect("ImageDoesNotExistView")
-
-    image_file: UploadedFile = request.FILES.get('edited_image', None)
-
-    edited_image_path = get_edited_image_file_path(user_id, edited_image)
-
-    if edited_image_path.exists():
-        default_storage.delete(edited_image_path)
-    else:
-        logging.error("Path to edited image not found")
-
-    default_storage.save(edited_image_path, image_file)
-
-    # TODO: add popup info about image size
-    try:
-        validate_image_file_size(image_file)
-    except ValidationError as errors:
-        validation_error = "".join(str(error) for error in errors)
-        return render(request, 'imageEdit.html', {'validation_error': validation_error})
-
-    # image = open_image_with_pil(edited_image_path)
-    edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"
-
-    EditedImage.objects.filter(user_id=user_id).update(
-        edited_image=edited_image_path_to_db,
-        edited_image_name=image_file.name,
-        session_id_expiration_date=request.session.get_expiry_date()
-    )
-
-    update_image_editor_session(request=request, user_id=user_id)
-
-
 def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
     user_id = get_user_id_from_session_store(request)
     if user_id is None:
@@ -182,11 +135,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 @requires_csrf_token
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    if request.method == 'POST':
-        response = post(request)
-        return response
-
-    elif request.method == "GET":
+    if request.method == "GET":
         response = get(request)
         return response
 

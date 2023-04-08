@@ -43,12 +43,7 @@
             </div>
           </div>
 
-
           <div class="col-span-7 flex items-center justify-center mr-[12rem]">
-            {{ edited_image_url|json_script:'imageUrl' }}
-            {{ csrf_token_value|json_script:'csrfToken' }}
-            {{ edited_image_name|json_script:'imageName' }}
-            {{ edited_image_content_type|json_script:'imageContentType' }}
             <div id="tui-image-editor"></div>
           </div>
 
@@ -59,10 +54,15 @@
     </main>
   </div>
 
+  {{ edited_image_url|json_script:'imageUrl' }}
+  {{ csrf_token_value|json_script:'csrfToken' }}
+  {{ edited_image_name|json_script:'imageName' }}
+  {{ edited_image_content_type|json_script:'imageContentType' }}
   <script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
   <script src="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.min.js"></script>
   <script src="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="{% static 'js/services/ToastUI.js' %}"></script>
+  <script src="{% static 'js/services/Toastify.js' %}"></script>
 
 {% endblock content %}

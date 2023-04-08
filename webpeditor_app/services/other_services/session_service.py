@@ -3,6 +3,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
+from django.contrib.sessions.models import Session
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.utils import timezone
@@ -33,7 +34,7 @@ def create_user_id() -> str:
     return str(uuid.uuid4())
 
 
-def add_user_id_into_session_store(request: WSGIRequest) -> str:
+def get_or_add_user_id(request: WSGIRequest) -> str:
     if "user_id" not in request.session:
         request.session["user_id"] = create_user_id()
     return request.session["user_id"]
@@ -81,13 +82,13 @@ def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonRespo
         edited_image.save()
 
     logging.info(
-        f"\nCurrent session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
+        f"Current session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
         f"{current_time_expiration_minutes} minute(s)"
     )
 
     logging.info(
         f"Updated session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
-        f"{new_time_expiration_minutes} minute(s)\n"
+        f"{new_time_expiration_minutes} minute(s)"
     )
 
 
@@ -111,7 +112,7 @@ def update_session(request: WSGIRequest, user_id: str) \
         now = timezone.localtime(timezone.now())
         if now > expiry_date:
             delete_old_image_in_db_and_local(user_id)
-            session_store.clear_expired()
+            delete_expired_session(session_key)
 
         session_store.encode(session_dict={'user_id': user_id})
         update_expiration = timezone.now() + timezone.timedelta(seconds=900)
@@ -122,13 +123,13 @@ def update_session(request: WSGIRequest, user_id: str) \
         new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
 
         logging.info(
-            f"\nCurrent session expiration time of anonymous user: "
+            f"Current session expiration time of anonymous user: "
             f"{current_time_expiration_minutes} minute(s)"
         )
 
         logging.info(
             f"Updated session expiration time of anonymous user: "
-            f"{new_time_expiration_minutes} minute(s)\n"
+            f"{new_time_expiration_minutes} minute(s)"
         )
 
     return session_store, \
@@ -138,3 +139,17 @@ def update_session(request: WSGIRequest, user_id: str) \
             'success': True, 'info': 'Session is alive',
             'estimated_time_of_session_id': current_time_expiration_minutes
         }, status=200)
+
+
+def delete_expired_session(session_key: str):
+    """
+    Delete a specific expired session from the database.
+
+    Parameters:
+        session_key (str): The session key of the expired session to delete.
+    """
+    try:
+        session = Session.objects.get(session_key=session_key)
+        session.delete()
+    except Session.DoesNotExist:
+        pass

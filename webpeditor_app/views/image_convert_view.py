@@ -8,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor_app.models.database.forms import ImagesToConvertForm
 from webpeditor_app.services.image_services.image_converter_service import convert_images
 from webpeditor_app.services.other_services.session_service import \
-    add_user_id_into_session_store, \
+    get_or_add_user_id, \
     update_session
 from webpeditor_app.services.validators.image_file_validator import \
     validate_image_files, \
@@ -16,7 +16,7 @@ from webpeditor_app.services.validators.image_file_validator import \
 
 
 def post(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    user_id = add_user_id_into_session_store(request)
+    user_id = get_or_add_user_id(request)
 
     image_form = ImagesToConvertForm(request.POST, request.FILES)
     if not image_form.is_valid():

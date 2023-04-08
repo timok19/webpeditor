@@ -9,6 +9,13 @@ from webpeditor import settings
 logging.basicConfig(level=logging.INFO)
 
 
+def delete_users_folder(folder_path: Path):
+    if folder_path.exists():
+        shutil.rmtree(folder_path)
+    else:
+        logging.error(f"Error: provided path does not exist {folder_path}")
+
+
 def delete_empty_folders(media_root: Path):
     empty_folders = find_empty_folders(media_root)
     for folder in empty_folders:

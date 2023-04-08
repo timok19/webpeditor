@@ -8,13 +8,14 @@ from django.core.files.uploadedfile import UploadedFile
 
 def convert_images(images_files: list[UploadedFile], output_format: str) -> str | List[Tuple]:
     """
+    Covert image formats into chosen one by user
 
     Args:
-        images_files (list[UploadedFile]):
-        output_format (str):
+        images_files: Image files from the form
+        output_format: The format, that images should be converted
 
     Returns:
-        Returns exception message about incorrect image format or list of images with converted format
+        Returns error about image conversion or converted list of image files
     """
 
     converted_images = []
