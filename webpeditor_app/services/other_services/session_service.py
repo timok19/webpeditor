@@ -112,7 +112,7 @@ def update_session(request: WSGIRequest, user_id: str) \
         now = timezone.localtime(timezone.now())
         if now > expiry_date:
             delete_old_image_in_db_and_local(user_id)
-            delete_expired_session(session_key)
+            session_store.clear_expired()
 
         session_store.encode(session_dict={'user_id': user_id})
         update_expiration = timezone.now() + timezone.timedelta(seconds=900)
@@ -139,17 +139,3 @@ def update_session(request: WSGIRequest, user_id: str) \
             'success': True, 'info': 'Session is alive',
             'estimated_time_of_session_id': current_time_expiration_minutes
         }, status=200)
-
-
-def delete_expired_session(session_key: str):
-    """
-    Delete a specific expired session from the database.
-
-    Parameters:
-        session_key (str): The session key of the expired session to delete.
-    """
-    try:
-        session = Session.objects.get(session_key=session_key)
-        session.delete()
-    except Session.DoesNotExist:
-        pass

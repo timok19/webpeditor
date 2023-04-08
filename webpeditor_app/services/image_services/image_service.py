@@ -35,7 +35,7 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     original_image = get_original_image(user_id)
     if original_image:
         session_store = SessionStore(session_key=original_image.session_id)
-        session_store.delete()
+        session_store.clear_expired()
         original_image.delete()
         logging.info("Original image has been deleted from db.\nClearing session...")
 
