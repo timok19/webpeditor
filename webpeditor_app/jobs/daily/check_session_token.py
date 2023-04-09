@@ -18,26 +18,23 @@ class Job(DailyJob):
     help = "Checks the estimated time of the session ID token and delete expired session, image from db and local"
 
     def execute(self):
-        deserialized_data_original_image = get_serialized_data_original_image()
-        deserialized_data_edited_image = get_serialized_data_edited_image()
-
-        original_images = get_all_original_images()
-        edited_images = get_all_edited_images()
+        original_images_deserialized = get_serialized_data_original_image()
+        edited_images_deserialized = get_serialized_data_edited_image()
 
         media_root: Path = settings.MEDIA_ROOT
 
         logging.info(
-            f"\n--- Original Image object(s) in db ---\n{json.dumps(deserialized_data_original_image, indent=4)}"
+            f"\n--- Original Image object(s) in db ---\n{json.dumps(original_images_deserialized, indent=4)}"
         )
         logging.info(
-            f"\n--- Edited Image object(s) in db ---\n{json.dumps(deserialized_data_edited_image, indent=4)}"
+            f"\n--- Edited Image object(s) in db ---\n{json.dumps(edited_images_deserialized, indent=4)}"
         )
 
         counter = 0
-        if len(original_images) > 0:
-            for image in original_images:
-                user_id = image.user_id
-                session_id_expiration_date = image.session_id_expiration_date
+        if len(original_images_deserialized) > 0:
+            for image in original_images_deserialized:
+                user_id = image["user_id"]
+                session_id_expiration_date = image["session_id_expiration_date"]
 
                 if timezone.now() > session_id_expiration_date:
                     delete_old_image_in_db_and_local(user_id)
@@ -60,5 +57,5 @@ class Job(DailyJob):
 
                 delete_old_image_in_db_and_local(user_id)
 
-        if len(deserialized_data_original_image) == 0 or len(deserialized_data_edited_image) == 0:
+        if len(original_images_deserialized) == 0 or len(edited_images_deserialized) == 0:
             delete_folder_by_expiry(media_root)

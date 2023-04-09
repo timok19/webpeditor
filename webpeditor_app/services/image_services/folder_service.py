@@ -16,14 +16,13 @@ def delete_users_folder(folder_path: Path):
         logging.error(f"Error: provided path does not exist {folder_path}")
 
 
-def delete_empty_folders(media_root: Path):
-    empty_folders = find_empty_folders(media_root)
-    for folder in empty_folders:
-        shutil.rmtree(folder)
-        logging.info(f"Deleted empty folder: {folder}")
-
-
 def delete_folder_by_expiry(media_root: Path):
+    """
+    Delete folder in case if user_id does not exist in db
+
+    Args:
+        media_root: Media root path
+    """
     folder_list = os.listdir(media_root)
     for folder in folder_list:
         folder_path = os.path.join(media_root, folder)
@@ -33,6 +32,13 @@ def delete_folder_by_expiry(media_root: Path):
                 logging.info("- User's folder deleted successfully\n")
         except Exception as e:
             logging.error(e)
+
+
+def delete_empty_folders(media_root: Path):
+    empty_folders = find_empty_folders(media_root)
+    for folder in empty_folders:
+        shutil.rmtree(folder)
+        logging.info(f"Deleted empty folder: {folder}")
 
 
 def find_empty_folders(folder: Path) -> Tuple:

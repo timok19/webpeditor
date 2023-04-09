@@ -23,7 +23,7 @@ function toastifyMessage(message, success) {
       position: "right",
       stopOnFocus: true,
       style: {
-        background: "linear-gradient(110.1deg, rgb(34, 126, 34) 2.9%, rgb(168, 251, 60) 90.3%)",
+        background: "linear-gradient(to right, #43e97b 0%, #38f9d7 100%)",
       }
     }).showToast();
   }
