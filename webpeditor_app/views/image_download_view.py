@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.services.image_services.image_service import get_extension_in_upper_case
+from webpeditor_app.services.image_services.image_service import get_file_extension
 from webpeditor_app.services.other_services.session_service import get_or_add_user_id, update_image_editor_session
 
 
@@ -24,7 +24,7 @@ def image_download_view(request: WSGIRequest):
 
         image_file = Image.open(edited_image)
 
-        file_extension: str = get_extension_in_upper_case(file_name)
+        file_extension: str = get_file_extension(file_name).upper()
         if file_extension == 'JPG':
             file_extension = 'JPEG'
 

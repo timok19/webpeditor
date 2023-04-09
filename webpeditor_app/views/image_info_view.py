@@ -7,10 +7,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
-    get_image_file_instance, \
     format_image_file_name, \
-    get_image_file_size, \
-    get_image_aspect_ratio, \
     get_original_image_file_path, get_info_about_image
 from webpeditor_app.services.other_services.session_service import update_image_editor_session, \
     get_user_id_from_session_store

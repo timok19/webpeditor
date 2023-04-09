@@ -54,7 +54,7 @@ def find_empty_folders(folder: Path) -> Tuple:
 
 
 def create_folder(user_id: str, is_original_image: bool) -> Path | None:
-    original_image_folder_path, edited_image_folder_path = get_media_root_paths(user_id)
+    original_image_folder_path, edited_image_folder_path = get_media_root_folder_paths(user_id)
 
     if is_original_image is True and not original_image_folder_path.exists():
         original_image_folder_path.mkdir(parents=True, exist_ok=True)
@@ -69,7 +69,7 @@ def create_folder(user_id: str, is_original_image: bool) -> Path | None:
     return None
 
 
-def get_media_root_paths(user_id: str) -> tuple[Path, Path]:
+def get_media_root_folder_paths(user_id: str) -> tuple[Path, Path]:
     """
     Get media root paths for original and edited image.
 

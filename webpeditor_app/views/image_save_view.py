@@ -58,14 +58,13 @@ def image_save_view(request: WSGIRequest):
         # image = open_image_with_pil(edited_image_path)
         edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"
 
+        update_image_editor_session(request=request, user_id=user_id)
+
         EditedImage.objects.filter(user_id=user_id).update(
             edited_image=edited_image_path_to_db,
-            edited_image_name=image_file.name,
             session_id_expiration_date=request.session.get_expiry_date()
         )
 
         response = HttpResponse(status=200, content_type="text/javascript")
-
-        update_image_editor_session(request=request, user_id=user_id)
 
         return response

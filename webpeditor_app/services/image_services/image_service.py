@@ -16,7 +16,9 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
-from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths, \
+from webpeditor_app.services.image_services.folder_service import \
+    create_folder, \
+    get_media_root_folder_paths, \
     delete_users_folder
 
 logging.basicConfig(level=logging.INFO)
@@ -110,6 +112,20 @@ def get_image_file_instance(path_to_local_image: Path | str) -> ImageClass | Non
         return None
 
 
+def convert_image(path_to_local_image: Path | str, path_to_save: str = "", output_format: str = ""):
+    output_format.upper()
+    try:
+        image = PilImage.open(path_to_local_image)
+        if len(path_to_save) == 0:
+            image.save(path_to_local_image, format=output_format)
+        else:
+            image.save(path_to_save, format=output_format)
+
+        image.close()
+    except (ValueError, TypeError) as e:
+        logging.error(e)
+
+
 def format_image_file_name(image_name: str) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > 20:
@@ -117,8 +133,13 @@ def format_image_file_name(image_name: str) -> str:
     return basename + ext
 
 
-def get_extension_in_upper_case(image_name: str) -> str:
-    return os.path.splitext(image_name)[1][1:].upper()
+def get_file_extension(image_name: str) -> str:
+    return os.path.splitext(image_name)[1][1:]
+
+
+def change_file_extension(image_name: str, extension: str) -> str:
+    base_name, _ = os.path.splitext(image_name)
+    return base_name + f".{extension.lower()}"
 
 
 def get_image_file_size(image: ImageClass) -> str:
@@ -136,13 +157,9 @@ def get_image_file_size(image: ImageClass) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
-def get_info_about_image(image: Path | str | EditedImage) \
+def get_info_about_image(path_to_local_image: Path | str) \
         -> HttpResponsePermanentRedirect | HttpResponseRedirect | Tuple:
-
-    if isinstance(image, EditedImage):
-        image_file = get_image_file_instance(image.edited_image.path)
-    else:
-        image_file = get_image_file_instance(image)
+    image_file = get_image_file_instance(path_to_local_image)
 
     if image_file is None:
         return redirect("ImageDoesNotExistView")
@@ -184,19 +201,18 @@ def get_image_aspect_ratio(image_file: ImageClass) -> Decimal:
 
 def get_original_image_file_path(user_id: str, original_image) -> Path:
     # Get first argument from get_media_root_paths() to get original image path
-    return get_media_root_paths(user_id)[0] / original_image.image_name
+    return get_media_root_folder_paths(user_id)[0] / original_image.image_name
 
 
 def get_edited_image_file_path(user_id: str, edited_image: EditedImage) -> Path:
     # Get second argument from get_media_root_paths() to get edited image path
-    return get_media_root_paths(user_id)[1] / edited_image.edited_image_name
+    return get_media_root_folder_paths(user_id)[1] / edited_image.edited_image_name
 
 
 def copy_original_image_to_edited_folder(user_id: str,
                                          original_image: OriginalImage,
                                          edited_image: EditedImage) -> bool:
-    original_image_folder_path, edited_image_folder_path = get_media_root_paths(user_id)
-
+    edited_image_folder_path = get_media_root_folder_paths(user_id)[1]
     if not edited_image_folder_path.exists():
         create_folder(user_id=user_id, is_original_image=False)
 

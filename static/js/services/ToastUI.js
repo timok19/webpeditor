@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const ImageEditor = tui.ImageEditor;
   const container = document.querySelector("#tui-image-editor");
 
@@ -6,13 +6,13 @@ document.addEventListener("DOMContentLoaded", function() {
   const csrfToken = csrfTokenElement ? JSON.parse(csrfTokenElement.textContent) : null;
 
   const imageUrlElement = document.getElementById("imageUrl");
-  const imageUrl = imageUrlElement ? JSON.parse(imageUrlElement.textContent) : null;
+  let imageUrl = imageUrlElement ? JSON.parse(imageUrlElement.textContent) : null;
 
   const imageContentTypeElement = document.getElementById("imageContentType");
   const imageContentType = imageContentTypeElement ? JSON.parse(imageContentTypeElement.textContent) : null;
 
   const imageNameElement = document.getElementById("imageName");
-  const imageName = imageNameElement ? JSON.parse(imageNameElement.textContent) : null;
+  let imageName = imageNameElement ? JSON.parse(imageNameElement.textContent) : null;
 
   const maxImageBlobSize = 6291456;
 
@@ -70,8 +70,8 @@ document.addEventListener("DOMContentLoaded", function() {
   svgDownloadPath.setAttribute("fill-rule", "evenodd");
   svgDownloadPath.setAttribute("clip-rule", "evenodd");
   svgDownloadPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
-      "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
-      "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
+    "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
+    "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
   svgDownloadIcon.appendChild(svgDownloadPath);
 
   // Icon svg (Save button)
@@ -115,9 +115,9 @@ document.addEventListener("DOMContentLoaded", function() {
   downloadButton.addEventListener("click", () => downloadImage(imageContentType, 1, imageName));
   downloadButton.id = "tuiDownloadButton";
   downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   downloadButton.appendChild(addSpanTextToButton("Download image"));
   downloadButton.appendChild(svgDownloadIcon);
 
@@ -126,22 +126,21 @@ document.addEventListener("DOMContentLoaded", function() {
   saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
   saveButton.id = "tuiSaveButton";
   saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   saveButton.appendChild(addSpanTextToButton("Save image"));
   saveButton.appendChild(svgSaveIcon);
 
   let originalImageButton = document.createElement("button");
-  // saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
+  originalImageButton.addEventListener("click", () => getOriginalImage());
   originalImageButton.id = "tuiOriginalImageButton";
   originalImageButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   originalImageButton.appendChild(addSpanTextToButton("Return original image"));
   originalImageButton.appendChild(svgOriginalImageIcon);
-
 
   // Additional div to group 2 buttons
   const twoButtonsDiv = document.createElement("div");
@@ -232,8 +231,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
   imageEditorMainContainer.style.width = "calc(100% - 120px)";
 
-
-
   // Span with text and icon
   function addSpanTextToButton(textOnButton) {
     const spanText = document.createElement("span");
@@ -271,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (let i = 0; i < data.length; i++) {
       view[i] = data.charCodeAt(i) & 0xff;
     }
-    return new Blob([arrayBuffer], { type: mimeType });
+    return new Blob([arrayBuffer], {type: mimeType});
   }
 
   function preventFormFromDefaultAction() {
@@ -334,16 +331,55 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         body: formData
       }).then((response) => {
-        console.log(response);
-        if (response.ok) {
-          console.log("Success");
-        } else {
-          console.error("Error");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
-      });
+      })
+        .catch((error) => {
+          console.error("Error:", error);
+          toastifyMessage("Failed to save image", false);
+        });
 
       toastifyMessage("Image has been saved successfully", true);
       location.reload();
     }
+  }
+
+  function getOriginalImage() {
+    preventFormFromDefaultAction();
+
+    fetch("/image_get_original/",
+      {
+        method: "GET",
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch the original image");
+        }
+        const imageName = response.headers.get("X-Image-Name");
+
+        return response.blob()
+          .then((imageBlob) => ({imageBlob, imageName}));
+
+      })
+      .then(({imageBlob, imageName}) => {
+        const imageFile = new File([imageBlob], imageName, {
+          type: imageBlob.type,
+        });
+
+        // Load the new image into the editor
+        editor.loadImageFromFile(imageFile, imageName).then((result) => {
+          console.log("Image loaded successfully:", result);
+        });
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        toastifyMessage("Failed to open the original image", false);
+      });
+
+    toastifyMessage("Original image is loaded", true);
   }
 });

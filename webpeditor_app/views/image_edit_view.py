@@ -14,7 +14,7 @@ from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_edited_image, \
     copy_original_image_to_edited_folder, \
-    get_image_file_instance,\
+    get_image_file_instance, \
     get_info_about_image
 from webpeditor_app.services.other_services.session_service import \
     update_image_editor_session, \
@@ -30,7 +30,6 @@ def create_and_save_edited_image(user_id: str,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
     new_edited_image_name = f"webpeditor_{original_image.image_name}"
-
     edited_image = f"{user_id}/edited/{new_edited_image_name}"
 
     edited_image_init = EditedImage(
@@ -88,28 +87,21 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
     image: EditedImage = edited_image_form.data.get("edited_image")
-    image_name = format_image_file_name(image.edited_image_name)
 
-    image_format_description, \
-        image_size, \
-        image_resolution, \
-        image_aspect_ratio, \
-        image_mode, \
-        exif_data, \
-        metadata = get_info_about_image(image)
+    image_name = format_image_file_name(image.edited_image_name)
 
     context: dict = {
         'edited_image_url': str(image.edited_image.url),
         'edited_image_name_short_version': image_name,
-        'edited_image_size': image_size,
-        'edited_image_resolution': image_resolution,
-        'edited_image_aspect_ratio': image_aspect_ratio,
+        'edited_image_size': get_info_about_image(image.edited_image.path)[1],
+        'edited_image_resolution': get_info_about_image(image.edited_image.path)[2],
+        'edited_image_aspect_ratio': get_info_about_image(image.edited_image.path)[3],
         'edited_image_format': original_image_format_description,
-        'edited_image_mode': image_mode,
-        'edited_image_exif_data': exif_data,
-        'edited_image_metadata': metadata,
+        'edited_image_mode': get_info_about_image(original_image.original_image.path)[4],
+        'edited_image_exif_data': get_info_about_image(original_image.original_image.path)[5],
+        'edited_image_metadata': get_info_about_image(original_image.original_image.path)[6],
         'image_form': edited_image_form,
-        'edited_image_name': edited_image.edited_image_name,
+        'edited_image_name': image.edited_image_name,
         'csrf_token_value': get_token(request),
         'edited_image_content_type': edited_image.content_type_edited
     }

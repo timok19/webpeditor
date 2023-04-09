@@ -7,6 +7,7 @@ from webpeditor_app.views.image_does_not_exist_view import image_does_not_exist_
 from webpeditor_app.views.image_download_view import image_download_view
 from webpeditor_app.views.image_edit_view import image_edit_view
 from webpeditor_app.views.image_convert_view import image_convert_view
+from webpeditor_app.views.image_get_original_view import image_get_original_view
 from webpeditor_app.views.image_info_view import image_info_view
 from webpeditor_app.views.image_save_view import image_save_view
 from webpeditor_app.views.image_upload_view import image_upload_view
@@ -19,6 +20,7 @@ urlpatterns = [
     re_path(r'^image_edit/?$', image_edit_view, name='ImageEditView'),
     re_path(r'^image_download/?$', image_download_view, name='ImageDownloadView'),
     re_path(r'^image_save/?$', image_save_view, name='ImageSaveView'),
+    re_path(r'^image_get_original/?$', image_get_original_view, name='ImageGetOriginalView'),
     re_path(r'^image_convert/?$', image_convert_view, name='ImageConvertView'),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 

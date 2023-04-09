@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_paths
+from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_folder_paths
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def clean_up_previous_images(user_id: str) -> HttpResponse | None:
-    original_image_folder_path, edited_images_folder_path = get_media_root_paths(user_id)
+    original_image_folder_path, edited_images_folder_path = get_media_root_folder_paths(user_id)
 
     previous_original_image = get_original_image(user_id)
     if previous_original_image is None:
@@ -47,7 +47,7 @@ def clean_up_previous_images(user_id: str) -> HttpResponse | None:
 
 
 def save_uploaded_image_locally(image: UploadedFile, user_id: str) -> str:
-    original_user_folder, _ = get_media_root_paths(user_id)
+    original_user_folder = get_media_root_folder_paths(user_id)[0]
     if not original_user_folder.exists():
         user_folder = create_folder(user_id=user_id, is_original_image=True)
     else:
