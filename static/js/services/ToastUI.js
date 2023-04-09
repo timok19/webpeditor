@@ -69,7 +69,9 @@ document.addEventListener("DOMContentLoaded", function() {
   svgDownloadPath.setAttribute("stroke-linejoin", "round");
   svgDownloadPath.setAttribute("fill-rule", "evenodd");
   svgDownloadPath.setAttribute("clip-rule", "evenodd");
-  svgDownloadPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " + "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " + "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
+  svgDownloadPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
+      "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
+      "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
   svgDownloadIcon.appendChild(svgDownloadPath);
 
   // Icon svg (Save button)
@@ -88,13 +90,34 @@ document.addEventListener("DOMContentLoaded", function() {
   svgSavePath.setAttribute("d", "M4.5 12.75l6 6 9-13.5");
   svgSaveIcon.appendChild(svgSavePath);
 
+  // Icon svg (Return original image)
+  const svgOriginalImageIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svgOriginalImageIcon.setAttribute("fill", "none");
+  svgOriginalImageIcon.setAttribute("stroke-width", "1.5");
+  svgOriginalImageIcon.setAttribute("viewBox", "0 0 24 24");
+  svgOriginalImageIcon.setAttribute("stroke", "currentColor");
+  svgOriginalImageIcon.setAttribute("aria-hidden", "true");
+  svgOriginalImageIcon.setAttribute("class", "w-6 h-6 ml-1 mr-1");
+
+  // Path icon (Return original image)
+  const svgOriginalImagePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  svgOriginalImagePath.setAttribute("stroke-linecap", "round");
+  svgOriginalImagePath.setAttribute("stroke-linejoin", "round");
+  svgOriginalImagePath.setAttribute("d", "M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3");
+  svgOriginalImageIcon.appendChild(svgOriginalImagePath);
+
+  // Old download button
   const oldDownloadButton = document.querySelector(".tui-image-editor-header-buttons button");
   oldDownloadButton.style.display = "none";
 
+  // Download button
   let downloadButton = document.createElement("button");
   downloadButton.addEventListener("click", () => downloadImage(imageContentType, 1, imageName));
   downloadButton.id = "tuiDownloadButton";
-  downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   downloadButton.appendChild(addSpanTextToButton("Download image"));
   downloadButton.appendChild(svgDownloadIcon);
 
@@ -102,16 +125,38 @@ document.addEventListener("DOMContentLoaded", function() {
   let saveButton = document.createElement("button");
   saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
   saveButton.id = "tuiSaveButton";
-  saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " + "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " + "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " + "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   saveButton.appendChild(addSpanTextToButton("Save image"));
   saveButton.appendChild(svgSaveIcon);
 
-  // Div with Save button
+  let originalImageButton = document.createElement("button");
+  // saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
+  originalImageButton.id = "tuiOriginalImageButton";
+  originalImageButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+      "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+      "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+      "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  originalImageButton.appendChild(addSpanTextToButton("Return original image"));
+  originalImageButton.appendChild(svgOriginalImageIcon);
+
+
+  // Additional div to group 2 buttons
+  const twoButtonsDiv = document.createElement("div");
+  twoButtonsDiv.appendChild(downloadButton);
+  twoButtonsDiv.appendChild(saveButton);
+  twoButtonsDiv.className = "flex justify-center items-center space-x-2";
+
+  // Div with Download and Save buttons
   const newDiv = document.createElement("div");
   oldDownloadButton.parentNode.insertBefore(newDiv, oldDownloadButton);
-  newDiv.appendChild(downloadButton);
-  newDiv.appendChild(saveButton);
-  newDiv.className = "flex justify-center items-center pt-[1rem] pr-[0.5rem] space-x-2";
+  newDiv.appendChild(originalImageButton);
+  newDiv.appendChild(twoButtonsDiv);
+  newDiv.style.marginTop = "0.2rem";
+  newDiv.style.marginRight = "0.8rem";
+  newDiv.className = "flex justify-between items-center";
 
   const imageEditorWrap = document.querySelector(".tui-image-editor-wrap");
   imageEditorWrap.style.bottom = "0";
@@ -126,6 +171,33 @@ document.addEventListener("DOMContentLoaded", function() {
   const menuFilter = document.querySelector(".tui-image-editor-menu-filter");
   menuFilter.style.padding = "1rem";
   menuFilter.style.height = "100%";
+
+  // Svg icon (Show image info button)
+  const svgImageInfoIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svgImageInfoIcon.setAttribute("fill", "none");
+  svgImageInfoIcon.setAttribute("stroke", "currentColor");
+  svgImageInfoIcon.setAttribute("stroke-width", "1.2");
+  svgImageInfoIcon.setAttribute("viewBox", "0 0 24 24");
+  svgImageInfoIcon.setAttribute("aria-hidden", "true");
+  svgImageInfoIcon.setAttribute("class", "w-6 h-6 ml-1 mr-1 text-gray-400 hover:text-gray-500");
+
+  // Path icon (Show image info button)
+  const svgImageInfoPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  svgImageInfoPath.setAttribute("stroke-linecap", "round");
+  svgImageInfoPath.setAttribute("stroke-linejoin", "round");
+  svgImageInfoPath.setAttribute("d", "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z");
+  svgImageInfoIcon.appendChild(svgImageInfoPath);
+
+  // Image info popover button
+  let imageInfoButton = document.createElement("button");
+  imageInfoButton.setAttribute("data-popover-target", "popover-description");
+  imageInfoButton.setAttribute("data-popover-placement", "left");
+  imageInfoButton.setAttribute("type", "button");
+  imageInfoButton.style.marginBottom = "2rem";
+  imageInfoButton.appendChild(svgImageInfoIcon)
+
+  let menu = document.querySelector(".tui-image-editor-menu");
+  menu.insertBefore(imageInfoButton, menu.firstElementChild);
 
   const imageEditorContainer = document.querySelector("#tui-image-editor");
   imageEditorContainer.style.borderRadius = "1rem";

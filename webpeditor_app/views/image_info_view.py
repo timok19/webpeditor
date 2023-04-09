@@ -11,8 +11,9 @@ from webpeditor_app.services.image_services.image_service import \
     format_image_file_name, \
     get_image_file_size, \
     get_image_aspect_ratio, \
-    get_original_image_file_path
-from webpeditor_app.services.other_services.session_service import update_image_editor_session, get_user_id_from_session_store
+    get_original_image_file_path, get_info_about_image
+from webpeditor_app.services.other_services.session_service import update_image_editor_session, \
+    get_user_id_from_session_store
 
 
 @require_http_methods(['GET'])
@@ -30,17 +31,23 @@ def image_info_view(request) -> HttpResponse:
 
     path_to_local_image: Path = get_original_image_file_path(user_id, original_image)
 
-    image_local_file = get_image_file_instance(path_to_local_image)
-    if image_local_file is None:
-        return redirect("ImageDoesNotExistView")
+    image_format_description, \
+        image_size, \
+        image_resolution, \
+        image_aspect_ratio, \
+        image_mode, \
+        exif_data, \
+        metadata = get_info_about_image(path_to_local_image)
 
     context: dict = {
         'original_image_url': original_image.original_image.url,
-        'image_format': image_local_file.format,
-        'image_resolution': f"{image_local_file.width}px ⨯ {image_local_file.height}px",
         'image_name': format_image_file_name(original_image.image_name),
-        'aspect_ratio': get_image_aspect_ratio(image_local_file),
-        'image_size': get_image_file_size(image_local_file),
+        'image_format': image_format_description,
+        'image_size': image_size,
+        'image_resolution': image_resolution,
+        'aspect_ratio': image_aspect_ratio,
+        'image_mode': image_mode,
+        'exif_data': exif_data
     }
 
     update_image_editor_session(request=request, user_id=user_id)

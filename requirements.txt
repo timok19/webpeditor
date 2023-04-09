@@ -50,7 +50,7 @@ packaging==23.0
 parso==0.8.3
 pickleshare==0.7.5
 pilkit==2.0
-Pillow==9.4.0
+Pillow==9.5.0
 platformdirs==2.6.2
 pout==0.8.16
 prompt-toolkit==3.0.38

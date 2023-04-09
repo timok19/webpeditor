@@ -1,8 +1,6 @@
 import logging
 
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.core.files.storage import default_storage
-from django.core.files.uploadedfile import UploadedFile
+from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
 from django.middleware.csrf import get_token
@@ -13,18 +11,15 @@ from django.views.decorators.http import require_http_methods
 from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_service import \
-    get_image_file_size, \
     get_original_image, \
     get_edited_image, \
     copy_original_image_to_edited_folder, \
-    get_edited_image_file_path, \
-    get_image_file_instance, \
-    get_image_aspect_ratio
+    get_image_file_instance,\
+    get_info_about_image
 from webpeditor_app.services.other_services.session_service import \
     update_image_editor_session, \
     get_session_id, \
     get_user_id_from_session_store
-from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 from webpeditor_app.views.image_info_view import format_image_file_name
 
 logging.basicConfig(level=logging.INFO)
@@ -60,23 +55,6 @@ def create_edited_image_form(edited_image: EditedImage | None) -> EditedImageFor
         return EditedImageForm(data=data)
 
 
-def process_edited_image_form(image_form: EditedImageForm):
-    image: EditedImage = image_form.data.get("edited_image")
-    image_name = format_image_file_name(image.edited_image_name)
-    image_file = get_image_file_instance(image.edited_image.path)
-    image_size = get_image_file_size(image_file)
-    image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
-    image_aspect_ratio = get_image_aspect_ratio(image_file)
-
-    # TODO: make sure, that on FE will be shown image with original format
-
-    return str(image.edited_image.url), \
-        image_size, \
-        image_resolution, \
-        image_name, \
-        image_aspect_ratio
-
-
 def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
     user_id = get_user_id_from_session_store(request)
     if user_id is None:
@@ -90,6 +68,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         raise PermissionDenied("You do not have permission to view this image.")
 
     original_image_file = get_image_file_instance(original_image.original_image.path)
+    original_image_format_description = original_image_file.format_description
 
     session_key = get_session_id(request)
 
@@ -108,26 +87,36 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     else:
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
-    update_image_editor_session(request=request, user_id=user_id)
+    image: EditedImage = edited_image_form.data.get("edited_image")
+    image_name = format_image_file_name(image.edited_image_name)
 
-    edited_image_url, \
-        edited_image_size, \
-        edited_image_resolution, \
-        edited_image_name_short_version, \
-        edited_image_aspect_ratio = process_edited_image_form(edited_image_form)
+    image_format_description, \
+        image_size, \
+        image_resolution, \
+        image_aspect_ratio, \
+        image_mode, \
+        exif_data, \
+        metadata = get_info_about_image(image)
 
     context: dict = {
+        'edited_image_url': str(image.edited_image.url),
+        'edited_image_name_short_version': image_name,
+        'edited_image_size': image_size,
+        'edited_image_resolution': image_resolution,
+        'edited_image_aspect_ratio': image_aspect_ratio,
+        'edited_image_format': original_image_format_description,
+        'edited_image_mode': image_mode,
+        'edited_image_exif_data': exif_data,
+        'edited_image_metadata': metadata,
         'image_form': edited_image_form,
-        'edited_image_url': edited_image_url,
-        'edited_image_format': original_image_file.format,
-        'edited_image_size': edited_image_size,
-        'edited_image_resolution': edited_image_resolution,
-        'edited_image_name_short_version': edited_image_name_short_version,
         'edited_image_name': edited_image.edited_image_name,
-        'edited_image_aspect_ratio': edited_image_aspect_ratio,
         'csrf_token_value': get_token(request),
         'edited_image_content_type': edited_image.content_type_edited
     }
+
+    original_image_file.close()
+
+    update_image_editor_session(request=request, user_id=user_id)
 
     return render(request, 'imageEdit.html', context)
 

@@ -3,13 +3,15 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from typing import Tuple
 
-from PIL import Image as PilImage
+from PIL import Image as PilImage, ExifTags
 from PIL.Image import Image as ImageClass
 from _decimal import ROUND_UP, Decimal
 from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.shortcuts import redirect
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
@@ -134,7 +136,49 @@ def get_image_file_size(image: ImageClass) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
-def get_image_aspect_ratio(image_file: ImageClass):
+def get_info_about_image(image: Path | str | EditedImage) \
+        -> HttpResponsePermanentRedirect | HttpResponseRedirect | Tuple:
+
+    if isinstance(image, EditedImage):
+        image_file = get_image_file_instance(image.edited_image.path)
+    else:
+        image_file = get_image_file_instance(image)
+
+    if image_file is None:
+        return redirect("ImageDoesNotExistView")
+
+    image_format_description = image_file.format_description
+    image_size = get_image_file_size(image_file)
+    image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
+    image_aspect_ratio = get_image_aspect_ratio(image_file)
+    image_mode = image_file.mode
+
+    # Get structured exif data, if exists
+    exif_data = image_file.getexif()
+    if len(exif_data) == 0:
+        exif_data = "No exif data was found"
+    else:
+        exif = {
+            ExifTags.TAGS[k]: v
+            for k, v in exif_data.items()
+            if k in ExifTags.TAGS
+        }
+        exif_data = exif
+
+    metadata = image_file.info
+
+    image_file.close()
+
+    return image_format_description, \
+        image_size, \
+        image_resolution, \
+        image_aspect_ratio, \
+        image_mode, \
+        exif_data, \
+        metadata
+
+
+def get_image_aspect_ratio(image_file: ImageClass) -> Decimal:
     return Decimal(image_file.width / image_file.height).quantize(Decimal('.1'), rounding=ROUND_UP)
 
 
@@ -161,7 +205,10 @@ def copy_original_image_to_edited_folder(user_id: str,
 
     shutil.copy2(original_image_file_path, edited_image_file_path)
 
-    if get_image_file_instance(edited_image_file_path) is None:
+    image_file = get_image_file_instance(edited_image_file_path)
+
+    if image_file is None:
         return False
 
+    image_file.close()
     return True
