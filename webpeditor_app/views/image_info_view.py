@@ -28,13 +28,16 @@ def image_info_view(request) -> HttpResponse:
 
     path_to_local_image: Path = get_original_image_file_path(user_id, original_image)
 
-    image_format_description, \
-        image_size, \
-        image_resolution, \
-        image_aspect_ratio, \
-        image_mode, \
-        exif_data, \
-        metadata = get_info_about_image(path_to_local_image)
+    result = get_info_about_image(path_to_local_image)
+
+    if result is None:
+        return redirect("ImageDoesNotExistView")
+    else:
+        image_format_description = result[0]
+        image_size = result[1]
+        image_resolution = result[2]
+        image_aspect_ratio = result[3]
+        image_mode = result[4]
 
     context: dict = {
         'original_image_url': original_image.original_image.url,
@@ -43,8 +46,7 @@ def image_info_view(request) -> HttpResponse:
         'image_size': image_size,
         'image_resolution': image_resolution,
         'aspect_ratio': image_aspect_ratio,
-        'image_mode': image_mode,
-        'exif_data': exif_data
+        'image_mode': image_mode
     }
 
     update_image_editor_session(request=request, user_id=user_id)

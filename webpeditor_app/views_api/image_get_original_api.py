@@ -13,7 +13,7 @@ from webpeditor_app.services.other_services.session_service import get_or_add_us
 
 @requires_csrf_token
 @require_http_methods(['GET'])
-def image_get_original_view(request: WSGIRequest):
+def image_get_original_api(request: WSGIRequest):
     user_id = get_or_add_user_id(request)
 
     if request.method == 'GET':

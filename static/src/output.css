@@ -1636,6 +1636,10 @@ input:checked + .toggle-bg {
   float: left;
 }
 
+.m-8 {
+  margin: 2rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -1703,6 +1707,10 @@ input:checked + .toggle-bg {
 
 .mb-1 {
   margin-bottom: 0.25rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
 }
 
 .block {
@@ -2159,9 +2167,9 @@ input:checked + .toggle-bg {
   background-color: rgb(245 245 245 / var(--tw-bg-opacity));
 }
 
-.bg-\[\#9394a5\] {
+.bg-\[\#9fd3c7\] {
   --tw-bg-opacity: 1;
-  background-color: rgb(147 148 165 / var(--tw-bg-opacity));
+  background-color: rgb(159 211 199 / var(--tw-bg-opacity));
 }
 
 .bg-gray-100 {
@@ -2186,16 +2194,6 @@ input:checked + .toggle-bg {
 .bg-gray-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#385170\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(56 81 112 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#9fd3c7\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(159 211 199 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {

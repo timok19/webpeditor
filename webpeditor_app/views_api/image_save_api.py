@@ -19,7 +19,7 @@ from webpeditor_app.services.validators.image_file_validator import validate_ima
 
 @requires_csrf_token
 @require_http_methods(['POST'])
-def image_save_view(request: WSGIRequest):
+def image_save_api(request: WSGIRequest):
     if request.method == 'POST':
         user_id = get_user_id_from_session_store(request)
 

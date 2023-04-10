@@ -9,8 +9,7 @@ from PIL import Image as PilImage, ExifTags
 from PIL.Image import Image as ImageClass
 from _decimal import ROUND_UP, Decimal
 from django.contrib.sessions.backends.db import SessionStore
-from django.http import JsonResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
@@ -109,7 +108,8 @@ def get_edited_image(user_id: str) -> EditedImage | None:
 def get_image_file_instance(path_to_local_image: Path | str) -> ImageClass | None:
     try:
         return PilImage.open(path_to_local_image)
-    except (FileExistsError, FileNotFoundError):
+    except (FileExistsError, FileNotFoundError) as e:
+        logging.error(e)
         return None
 
 
@@ -159,11 +159,11 @@ def get_image_file_size(image: ImageClass) -> str:
 
 
 def get_info_about_image(path_to_local_image: Path | str) \
-        -> HttpResponsePermanentRedirect | HttpResponseRedirect | Tuple:
+        -> None | Tuple:
     image_file = get_image_file_instance(path_to_local_image)
 
     if image_file is None:
-        return redirect("ImageDoesNotExistView")
+        return None
 
     image_format_description = image_file.format_description
     image_size = get_image_file_size(image_file)

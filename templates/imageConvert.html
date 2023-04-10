@@ -16,13 +16,12 @@
             </div>
         {% endif %}
 
-        <div
-                class="max-w-sm p-6 ml-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div class="max-w-sm p-6 ml-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
 
             {% if form.is_multipart %}
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" id="imageFormConvertId">
             {% else %}
-                <form method="post">
+                <form method="post" id="imageFormConvertId">
             {% endif %}
 
             {% csrf_token %}
@@ -31,59 +30,51 @@
                 Upload your image(s):
             </label>
 
-            <input
-                    class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            <input class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                     type="file" name="images_to_convert" multiple accept=".jpeg,.jpg,.png,.webp,.raw,.jfif,.ico"
                     id="{{ form.images_to_convert.auto_id }}"
                     size="image">
 
-            {% if validation_error %}
-                <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ validation_error }}</p>
+            {% if validation_file_size_error %}
+                <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ validation_file_size_error }}</p>
             {% else %}
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-300 font-light">
                     Image size should be lower than 6 MB
                 </p>
             {% endif %}
 
-
-
             <p class="mt-3 text-sm text-gray-500 dark:text-gray-300 font-light">
                 Supports .WEBP, .JPEG, .JPG, .PNG, .RAW, .JFIF, .ICO and other...
             </p>
-            <br/>
 
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            <label class="block mb-2 mt-8 text-sm font-medium text-gray-900 dark:text-white"
                    for="{{ form.output_format.auto_id }}">
                 Output format:
             </label>
 
             <label>
                 <select name="output_format"
-                        id="{{ form.images_to_convert.auto_id }}"
+                        id="{{ form.output_format.auto_id }}"
                         class="block w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option value="JPEG">JPEG</option>
                     <option value="PNG">PNG</option>
                     <option value="GIF">GIF</option>
                     <option value="WEBP">WEBP</option>
-                    <option value="BPM">BPM</option>
+                    <option value="BMP">BMP</option>
                     <option value="ICO">ICO</option>
                     <option value="TIFF">TIFF</option>
                 </select>
             </label>
 
-
-            <br/>
-
-            <div class="flex flex-row justify-between">
+            <div class="flex flex-row justify-between mt-8">
                 <button type="submit"
                         id="upload-image"
-                        onclick="toastifyMessage('Images have been uploaded', true)"
                         class="relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
                         disabled>
-                <span
-                        class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                    Upload and convert
-                </span>
+                    <span
+                            class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                        Upload and convert
+                    </span>
                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                          class="w-6 h-6 ml-1 mr-1"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -148,12 +139,9 @@
                             </td>
                         </tr>
                     {% endfor %}
-
                     </tbody>
                 </table>
             </div>
-        {% else %}
-            <script type="text/javascript">toastifyMessage("Error: cannot convert image(s)", false)</script>
         {% endif %}
 
     </div>
@@ -212,7 +200,10 @@
         </div>
     </div>
 
+    {{ form.images_to_convert.auto_id|json_script:'inputId' }}
+    {{ form.output_format.auto_id|json_script:'outputFormatId' }}
     <script src="{% static 'js/services/enableUploadButton.js' %}"></script>
     <script src="{% static 'js/services/openImageModal.js' %}"></script>
     <script src="{% static 'js/services/Toastify.js' %}"></script>
+    <script src="{% static 'js/services/convertImages.js' %}"></script>
 {% endblock content %}

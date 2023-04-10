@@ -12,14 +12,13 @@ from django.views.decorators.http import require_http_methods
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.folder_service import create_folder, get_media_root_folder_paths
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
+from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, \
+    get_image_file_instance
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
-    set_session_expiry, \
     update_image_editor_session, \
     get_user_id_from_session_store, \
-    get_or_add_user_id
-
+    get_or_add_user_id, set_session_expiry
 
 logging.basicConfig(level=logging.INFO)
 
@@ -99,8 +98,13 @@ def get(request: WSGIRequest) -> HttpResponse:
 
     user_id = get_user_id_from_session_store(request)
 
-    if get_original_image(user_id) is None:
+    original_image = get_original_image(user_id)
+    if original_image is None:
         is_image_exist = False
+    else:
+        path_to_original_image = get_image_file_instance(original_image.original_image.path)
+        if path_to_original_image is None:
+            is_image_exist = False
 
     context: dict = {
         'form': form,

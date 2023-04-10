@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("image_file", imageBlob, fileName);
       formData.append("mime_type", mimeType);
 
-      fetch("/image_download/", {
+      fetch("/api/image_download/", {
         method: "POST",
         headers: {
           "X-CSRFToken": csrfToken,
@@ -379,6 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => {
           if (!response.ok) {
+            toastifyMessage("Error: cannot save", false);
             throw new Error("Network response was not ok");
           }
 
@@ -403,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formData = new FormData();
     formData.append("edited_image", imageBlob, fileName);
 
-    fetch("/image_save/", {
+    fetch("/api/image_save/", {
       method: "POST",
       headers: {
         "X-CSRFToken": csrfToken
@@ -432,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function getOriginalImage() {
     preventFormFromDefaultAction();
 
-    fetch("/image_get_original/",
+    fetch("/api/image_get_original/",
       {
         method: "GET",
         headers: {

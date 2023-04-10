@@ -14,7 +14,7 @@ from webpeditor_app.services.other_services.session_service import get_or_add_us
 
 @requires_csrf_token
 @require_http_methods(['POST'])
-def image_download_view(request: WSGIRequest):
+def image_download_api(request: WSGIRequest):
     if request.method == 'POST':
         user_id: str = get_or_add_user_id(request)
 
@@ -25,7 +25,7 @@ def image_download_view(request: WSGIRequest):
         image_file = Image.open(edited_image)
 
         file_extension: str = get_file_extension(file_name).upper()
-        if file_extension == 'JPG':
+        if file_extension in ['JPG', 'JFIF']:
             file_extension = 'JPEG'
 
         if file_extension == 'PNG':

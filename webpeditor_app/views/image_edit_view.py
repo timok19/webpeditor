@@ -67,6 +67,9 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         raise PermissionDenied("You do not have permission to view this image.")
 
     original_image_file = get_image_file_instance(original_image.original_image.path)
+    if original_image_file is None:
+        return redirect("ImageDoesNotExistView")
+
     original_image_format_description = original_image_file.format_description
 
     session_key = get_session_id(request)
