@@ -446,8 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const imageName = response.headers.get("X-Image-Name");
 
-        return response.blob()
-          .then((imageBlob) => ({imageBlob, imageName}));
+        return response.blob().then((imageBlob) => ({imageBlob, imageName}));
 
       })
       .then(({imageBlob, imageName}) => {
