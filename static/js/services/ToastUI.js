@@ -318,31 +318,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const imageBlob = dataURLtoBlob(mimeType, quality);
 
-    if (imageBlob.size > maxImageBlobSize) {
-      toastifyMessage("Image size cannot be more than 6 MB", false);
-    } else {
-      const formData = new FormData();
-      formData.append("edited_image", imageBlob, fileName);
+    const formData = new FormData();
+    formData.append("edited_image", imageBlob, fileName);
 
-      fetch("/image_save/", {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": csrfToken
-        },
-        body: formData
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-      })
-        .catch((error) => {
-          console.error("Error:", error);
-          toastifyMessage("Failed to save image", false);
-        });
+    fetch("/image_save/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken
+      },
+      body: formData
+    }).then((response) => {
+      if (!response.ok) {
+        toastifyMessage("Failed to save image", false);
+        throw new Error("Network response was not ok");
+      }
 
-      toastifyMessage("Image has been saved successfully", true);
+      if (imageBlob.size > maxImageBlobSize){
+        toastifyMessage(`Image size should not exceed 6 MB`, false);
+        throw new Error("Image size is more than 6 MB");
+      } else {
+        toastifyMessage("Image has been saved successfully", true);
+      }
+
       location.reload();
-    }
+    })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   }
 
   function getOriginalImage() {

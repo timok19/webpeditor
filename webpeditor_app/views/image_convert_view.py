@@ -46,19 +46,16 @@ def post(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRe
         return render(request, 'imageConvert.html', context)
 
     output_format = image_form.cleaned_data['output_format']
-
-    converted_images = convert_images(image_files, output_format)
-
-    if isinstance(converted_images, str):
-        format_error = converted_images
-        context: dict = {
-            'form': image_form,
-            'image_format_error': format_error
-        }
-    else:
+    try:
+        converted_images = convert_images(image_files, output_format)
         context: dict = {
             'form': image_form,
             'converted_images': converted_images
+        }
+    except Exception as e:
+        context: dict = {
+            'form': image_form,
+            'image_format_error': str(e)
         }
 
     update_session(request=request, user_id=user_id)

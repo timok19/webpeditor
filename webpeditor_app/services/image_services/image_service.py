@@ -8,7 +8,6 @@ from typing import Tuple
 from PIL import Image as PilImage, ExifTags
 from PIL.Image import Image as ImageClass
 from _decimal import ROUND_UP, Decimal
-from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
 from django.http import JsonResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect
@@ -34,14 +33,16 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     Returns:
         A JSON response with success status and information message.
     """
-    path_to_old_user_folder = Path(settings.MEDIA_ROOT) / user_id
+    path_to_old_user_folder = get_media_root_folder_paths(user_id)[0]
 
     original_image = get_original_image(user_id)
     if original_image:
+        original_image.delete()
+        logging.info("Original image has been deleted from db.")
+
         session_store = SessionStore(session_key=original_image.session_id)
         session_store.clear_expired()
-        original_image.delete()
-        logging.info("Original image has been deleted from db.\nClearing session...")
+        logging.info("Session has been cleared")
 
     edited_image = get_edited_image(user_id)
     if edited_image:
@@ -49,7 +50,7 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
         logging.info("Edited image has been deleted from db.")
 
     # Delete user's folder in all other cases
-    if not original_image and not edited_image:
+    if original_image is None or edited_image is None:
         logging.info("No images in db. Deleting user folder...")
         delete_users_folder(path_to_old_user_folder)
 

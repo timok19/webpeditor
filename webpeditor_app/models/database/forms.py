@@ -30,8 +30,9 @@ class ImagesToConvertForm(forms.Form):
                  ('PNG', 'PNG'),
                  ('GIF', 'GIF'),
                  ('WEBP', 'WEBP'),
-                 ('RAW', 'RAW'),
-                 ('JFIF', 'JFIF'),
-                 ('ICO', 'ICO')],
+                 ('BPM', 'BPM'),
+                 ('ICO', 'ICO'),
+                 ('TIFF', 'TIFF')],
+
         required=True,
     )

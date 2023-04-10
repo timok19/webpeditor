@@ -1677,8 +1677,8 @@ input:checked + .toggle-bg {
   margin-left: auto;
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
+.mt-4 {
+  margin-top: 1rem;
 }
 
 .mr-4 {
@@ -1691,10 +1691,6 @@ input:checked + .toggle-bg {
 
 .mr-3 {
   margin-right: 0.75rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
 }
 
 .mt-\[5\.5rem\] {

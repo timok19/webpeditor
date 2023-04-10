@@ -23,9 +23,8 @@ function toastifyMessage(message, success) {
       position: "right",
       stopOnFocus: true,
       style: {
-        background: "linear-gradient(to right, #43e97b 0%, #38f9d7 100%)",
+        background: "linear-gradient(to top, #9be15d 0%, #00e3ae 100%)",
       }
     }).showToast();
   }
-
 }
