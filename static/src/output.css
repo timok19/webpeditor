@@ -2188,6 +2188,16 @@ input:checked + .toggle-bg {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#385170\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(56 81 112 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#9fd3c7\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(159 211 199 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }

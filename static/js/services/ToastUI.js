@@ -110,37 +110,76 @@ document.addEventListener("DOMContentLoaded", function () {
   const oldDownloadButton = document.querySelector(".tui-image-editor-header-buttons button");
   oldDownloadButton.style.display = "none";
 
+
   // Download button
   let downloadButton = document.createElement("button");
   downloadButton.addEventListener("click", () => downloadImage(imageContentType, 1, imageName));
   downloadButton.id = "tuiDownloadButton";
+  downloadButton.setAttribute("data-tooltip-target", "tooltip-download");
+  downloadButton.setAttribute("data-tooltip-placement", "bottom");
+  downloadButton.setAttribute("type", "button");
+
+  const tooltipDownload = addToolTip('Download image', 'tooltip-download');
+  downloadButton.addEventListener('mouseenter', () => {
+    tooltipDownload.classList.remove('invisible');
+  });
+  downloadButton.addEventListener('mouseleave', () => {
+    tooltipDownload.classList.add('invisible');
+  });
+
   downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
-  downloadButton.appendChild(addSpanTextToButton("Download image"));
-  downloadButton.appendChild(svgDownloadIcon);
+  downloadButton.appendChild(addIconIntoButton(svgDownloadIcon));
+  document.body.appendChild(tooltipDownload);
+
 
   // Save button
   let saveButton = document.createElement("button");
   saveButton.addEventListener("click", () => saveImage(imageContentType, 1, imageName));
   saveButton.id = "tuiSaveButton";
+  saveButton.setAttribute("data-tooltip-target", "tooltip-save");
+  saveButton.setAttribute("data-tooltip-placement", "bottom");
+  saveButton.setAttribute("type", "button");
+
+  const tooltipSave = addToolTip('Save image', 'tooltip-save');
+  saveButton.addEventListener('mouseenter', () => {
+    tooltipSave.classList.remove('invisible');
+  });
+  saveButton.addEventListener('mouseleave', () => {
+    tooltipSave.classList.add('invisible');
+  });
+
   saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
-  saveButton.appendChild(addSpanTextToButton("Save image"));
-  saveButton.appendChild(svgSaveIcon);
+  saveButton.appendChild(addIconIntoButton(svgSaveIcon));
+  document.body.appendChild(tooltipSave);
 
+  // Original image button
   let originalImageButton = document.createElement("button");
   originalImageButton.addEventListener("click", () => getOriginalImage());
   originalImageButton.id = "tuiOriginalImageButton";
+  originalImageButton.setAttribute("data-tooltip-target", "tooltip-restore-original-image");
+  originalImageButton.setAttribute("data-tooltip-placement", "bottom");
+  originalImageButton.setAttribute("type", "button");
+
+  const tooltipRestore = addToolTip('Restore original image', 'tooltip-restore-original-image');
+  originalImageButton.addEventListener('mouseenter', () => {
+    tooltipRestore.classList.remove('invisible');
+  });
+  originalImageButton.addEventListener('mouseleave', () => {
+    tooltipRestore.classList.add('invisible');
+  });
+
   originalImageButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
-  originalImageButton.appendChild(addSpanTextToButton("Return original image"));
-  originalImageButton.appendChild(svgOriginalImageIcon);
+  originalImageButton.appendChild(addIconIntoButton(svgOriginalImageIcon));
+  document.body.appendChild(tooltipRestore);
 
   // Additional div to group 2 buttons
   const twoButtonsDiv = document.createElement("div");
@@ -200,7 +239,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const imageEditorContainer = document.querySelector("#tui-image-editor");
   imageEditorContainer.style.borderRadius = "1rem";
-  imageEditorContainer.style.background = "#1F2937";
+  imageEditorContainer.classList.add("shadow");
+  imageEditorContainer.classList.add("border");
+  imageEditorContainer.classList.add("border-gray-200");
+  imageEditorContainer.classList.add("dark:bg-gray-800");
+  imageEditorContainer.classList.add("dark:border-gray-700");
+
+  applyDarkModeOnEditorContainer(imageEditorContainer);
+
+  const themeButton = document.getElementById("theme-toggle");
+  themeButton.addEventListener("click", () => applyDarkModeOnEditorContainer(imageEditorContainer));
 
   editCanvasSize(".lower-canvas");
   editCanvasSize(".upper-canvas");
@@ -232,11 +280,45 @@ document.addEventListener("DOMContentLoaded", function () {
   imageEditorMainContainer.style.width = "calc(100% - 120px)";
 
   // Span with text and icon
-  function addSpanTextToButton(textOnButton) {
-    const spanText = document.createElement("span");
-    spanText.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " + "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
-    spanText.textContent = textOnButton + String.fromCharCode(160);
-    return spanText;
+  function addIconIntoButton(icon) {
+    const span = document.createElement("span");
+    span.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " +
+      "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
+    span.appendChild(icon)
+
+    return span;
+  }
+
+  // Add tooltip to button
+  function addToolTip(text, dataTooltipTargetId) {
+    let divTooltip = document.createElement("div");
+    divTooltip.id = `${dataTooltipTargetId}`;
+    divTooltip.setAttribute("role", "tooltip");
+    divTooltip.className = "absolute tooltip z-10 invisible px-3 py-2 font-light transition-opacity " +
+      "duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700";
+
+    let divTooltipText = document.createElement("div");
+    divTooltipText.className = "text-sm text-white";
+    divTooltipText.style.padding = "0.2rem";
+    divTooltipText.textContent = text;
+    divTooltip.appendChild(divTooltipText);
+
+    let divTooltipArrow = document.createElement("div");
+    divTooltipArrow.className = "tooltip-arrow";
+    divTooltipArrow.setAttribute("data-popper-arrow", "");
+
+    divTooltip.appendChild(divTooltipArrow)
+    return divTooltip
+  }
+
+  function applyDarkModeOnEditorContainer(element) {
+    let colorTheme = localStorage.getItem("color-theme") === 'dark' ? 'dark' : 'light';
+
+    if (colorTheme === 'dark') {
+      element.style.background = "#1F2937";
+    } else {
+      element.style.background = "rgb(255 255 255 / var(--tw-bg-opacity))";
+    }
   }
 
   function editCanvasSize(queryClass) {
@@ -333,7 +415,7 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error("Network response was not ok");
       }
 
-      if (imageBlob.size > maxImageBlobSize){
+      if (imageBlob.size > maxImageBlobSize) {
         toastifyMessage(`Image size should not exceed 6 MB`, false);
         throw new Error("Image size is more than 6 MB");
       } else {
