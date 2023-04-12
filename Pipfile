@@ -46,6 +46,7 @@ django-imagekit = "*"
 django-cropperjs = "*"
 opencv-python = "*"
 django-crispy-forms = "*"
+gunicorn = "*"
 
 [dev-packages]
 autopep8 = "*"

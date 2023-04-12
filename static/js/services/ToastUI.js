@@ -20,35 +20,26 @@ document.addEventListener("DOMContentLoaded", function () {
     includeUI: {
       loadImage: {
         path: imageUrl,
-        name: imageName
-      }, theme: {
+        name: imageName,
+      },
+      theme: {
         "common.backgroundImage": "none",
-        "common.backgroundColor": "transparent"
-      }, menu: [
-        "resize",
-        "crop",
-        "flip",
-        "rotate",
-        "draw",
-        "shape",
-        "icon",
-        "text",
-        "mask",
-        "filter"
-      ],
+        "common.backgroundColor": "transparent",
+      },
+      menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
         width: "52rem",
-        height: "36rem"
+        height: "36rem",
       },
-      menuBarPosition: "left"
+      menuBarPosition: "left",
     },
     cssMaxWidth: "700",
     cssMaxHeight: "500",
     usageStatistics: false,
     selectionStyle: {
       cornerSize: 20,
-      rotatingPointOffset: 70
-    }
+      rotatingPointOffset: 70,
+    },
   });
 
   // Delete Upload button
@@ -69,9 +60,12 @@ document.addEventListener("DOMContentLoaded", function () {
   svgDownloadPath.setAttribute("stroke-linejoin", "round");
   svgDownloadPath.setAttribute("fill-rule", "evenodd");
   svgDownloadPath.setAttribute("clip-rule", "evenodd");
-  svgDownloadPath.setAttribute("d", "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
-    "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
-    "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z");
+  svgDownloadPath.setAttribute(
+    "d",
+    "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
+      "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
+      "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+  );
   svgDownloadIcon.appendChild(svgDownloadPath);
 
   // Icon svg (Save button)
@@ -110,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const oldDownloadButton = document.querySelector(".tui-image-editor-header-buttons button");
   oldDownloadButton.style.display = "none";
 
-
   // Download button
   let downloadButton = document.createElement("button");
   downloadButton.addEventListener("click", () => downloadImage(imageContentType, 1, imageName));
@@ -119,21 +112,21 @@ document.addEventListener("DOMContentLoaded", function () {
   downloadButton.setAttribute("data-tooltip-placement", "bottom");
   downloadButton.setAttribute("type", "button");
 
-  const tooltipDownload = addToolTip('Download image', 'tooltip-download');
-  downloadButton.addEventListener('mouseenter', () => {
-    tooltipDownload.classList.remove('invisible');
+  const tooltipDownload = addToolTip("Download image", "tooltip-download");
+  downloadButton.addEventListener("mouseenter", () => {
+    tooltipDownload.classList.remove("invisible");
   });
-  downloadButton.addEventListener('mouseleave', () => {
-    tooltipDownload.classList.add('invisible');
+  downloadButton.addEventListener("mouseleave", () => {
+    tooltipDownload.classList.add("invisible");
   });
 
-  downloadButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+  downloadButton.className =
+    "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   downloadButton.appendChild(addIconIntoButton(svgDownloadIcon));
   document.body.appendChild(tooltipDownload);
-
 
   // Save button
   let saveButton = document.createElement("button");
@@ -143,15 +136,16 @@ document.addEventListener("DOMContentLoaded", function () {
   saveButton.setAttribute("data-tooltip-placement", "bottom");
   saveButton.setAttribute("type", "button");
 
-  const tooltipSave = addToolTip('Save image', 'tooltip-save');
-  saveButton.addEventListener('mouseenter', () => {
-    tooltipSave.classList.remove('invisible');
+  const tooltipSave = addToolTip("Save image", "tooltip-save");
+  saveButton.addEventListener("mouseenter", () => {
+    tooltipSave.classList.remove("invisible");
   });
-  saveButton.addEventListener('mouseleave', () => {
-    tooltipSave.classList.add('invisible');
+  saveButton.addEventListener("mouseleave", () => {
+    tooltipSave.classList.add("invisible");
   });
 
-  saveButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+  saveButton.className =
+    "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
@@ -166,15 +160,16 @@ document.addEventListener("DOMContentLoaded", function () {
   originalImageButton.setAttribute("data-tooltip-placement", "bottom");
   originalImageButton.setAttribute("type", "button");
 
-  const tooltipRestore = addToolTip('Restore original image', 'tooltip-restore-original-image');
-  originalImageButton.addEventListener('mouseenter', () => {
-    tooltipRestore.classList.remove('invisible');
+  const tooltipRestore = addToolTip("Restore original image", "tooltip-restore-original-image");
+  originalImageButton.addEventListener("mouseenter", () => {
+    tooltipRestore.classList.remove("invisible");
   });
-  originalImageButton.addEventListener('mouseleave', () => {
-    tooltipRestore.classList.add('invisible');
+  originalImageButton.addEventListener("mouseleave", () => {
+    tooltipRestore.classList.add("invisible");
   });
 
-  originalImageButton.className = "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
+  originalImageButton.className =
+    "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
     "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
     "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
     "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
@@ -223,7 +218,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const svgImageInfoPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
   svgImageInfoPath.setAttribute("stroke-linecap", "round");
   svgImageInfoPath.setAttribute("stroke-linejoin", "round");
-  svgImageInfoPath.setAttribute("d", "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z");
+  svgImageInfoPath.setAttribute(
+    "d",
+    "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+  );
   svgImageInfoIcon.appendChild(svgImageInfoPath);
 
   // Image info popover button
@@ -232,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
   imageInfoButton.setAttribute("data-popover-placement", "left");
   imageInfoButton.setAttribute("type", "button");
   imageInfoButton.style.marginBottom = "2rem";
-  imageInfoButton.appendChild(svgImageInfoIcon)
+  imageInfoButton.appendChild(svgImageInfoIcon);
 
   let menu = document.querySelector(".tui-image-editor-menu");
   menu.insertBefore(imageInfoButton, menu.firstElementChild);
@@ -282,9 +280,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Span with text and icon
   function addIconIntoButton(icon) {
     const span = document.createElement("span");
-    span.className = "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " +
+    span.className =
+      "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " +
       "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
-    span.appendChild(icon)
+    span.appendChild(icon);
 
     return span;
   }
@@ -294,7 +293,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let divTooltip = document.createElement("div");
     divTooltip.id = `${dataTooltipTargetId}`;
     divTooltip.setAttribute("role", "tooltip");
-    divTooltip.className = "absolute tooltip z-10 invisible px-3 py-2 font-light transition-opacity " +
+    divTooltip.className =
+      "absolute tooltip z-10 invisible px-3 py-2 font-light transition-opacity " +
       "duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700";
 
     let divTooltipText = document.createElement("div");
@@ -307,14 +307,14 @@ document.addEventListener("DOMContentLoaded", function () {
     divTooltipArrow.className = "tooltip-arrow";
     divTooltipArrow.setAttribute("data-popper-arrow", "");
 
-    divTooltip.appendChild(divTooltipArrow)
-    return divTooltip
+    divTooltip.appendChild(divTooltipArrow);
+    return divTooltip;
   }
 
   function applyDarkModeOnEditorContainer(element) {
-    let colorTheme = localStorage.getItem("color-theme") === 'dark' ? 'dark' : 'light';
+    let colorTheme = localStorage.getItem("color-theme") === "dark" ? "dark" : "light";
 
-    if (colorTheme === 'dark') {
+    if (colorTheme === "dark") {
       element.style.background = "#1F2937";
     } else {
       element.style.background = "rgb(255 255 255 / var(--tw-bg-opacity))";
@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function dataURLtoBlob(mimeType, quality) {
     const dataURL = editor.toDataURL({
       format: mimeType,
-      quality: quality
+      quality: quality,
     });
 
     const data = atob(dataURL.split(",")[1]);
@@ -350,7 +350,7 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let i = 0; i < data.length; i++) {
       view[i] = data.charCodeAt(i) & 0xff;
     }
-    return new Blob([arrayBuffer], {type: mimeType});
+    return new Blob([arrayBuffer], { type: mimeType });
   }
 
   function preventFormFromDefaultAction() {
@@ -375,24 +375,23 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "X-CSRFToken": csrfToken,
         },
-        body: formData
+        body: formData,
       })
         .then((response) => {
           if (!response.ok) {
-            toastifyMessage("Error: cannot save", false);
-            throw new Error("Network response was not ok");
+            const errorMessage = "Error: image cannot be saved";
+            toastifyMessage(errorMessage, false);
+            throw new Error(errorMessage);
           }
-
           return response.blob();
         })
         .then((convertedBlob) => {
           saveAs(convertedBlob, fileName);
+          toastifyMessage("Image has been downloaded", true);
         })
         .catch((error) => {
           console.error("There was a problem with the fetch operation:", error);
         });
-
-      toastifyMessage("Image has been downloaded", true);
     }
   }
 
@@ -407,24 +406,27 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/api/image_save/", {
       method: "POST",
       headers: {
-        "X-CSRFToken": csrfToken
+        "X-CSRFToken": csrfToken,
       },
-      body: formData
-    }).then((response) => {
-      if (!response.ok) {
-        toastifyMessage("Failed to save image", false);
-        throw new Error("Network response was not ok");
-      }
-
-      if (imageBlob.size > maxImageBlobSize) {
-        toastifyMessage(`Image size should not exceed 6 MB`, false);
-        throw new Error("Image size is more than 6 MB");
-      } else {
-        toastifyMessage("Image has been saved successfully", true);
-      }
-
-      location.reload();
+      body: formData,
     })
+      .then((response) => {
+        if (!response.ok) {
+          toastifyMessage("Failed to save image", false);
+          throw new Error("Network response was not ok");
+        }
+
+        if (imageBlob.size > maxImageBlobSize) {
+          const errorMessage = "Image size should not exceed 6 MB";
+          toastifyMessage(errorMessage, false);
+
+          throw new Error(errorMessage);
+        } else {
+          toastifyMessage("Image has been saved successfully", true);
+        }
+
+        location.reload();
+      })
       .catch((error) => {
         console.error("Error:", error);
       });
@@ -433,23 +435,20 @@ document.addEventListener("DOMContentLoaded", function () {
   function getOriginalImage() {
     preventFormFromDefaultAction();
 
-    fetch("/api/image_get_original/",
-      {
-        method: "GET",
-        headers: {
-          "X-CSRFToken": csrfToken,
-        },
-      })
+    fetch("/api/image_get_original/", {
+      method: "GET",
+      headers: {
+        "X-CSRFToken": csrfToken,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch the original image");
         }
         const imageName = response.headers.get("X-Image-Name");
-
-        return response.blob().then((imageBlob) => ({imageBlob, imageName}));
-
+        return response.blob().then((imageBlob) => ({ imageBlob, imageName }));
       })
-      .then(({imageBlob, imageName}) => {
+      .then(({ imageBlob, imageName }) => {
         const imageFile = new File([imageBlob], imageName, {
           type: imageBlob.type,
         });
@@ -458,12 +457,12 @@ document.addEventListener("DOMContentLoaded", function () {
         editor.loadImageFromFile(imageFile, imageName).then((result) => {
           console.log("Image loaded successfully:", result);
         });
+
+        toastifyMessage("Original image is loaded", true);
       })
       .catch((error) => {
         console.error("Error:", error);
         toastifyMessage("Failed to open the original image", false);
       });
-
-    toastifyMessage("Original image is loaded", true);
   }
 });
