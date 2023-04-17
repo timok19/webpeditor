@@ -28,8 +28,8 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
-        width: "52rem",
-        height: "36rem",
+        width: window.innerHeight < 768 ? "52rem" : "62rem",
+        height: window.innerHeight < 768 ? "36rem" : "42rem",
       },
       menuBarPosition: "left",
     },
@@ -45,13 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Delete Upload button
   document.querySelector(".tui-image-editor-header-buttons div").remove();
 
-  editor.ui.resizeEditor({
-    uiSize: {
-      width: window.innerHeight < 768 ? "52rem" : "62rem",
-      height: window.innerHeight < 768 ? "36rem" : "42rem"
-    }
-  })
-
+  // Set height of svg object with icons to 0
+  document.querySelector("svg[display='none']").style.height = 0
 
   // Icon svg (Download button)
   const svgDownloadIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -293,7 +288,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const imageEditorAlignWrap = document.querySelector(".tui-image-editor-align-wrap");
   imageEditorAlignWrap.style.display = "flex";
   imageEditorAlignWrap.style.alignItems = "center";
-
 
   // Span with text and icon
   function addIconIntoButton(icon) {
