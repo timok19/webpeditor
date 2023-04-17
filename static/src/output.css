@@ -1636,10 +1636,6 @@ input:checked + .toggle-bg {
   float: left;
 }
 
-.m-8 {
-  margin: 2rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -1659,6 +1655,10 @@ input:checked + .toggle-bg {
 
 .mt-3 {
   margin-top: 0.75rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
 }
 
 .ml-1 {
@@ -1707,10 +1707,6 @@ input:checked + .toggle-bg {
 
 .mb-1 {
   margin-bottom: 0.25rem;
-}
-
-.mt-8 {
-  margin-top: 2rem;
 }
 
 .block {

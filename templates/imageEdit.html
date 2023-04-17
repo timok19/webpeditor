@@ -72,14 +72,18 @@
                 </p>
             {% endif %}
 
-{#            {% for key, value in edited_image_metadata.items %}#}
-{#                {% with key|replace_with_space:"_"|capfirst as formatted_key %}#}
-{#                    <p class="font-bold text-sm text-gray-700 dark:text-gray-200">{{ formatted_key }}: &nbsp;<span#}
-{#                            class="font-normal dark:text-gray-400 whitespace-pre-line"#}
-{#                            style="font-family: Consolas, monospace">{{ value }}</span>#}
-{#                    </p>#}
-{#                {% endwith %}#}
-{#            {% endfor %}#}
+            {% if edited_image_metadata %}
+                {% for key, value in edited_image_metadata.items %}
+                    {% with key|replace_with_space:"_"|capfirst as formatted_key %}
+                        {% if not value|is_instance:"bytes" %}
+                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">
+                                {{ formatted_key }}: &nbsp;
+                                <span class="font-normal dark:text-gray-400 whitespace-pre-line" style="font-family: Consolas, monospace">{{ value }}</span>
+                            </p>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            {% endif %}
 
         </div>
         <div data-popper-arrow></div>

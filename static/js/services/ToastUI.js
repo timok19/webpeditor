@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       menuBarPosition: "left",
     },
-    cssMaxWidth: "700",
-    cssMaxHeight: "500",
+    cssMaxWidth: window.innerWidth < 768 ? "700" : "750",
+    cssMaxHeight: window.innerHeight < 768 ? "500" : "550",
     usageStatistics: false,
     selectionStyle: {
       cornerSize: 20,
@@ -44,6 +44,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Delete Upload button
   document.querySelector(".tui-image-editor-header-buttons div").remove();
+
+  editor.ui.resizeEditor({
+    uiSize: {
+      width: window.innerHeight < 768 ? "52rem" : "62rem",
+      height: window.innerHeight < 768 ? "36rem" : "42rem"
+    }
+  })
+
 
   // Icon svg (Download button)
   const svgDownloadIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -204,6 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const menuFilter = document.querySelector(".tui-image-editor-menu-filter");
   menuFilter.style.padding = "1rem";
   menuFilter.style.height = "100%";
+  menuFilter.style.overflowY = "overlay";
 
   // Svg icon (Show image info button)
   const svgImageInfoIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -277,6 +286,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const imageEditorMainContainer = document.querySelector(".tui-image-editor-main-container");
   imageEditorMainContainer.style.width = "calc(100% - 120px)";
 
+  const imageEditorSizeWrap = document.querySelector(".tui-image-editor-size-wrap");
+  imageEditorSizeWrap.style.display = "flex";
+  imageEditorSizeWrap.style.justifyContent = "center";
+
+  const imageEditorAlignWrap = document.querySelector(".tui-image-editor-align-wrap");
+  imageEditorAlignWrap.style.display = "flex";
+  imageEditorAlignWrap.style.alignItems = "center";
+
+
   // Span with text and icon
   function addIconIntoButton(icon) {
     const span = document.createElement("span");
@@ -326,7 +344,6 @@ document.addEventListener("DOMContentLoaded", function () {
     canvas.style.position = "absolute";
     canvas.style.width = "400px";
     canvas.style.height = "400px";
-    canvas.style.left = "-20px";
     canvas.style.top = "0";
     canvas.style.touchAction = "none";
     canvas.style.userSelect = "none";
