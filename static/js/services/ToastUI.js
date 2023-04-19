@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
-        width: window.innerHeight < 768 ? "52rem" : "62rem",
+        width: window.innerWidth < 1600? "56rem" : "62rem",
         height: window.innerHeight < 768 ? "36rem" : "42rem",
       },
       menuBarPosition: "left",
     },
-    cssMaxWidth: window.innerWidth < 768 ? "700" : "750",
+    cssMaxWidth: window.innerWidth < 1600 ? "750" : "800",
     cssMaxHeight: window.innerHeight < 768 ? "500" : "550",
     usageStatistics: false,
     selectionStyle: {

@@ -93,16 +93,25 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     image_name = format_image_file_name(image.edited_image_name)
 
+    image_info_values = get_info_about_image(image.edited_image.path)
+
+    edited_image_size = image_info_values[1]
+    edited_image_resolution = image_info_values[2]
+    edited_image_aspect_ratio = image_info_values[3]
+    edited_image_mode = image_info_values[4]
+    edited_image_exif_data = image_info_values[5]
+    edited_image_metadata = image_info_values[6]
+
     context: dict = {
         'edited_image_url': str(image.edited_image.url),
         'edited_image_name_short_version': image_name,
-        'edited_image_size': get_info_about_image(image.edited_image.path)[1],
-        'edited_image_resolution': get_info_about_image(image.edited_image.path)[2],
-        'edited_image_aspect_ratio': get_info_about_image(image.edited_image.path)[3],
+        'edited_image_size': edited_image_size,
+        'edited_image_resolution': edited_image_resolution,
+        'edited_image_aspect_ratio': edited_image_aspect_ratio,
         'edited_image_format': original_image_format_description,
-        'edited_image_mode': get_info_about_image(original_image.original_image.path)[4],
-        'edited_image_exif_data': get_info_about_image(original_image.original_image.path)[5],
-        'edited_image_metadata': get_info_about_image(original_image.original_image.path)[6],
+        'edited_image_mode': edited_image_mode,
+        'edited_image_exif_data': edited_image_exif_data,
+        'edited_image_metadata': edited_image_metadata,
         'image_form': edited_image_form,
         'edited_image_name': image.edited_image_name,
         'csrf_token_value': get_token(request),

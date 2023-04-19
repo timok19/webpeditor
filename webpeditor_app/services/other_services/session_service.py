@@ -59,10 +59,11 @@ def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonRespo
         Response about session status and estimated time of sessionid
     """
 
-    session_store, \
-        current_time_expiration_minutes, \
-        new_time_expiration_minutes, \
-        _ = update_session(request=request, user_id=user_id)
+    update_session_values = update_session(request=request, user_id=user_id)
+
+    session_store = update_session_values[0]
+    current_time_expiration_minutes = update_session_values[1]
+    new_time_expiration_minutes = update_session_values[2]
 
     original_image: OriginalImage = OriginalImage.objects.filter(user_id=user_id).first()
     if original_image is None:
@@ -72,13 +73,11 @@ def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonRespo
     if edited_image is None:
         return JsonResponse({'success': False, 'error': 'Edited image was not found'}, status=404)
 
-    if original_image:
-        original_image.session_id_expiration_date = session_store.get_expiry_date()
-        original_image.save()
+    original_image.session_id_expiration_date = session_store.get_expiry_date()
+    original_image.save()
 
-    if edited_image:
-        edited_image.session_id_expiration_date = session_store.get_expiry_date()
-        edited_image.save()
+    edited_image.session_id_expiration_date = session_store.get_expiry_date()
+    edited_image.save()
 
     logging.info(
         f"Current session expiration time of user \'{original_image.user_id or edited_image.user_id}\': "
@@ -93,43 +92,39 @@ def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonRespo
 
 def update_session(request: WSGIRequest, user_id: str) \
         -> JsonResponse | tuple[SessionStore, int, int, JsonResponse]:
-
     session_key = get_session_id(request)
-    current_time_expiration_minutes = 0
-    new_time_expiration_minutes = 0
 
     session_store = SessionStore(session_key=session_key)
     if session_store is None:
         delete_empty_folders(settings.MEDIA_ROOT)
         return JsonResponse({'success': False, 'error': f'Session store does not exist'}, status=404)
 
-    if session_store:
-        # Set cookie expiration time to 15 minutes
-        current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+    # Set cookie expiration time to 15 minutes
+    current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
 
-        expiry_date = timezone.localtime(session_store.get_expiry_date())
-        now = timezone.localtime(timezone.now())
-        if now > expiry_date:
-            delete_old_image_in_db_and_local(user_id)
-            session_store.clear_expired()
+    expiry_date = timezone.localtime(session_store.get_expiry_date())
+    now = timezone.localtime(timezone.now())
+    if now > expiry_date:
+        delete_old_image_in_db_and_local(user_id)
+        session_store.clear_expired()
 
-        session_store.encode(session_dict={'user_id': user_id})
-        update_expiration = timezone.now() + timezone.timedelta(seconds=900)
+    session_store.encode(session_dict={'user_id': user_id})
+    update_expiration = timezone.now() + timezone.timedelta(seconds=900)
 
-        session_store.set_expiry(value=update_expiration)
-        session_store.save()
+    session_store.set_expiry(value=update_expiration)
+    session_store.save()
 
-        new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+    new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
 
-        logging.info(
-            f"Current session expiration time of anonymous user: "
-            f"{current_time_expiration_minutes} minute(s)"
-        )
+    logging.info(
+        f"Current session expiration time of anonymous user: "
+        f"{current_time_expiration_minutes} minute(s)"
+    )
 
-        logging.info(
-            f"Updated session expiration time of anonymous user: "
-            f"{new_time_expiration_minutes} minute(s)"
-        )
+    logging.info(
+        f"Updated session expiration time of anonymous user: "
+        f"{new_time_expiration_minutes} minute(s)"
+    )
 
     return session_store, \
         current_time_expiration_minutes, \
