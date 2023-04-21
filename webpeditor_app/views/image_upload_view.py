@@ -74,7 +74,7 @@ def save_uploaded_image_to_db(image: UploadedFile, original_image: str, request:
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id = get_or_add_user_id(request)
 
-    set_session_expiry(request)
+    set_session_expiry(request, 900)
 
     clean_up_previous_images(user_id)
 
