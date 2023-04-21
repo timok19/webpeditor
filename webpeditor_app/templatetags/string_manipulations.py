@@ -12,4 +12,6 @@ def replace_with_space(value: str, arg):
 
 @register.filter
 def is_instance(value, class_name):
+    # TODO: Handle case, when exif data in dict
+
     return isinstance(value, eval(class_name))

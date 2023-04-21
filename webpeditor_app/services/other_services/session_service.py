@@ -14,9 +14,9 @@ from webpeditor_app.services.image_services.image_service import delete_old_imag
 logging.basicConfig(level=logging.INFO)
 
 
-def set_session_expiry(request: WSGIRequest):
+def set_session_expiry(request: WSGIRequest, num_of_seconds: int):
     # Set session_id token expiry to 15 minutes
-    request.session.set_expiry(900)
+    request.session.set_expiry(num_of_seconds)
 
 
 def get_session_id(request: WSGIRequest) -> str | None:
@@ -59,11 +59,16 @@ def update_image_editor_session(request: WSGIRequest, user_id: str) -> JsonRespo
         Response about session status and estimated time of sessionid
     """
 
+    session_store = SessionStore()
+    current_time_expiration_minutes = 0
+    new_time_expiration_minutes = 0
+
     update_session_values = update_session(request=request, user_id=user_id)
 
-    session_store = update_session_values[0]
-    current_time_expiration_minutes = update_session_values[1]
-    new_time_expiration_minutes = update_session_values[2]
+    if isinstance(update_session_values, tuple):
+        session_store = update_session_values[0]
+        current_time_expiration_minutes = update_session_values[1]
+        new_time_expiration_minutes = update_session_values[2]
 
     original_image: OriginalImage = OriginalImage.objects.filter(user_id=user_id).first()
     if original_image is None:
