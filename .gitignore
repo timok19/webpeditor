@@ -11,9 +11,10 @@ build/
 _gh_pages/
 
 static/CACHE/
-**/static/*.css
-**/static/*.js
-**/static/*.map
+static/*.css
+static/*.js
+static/*.map
+static/media/uploaded_images/
 
 .DS_Store
 yarn-error.log.DS_Store
