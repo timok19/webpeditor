@@ -105,16 +105,16 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'djongo',
-    #     'CLIENT': {
-    #         # Add local env variables to store host string
-    #         'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
-    #                 '=true&w=majority',
-    #         'name': env("DATABASE_NAME"),
-    #         'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
-    #     },
-    # }
+    'default': {
+        'ENGINE': 'djongo',
+        'CLIENT': {
+            # Add local env variables to store host string
+            'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
+                    '=true&w=majority',
+            'name': env("DATABASE_NAME"),
+            'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
+        },
+    }
 }
 
 # Path for future migrations
