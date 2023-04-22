@@ -2,15 +2,13 @@
   "builds": [
     {
       "src": "webpeditor/wsgi.py",
-      "use": "@ardnt/vercel-python-wsgi",
+      "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "output": ".vercel"
+        "runtime": "python3.9"
       }
     }
   ],
-  "outputDirectory": ".vercel",
   "routes": [
     {
       "src": "/(.*)",
