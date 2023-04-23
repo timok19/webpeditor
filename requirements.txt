@@ -45,7 +45,7 @@ mccabe==0.7.0
 mock==5.0.1
 multidict==6.0.4
 networkx==3.0
-numpy==1.24.2
+numpy==1.24.3
 opencv-python==4.7.0.72
 packaging==23.0
 parso==0.8.3
@@ -66,6 +66,7 @@ pylint-django==2.5.3
 pylint-plugin-utils==0.7
 pymongo==3.12.1
 python-clu==0.8.5
+python-dotenv==1.0.0
 python-jose==3.3.0
 pytz==2023.3
 PyWavelets==1.4.1

@@ -48,6 +48,7 @@ opencv-python = "*"
 django-crispy-forms = "*"
 gunicorn = "*"
 whitenoise = "*"
+python-dotenv = "*"
 
 [dev-packages]
 autopep8 = "*"

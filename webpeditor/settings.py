@@ -12,29 +12,28 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 import environ
-from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
 
-# Environment variables instance
-env = environ.Env()
-environ.Env().read_env()
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / 'webpeditor' / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Local development
-SECRET_KEY = env('SECRET_KEY')
-
-# Production
-# SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
+SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '.fly.dev']
+
+CSRF_TRUSTED_ORIGINS = [str(os.getenv('CSRF_TRUSTED_ORIGINS'))]
 
 # Application definition
 # In development mode. Delete this in production mode (add domains in white list)
@@ -107,34 +106,19 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# Local development
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'CLIENT': {
             # Add local env variables to store host string
-            'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
-                    '=true&w=majority',
-            'name': env("DATABASE_NAME"),
-            'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
+            'host': f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
+                    f'{os.getenv("DATABASE_PASSWORD")}'
+                    f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+            'name': str(os.getenv("DATABASE_NAME")),
+            'authMechanism': str(os.getenv('AUTH_MECHANISM'))  # For atlas cloud db
         },
     }
 }
-
-# Production
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'djongo',
-#         'CLIENT': {
-#             # Add local env variables to store host string
-#             'host': f'mongodb+srv://'
-#                     f'{os.getenv("DATABASE_USER")}:{os.getenv("DATABASE_PASSWORD")}'
-#                     f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
-#             'name': os.getenv("DATABASE_NAME"),
-#             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
-#         },
-#     }
-# }
 
 # Path for future migrations
 MIGRATION_MODULES = {
@@ -185,8 +169,8 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
 # PROD ONLY
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
