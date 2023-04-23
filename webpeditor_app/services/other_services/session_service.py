@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.INFO)
 
 
 def set_session_expiry(request: WSGIRequest, num_of_seconds: int):
-    # Set session_id token expiry to 15 minutes
     request.session.set_expiry(num_of_seconds)
 
 
