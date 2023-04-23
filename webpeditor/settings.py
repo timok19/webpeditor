@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = env('SECRET_KEY')
 
 # Production
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -129,9 +129,9 @@ DATABASES = {
         'CLIENT': {
             # Add local env variables to store host string
             'host': f'mongodb+srv://'
-                    f'{os.getenv("DATABASE_USER")}:{os.getenv("DATABASE_PASSWORD")}'
-                    f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
-            'name': os.getenv("DATABASE_NAME"),
+                    f'{os.environ.get("DATABASE_USER")}:{os.environ.get("DATABASE_PASSWORD")}'
+                    f'{os.environ.get("HOST_LINK")}/?retryWrites=true&w=majority',
+            'name': os.environ.get("DATABASE_NAME"),
             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
         },
     }
