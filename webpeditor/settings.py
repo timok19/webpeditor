@@ -55,10 +55,10 @@ INSTALLED_APPS = [
 # Delete in production
 CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_WHITELIST = (
-    'localhost',
-    '127.0.0.1',
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'https://localhost:8000',
+#     'https://127.0.0.1:8000',
+# )
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
