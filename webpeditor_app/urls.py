@@ -4,13 +4,13 @@ from django.urls import re_path
 from django.views.static import serve
 
 from webpeditor_app.views.image_does_not_exist_view import image_does_not_exist_view
-from webpeditor_app.views_api.image_convert_api import image_convert_api
-from webpeditor_app.views_api.image_download_api import image_download_api
+from webpeditor_app.api.image_convert_api import image_convert_api
+from webpeditor_app.api.image_download_api import image_download_api
 from webpeditor_app.views.image_edit_view import image_edit_view
 from webpeditor_app.views.image_convert_view import image_convert_view
-from webpeditor_app.views_api.image_get_original_api import image_get_original_api
+from webpeditor_app.api.image_get_original_api import image_get_original_api
 from webpeditor_app.views.image_info_view import image_info_view
-from webpeditor_app.views_api.image_save_api import image_save_api
+from webpeditor_app.api.image_save_api import image_save_api
 from webpeditor_app.views.image_upload_view import image_upload_view
 from webpeditor_app.views.no_content_view import no_content_view
 
