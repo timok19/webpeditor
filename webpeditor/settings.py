@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 import environ
 
@@ -24,7 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+# Local development
+# SECRET_KEY = env('SECRET_KEY')
+
+# Production
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -104,14 +108,30 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# Local development
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'CLIENT': {
+#             # Add local env variables to store host string
+#             'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
+#                     '=true&w=majority',
+#             'name': env("DATABASE_NAME"),
+#             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
+#         },
+#     }
+# }
+
+# Production
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'CLIENT': {
             # Add local env variables to store host string
-            'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
-                    '=true&w=majority',
-            'name': env("DATABASE_NAME"),
+            'host': f'mongodb+srv://'
+                    f'{os.getenv("DATABASE_USER")}:{os.getenv("DATABASE_PASSWORD")}'
+                    f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+            'name': os.getenv("DATABASE_NAME"),
             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
         },
     }
