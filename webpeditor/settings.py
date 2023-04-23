@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 import environ
+from django.core.management.utils import get_random_secret_key
 
 # Environment variables instance
 env = environ.Env()
@@ -25,15 +26,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Local development
-# SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY')
 
 # Production
-SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 # In development mode. Delete this in production mode (add domains in white list)
@@ -48,8 +49,6 @@ INSTALLED_APPS = [
     'compressor',
     'rest_framework',
     'corsheaders',
-    'cropperjs',
-    'imagekit',
     'webpeditor_app.apps.WebpeditorAppConfig',
 ]
 
@@ -57,8 +56,8 @@ INSTALLED_APPS = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
+    'localhost',
+    '127.0.0.1',
 )
 
 MIDDLEWARE = [
@@ -109,33 +108,33 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 # Local development
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'djongo',
-#         'CLIENT': {
-#             # Add local env variables to store host string
-#             'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
-#                     '=true&w=majority',
-#             'name': env("DATABASE_NAME"),
-#             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
-#         },
-#     }
-# }
-
-# Production
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'CLIENT': {
             # Add local env variables to store host string
-            'host': f'mongodb+srv://'
-                    f'{os.environ.get("DATABASE_USER")}:{os.environ.get("DATABASE_PASSWORD")}'
-                    f'{os.environ.get("HOST_LINK")}/?retryWrites=true&w=majority',
-            'name': os.environ.get("DATABASE_NAME"),
+            'host': f'mongodb+srv://{env("DATABASE_USER")}:{env("DATABASE_PASSWORD")}{env("HOST_LINK")}/?retryWrites'
+                    '=true&w=majority',
+            'name': env("DATABASE_NAME"),
             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
         },
     }
 }
+
+# Production
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'CLIENT': {
+#             # Add local env variables to store host string
+#             'host': f'mongodb+srv://'
+#                     f'{os.getenv("DATABASE_USER")}:{os.getenv("DATABASE_PASSWORD")}'
+#                     f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+#             'name': os.getenv("DATABASE_NAME"),
+#             'authMechanism': 'SCRAM-SHA-1'  # For atlas cloud db
+#         },
+#     }
+# }
 
 # Path for future migrations
 MIGRATION_MODULES = {
