@@ -21,6 +21,6 @@
     "workbox-webpack-plugin": "^6.5.4"
   },
   "scripts": {
-    "update-css": "npx tailwindcss -i ./static/src/input.css -o ./static/src/output.css --watch"
+    "update-css": "npx tailwindcss -i static/src/input.css -o static/src/output.css --watch"
   }
 }

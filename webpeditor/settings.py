@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+from logging.handlers import SysLogHandler
 from pathlib import Path
 import environ
 from dotenv import load_dotenv
@@ -25,11 +26,18 @@ load_dotenv(BASE_DIR / 'webpeditor' / '.env')
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(os.getenv('SECRET_KEY'))
+SECRET_KEY = str(os.getenv('SECRET_KEY', default=get_random_secret_key()))
+
+# Default file storage
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+
+MEDIA_URL = '/webpeditor/media/'
+
+MEDIA_ROOT = BASE_DIR / 'media' / 'uploaded_images'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
-DEBUG = True
+DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
+# DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '.fly.dev']
 
@@ -44,7 +52,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
+    'cloudinary',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'raven.contrib.django.raven_compat',
     'compressor',
     'rest_framework',
     'corsheaders',
@@ -61,8 +73,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -175,13 +187,20 @@ SESSION_COOKIE_SECURE = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'static'
 
-MEDIA_URL = '/media/'
+# Static files directory
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_ROOT = BASE_DIR / 'static' / 'media' / 'uploaded_images'
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': str(os.getenv("CLOUDINARY_CLOUD_NAME")),
+    'API_KEY': str(os.getenv("CLOUDINARY_API_KEY")),
+    'API_SECRET': str(os.getenv("CLOUDINARY_API_SECRET")),
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -195,8 +214,55 @@ COMPRESS_ENABLED = True
 
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
-# Static files directory
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
 # Allow slash in url paths
 APPEND_SLASH = False
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'formatters': {
+        'verbose': {
+            'format': '[contactor] %(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'handlers': {
+        # Send all messages to console
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        # Send info messages to syslog
+        'syslog': {
+            'level': 'INFO',
+            'class': 'logging.handlers.SysLogHandler',
+            'facility': SysLogHandler.LOG_LOCAL2,
+            'address': '/dev/log',
+            'formatter': 'verbose',
+        },
+        # Warning messages are sent to admin emails
+        'mail_admins': {
+            'level': 'WARNING',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+        # critical errors are logged to sentry
+        'sentry': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'raven.contrib.django.handlers.SentryHandler',
+        },
+    },
+    'loggers': {
+        # This is the "catch all" logger
+        '': {
+            'handlers': ['console', 'syslog', 'mail_admins', 'sentry'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    }
+}

@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==4.1.7"
 astroid = "==2.13.3"
 autopep8 = "==2.0.2"
 dill = "==0.3.6"
@@ -49,6 +48,10 @@ django-crispy-forms = "*"
 gunicorn = "*"
 whitenoise = "*"
 python-dotenv = "*"
+cloudinary = "*"
+django-cloudinary-storage = "*"
+raven = "*"
+django = "==4.1.7"
 
 [dev-packages]
 autopep8 = "*"
