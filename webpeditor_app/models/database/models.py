@@ -1,17 +1,12 @@
 from django.db import models
 from django.utils import timezone
 
-from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
-
 
 class OriginalImage(models.Model):
     image_id = models.AutoField(primary_key=True)
     image_name = models.CharField(max_length=255)
     content_type = models.CharField(max_length=255)
-    original_image = models.ImageField(upload_to="",
-                                       validators=[validate_image_file_size],
-                                       null=True,
-                                       blank=True)
+    image_url = models.CharField(max_length=350, default="")
     user_id = models.CharField(max_length=32, null=True)
     session_id = models.CharField(max_length=120, null=True)
     session_id_expiration_date = models.DateTimeField(default=timezone.now)
@@ -27,14 +22,11 @@ class OriginalImage(models.Model):
 
 
 class EditedImage(models.Model):
-    edited_image_id = models.AutoField(primary_key=True)
+    image_id = models.AutoField(primary_key=True)
     original_image = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
-    edited_image_name = models.CharField(max_length=255, default="")
-    content_type_edited = models.CharField(max_length=255)
-    edited_image = models.ImageField(upload_to="",
-                                     validators=[validate_image_file_size],
-                                     null=True,
-                                     blank=True)
+    image_name = models.CharField(max_length=255, default="")
+    content_type = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=350, default="")
     user_id = models.CharField(max_length=32, null=True)
     session_id = models.CharField(max_length=120, null=True)
     session_id_expiration_date = models.DateTimeField(default=timezone.now)
@@ -46,4 +38,4 @@ class EditedImage(models.Model):
         verbose_name_plural = 'Edited Images'
 
     def __str__(self):
-        return str(self.edited_image_id)
+        return str(self.image_id)

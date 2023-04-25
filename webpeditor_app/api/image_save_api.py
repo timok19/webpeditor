@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -10,8 +11,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import EditedImage
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, \
-    get_edited_image_file_path
+from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.other_services.session_service import get_user_id_from_session_store, \
     update_image_editor_session
 from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
@@ -39,7 +39,7 @@ def image_save_api(request: WSGIRequest):
 
         image_file: UploadedFile = request.FILES.get('edited_image', None)
 
-        edited_image_path = get_edited_image_file_path(user_id, edited_image)
+        edited_image_path = Path()
 
         if edited_image_path.exists():
             default_storage.delete(edited_image_path)
@@ -49,11 +49,11 @@ def image_save_api(request: WSGIRequest):
         default_storage.save(edited_image_path, image_file)
 
         # TODO: add popup info about image size
-        try:
-            validate_image_file_size(image_file)
-        except ValidationError as errors:
-            validation_error = "".join(str(error) for error in errors)
-            return render(request, 'imageEdit.html', {'validation_error': validation_error})
+        # try:
+        #     validate_image_file_size(image_file)
+        # except ValidationError as errors:
+        #     validation_error = "".join(str(error) for error in errors)
+        #     return render(request, 'imageEdit.html', {'validation_error': validation_error})
 
         # image = open_image_with_pil(edited_image_path)
         edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"

@@ -13,7 +13,6 @@ from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_edited_image, \
-    copy_original_image_to_edited_folder, \
     get_image_file_instance, \
     get_info_about_image
 from webpeditor_app.services.other_services.session_service import \
@@ -66,7 +65,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
-    original_image_file = get_image_file_instance(original_image.original_image.path)
+    original_image_file = get_image_file_instance(original_image.image_url)
     if original_image_file is None:
         return redirect("ImageDoesNotExistView")
 
@@ -81,8 +80,8 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     elif edited_image is None and original_image.user_id == user_id:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
-        if not copy_original_image_to_edited_folder(user_id, original_image, edited_image):
-            return redirect("ImageDoesNotExistView")
+        # if not copy_original_image_to_edited_folder(user_id, original_image, edited_image):
+        #     return redirect("ImageDoesNotExistView")
 
         edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
 
@@ -91,9 +90,9 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     image: EditedImage = edited_image_form.data.get("edited_image")
 
-    image_name = format_image_file_name(image.edited_image_name)
+    image_name = format_image_file_name(image.image_name)
 
-    image_info_values = get_info_about_image(image.edited_image.path)
+    image_info_values = get_info_about_image(image.image_url)
 
     edited_image_size = image_info_values[1]
     edited_image_resolution = image_info_values[2]
@@ -103,7 +102,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     edited_image_metadata = image_info_values[6]
 
     context: dict = {
-        'edited_image_url': str(image.edited_image.url),
+        'edited_image_url': str(image.image_url),
         'edited_image_name_short_version': image_name,
         'edited_image_size': edited_image_size,
         'edited_image_resolution': edited_image_resolution,
@@ -113,9 +112,9 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         'edited_image_exif_data': edited_image_exif_data,
         'edited_image_metadata': edited_image_metadata,
         'image_form': edited_image_form,
-        'edited_image_name': image.edited_image_name,
+        'edited_image_name': image.image_name,
         'csrf_token_value': get_token(request),
-        'edited_image_content_type': edited_image.content_type_edited
+        'edited_image_content_type': edited_image.content_type
     }
 
     original_image_file.close()

@@ -6,11 +6,10 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import \
-    get_original_image, \
-    format_image_file_name, \
-    get_original_image_file_path, get_info_about_image
-from webpeditor_app.services.other_services.session_service import update_image_editor_session, \
-    get_user_id_from_session_store
+    get_original_image, format_image_file_name, get_info_about_image
+
+from webpeditor_app.services.other_services.session_service import \
+    update_image_editor_session, get_user_id_from_session_store
 
 
 @require_http_methods(['GET'])
@@ -26,7 +25,8 @@ def image_info_view(request) -> HttpResponse:
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
-    path_to_local_image: Path = get_original_image_file_path(user_id, original_image)
+    # TODO: connect to server storage
+    path_to_local_image: Path = Path()
 
     result = get_info_about_image(path_to_local_image)
 
@@ -40,7 +40,7 @@ def image_info_view(request) -> HttpResponse:
         image_mode = result[4]
 
     context: dict = {
-        'original_image_url': original_image.original_image.url,
+        'original_image_url': original_image.image_url,
         'image_name': format_image_file_name(original_image.image_name),
         'image_format': image_format_description,
         'image_size': image_size,

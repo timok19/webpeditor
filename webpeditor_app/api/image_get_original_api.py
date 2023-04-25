@@ -20,7 +20,7 @@ def image_get_original_api(request: WSGIRequest):
         try:
             original_image = get_original_image(user_id)
 
-            image_path = original_image.original_image.path
+            image_path = original_image.image_url.path
             content_type = original_image.content_type
             image_name = original_image.image_name
 

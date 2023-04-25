@@ -1,7 +1,6 @@
 import io
 import logging
 import os
-import shutil
 from pathlib import Path
 from typing import Tuple
 
@@ -14,10 +13,6 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
-from webpeditor_app.services.image_services.folder_service import \
-    create_folder, \
-    get_media_root_folder_paths, \
-    delete_users_folder
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,8 +27,6 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     Returns:
         A JSON response with success status and information message.
     """
-    path_to_old_user_folder = get_media_root_folder_paths(user_id)[0]
-
     original_image = get_original_image(user_id)
     if original_image:
         original_image.delete()
@@ -51,7 +44,6 @@ def delete_old_image_in_db_and_local(user_id: str) -> JsonResponse:
     # Delete user's folder in all other cases
     if original_image is None or edited_image is None:
         logging.info("No images in db. Deleting user folder...")
-        delete_users_folder(path_to_old_user_folder)
 
     return JsonResponse({
         'success': True,
@@ -198,34 +190,3 @@ def get_info_about_image(path_to_local_image: Path | str) \
 
 def get_image_aspect_ratio(image_file: ImageClass) -> Decimal:
     return Decimal(image_file.width / image_file.height).quantize(Decimal('.1'), rounding=ROUND_UP)
-
-
-def get_original_image_file_path(user_id: str, original_image) -> Path:
-    # Get first argument from get_media_root_paths() to get original image path
-    return get_media_root_folder_paths(user_id)[0] / original_image.image_name
-
-
-def get_edited_image_file_path(user_id: str, edited_image: EditedImage) -> Path:
-    # Get second argument from get_media_root_paths() to get edited image path
-    return get_media_root_folder_paths(user_id)[1] / edited_image.edited_image_name
-
-
-def copy_original_image_to_edited_folder(user_id: str,
-                                         original_image: OriginalImage,
-                                         edited_image: EditedImage) -> bool:
-    edited_image_folder_path = get_media_root_folder_paths(user_id)[1]
-    if not edited_image_folder_path.exists():
-        create_folder(user_id=user_id, is_original_image=False)
-
-    original_image_file_path = get_original_image_file_path(user_id, original_image)
-    edited_image_file_path = get_edited_image_file_path(user_id, edited_image)
-
-    shutil.copy2(original_image_file_path, edited_image_file_path)
-
-    image_file = get_image_file_instance(edited_image_file_path)
-
-    if image_file is None:
-        return False
-
-    image_file.close()
-    return True

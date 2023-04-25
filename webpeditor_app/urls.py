@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
-from django.views.static import serve
 
 from webpeditor_app.views.image_does_not_exist_view import image_does_not_exist_view
 from webpeditor_app.api.image_convert_api import image_convert_api
@@ -24,10 +23,9 @@ urlpatterns = [
     re_path(r'^api/image_get_original/?$', image_get_original_api, name='ImageGetOriginalApi'),
     re_path(r'^image_convert/?$', image_convert_view, name='ImageConvertView'),
     re_path(r'^api/image_convert/?$', image_convert_api, name='ImageConvertApi'),
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
     # For all non-existing (not allowed) urls
-    re_path(r'^.+$', no_content_view, name='NoContentView'),
+    # re_path(r'^.+$', no_content_view, name='NoContentView'),
 ]
 
 if settings.DEBUG:

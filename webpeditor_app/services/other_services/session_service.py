@@ -1,14 +1,12 @@
 import logging
 import uuid
 
-from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.utils import timezone
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.folder_service import delete_empty_folders
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
 
 logging.basicConfig(level=logging.INFO)
@@ -100,7 +98,6 @@ def update_session(request: WSGIRequest, user_id: str) \
 
     session_store = SessionStore(session_key=session_key)
     if session_store is None:
-        delete_empty_folders(settings.MEDIA_ROOT)
         return JsonResponse({'success': False, 'error': f'Session store does not exist'}, status=404)
 
     # Set cookie expiration time to 15 minutes

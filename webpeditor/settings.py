@@ -13,6 +13,7 @@ import os
 from logging.handlers import SysLogHandler
 from pathlib import Path
 import environ
+import cloudinary
 from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
@@ -26,14 +27,14 @@ load_dotenv(BASE_DIR / 'webpeditor' / '.env')
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(os.getenv('SECRET_KEY', default=get_random_secret_key()))
+SECRET_KEY = str(os.getenv(key='SECRET_KEY', default=get_random_secret_key()))
 
 # Default file storage
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
-
-MEDIA_URL = '/webpeditor/media/'
+MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media' / 'uploaded_images'
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
@@ -53,9 +54,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
-    'cloudinary',
-    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'raven.contrib.django.raven_compat',
     'compressor',
     'rest_framework',
@@ -196,11 +196,13 @@ STATIC_ROOT = BASE_DIR / 'static'
 # Static files directory
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': str(os.getenv("CLOUDINARY_CLOUD_NAME")),
-    'API_KEY': str(os.getenv("CLOUDINARY_API_KEY")),
-    'API_SECRET': str(os.getenv("CLOUDINARY_API_SECRET")),
-}
+cloudinary.config(
+    cloud_name=str(os.getenv("CLOUDINARY_CLOUD_NAME")),
+    api_key=str(os.getenv("CLOUDINARY_API_KEY")),
+    api_secret=str(os.getenv("CLOUDINARY_API_SECRET")),
+    secure=True,
+)
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -216,53 +218,3 @@ STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 # Allow slash in url paths
 APPEND_SLASH = False
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'formatters': {
-        'verbose': {
-            'format': '[contactor] %(levelname)s %(asctime)s %(message)s'
-        },
-    },
-    'handlers': {
-        # Send all messages to console
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-        # Send info messages to syslog
-        'syslog': {
-            'level': 'INFO',
-            'class': 'logging.handlers.SysLogHandler',
-            'facility': SysLogHandler.LOG_LOCAL2,
-            'address': '/dev/log',
-            'formatter': 'verbose',
-        },
-        # Warning messages are sent to admin emails
-        'mail_admins': {
-            'level': 'WARNING',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
-        },
-        # critical errors are logged to sentry
-        'sentry': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'raven.contrib.django.handlers.SentryHandler',
-        },
-    },
-    'loggers': {
-        # This is the "catch all" logger
-        '': {
-            'handlers': ['console', 'syslog', 'mail_admins', 'sentry'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    }
-}
