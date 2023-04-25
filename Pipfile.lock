@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "10036913e7d11a64a0d8d98842053906de7632134572e6f38d761920d9e80a0c"
+            "sha256": "66361ba51248bac184d7abdd1210073ddf0053663e5e8ddbb8f14bdcc18799c5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -329,14 +329,6 @@
             "index": "pypi",
             "version": "==1.0.5"
         },
-        "django-cloudinary-storage": {
-            "hashes": [
-                "sha256:95c855c7334141b2a485ea7eb5716de87bb6ce0d848e205debb3a3ab7bbbd49a",
-                "sha256:debd403a5f225c9d35c4af508ff4abc7fdc262129464134b60b2feeb2c44d3e1"
-            ],
-            "index": "pypi",
-            "version": "==0.3.0"
-        },
         "django-compressor": {
             "hashes": [
                 "sha256:2c451174acb6f083054af7c8089376599b22d6380bd60311f78ec3fed79acc8e",
@@ -568,7 +560,7 @@
                 "sha256:ecde0f8adef7dfdec993fd54b0f78183051b6580f606111a6d789cd14c61ea0c",
                 "sha256:f21c442fdd2805e91799fbe044a7b999b8571bb0ab0f7850d0cb9641a687092b"
             ],
-            "markers": "python_version >= '3.10'",
+            "markers": "python_version >= '3.7'",
             "version": "==1.24.3"
         },
         "opencv-python": {

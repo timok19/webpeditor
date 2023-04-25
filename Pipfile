@@ -49,7 +49,6 @@ gunicorn = "*"
 whitenoise = "*"
 python-dotenv = "*"
 cloudinary = "*"
-django-cloudinary-storage = "*"
 raven = "*"
 django = "==4.1.7"
 

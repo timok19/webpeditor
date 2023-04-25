@@ -33,7 +33,9 @@ def clean_up_previous_images(user_id: str) -> None:
     if previous_original_image is None or previous_edited_image is None:
         return None
 
-    # TODO: add deletion of previous images on Cloudinary
+    # if cloudinary.api.root_folders()
+    # cloudinary.uploader.destroy()
+
     previous_original_image.delete()
     previous_edited_image.delete()
 
@@ -62,6 +64,19 @@ def save_uploaded_image_to_db(image_file: InMemoryUploadedFile, image_url: str, 
     image_url.save()
 
 
+def check_image_existence(request: WSGIRequest) -> bool:
+    is_image_exist = True
+
+    user_id = get_user_id_from_session_store(request)
+
+    original_image = get_original_image(user_id)
+    if original_image is None or original_image.image_url is None:
+        is_image_exist = False
+        return is_image_exist
+
+    return is_image_exist
+
+
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id = get_or_add_user_id(request)
 
@@ -72,7 +87,14 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
     uploaded_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
     if uploaded_image_file.size > MAX_IMAGE_FILE_SIZE:
         max_image_file_size_in_mb = MAX_IMAGE_FILE_SIZE / 1_000_000
-        return render(request, 'imageUpload.html', {'error': f'Image should not exceed {max_image_file_size_in_mb}'})
+        is_image_exist = check_image_existence(request)
+
+        context: dict = {
+            'error': f'Image should not exceed {max_image_file_size_in_mb} MB',
+            'is_image_exist': is_image_exist
+        }
+
+        return render(request, 'imageUpload.html', context)
 
     uploaded_image_url = upload_image_to_cloudinary(uploaded_image_file, user_id)
     save_uploaded_image_to_db(uploaded_image_file, uploaded_image_url, request, user_id)
@@ -84,13 +106,8 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
 
 def get(request: WSGIRequest) -> HttpResponse:
     form = OriginalImageForm()
-    is_image_exist = True
 
-    user_id = get_user_id_from_session_store(request)
-
-    original_image = get_original_image(user_id)
-    if original_image is None or original_image.image_url is None:
-        is_image_exist = False
+    is_image_exist = check_image_existence(request)
 
     context: dict = {
         'form': form,

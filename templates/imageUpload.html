@@ -32,26 +32,23 @@
                        for="{{ form.original_image_form.auto_id }}">
                     Upload your image:</label>
 
-                <input
-                        class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                        type="file" name="original_image_form" required accept=".jpeg,.jpg,.png,.webp,.jfif,.ico"
-                        id="{{ form.original_image_form.auto_id }}"
-                        size="image">
-                {% if form.errors %}
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ error|escape }}</p>
-                        {% endfor %}
-                    {% endfor %}
+                <input class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                       type="file" name="original_image_form" required accept=".jpeg,.jpg,.png,.webp,.jfif,.ico"
+                       id="{{ form.original_image_form.auto_id }}"
+                       size="image">
+
+                {% if error %}
+                    <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ error }}</p>
+                    <script type="text/javascript">
+                        document.addEventListener('DOMContentLoaded', function() {
+                            toastifyMessage('Error: Image has not been uploaded successfully', false);
+                        });
+                    </script>
                 {% else %}
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-300 font-light">Image size should be lower than
-                        6
-                        MB</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-300 font-light">Image size should be lower than 6 MB</p>
                 {% endif %}
-                <p class="mt-3 text-sm text-gray-500 dark:text-gray-300 font-light">Supports .WEBP, .JPEG, .JPG, .PNG,
-                    .RAW,
-                    .JFIF,
-                    .ICO</p>
+
+                <p class="mt-3 text-sm text-gray-500 dark:text-gray-300 font-light">Supports .WEBP, .JPEG, .JPG, .PNG, .JFIF, .ICO</p>
                 <br/>
 
                 <div class="flex flex-row justify-between">
