@@ -1,6 +1,6 @@
-import io
 import logging
 import os
+from io import BytesIO
 from pathlib import Path
 from typing import Tuple
 
@@ -97,10 +97,10 @@ def get_edited_image(user_id: str) -> EditedImage | None:
     return edited_image
 
 
-def get_image_file_instance(path_to_local_image: Path | str) -> ImageClass | None:
+def get_image_file_instance(image_file_bytes: BytesIO) -> ImageClass | None:
     try:
-        return PilImage.open(path_to_local_image)
-    except (FileExistsError, FileNotFoundError) as e:
+        return PilImage.open(image_file_bytes)
+    except Exception as e:
         logging.error(e)
         return None
 
@@ -136,7 +136,7 @@ def change_file_extension(image_name: str, extension: str) -> str:
 
 
 def get_image_file_size(image: ImageClass) -> str:
-    buffer = io.BytesIO()
+    buffer = BytesIO()
     image.save(buffer, format=image.format)
 
     size_in_bytes: int = buffer.tell()
@@ -150,9 +150,9 @@ def get_image_file_size(image: ImageClass) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
-def get_info_about_image(path_to_local_image: Path | str) \
+def get_info_about_image(image_file_bytes: BytesIO) \
         -> None | Tuple:
-    image_file = get_image_file_instance(path_to_local_image)
+    image_file = get_image_file_instance(image_file_bytes)
 
     if image_file is None:
         return None

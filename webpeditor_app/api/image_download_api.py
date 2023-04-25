@@ -9,7 +9,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import get_file_extension
-from webpeditor_app.services.other_services.session_service import get_or_add_user_id, update_image_editor_session
+from webpeditor_app.services.other_services.session_service import get_or_add_user_id, update_session
 
 
 @requires_csrf_token
@@ -42,7 +42,7 @@ def image_download_api(request: WSGIRequest):
         response = HttpResponse(buffer, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_name)}"'
 
-        update_image_editor_session(request=request, user_id=user_id)
+        update_session(request=request, user_id=user_id)
 
         return response
 

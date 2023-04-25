@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor_app.models.database.models import EditedImage
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.other_services.session_service import get_user_id_from_session_store, \
-    update_image_editor_session
+    update_session
 from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 
 
@@ -58,7 +58,7 @@ def image_save_api(request: WSGIRequest):
         # image = open_image_with_pil(edited_image_path)
         edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"
 
-        update_image_editor_session(request=request, user_id=user_id)
+        update_session(request=request, user_id=user_id)
 
         EditedImage.objects.filter(user_id=user_id).update(
             edited_image=edited_image_path_to_db,

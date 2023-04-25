@@ -15,41 +15,69 @@ from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
-    update_image_editor_session, \
+    update_session, \
     get_user_id_from_session_store, \
     get_or_add_user_id, set_session_expiry
 
 logging.basicConfig(level=logging.INFO)
 
-
-# cloudinary.uploader.destroy(cloudinary_image.public_id)
-# cloudinary.api.delete_folder(folder_path)
 # result = cloudinary.uploader\
 # .rename("canyon", "grand_canyon") -> for file renaming
 
-def clean_up_previous_images(user_id: str) -> None:
+
+def delete_assets_in_folder(folder_path):
+    try:
+        assets = cloudinary.api.resources(folder=folder_path, max_results=500)
+        for asset in assets['resources']:
+            cloudinary.api.delete_resources([asset['public_id']])
+            logging.info(f"Deleted asset: {asset['public_id']}")
+
+        # Recursively delete assets in subfolders
+        response = cloudinary.api.subfolders(folder_path)
+        for folder in response['folders']:
+            delete_assets_in_folder(folder['path'])
+
+    except cloudinary.api.NotFound:
+        pass
+
+
+def delete_folder_with_content(folder_path):
+    delete_assets_in_folder(folder_path)
+
+    # Delete the folder
+    try:
+        cloudinary.api.delete_folder(folder_path)
+        logging.info(f"Folder '{folder_path}' and its content have been deleted")
+    except cloudinary.api.NotFound:
+        logging.info(f"Folder '{folder_path}' not found")
+
+
+def clean_up_previous_images(user_id: str):
     previous_original_image = get_original_image(user_id)
     previous_edited_image = get_edited_image(user_id)
-    if previous_original_image is None or previous_edited_image is None:
-        return None
 
-    # if cloudinary.api.root_folders()
-    # cloudinary.uploader.destroy()
+    if previous_original_image:
+        previous_original_image.delete()
 
-    previous_original_image.delete()
-    previous_edited_image.delete()
+    if previous_edited_image:
+        previous_edited_image.delete()
+
+    delete_folder_with_content(user_id)
 
 
 def upload_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> str:
     folder_path: str = f"{user_id}/"
-    cloudinary_image = cloudinary.uploader.upload_image(
+    cloudinary.uploader.upload_image(
         file=image,
         folder=folder_path,
         use_filename=True,
         overwrite=True
     )
 
-    return cloudinary_image.url
+    assets = cloudinary.api.resources(folder=folder_path, max_results=500)
+    secure_url: str = assets['resources'][0]['secure_url']
+
+    return secure_url
 
 
 def save_uploaded_image_to_db(image_file: InMemoryUploadedFile, image_url: str, request: WSGIRequest, user_id: str):
@@ -66,7 +94,6 @@ def save_uploaded_image_to_db(image_file: InMemoryUploadedFile, image_url: str, 
 
 def check_image_existence(request: WSGIRequest) -> bool:
     is_image_exist = True
-
     user_id = get_user_id_from_session_store(request)
 
     original_image = get_original_image(user_id)
@@ -79,18 +106,14 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id = get_or_add_user_id(request)
-
     set_session_expiry(request, 900)
-
     clean_up_previous_images(user_id)
 
     uploaded_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
     if uploaded_image_file.size > MAX_IMAGE_FILE_SIZE:
-        max_image_file_size_in_mb = MAX_IMAGE_FILE_SIZE / 1_000_000
         is_image_exist = check_image_existence(request)
-
         context: dict = {
-            'error': f'Image should not exceed {max_image_file_size_in_mb} MB',
+            'error': f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB',
             'is_image_exist': is_image_exist
         }
 
@@ -99,16 +122,14 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
     uploaded_image_url = upload_image_to_cloudinary(uploaded_image_file, user_id)
     save_uploaded_image_to_db(uploaded_image_file, uploaded_image_url, request, user_id)
 
-    update_image_editor_session(request=request, user_id=user_id)
+    update_session(request=request, user_id=user_id)
 
     return redirect('ImageInfoView')
 
 
 def get(request: WSGIRequest) -> HttpResponse:
     form = OriginalImageForm()
-
     is_image_exist = check_image_existence(request)
-
     context: dict = {
         'form': form,
         'is_image_exist': is_image_exist

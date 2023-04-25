@@ -16,7 +16,7 @@ from webpeditor_app.services.image_services.image_service import \
     get_image_file_instance, \
     get_info_about_image
 from webpeditor_app.services.other_services.session_service import \
-    update_image_editor_session, \
+    update_session, \
     get_session_id, \
     get_user_id_from_session_store
 from webpeditor_app.views.image_info_view import format_image_file_name
@@ -119,7 +119,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     original_image_file.close()
 
-    update_image_editor_session(request=request, user_id=user_id)
+    update_session(request=request, user_id=user_id)
 
     return render(request, 'imageEdit.html', context)
 
