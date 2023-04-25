@@ -12,8 +12,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, \
-    get_image_file_instance
+from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     update_image_editor_session, \

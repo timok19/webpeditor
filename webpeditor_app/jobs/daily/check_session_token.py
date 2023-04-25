@@ -7,7 +7,6 @@ from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
 from webpeditor import settings
-from webpeditor_app.services.image_services.folder_service import delete_folder_by_expiry
 from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local, \
     get_serialized_data_original_image, get_serialized_data_edited_image, get_all_original_images
 
@@ -40,7 +39,6 @@ class Job(DailyJob):
 
                 if not user_id:
                     logging.error("There is no original images. Deleting users folders...")
-                    delete_folder_by_expiry(media_root)
 
                 if timezone.now() > session_id_expiration_date:
                     delete_old_image_in_db_and_local(user_id)
@@ -48,9 +46,9 @@ class Job(DailyJob):
 
                 if user_id:
                     if user_id not in os.listdir(media_root):
-                        delete_folder_by_expiry(media_root)
+                        pass
 
             logging.info(f"Deleted collections in db: {counter}")
 
         if len(original_images_deserialized) == 0 or len(edited_images_deserialized) == 0:
-            delete_folder_by_expiry(media_root)
+            pass
