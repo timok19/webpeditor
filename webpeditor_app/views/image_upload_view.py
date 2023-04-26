@@ -1,4 +1,6 @@
 import logging
+from typing import Tuple
+
 import cloudinary.uploader
 import cloudinary.api
 
@@ -12,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
+from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, get_file_name
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
@@ -20,9 +22,6 @@ from webpeditor_app.services.other_services.session_service import \
     get_or_add_user_id, set_session_expiry
 
 logging.basicConfig(level=logging.INFO)
-
-# result = cloudinary.uploader\
-# .rename("canyon", "grand_canyon") -> for file renaming
 
 
 def delete_assets_in_folder(folder_path):
@@ -65,31 +64,39 @@ def clean_up_previous_images(user_id: str):
     delete_folder_with_content(user_id)
 
 
-def upload_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> str:
+def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
     folder_path: str = f"{user_id}/"
-    cloudinary.uploader.upload_image(
-        file=image,
-        folder=folder_path,
-        use_filename=True,
-        overwrite=True
-    )
 
-    assets = cloudinary.api.resources(folder=folder_path, max_results=500)
-    secure_url: str = assets['resources'][0]['secure_url']
+    image_name = get_file_name(str(image.name))
+    image_name_after_re = replace_with_underscore(image_name)
+    new_original_image_name = f"webpeditor_{image_name_after_re}"
 
-    return secure_url
+    cloudinary_parameters: dict = {
+        "folder": folder_path,
+        "use_filename": True,
+        "filename_override": new_original_image_name,
+        "overwrite": True,
+    }
+    cloudinary_image = cloudinary.uploader.upload_image(image, **cloudinary_parameters)
+
+    return str(cloudinary_image.url), new_original_image_name
 
 
-def save_uploaded_image_to_db(image_file: InMemoryUploadedFile, image_url: str, request: WSGIRequest, user_id: str):
-    image_url = OriginalImage(
-        image_name=replace_with_underscore(image_file.name),
+def save_uploaded_image_to_db(image_file: InMemoryUploadedFile,
+                              image_name: str,
+                              image_url: str,
+                              request: WSGIRequest,
+                              user_id: str):
+
+    original_image = OriginalImage(
+        image_name=image_name,
         content_type=image_file.content_type,
         image_url=image_url,
         session_id=request.session.session_key,
         session_id_expiration_date=request.session.get_expiry_date(),
         user_id=user_id
     )
-    image_url.save()
+    original_image.save()
 
 
 def check_image_existence(request: WSGIRequest) -> bool:
@@ -109,8 +116,8 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
     set_session_expiry(request, 900)
     clean_up_previous_images(user_id)
 
-    uploaded_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
-    if uploaded_image_file.size > MAX_IMAGE_FILE_SIZE:
+    uploaded_original_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
+    if uploaded_original_image_file.size > MAX_IMAGE_FILE_SIZE:
         is_image_exist = check_image_existence(request)
         context: dict = {
             'error': f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB',
@@ -119,8 +126,14 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
 
         return render(request, 'imageUpload.html', context)
 
-    uploaded_image_url = upload_image_to_cloudinary(uploaded_image_file, user_id)
-    save_uploaded_image_to_db(uploaded_image_file, uploaded_image_url, request, user_id)
+    image_url, new_image_name = upload_original_image_to_cloudinary(uploaded_original_image_file, user_id)
+    save_uploaded_image_to_db(
+        image_file=uploaded_original_image_file,
+        image_name=new_image_name,
+        image_url=image_url,
+        request=request,
+        user_id=user_id
+    )
 
     update_session(request=request, user_id=user_id)
 

@@ -1,30 +1,27 @@
-import logging
-from pathlib import Path
+import cloudinary.uploader
+from io import BytesIO
+from PIL.Image import Image as ImageClass
 
-from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
-from django.core.files.uploadedfile import UploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.views.decorators.csrf import requires_csrf_token
+from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import EditedImage
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
-from webpeditor_app.services.other_services.session_service import get_user_id_from_session_store, \
-    update_session
-from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
+from webpeditor_app.services.other_services.api_service import get_json_request_body
+from webpeditor_app.services.other_services.session_service import get_user_id_from_session_store, update_session
 
 
-@requires_csrf_token
+@csrf_exempt
 @require_http_methods(['POST'])
 def image_save_api(request: WSGIRequest):
     if request.method == 'POST':
         user_id = get_user_id_from_session_store(request)
-
+        image_file = ImageClass()
         if user_id is None:
-            return redirect('ImageDoesNotExistView')
+            return redirect('NoContentView')
 
         if request.session.get_expiry_age() == 0:
             return redirect('ImageDoesNotExistView')
@@ -37,33 +34,30 @@ def image_save_api(request: WSGIRequest):
         if edited_image is None:
             return redirect("ImageDoesNotExistView")
 
-        image_file: UploadedFile = request.FILES.get('edited_image', None)
+        request_body = get_json_request_body(request)
+        if isinstance(request_body, tuple):
+            image_file: ImageClass = request_body[3]
 
-        edited_image_path = Path()
+        buffer = BytesIO()
+        image_file.save(buffer, format=image_file.format)
+        buffer.seek(0)
 
-        if edited_image_path.exists():
-            default_storage.delete(edited_image_path)
-        else:
-            logging.error("Path to edited image not found")
+        folder_path = f"{user_id}/edited/"
 
-        default_storage.save(edited_image_path, image_file)
-
-        # TODO: add popup info about image size
-        # try:
-        #     validate_image_file_size(image_file)
-        # except ValidationError as errors:
-        #     validation_error = "".join(str(error) for error in errors)
-        #     return render(request, 'imageEdit.html', {'validation_error': validation_error})
-
-        # image = open_image_with_pil(edited_image_path)
-        edited_image_path_to_db = f"{user_id}/edited/{image_file.name}"
-
-        update_session(request=request, user_id=user_id)
+        cloudinary_parameters: dict = {
+            "folder": folder_path,
+            "use_filename": True,
+            "filename_override": edited_image.image_name,
+            "overwrite": True
+        }
+        cloudinary_image = cloudinary.uploader.upload_image(file=buffer, **cloudinary_parameters)
 
         EditedImage.objects.filter(user_id=user_id).update(
-            edited_image=edited_image_path_to_db,
-            session_id_expiration_date=request.session.get_expiry_date()
+            image_url=cloudinary_image.url,
+            session_id_expiration_date=request.session.get_expiry_date(),
         )
+
+        update_session(request=request, user_id=user_id)
 
         response = HttpResponse(status=200, content_type="text/javascript")
 

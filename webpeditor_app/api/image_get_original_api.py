@@ -3,7 +3,7 @@ from wsgiref.util import FileWrapper
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
-from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage
@@ -11,7 +11,7 @@ from webpeditor_app.services.image_services.image_service import get_original_im
 from webpeditor_app.services.other_services.session_service import get_or_add_user_id
 
 
-@requires_csrf_token
+@csrf_exempt
 @require_http_methods(['GET'])
 def image_get_original_api(request: WSGIRequest):
     user_id = get_or_add_user_id(request)

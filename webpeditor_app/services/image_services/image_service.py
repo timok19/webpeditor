@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Tuple
 
+import requests
 from PIL import Image as PilImage, ExifTags
 from PIL.Image import Image as ImageClass
 from _decimal import ROUND_UP, Decimal
@@ -119,7 +120,7 @@ def convert_image(path_to_local_image: Path | str, path_to_save: str = "", outpu
         logging.error(e)
 
 
-def format_image_file_name(image_name: str) -> str:
+def image_name_shorter(image_name: str) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > 20:
         basename = basename[:17] + "..."
@@ -130,9 +131,22 @@ def get_file_extension(image_name: str) -> str:
     return os.path.splitext(image_name)[1][1:]
 
 
+def get_file_name(image_name: str) -> str:
+    return os.path.splitext(image_name)[0]
+
+
 def change_file_extension(image_name: str, extension: str) -> str:
     base_name, _ = os.path.splitext(image_name)
     return base_name + f".{extension.lower()}"
+
+
+def get_image_bytes_from_url(image_url: str) -> BytesIO | None:
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        return BytesIO(response.content)
+    else:
+        logging.error(f"Failed to download image: {response.status_code}")
+        return None
 
 
 def get_image_file_size(image: ImageClass) -> str:
@@ -162,6 +176,7 @@ def get_info_about_image(image_file_bytes: BytesIO) \
     image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
     image_aspect_ratio = get_image_aspect_ratio(image_file)
     image_mode = image_file.mode
+    image_format = str(image_file.format).lower()
 
     # Get structured exif data, if exists
     exif_data = image_file.getexif()
@@ -180,6 +195,7 @@ def get_info_about_image(image_file_bytes: BytesIO) \
     image_file.close()
 
     return image_format_description, \
+        image_format, \
         image_size, \
         image_resolution, \
         image_aspect_ratio, \

@@ -1,25 +1,24 @@
 import logging
 
+import cloudinary.uploader
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
-from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.models.database.forms import EditedImageForm
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
 from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_edited_image, \
     get_image_file_instance, \
-    get_info_about_image
+    get_info_about_image, get_image_bytes_from_url
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
     get_session_id, \
     get_user_id_from_session_store
-from webpeditor_app.views.image_info_view import format_image_file_name
+from webpeditor_app.views.image_info_view import image_name_shorter
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,14 +27,24 @@ def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
-    new_edited_image_name = f"webpeditor_{original_image.image_name}"
-    edited_image = f"{user_id}/edited/{new_edited_image_name}"
+
+    original_image_url = original_image.image_url
+    new_edited_image_name = f"{original_image.image_name}_edited"
+    folder_path = f"{user_id}/edited/"
+
+    cloudinary_parameters: dict = {
+        "folder": folder_path,
+        "use_filename": True,
+        "filename_override": new_edited_image_name,
+        "overwrite": True
+    }
+    cloudinary_image = cloudinary.uploader.upload_image(original_image_url, **cloudinary_parameters)
 
     edited_image_init = EditedImage(
         user_id=user_id,
-        edited_image=edited_image,
-        edited_image_name=new_edited_image_name,
-        content_type_edited=original_image.content_type,
+        image_url=cloudinary_image.url,
+        image_name=new_edited_image_name,
+        content_type=original_image.content_type,
         session_id=session_key,
         session_id_expiration_date=request.session.get_expiry_date(),
         original_image=original_image
@@ -43,14 +52,6 @@ def create_and_save_edited_image(user_id: str,
     edited_image_init.save()
 
     return edited_image_init
-
-
-def create_edited_image_form(edited_image: EditedImage | None) -> EditedImageForm:
-    data = {"edited_image": edited_image}
-    if edited_image is None:
-        return EditedImageForm()
-    else:
-        return EditedImageForm(data=data)
 
 
 def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
@@ -65,45 +66,40 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
-    original_image_file = get_image_file_instance(original_image.image_url)
-    if original_image_file is None:
-        return redirect("ImageDoesNotExistView")
-
-    original_image_format_description = original_image_file.format_description
-
     session_key = get_session_id(request)
 
     edited_image = get_edited_image(user_id)
     if edited_image and original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
-
     elif edited_image is None and original_image.user_id == user_id:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
-        # if not copy_original_image_to_edited_folder(user_id, original_image, edited_image):
-        #     return redirect("ImageDoesNotExistView")
+    original_image_data = get_image_bytes_from_url(edited_image.image_url)
+    if original_image_data is None:
+        return redirect("ImageDoesNotExistView")
 
-        edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
+    image_info = get_info_about_image(original_image_data)
+    edited_image_format = image_info[1]
+    edited_image_size = image_info[2]
+    edited_image_resolution = image_info[3]
+    edited_image_aspect_ratio = image_info[4]
+    edited_image_mode = image_info[5]
+    edited_image_exif_data = image_info[6]
+    edited_image_metadata = image_info[7]
 
-    else:
-        edited_image_form: EditedImageForm = create_edited_image_form(edited_image)
+    # Original image format description to show on FE
+    original_image_data = get_image_bytes_from_url(original_image.image_url)
+    if original_image_data is None:
+        return redirect("ImageDoesNotExistView")
 
-    image: EditedImage = edited_image_form.data.get("edited_image")
+    original_image_file = get_image_file_instance(original_image_data)
+    original_image_format_description = original_image_file.format_description
 
-    image_name = format_image_file_name(image.image_name)
-
-    image_info_values = get_info_about_image(image.image_url)
-
-    edited_image_size = image_info_values[1]
-    edited_image_resolution = image_info_values[2]
-    edited_image_aspect_ratio = image_info_values[3]
-    edited_image_mode = image_info_values[4]
-    edited_image_exif_data = image_info_values[5]
-    edited_image_metadata = image_info_values[6]
+    edited_image_name_with_extension = f"{edited_image.image_name}.{edited_image_format}"
 
     context: dict = {
-        'edited_image_url': str(image.image_url),
-        'edited_image_name_short_version': image_name,
+        'edited_image_url': edited_image.image_url,
+        'edited_image_name_short': image_name_shorter(edited_image_name_with_extension),
         'edited_image_size': edited_image_size,
         'edited_image_resolution': edited_image_resolution,
         'edited_image_aspect_ratio': edited_image_aspect_ratio,
@@ -111,9 +107,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         'edited_image_mode': edited_image_mode,
         'edited_image_exif_data': edited_image_exif_data,
         'edited_image_metadata': edited_image_metadata,
-        'image_form': edited_image_form,
-        'edited_image_name': image.image_name,
-        'csrf_token_value': get_token(request),
+        'edited_image_name_with_extension': edited_image_name_with_extension,
         'edited_image_content_type': edited_image.content_type
     }
 
@@ -130,6 +124,5 @@ def image_edit_view(request: WSGIRequest) -> HttpResponsePermanentRedirect | Htt
     if request.method == "GET":
         response = get(request)
         return response
-
     else:
         return HttpResponse(status=405)

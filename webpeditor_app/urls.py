@@ -25,7 +25,7 @@ urlpatterns = [
     re_path(r'^api/image_convert/?$', image_convert_api, name='ImageConvertApi'),
 
     # For all non-existing (not allowed) urls
-    # re_path(r'^.+$', no_content_view, name='NoContentView'),
+    re_path(r'^no_content/?$', no_content_view, name='NoContentView'),
 ]
 
 if settings.DEBUG:

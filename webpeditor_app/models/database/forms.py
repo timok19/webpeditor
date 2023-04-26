@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import HiddenInput
 
 from webpeditor_app.services.validators.image_file_validator import validate_image_file_size
 
@@ -9,14 +8,6 @@ class OriginalImageForm(forms.Form):
         required=True,
         validators=[validate_image_file_size],
         allow_empty_file=False
-    )
-
-
-class EditedImageForm(forms.Form):
-    edited_image_form = forms.ImageField(
-        required=False,
-        validators=[validate_image_file_size],
-        widget=HiddenInput()
     )
 
 

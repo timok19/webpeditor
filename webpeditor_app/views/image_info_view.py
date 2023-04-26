@@ -1,6 +1,4 @@
 import logging
-import requests
-from io import BytesIO
 
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -8,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import \
-    get_original_image, format_image_file_name, get_info_about_image
+    get_original_image, image_name_shorter, get_info_about_image, get_image_bytes_from_url
 
 from webpeditor_app.services.other_services.session_service import \
     update_session, get_user_id_from_session_store
@@ -18,7 +16,6 @@ logging.basicConfig(level=logging.INFO)
 
 @require_http_methods(['GET'])
 def image_info_view(request) -> HttpResponse:
-    image_data = BytesIO()
     user_id = get_user_id_from_session_store(request)
     if user_id is None:
         return redirect('ImageUploadView')
@@ -30,26 +27,23 @@ def image_info_view(request) -> HttpResponse:
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
-    response = requests.get(original_image.image_url)
-    if response.status_code == 200:
-        image_data = BytesIO(response.content)
-    else:
-        logging.error(f"Failed to download image: {response.status_code}")
-
-    result = get_info_about_image(image_data)
-    if result is None:
+    image_data = get_image_bytes_from_url(original_image.image_url)
+    if image_data is None:
         return redirect("ImageDoesNotExistView")
 
     # Image info taken from file
-    image_format_description = result[0]
-    image_size = result[1]
-    image_resolution = result[2]
-    image_aspect_ratio = result[3]
-    image_mode = result[4]
+    image_info = get_info_about_image(image_data)
+
+    image_format_description = image_info[0]
+    image_format = image_info[1]
+    image_size = image_info[2]
+    image_resolution = image_info[3]
+    image_aspect_ratio = image_info[4]
+    image_mode = image_info[5]
 
     context: dict = {
         'original_image_url': original_image.image_url,
-        'image_name': format_image_file_name(original_image.image_name),
+        'image_name': image_name_shorter(f"{original_image.image_name}.{image_format}"),
         'image_format': image_format_description,
         'image_size': image_size,
         'image_resolution': image_resolution,

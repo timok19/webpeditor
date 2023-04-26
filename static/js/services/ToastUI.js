@@ -1,9 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const ImageEditor = tui.ImageEditor;
   const container = document.querySelector("#tui-image-editor");
-
-  const csrfTokenElement = document.getElementById("csrfToken");
-  const csrfToken = csrfTokenElement ? JSON.parse(csrfTokenElement.textContent) : null;
+  const ImageEditor = tui.ImageEditor;
 
   const imageUrlElement = document.getElementById("imageUrl");
   let imageUrl = imageUrlElement ? JSON.parse(imageUrlElement.textContent) : null;
@@ -349,44 +346,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // TODO: Refactor logic of the editor with using url as image source
+
   function dataURLtoBlob(mimeType, quality) {
-    const dataURL = editor.toDataURL({
+    const dataUrl = editor.toDataURL({
       format: mimeType,
       quality: quality,
     });
 
-    const data = atob(dataURL.split(",")[1]);
+    const data = atob(dataUrl.split(",")[1]);
     const arrayBuffer = new ArrayBuffer(data.length);
     const view = new Uint8Array(arrayBuffer);
     for (let i = 0; i < data.length; i++) {
       view[i] = data.charCodeAt(i) & 0xff;
     }
-    return new Blob([arrayBuffer], { type: mimeType });
-  }
 
-  function preventFormFromDefaultAction() {
-    const editedImageForm = document.getElementById("editedImageFormId");
-    editedImageForm.addEventListener("submit", (event) => event.preventDefault());
+    return [new Blob([arrayBuffer], { type: mimeType }), dataUrl];
   }
 
   function downloadImage(mimeType, quality, fileName) {
-    preventFormFromDefaultAction();
-
-    const imageBlob = dataURLtoBlob(mimeType, quality);
+    const convertedData = dataURLtoBlob(mimeType, quality);
+    const imageBlob = convertedData[0]
+    const dataUrl = convertedData[1]
 
     if (imageBlob.size > maxImageBlobSize) {
       toastifyMessage("Failed to download. Image size cannot be more than 6 MB", false);
     } else {
-      const formData = new FormData();
-      formData.append("image_file", imageBlob, fileName);
-      formData.append("mime_type", mimeType);
 
       fetch("/api/image_download/", {
         method: "POST",
         headers: {
-          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
         },
-        body: formData,
+        body: JSON.stringify({
+          data_url: dataUrl,
+          mime_type: mimeType,
+          file_name: fileName
+        }),
       })
         .then((response) => {
           if (!response.ok) {
@@ -407,19 +403,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function saveImage(mimeType, quality, fileName) {
-    preventFormFromDefaultAction();
-
-    const imageBlob = dataURLtoBlob(mimeType, quality);
-
-    const formData = new FormData();
-    formData.append("edited_image", imageBlob, fileName);
+    const convertedData = dataURLtoBlob(mimeType, quality);
+    const imageBlob = convertedData[0]
+    const dataUrl = convertedData[1]
 
     fetch("/api/image_save/", {
       method: "POST",
       headers: {
-        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json",
       },
-      body: formData,
+      body: JSON.stringify({
+        data_url: dataUrl,
+        file_name: fileName,
+        mime_type: mimeType,
+      }),
     })
       .then((response) => {
         if (!response.ok) {
@@ -444,12 +441,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function getOriginalImage() {
-    preventFormFromDefaultAction();
-
     fetch("/api/image_get_original/", {
       method: "GET",
       headers: {
-        "X-CSRFToken": csrfToken,
+         "Content-Type": "application/json",
       },
     })
       .then((response) => {
@@ -465,7 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // Load the new image into the editor
-        editor.loadImageFromFile(imageFile, imageName).then((result) => {
+        editor.loadImageFromURL(imageFile, imageName).then((result) => {
           console.log("Image loaded successfully:", result);
         });
 
