@@ -346,8 +346,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // TODO: Refactor logic of the editor with using url as image source
-
   function dataURLtoBlob(mimeType, quality) {
     const dataUrl = editor.toDataURL({
       format: mimeType,
@@ -451,16 +449,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!response.ok) {
           throw new Error("Failed to fetch the original image");
         }
-        const imageName = response.headers.get("X-Image-Name");
-        return response.blob().then((imageBlob) => ({ imageBlob, imageName }));
+
+        return response.json();
       })
-      .then(({ imageBlob, imageName }) => {
-        const imageFile = new File([imageBlob], imageName, {
-          type: imageBlob.type,
-        });
+      .then((data) => {
+        const imageUrl = data["image_url"];
+        const imageName = data["image_name"]
 
         // Load the new image into the editor
-        editor.loadImageFromURL(imageFile, imageName).then((result) => {
+        editor.loadImageFromURL(imageUrl, imageName).then((result) => {
           console.log("Image loaded successfully:", result);
         });
 

@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 from io import BytesIO
@@ -90,6 +91,14 @@ def get_original_image(user_id: str) -> OriginalImage | None:
     return original_image
 
 
+def data_url_to_binary(data_url: str) -> BytesIO:
+    data_url = data_url.split(',')[1]
+    image_data = base64.b64decode(data_url)
+
+    return BytesIO(image_data)
+
+
+
 def get_edited_image(user_id: str) -> EditedImage | None:
     edited_image = EditedImage.objects.filter(user_id=user_id).first()
     if edited_image is None:
@@ -140,7 +149,7 @@ def change_file_extension(image_name: str, extension: str) -> str:
     return base_name + f".{extension.lower()}"
 
 
-def get_image_bytes_from_url(image_url: str) -> BytesIO | None:
+def get_data_from_image_url(image_url: str) -> BytesIO | None:
     response = requests.get(image_url)
     if response.status_code == 200:
         return BytesIO(response.content)

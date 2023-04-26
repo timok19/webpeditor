@@ -13,7 +13,7 @@ from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_edited_image, \
     get_image_file_instance, \
-    get_info_about_image, get_image_bytes_from_url
+    get_info_about_image, get_data_from_image_url
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
     get_session_id, \
@@ -29,7 +29,7 @@ def create_and_save_edited_image(user_id: str,
                                  request: WSGIRequest) -> EditedImage:
 
     original_image_url = original_image.image_url
-    new_edited_image_name = f"{original_image.image_name}_edited"
+    new_edited_image_name = original_image.image_name
     folder_path = f"{user_id}/edited/"
 
     cloudinary_parameters: dict = {
@@ -74,7 +74,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     elif edited_image is None and original_image.user_id == user_id:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
-    original_image_data = get_image_bytes_from_url(edited_image.image_url)
+    original_image_data = get_data_from_image_url(edited_image.image_url)
     if original_image_data is None:
         return redirect("ImageDoesNotExistView")
 
@@ -88,7 +88,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     edited_image_metadata = image_info[7]
 
     # Original image format description to show on FE
-    original_image_data = get_image_bytes_from_url(original_image.image_url)
+    original_image_data = get_data_from_image_url(original_image.image_url)
     if original_image_data is None:
         return redirect("ImageDoesNotExistView")
 

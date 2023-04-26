@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import \
-    get_original_image, image_name_shorter, get_info_about_image, get_image_bytes_from_url
+    get_original_image, image_name_shorter, get_info_about_image, get_data_from_image_url
 
 from webpeditor_app.services.other_services.session_service import \
     update_session, get_user_id_from_session_store
@@ -27,7 +27,7 @@ def image_info_view(request) -> HttpResponse:
     if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
-    image_data = get_image_bytes_from_url(original_image.image_url)
+    image_data = get_data_from_image_url(original_image.image_url)
     if image_data is None:
         return redirect("ImageDoesNotExistView")
 

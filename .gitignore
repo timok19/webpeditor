@@ -18,7 +18,8 @@ media/uploaded_images/
 
 .DS_Store
 yarn-error.log.DS_Store
-/.idea
+.idea
+.vscode
 
 webpeditor/.env
 .vercel

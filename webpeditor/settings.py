@@ -10,9 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
-from logging.handlers import SysLogHandler
 from pathlib import Path
-import environ
 import cloudinary
 from dotenv import load_dotenv
 
@@ -38,9 +36,8 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
-# DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '.fly.dev']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.fly.dev']
 
 CSRF_TRUSTED_ORIGINS = [str(os.getenv('CSRF_TRUSTED_ORIGINS'))]
 
@@ -56,7 +53,6 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'cloudinary',
-    'raven.contrib.django.raven_compat',
     'compressor',
     'rest_framework',
     'corsheaders',
@@ -69,6 +65,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = (
 #     'https://localhost:8000',
 #     'https://127.0.0.1:8000',
+#     'https://webpeditor.fly.dev'
 # )
 
 MIDDLEWARE = [
@@ -196,6 +193,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 # Static files directory
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+# Cloudinary's storage config
 cloudinary.config(
     cloud_name=str(os.getenv("CLOUDINARY_CLOUD_NAME")),
     api_key=str(os.getenv("CLOUDINARY_API_KEY")),
@@ -203,10 +201,8 @@ cloudinary.config(
     secure=True,
 )
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Compressor settings

@@ -1,13 +1,13 @@
-import os
-from wsgiref.util import FileWrapper
+from io import BytesIO
+import imghdr
 
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_service import get_original_image
+from webpeditor_app.services.image_services.image_service import get_data_from_image_url, get_original_image
 from webpeditor_app.services.other_services.session_service import get_or_add_user_id
 
 
@@ -20,16 +20,19 @@ def image_get_original_api(request: WSGIRequest):
         try:
             original_image = get_original_image(user_id)
 
-            image_path = original_image.image_url.path
-            content_type = original_image.content_type
-            image_name = original_image.image_name
+            image_url: str = original_image.image_url
+            image_name: str = original_image.image_name
 
-            wrapper = FileWrapper(open(image_path, 'rb'))
+            image_data: BytesIO = get_data_from_image_url(image_url)
+            image_format = imghdr.what(image_data)
+            image_name_with_extension: str = f"{image_name}.{image_format}" 
 
-            response = HttpResponse(wrapper, content_type=content_type)
-            response['Content-Disposition'] = f'attachment; filename={os.path.basename(image_path)}'
-            response['X-Image-Name'] = image_name
-            return response
+            response_data = {
+                "image_url": image_url,
+                "image_name": image_name_with_extension
+            }
+
+            return JsonResponse(response_data)
 
         except OriginalImage.DoesNotExist:
             return HttpResponse(status=404)

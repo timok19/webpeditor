@@ -44,6 +44,8 @@ def image_save_api(request: WSGIRequest):
 
         folder_path = f"{user_id}/edited/"
 
+        # Save image to Cloudinary
+        # TODO: make sure, that this will overwrite an existing image (create if else statement)
         cloudinary_parameters: dict = {
             "folder": folder_path,
             "use_filename": True,
@@ -52,6 +54,7 @@ def image_save_api(request: WSGIRequest):
         }
         cloudinary_image = cloudinary.uploader.upload_image(file=buffer, **cloudinary_parameters)
 
+        # Update edited image in DB
         EditedImage.objects.filter(user_id=user_id).update(
             image_url=cloudinary_image.url,
             session_id_expiration_date=request.session.get_expiry_date(),
