@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import EditedImage
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
-from webpeditor_app.services.other_services.api_service import get_json_request_body
+from webpeditor_app.services.api_services.request_service import get_json_request_body
 from webpeditor_app.services.other_services.session_service import get_user_id_from_session_store, update_session
 
 

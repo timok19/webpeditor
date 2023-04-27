@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, get_file_name
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
@@ -22,33 +23,6 @@ from webpeditor_app.services.other_services.session_service import \
     get_or_add_user_id, set_session_expiry
 
 logging.basicConfig(level=logging.INFO)
-
-
-def delete_assets_in_folder(folder_path):
-    try:
-        assets = cloudinary.api.resources(folder=folder_path, max_results=500)
-        for asset in assets['resources']:
-            cloudinary.api.delete_resources([asset['public_id']])
-            logging.info(f"Deleted asset: {asset['public_id']}")
-
-        # Recursively delete assets in subfolders
-        response = cloudinary.api.subfolders(folder_path)
-        for folder in response['folders']:
-            delete_assets_in_folder(folder['path'])
-
-    except cloudinary.api.NotFound:
-        pass
-
-
-def delete_folder_with_content(folder_path):
-    delete_assets_in_folder(folder_path)
-
-    # Delete the folder
-    try:
-        cloudinary.api.delete_folder(folder_path)
-        logging.info(f"Folder '{folder_path}' and its content have been deleted")
-    except cloudinary.api.NotFound:
-        logging.info(f"Folder '{folder_path}' not found")
 
 
 def clean_up_previous_images(user_id: str):
@@ -61,7 +35,7 @@ def clean_up_previous_images(user_id: str):
     if previous_edited_image:
         previous_edited_image.delete()
 
-    delete_folder_with_content(user_id)
+    delete_user_folder_with_content(user_id)
 
 
 def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
@@ -114,6 +88,7 @@ def check_image_existence(request: WSGIRequest) -> bool:
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id = get_or_add_user_id(request)
     set_session_expiry(request, 900)
+
     clean_up_previous_images(user_id)
 
     uploaded_original_image_file: InMemoryUploadedFile = request.FILES['original_image_form']

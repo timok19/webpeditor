@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import delete_old_image_in_db_and_local
+from webpeditor_app.services.image_services.image_service import delete_old_original_and_edited_image
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,9 +48,14 @@ def update_session_store(session_store: SessionStore, user_id: str) -> SessionSt
     session_store.encode(session_dict={'user_id': user_id})
     update_expiration = timezone.now() + timezone.timedelta(seconds=900)
     session_store.set_expiry(value=update_expiration)
-    session_store.save()
 
     return session_store
+
+
+def clear_expired_session_store(session_key: str):
+    session_store = SessionStore(session_key=session_key)
+    session_store.clear_expired()
+    logging.info("Session has been cleared")
 
 
 def log_session_expiration_times(user_id: str,
@@ -68,20 +73,17 @@ def log_session_expiration_times(user_id: str,
 
 
 def update_image_expiration_dates(user_id: str, session_store: SessionStore):
-    original_image = OriginalImage.objects.filter(user_id=user_id).first()
+    original_image = OriginalImage.objects.filter(user_id=user_id)
     if original_image is None:
         return JsonResponse({'success': False, 'error': 'Original image was not found'}, status=404)
 
-    edited_image = EditedImage.objects.filter(user_id=user_id).first()
+    edited_image = EditedImage.objects.filter(user_id=user_id)
     if edited_image is None:
         return JsonResponse({'success': False, 'error': 'Edited image was not found'}, status=404)
 
     expiry_date = session_store.get_expiry_date()
-    original_image.session_id_expiration_date = expiry_date
-    original_image.save()
-
-    edited_image.session_id_expiration_date = expiry_date
-    edited_image.save()
+    original_image.update(session_key_expiration_date=expiry_date)
+    edited_image.update(session_key_expiration_date=expiry_date)
 
 
 def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
@@ -89,15 +91,18 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
 
     session_store = SessionStore(session_key=session_key)
     if session_store is None:
-        return JsonResponse({'success': False, 'error': f'Session store does not exist'}, status=404)
+        return JsonResponse({
+            'success': False,
+            'error': f'Session store does not exist'
+        }, status=404)
 
     current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
 
     expiry_date = timezone.localtime(session_store.get_expiry_date())
     now = timezone.localtime(timezone.now())
     if now > expiry_date:
-        delete_old_image_in_db_and_local(user_id)
-        session_store.clear_expired()
+        delete_old_original_and_edited_image(user_id)
+        clear_expired_session_store(session_key)
 
     session_store = update_session_store(session_store, user_id)
     new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)

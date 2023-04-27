@@ -10,10 +10,10 @@ class OriginalImageSerializer(serializers.ModelSerializer):
             'image_id',
             'image_name',
             'content_type',
-            'original_image',
+            'image_url',
             'user_id',
-            'session_id',
-            'session_id_expiration_date',
+            'session_key',
+            'session_key_expiration_date',
             'created_at',
         )
 
@@ -22,13 +22,13 @@ class EditedImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EditedImage
         fields = (
-            'edited_image_id',
+            'image_id',
             'original_image',
-            'edited_image_name',
-            'content_type_edited',
-            'edited_image',
+            'image_name',
+            'content_type',
+            'image_url',
             'user_id',
-            'session_id',
-            'session_id_expiration_date',
+            'session_key',
+            'session_key_expiration_date',
             'created_at',
         )

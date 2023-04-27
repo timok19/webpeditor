@@ -8,8 +8,8 @@ class OriginalImage(models.Model):
     content_type = models.CharField(max_length=255)
     image_url = models.CharField(max_length=350, default="")
     user_id = models.CharField(max_length=32, null=True)
-    session_id = models.CharField(max_length=120, null=True)
-    session_id_expiration_date = models.DateTimeField(default=timezone.now)
+    session_key = models.CharField(max_length=120, null=True)
+    session_key_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -28,8 +28,8 @@ class EditedImage(models.Model):
     content_type = models.CharField(max_length=255)
     image_url = models.CharField(max_length=350, default="")
     user_id = models.CharField(max_length=32, null=True)
-    session_id = models.CharField(max_length=120, null=True)
-    session_id_expiration_date = models.DateTimeField(default=timezone.now)
+    session_key = models.CharField(max_length=120, null=True)
+    session_key_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
