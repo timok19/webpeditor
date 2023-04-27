@@ -21,21 +21,24 @@ from webpeditor_app.services.image_services.text_utils import replace_with_under
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
     get_unsigned_user_id, \
-    set_session_expiry, add_signed_user_id
+    set_session_expiry, \
+    add_signed_user_id_to_session_store
 
 logging.basicConfig(level=logging.INFO)
 
 
 def clean_up_previous_images(user_id: str):
     previous_original_image = get_original_image(user_id)
-    if previous_original_image.session_key is not None:
+    if previous_original_image is not None:
         previous_original_image.delete()
 
     delete_user_folder_with_content(user_id)
 
 
-def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
-    folder_path: str = user_id
+def upload_original_image_to_cloudinary(
+        image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
+
+    folder_path: str = f"{user_id}/"
 
     image_name: str = get_file_name(str(image.name))
     image_name_after_re: str = replace_with_underscore(image_name)
@@ -57,7 +60,7 @@ def check_image_existence(request: WSGIRequest) -> bool:
     user_id = get_unsigned_user_id(request)
 
     original_image = get_original_image(user_id)
-    if original_image is None or original_image.image_url == "":
+    if original_image is None:
         is_image_exist = False
         return is_image_exist
 
@@ -65,12 +68,11 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
+    if "user_id" not in request.session:
+        add_signed_user_id_to_session_store(request)
+
     set_session_expiry(request, 900)
     user_id = get_unsigned_user_id(request)
-
-    original_image = get_original_image(user_id)
-    if original_image is None:
-        raise PermissionDenied("You do not have permission to view this image.")
 
     clean_up_previous_images(user_id)
 
@@ -83,16 +85,20 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         }
         return render(request, 'imageUpload.html', context)
 
-    image_url, new_image_name = upload_original_image_to_cloudinary(uploaded_original_image_file, user_id)
+    image_url, new_image_name = upload_original_image_to_cloudinary(
+        uploaded_original_image_file,
+        user_id
+    )
 
-    values_to_update: dict = {
-        "image_name": new_image_name,
-        "content_type": uploaded_original_image_file.content_type,
-        "image_url": image_url,
-        "session_key": request.session.session_key,
-        "session_key_expiration_date": request.session.get_expiry_date()
-    }
-    OriginalImage.objects.filter(user_id=user_id).update(**values_to_update)
+    original_image = OriginalImage(
+        user_id=user_id,
+        image_name=new_image_name,
+        content_type=uploaded_original_image_file.content_type,
+        image_url=image_url,
+        session_key=request.session.session_key,
+        session_key_expiration_date=request.session.get_expiry_date()
+    )
+    original_image.save()
 
     update_session(request=request, user_id=user_id)
 
@@ -100,9 +106,6 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
 
 
 def get(request: WSGIRequest) -> HttpResponse:
-    if "user_id" not in request.session:
-        add_signed_user_id(request)
-
     form = OriginalImageForm()
     is_image_exist = check_image_existence(request)
     context: dict = {
@@ -115,7 +118,8 @@ def get(request: WSGIRequest) -> HttpResponse:
 
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
-def image_upload_view(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
+def image_upload_view(
+        request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     if request.method == 'POST':
         response = post(request)
         return response

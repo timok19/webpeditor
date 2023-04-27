@@ -25,15 +25,13 @@ def get_session_key(request: WSGIRequest) -> str | None:
         return None
 
 
-def create_signed_user_id_and_save_to_dbs() -> str:
+def create_signed_user_id() -> str:
     user_id = str(uuid.uuid4())
-    OriginalImage(user_id=user_id).save()
-
     return signing.dumps(user_id)
 
 
-def add_signed_user_id(request: WSGIRequest):
-    request.session["user_id"] = create_signed_user_id_and_save_to_dbs()
+def add_signed_user_id_to_session_store(request: WSGIRequest):
+    request.session["user_id"] = create_signed_user_id()
 
 
 def get_unsigned_user_id(request: WSGIRequest) -> str | None:
@@ -44,8 +42,8 @@ def get_unsigned_user_id(request: WSGIRequest) -> str | None:
         return None
 
 
-def update_session_store(session_store: SessionStore, user_id: str) -> SessionStore:
-    session_store.encode(session_dict={'user_id': user_id})
+def update_session_store(session_store: SessionStore, request: WSGIRequest) -> SessionStore:
+    session_store.encode(session_dict={'user_id': request.session["user_id"]})
     update_expiration = timezone.now() + timezone.timedelta(seconds=900)
     session_store.set_expiry(value=update_expiration)
 
@@ -104,7 +102,7 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
         delete_old_original_and_edited_image(user_id)
         clear_expired_session_store(session_key)
 
-    session_store = update_session_store(session_store, user_id)
+    session_store = update_session_store(session_store, request)
     new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
 
     log_session_expiration_times(

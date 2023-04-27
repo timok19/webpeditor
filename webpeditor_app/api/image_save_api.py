@@ -19,8 +19,9 @@ from webpeditor_app.services.other_services.session_service import get_unsigned_
 @require_http_methods(['POST'])
 def image_save_api(request: WSGIRequest):
     if request.method == 'POST':
-        user_id = get_unsigned_user_id(request)
         image_file = ImageClass()
+        
+        user_id = get_unsigned_user_id(request)
         if user_id is None:
             return redirect('NoContentView')
 

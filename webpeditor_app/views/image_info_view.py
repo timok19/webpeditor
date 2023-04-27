@@ -22,7 +22,7 @@ def image_info_view(request) -> HttpResponse:
         return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
-    if original_image is None:
+    if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
     image_data = get_data_from_image_url(original_image.image_url)

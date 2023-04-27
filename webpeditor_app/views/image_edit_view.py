@@ -60,11 +60,11 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
-    if original_image is None:
+    if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
     edited_image = get_edited_image(user_id)
-    if edited_image.session_key is None and original_image is not None:
+    if edited_image is None and original_image is not None:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
     edited_image_data = get_data_from_image_url(edited_image.image_url)
@@ -107,7 +107,8 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
 @requires_csrf_token
 @require_http_methods(['GET', 'POST'])
-def image_edit_view(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+def image_edit_view(
+        request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
     if request.method == "GET":
         response = get(request)
         return response
