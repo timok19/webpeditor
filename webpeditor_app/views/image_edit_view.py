@@ -44,8 +44,8 @@ def create_and_save_edited_image(user_id: str,
         image_url=cloudinary_image.url,
         image_name=image_name,
         content_type=original_image.content_type,
-        session_id=session_key,
-        session_id_expiration_date=request.session.get_expiry_date(),
+        session_key=session_key,
+        session_key_expiration_date=request.session.get_expiry_date(),
         original_image=original_image
     )
     edited_image_init.save()

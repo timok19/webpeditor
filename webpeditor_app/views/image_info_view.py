@@ -1,5 +1,6 @@
 import logging
 
+from _decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -34,16 +35,16 @@ def image_info_view(request) -> HttpResponse:
     # Image info taken from file
     image_info = get_info_about_image(image_data)
 
-    image_format_description = image_info[0]
-    image_format = image_info[1]
-    image_size = image_info[2]
-    image_resolution = image_info[3]
-    image_aspect_ratio = image_info[4]
-    image_mode = image_info[5]
+    image_format_description: str = image_info[0]
+    image_format: str = image_info[1]
+    image_size: str = image_info[2]
+    image_resolution: str = image_info[3]
+    image_aspect_ratio: Decimal = image_info[4]
+    image_mode: str = image_info[5]
 
     context: dict = {
         'original_image_url': original_image.image_url,
-        'image_name': image_name_shorter(f"{original_image.image_name}.{image_format}"),
+        'image_name': image_name_shorter(f"{original_image.image_name}.{image_format.lower()}"),
         'image_format': image_format_description,
         'image_size': image_size,
         'image_resolution': image_resolution,

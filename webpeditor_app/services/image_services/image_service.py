@@ -2,7 +2,6 @@ import base64
 import logging
 import os
 from io import BytesIO
-from pathlib import Path
 from typing import Tuple
 
 import requests
@@ -88,19 +87,19 @@ def get_original_image(user_id: str) -> OriginalImage | None:
     return original_image
 
 
-def data_url_to_binary(data_url: str) -> BytesIO:
-    data_url = data_url.split(',')[1]
-    image_data = base64.b64decode(data_url)
-
-    return BytesIO(image_data)
-
-
 def get_edited_image(user_id: str) -> EditedImage | None:
     edited_image = EditedImage.objects.filter(user_id=user_id).first()
     if edited_image is None:
         return None
 
     return edited_image
+
+
+def data_url_to_binary(data_url: str) -> BytesIO:
+    data_url = data_url.split(',')[1]
+    image_data = base64.b64decode(data_url)
+
+    return BytesIO(image_data)
 
 
 def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
@@ -112,24 +111,11 @@ def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
         return None
 
 
-def convert_image(path_to_local_image: Path | str, path_to_save: str = "", output_format: str = ""):
-    output_format.upper()
-    try:
-        image = PilImage.open(path_to_local_image)
-        if len(path_to_save) == 0:
-            image.save(path_to_local_image, format=output_format)
-        else:
-            image.save(path_to_save, format=output_format)
-
-        image.close()
-    except (ValueError, TypeError) as e:
-        logging.error(e)
-
-
 def image_name_shorter(image_name: str) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > 20:
         basename = basename[:17] + "..."
+
     return basename + ext
 
 
@@ -143,6 +129,7 @@ def get_file_name(image_name: str) -> str:
 
 def change_file_extension(image_name: str, extension: str) -> str:
     base_name, _ = os.path.splitext(image_name)
+
     return base_name + f".{extension.lower()}"
 
 

@@ -15,7 +15,7 @@ from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image, get_file_name
+from webpeditor_app.services.image_services.image_service import get_original_image, get_file_name
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
@@ -27,13 +27,9 @@ logging.basicConfig(level=logging.INFO)
 
 def clean_up_previous_images(user_id: str):
     previous_original_image = get_original_image(user_id)
-    previous_edited_image = get_edited_image(user_id)
 
     if previous_original_image:
         previous_original_image.delete()
-
-    if previous_edited_image:
-        previous_edited_image.delete()
 
     delete_user_folder_with_content(user_id)
 
@@ -66,8 +62,8 @@ def save_uploaded_image_to_db(image_file: InMemoryUploadedFile,
         image_name=image_name,
         content_type=image_file.content_type,
         image_url=image_url,
-        session_id=request.session.session_key,
-        session_id_expiration_date=request.session.get_expiry_date(),
+        session_key=request.session.session_key,
+        session_key_expiration_date=request.session.get_expiry_date(),
         user_id=user_id
     )
     original_image.save()

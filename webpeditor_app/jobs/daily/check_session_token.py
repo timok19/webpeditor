@@ -54,7 +54,8 @@ class Job(DailyJob):
                     delete_old_original_and_edited_image(user_id)
                     clear_expired_session_store(session_key)
                     counter += 1
-                elif user_id not in user_folders:
+
+                if user_id not in user_folders:
                     delete_original_image_in_db(user_id)
                     delete_edited_image_in_db(user_id)
                     counter += 1

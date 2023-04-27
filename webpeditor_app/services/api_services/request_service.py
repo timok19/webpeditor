@@ -19,7 +19,7 @@ def get_json_request_body(request: WSGIRequest) -> JsonResponse | Tuple[str | No
     if data_url is None or mime_type is None or file_name is None:
         return JsonResponse({'error': 'Missing required data'}, status=400)
 
-    image_binary: BytesIO = data_url_to_binary(data_url)
-    image_file = get_image_file_instance(image_binary)
+    image_data: BytesIO = data_url_to_binary(data_url)
+    image_file = get_image_file_instance(image_data)
 
     return data_url, mime_type, file_name, image_file

@@ -1,4 +1,5 @@
 import cloudinary.uploader
+import cloudinary.api
 from io import BytesIO
 from PIL.Image import Image as ImageClass
 
@@ -42,26 +43,22 @@ def image_save_api(request: WSGIRequest):
         image_file.save(buffer, format=image_file.format)
         buffer.seek(0)
 
-        folder_path = f"{user_id}/edited/"
+        resources = cloudinary.api.resources(
+            prefix=f"{user_id}/edited",
+            type="upload"
+        )
+
+        public_ids: list = [resource["public_id"] for resource in resources["resources"]]
 
         # Save image to Cloudinary
-        # TODO: make sure, that this will overwrite an existing image (create if else statement)
         cloudinary_parameters: dict = {
-            "folder": folder_path,
-            "use_filename": True,
-            "filename_override": edited_image.image_name,
+            "public_id": public_ids[0],
             "overwrite": True
         }
         cloudinary_image = cloudinary.uploader.upload_image(file=buffer, **cloudinary_parameters)
 
-        # Update edited image in DB
-        EditedImage.objects.filter(user_id=user_id).update(
-            image_url=cloudinary_image.url,
-            session_id_expiration_date=request.session.get_expiry_date(),
-        )
-
         update_session(request=request, user_id=user_id)
+        # Update edited image in DB
+        EditedImage.objects.filter(user_id=user_id).update(image_url=cloudinary_image.url)
 
-        response = HttpResponse(status=200, content_type="text/javascript")
-
-        return response
+        return HttpResponse(status=200, content_type="text/javascript")
