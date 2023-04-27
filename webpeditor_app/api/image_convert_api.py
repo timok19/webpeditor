@@ -11,14 +11,14 @@ from webpeditor_app.services.image_services.image_converter_service import conve
 from webpeditor_app.services.validators.image_file_validator import \
     validate_image_files, \
     validate_number_of_image_files
-from webpeditor_app.services.other_services.session_service import get_or_add_user_id, update_session
+from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
 
 
 @requires_csrf_token
 @require_http_methods(['POST'])
 def image_convert_api(request: WSGIRequest):
     if request.method == 'POST':
-        user_id = get_or_add_user_id(request)
+        user_id = get_unsigned_user_id(request)
 
         image_form = ImagesToConvertForm(request.POST, request.FILES)
         if not image_form.is_valid():

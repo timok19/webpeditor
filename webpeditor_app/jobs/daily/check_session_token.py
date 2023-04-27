@@ -57,7 +57,6 @@ class Job(DailyJob):
 
                 if user_id not in user_folders:
                     delete_original_image_in_db(user_id)
-                    delete_edited_image_in_db(user_id)
                     counter += 1
 
         logging.info(f"Deleted collections in db: {counter}")

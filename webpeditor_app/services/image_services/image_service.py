@@ -20,8 +20,6 @@ logging.basicConfig(level=logging.INFO)
 
 def delete_old_original_and_edited_image(user_id: str) -> JsonResponse:
     delete_original_image_in_db(user_id)
-    delete_edited_image_in_db(user_id)
-
     delete_user_folder_with_content(user_id)
 
     return JsonResponse({
@@ -38,15 +36,6 @@ def delete_original_image_in_db(user_id: str):
 
     original_image.delete()
     logging.info("Original image has been deleted from db")
-
-
-def delete_edited_image_in_db(user_id: str):
-    original_image = get_original_image(user_id)
-    edited_image = get_edited_image(user_id)
-    # Check if original image was deleted
-    if original_image is None and edited_image is not None:
-        edited_image.delete()
-        logging.info("Edited image has been deleted from db")
 
 
 def get_serialized_data_original_image() -> ReturnDict:

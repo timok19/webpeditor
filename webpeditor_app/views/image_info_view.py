@@ -10,22 +10,19 @@ from webpeditor_app.services.image_services.image_service import \
     get_original_image, image_name_shorter, get_info_about_image, get_data_from_image_url
 
 from webpeditor_app.services.other_services.session_service import \
-    update_session, get_user_id_from_session_store
+    update_session, get_unsigned_user_id
 
 logging.basicConfig(level=logging.INFO)
 
 
 @require_http_methods(['GET'])
 def image_info_view(request) -> HttpResponse:
-    user_id = get_user_id_from_session_store(request)
+    user_id = get_unsigned_user_id(request)
     if user_id is None:
-        return redirect('ImageUploadView')
+        return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
     if original_image is None:
-        return redirect("ImageDoesNotExistView")
-
-    if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
     image_data = get_data_from_image_url(original_image.image_url)

@@ -3,6 +3,7 @@ import uuid
 
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.handlers.wsgi import WSGIRequest
+from django.core import signing
 from django.http import JsonResponse
 from django.utils import timezone
 
@@ -16,29 +17,28 @@ def set_session_expiry(request: WSGIRequest, num_of_seconds: int):
     request.session.set_expiry(num_of_seconds)
 
 
-def get_session_id(request: WSGIRequest) -> str | None:
+def get_session_key(request: WSGIRequest) -> str | None:
     try:
-        session_id = request.session.session_key
-        if session_id:
-            return session_id
-    except TypeError as e:
+        return request.session.session_key
+    except Exception as e:
         logging.error(e)
         return None
 
 
-def create_user_id() -> str:
-    return str(uuid.uuid4())
+def create_signed_user_id_and_save_to_dbs() -> str:
+    user_id = str(uuid.uuid4())
+    OriginalImage(user_id=user_id).save()
+
+    return signing.dumps(user_id)
 
 
-def get_or_add_user_id(request: WSGIRequest) -> str:
-    if "user_id" not in request.session:
-        request.session["user_id"] = create_user_id()
-    return request.session["user_id"]
+def add_signed_user_id(request: WSGIRequest):
+    request.session["user_id"] = create_signed_user_id_and_save_to_dbs()
 
 
-def get_user_id_from_session_store(request: WSGIRequest) -> str | None:
+def get_unsigned_user_id(request: WSGIRequest) -> str | None:
     try:
-        return request.session.get("user_id")
+        return signing.loads(request.session["user_id"])
     except Exception as e:
         logging.error(e)
         return None
@@ -87,7 +87,7 @@ def update_image_expiration_dates(user_id: str, session_store: SessionStore):
 
 
 def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
-    session_key = get_session_id(request)
+    session_key = get_session_key(request)
 
     session_store = SessionStore(session_key=session_key)
     if session_store is None:

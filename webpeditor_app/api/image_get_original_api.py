@@ -8,13 +8,13 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_service import get_data_from_image_url, get_original_image
-from webpeditor_app.services.other_services.session_service import get_or_add_user_id
+from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
 
 @csrf_exempt
 @require_http_methods(['GET'])
 def image_get_original_api(request: WSGIRequest):
-    user_id = get_or_add_user_id(request)
+    user_id = get_unsigned_user_id(request)
 
     if request.method == 'GET':
         try:

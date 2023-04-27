@@ -3,6 +3,7 @@ from typing import Tuple
 
 import cloudinary.uploader
 import cloudinary.api
+from django.core.exceptions import PermissionDenied
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
@@ -19,27 +20,26 @@ from webpeditor_app.services.image_services.image_service import get_original_im
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
-    get_user_id_from_session_store, \
-    get_or_add_user_id, set_session_expiry
+    get_unsigned_user_id, \
+    set_session_expiry, add_signed_user_id
 
 logging.basicConfig(level=logging.INFO)
 
 
 def clean_up_previous_images(user_id: str):
     previous_original_image = get_original_image(user_id)
-
-    if previous_original_image:
+    if previous_original_image.session_key is not None:
         previous_original_image.delete()
 
     delete_user_folder_with_content(user_id)
 
 
 def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
-    folder_path: str = f"{user_id}/"
+    folder_path: str = user_id
 
-    image_name = get_file_name(str(image.name))
-    image_name_after_re = replace_with_underscore(image_name)
-    new_original_image_name = f"webpeditor_{image_name_after_re}"
+    image_name: str = get_file_name(str(image.name))
+    image_name_after_re: str = replace_with_underscore(image_name)
+    new_original_image_name: str = f"webpeditor_{image_name_after_re}"
 
     cloudinary_parameters: dict = {
         "folder": folder_path,
@@ -52,29 +52,12 @@ def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: st
     return str(cloudinary_image.url), new_original_image_name
 
 
-def save_uploaded_image_to_db(image_file: InMemoryUploadedFile,
-                              image_name: str,
-                              image_url: str,
-                              request: WSGIRequest,
-                              user_id: str):
-
-    original_image = OriginalImage(
-        image_name=image_name,
-        content_type=image_file.content_type,
-        image_url=image_url,
-        session_key=request.session.session_key,
-        session_key_expiration_date=request.session.get_expiry_date(),
-        user_id=user_id
-    )
-    original_image.save()
-
-
 def check_image_existence(request: WSGIRequest) -> bool:
     is_image_exist = True
-    user_id = get_user_id_from_session_store(request)
+    user_id = get_unsigned_user_id(request)
 
     original_image = get_original_image(user_id)
-    if original_image is None or original_image.image_url is None:
+    if original_image is None or original_image.image_url == "":
         is_image_exist = False
         return is_image_exist
 
@@ -82,8 +65,12 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    user_id = get_or_add_user_id(request)
     set_session_expiry(request, 900)
+    user_id = get_unsigned_user_id(request)
+
+    original_image = get_original_image(user_id)
+    if original_image is None:
+        raise PermissionDenied("You do not have permission to view this image.")
 
     clean_up_previous_images(user_id)
 
@@ -94,17 +81,18 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
             'error': f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB',
             'is_image_exist': is_image_exist
         }
-
         return render(request, 'imageUpload.html', context)
 
     image_url, new_image_name = upload_original_image_to_cloudinary(uploaded_original_image_file, user_id)
-    save_uploaded_image_to_db(
-        image_file=uploaded_original_image_file,
-        image_name=new_image_name,
-        image_url=image_url,
-        request=request,
-        user_id=user_id
-    )
+
+    values_to_update: dict = {
+        "image_name": new_image_name,
+        "content_type": uploaded_original_image_file.content_type,
+        "image_url": image_url,
+        "session_key": request.session.session_key,
+        "session_key_expiration_date": request.session.get_expiry_date()
+    }
+    OriginalImage.objects.filter(user_id=user_id).update(**values_to_update)
 
     update_session(request=request, user_id=user_id)
 
@@ -112,6 +100,9 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
 
 
 def get(request: WSGIRequest) -> HttpResponse:
+    if "user_id" not in request.session:
+        add_signed_user_id(request)
+
     form = OriginalImageForm()
     is_image_exist = check_image_existence(request)
     context: dict = {

@@ -1,7 +1,7 @@
-import copy
 import logging
-
 import cloudinary.uploader
+from copy import copy
+
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
@@ -17,7 +17,7 @@ from webpeditor_app.services.image_services.image_service import \
     get_info_about_image, \
     get_data_from_image_url, \
     image_name_shorter
-from webpeditor_app.services.other_services.session_service import get_session_id, get_user_id_from_session_store
+from webpeditor_app.services.other_services.session_service import get_session_key, get_unsigned_user_id
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,13 +40,13 @@ def create_and_save_edited_image(user_id: str,
     cloudinary_image = cloudinary.uploader.upload_image(original_image_url, **cloudinary_parameters)
 
     edited_image_init = EditedImage(
-        user_id=user_id,
         image_url=cloudinary_image.url,
         image_name=image_name,
         content_type=original_image.content_type,
         session_key=session_key,
         session_key_expiration_date=request.session.get_expiry_date(),
-        original_image=original_image
+        original_image=original_image,
+        user_id=user_id
     )
     edited_image_init.save()
 
@@ -54,29 +54,24 @@ def create_and_save_edited_image(user_id: str,
 
 
 def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    session_key = get_session_id(request)
-    user_id = get_user_id_from_session_store(request)
+    session_key = get_session_key(request)
+    user_id = get_unsigned_user_id(request)
     if user_id is None:
-        return redirect('ImageDoesNotExistView')
+        return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
     if original_image is None:
-        return redirect("ImageDoesNotExistView")
-
-    if original_image.user_id != user_id:
         raise PermissionDenied("You do not have permission to view this image.")
 
     edited_image = get_edited_image(user_id)
-    if edited_image and original_image.user_id != user_id:
-        raise PermissionDenied("You do not have permission to view this image.")
-    elif edited_image is None and original_image.user_id == user_id:
+    if edited_image.session_key is None and original_image is not None:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
 
     edited_image_data = get_data_from_image_url(edited_image.image_url)
     if edited_image_data is None:
         return redirect("ImageDoesNotExistView")
 
-    image_info = get_info_about_image(copy.copy(edited_image_data))
+    image_info = get_info_about_image(copy(edited_image_data))
     edited_image_size = image_info[2]
     edited_image_resolution = image_info[3]
     edited_image_aspect_ratio = image_info[4]
