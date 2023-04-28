@@ -2,11 +2,10 @@ from io import BytesIO
 import imghdr
 
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.image_services.image_service import get_data_from_image_url, get_original_image
 from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
@@ -17,22 +16,21 @@ def image_get_original_api(request: WSGIRequest):
     user_id = get_unsigned_user_id(request)
 
     if request.method == 'GET':
-        try:
-            original_image = get_original_image(user_id)
 
-            image_url: str = original_image.image_url
-            image_name: str = original_image.image_name
+        original_image = get_original_image(user_id)
+        if original_image is None:
+            return JsonResponse({"error": "Original image was not found"})
 
-            image_data: BytesIO = get_data_from_image_url(image_url)
-            image_format = imghdr.what(image_data)
-            image_name_with_extension: str = f"{image_name}.{image_format}" 
+        image_url: str = original_image.image_url
+        image_name: str = original_image.image_name
 
-            response_data = {
-                "image_url": image_url,
-                "image_name": image_name_with_extension
-            }
+        image_data: BytesIO = get_data_from_image_url(image_url)
+        image_format = imghdr.what(image_data)
+        image_name_with_extension: str = f"{image_name}.{image_format}"
 
-            return JsonResponse(response_data)
+        response_data = {
+            "image_url": image_url,
+            "image_name": image_name_with_extension
+        }
 
-        except OriginalImage.DoesNotExist:
-            return HttpResponse(status=404)
+        return JsonResponse(response_data)
