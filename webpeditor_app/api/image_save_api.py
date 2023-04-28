@@ -26,7 +26,7 @@ def image_save_api(request: WSGIRequest):
             return redirect('NoContentView')
 
         if request.session.get_expiry_age() == 0:
-            return redirect('ImageDoesNotExistView')
+            return redirect('NoContentView')
 
         original_image = get_original_image(user_id)
         if original_image is None or original_image.user_id != user_id:
