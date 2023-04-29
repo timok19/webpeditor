@@ -18,14 +18,16 @@ function closeImageModal() {
 function showInfoImageModal() {
   infoImageModal.classList.remove("hidden");
   if (document.querySelector("[modal-backdrop]") !== null) {
-    document.querySelector("[modal-backdrop]").setAttribute("class", "bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40");
+    document.querySelector("[modal-backdrop]")
+      .setAttribute("class", "bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40");
   }
 }
 
 function closeInfoImageModal() {
   infoImageModal.classList.add("hidden");
   if (document.querySelector("[modal-backdrop]") !== null) {
-    document.querySelector("[modal-backdrop]").setAttribute("class", "hidden bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40");
+    document.querySelector("[modal-backdrop]")
+      .setAttribute("class", "hidden bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40");
   }
 }
 

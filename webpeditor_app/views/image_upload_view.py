@@ -3,12 +3,11 @@ from typing import Tuple
 
 import cloudinary.uploader
 import cloudinary.api
-from django.core.exceptions import PermissionDenied
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
@@ -47,12 +46,13 @@ def upload_original_image_to_cloudinary(
     cloudinary_parameters: dict = {
         "folder": folder_path,
         "use_filename": True,
+        "unique_filename": False,
         "filename_override": new_original_image_name,
-        "overwrite": True,
+        "overwrite": True
     }
     cloudinary_image = cloudinary.uploader.upload_image(image, **cloudinary_parameters)
 
-    return str(cloudinary_image.url), new_original_image_name
+    return cloudinary_image.url, new_original_image_name
 
 
 def check_image_existence(request: WSGIRequest) -> bool:
@@ -68,6 +68,8 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
+    print("POST request received")  # Debug print
+    print(request.FILES)  # Debug print
     if "user_id" not in request.session:
         add_signed_user_id_to_session_store(request)
 
@@ -75,6 +77,14 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
     user_id = get_unsigned_user_id(request)
 
     clean_up_previous_images(user_id)
+
+    if 'original_image_form' not in request.FILES:
+        is_image_exist = check_image_existence(request)
+        context: dict = {
+            'error': 'No image file was provided.',
+            'is_image_exist': is_image_exist
+        }
+        return render(request, 'imageUpload.html', context)
 
     uploaded_original_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
     if uploaded_original_image_file.size > MAX_IMAGE_FILE_SIZE:
@@ -85,7 +95,7 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         }
         return render(request, 'imageUpload.html', context)
 
-    image_url, new_image_name = upload_original_image_to_cloudinary(
+    cloudinary_image_url, new_image_name = upload_original_image_to_cloudinary(
         uploaded_original_image_file,
         user_id
     )
@@ -94,7 +104,7 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         user_id=user_id,
         image_name=new_image_name,
         content_type=uploaded_original_image_file.content_type,
-        image_url=image_url,
+        image_url=cloudinary_image_url,
         session_key=request.session.session_key,
         session_key_expiration_date=request.session.get_expiry_date()
     )
@@ -113,7 +123,7 @@ def get(request: WSGIRequest) -> HttpResponse:
         'is_image_exist': is_image_exist
     }
 
-    return render(request, 'imageUpload.html', context)
+    return render(request, 'imageUpload.html', context, status=200)
 
 
 @csrf_protect

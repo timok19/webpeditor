@@ -8,7 +8,8 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import delete_old_original_and_edited_image
+from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
+from webpeditor_app.services.image_services.image_service import delete_original_image_in_db
 
 logging.basicConfig(level=logging.INFO)
 
@@ -99,7 +100,8 @@ def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
     expiry_date = timezone.localtime(session_store.get_expiry_date())
     now = timezone.localtime(timezone.now())
     if now > expiry_date:
-        delete_old_original_and_edited_image(user_id)
+        delete_original_image_in_db(user_id)
+        delete_user_folder_with_content(user_id)
         clear_expired_session_store(session_key)
 
     session_store = update_session_store(session_store, request)

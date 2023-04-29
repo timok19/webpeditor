@@ -12,4 +12,4 @@ def image_does_not_exist_view(request: WSGIRequest):
         'response_message': response_message
     }
 
-    return render(request, 'imageDoesNotExist.html', content)
+    return render(request, 'imageDoesNotExist.html', content, status=404)

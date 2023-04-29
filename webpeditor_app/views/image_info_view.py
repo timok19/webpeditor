@@ -1,7 +1,6 @@
 import logging
 
 from _decimal import Decimal
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -22,8 +21,8 @@ def image_info_view(request) -> HttpResponse:
         return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
-    if original_image.user_id != user_id:
-        raise PermissionDenied("You do not have permission to view this image.")
+    if original_image is None or original_image.user_id != user_id:
+        return redirect("NoContentView")
 
     image_data = get_data_from_image_url(original_image.image_url)
     if image_data is None:
@@ -51,4 +50,4 @@ def image_info_view(request) -> HttpResponse:
 
     update_session(request=request, user_id=user_id)
 
-    return render(request, 'imageInfo.html', context)
+    return render(request, 'imageInfo.html', context, status=200)

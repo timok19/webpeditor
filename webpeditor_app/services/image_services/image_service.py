@@ -18,24 +18,20 @@ from webpeditor_app.services.api_services.cloudinary_service import delete_user_
 logging.basicConfig(level=logging.INFO)
 
 
-def delete_old_original_and_edited_image(user_id: str) -> JsonResponse:
-    delete_original_image_in_db(user_id)
-    delete_user_folder_with_content(user_id)
-
-    return JsonResponse({
-        'success': True,
-        'info': 'Session has been expired and image has been deleted'
-    }, status=204)
-
-
-def delete_original_image_in_db(user_id: str):
+def delete_original_image_in_db(user_id: str) -> JsonResponse:
     original_image = get_original_image(user_id)
     if original_image is None:
         logging.info("No original image in db. Deleting user's folder...")
         delete_user_folder_with_content(user_id)
+    else:
+        original_image.delete()
 
-    original_image.delete()
     logging.info("Original image has been deleted from db")
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Images has been deleted in db'
+    }, status=204)
 
 
 def get_serialized_data_original_image() -> ReturnDict:

@@ -5,6 +5,7 @@ from PIL.Image import Image as ImageClass
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
+from django.http.response import ResponseHeaders
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -62,4 +63,8 @@ def image_save_api(request: WSGIRequest):
         # Update edited image in DB
         EditedImage.objects.filter(user_id=user_id).update(image_url=cloudinary_image.url)
 
-        return HttpResponse(status=200, content_type="text/javascript")
+        response = HttpResponse()
+        response.status_code = 200
+        response.headers = ResponseHeaders({"Content-Type": "text/javascript"})
+
+        return response

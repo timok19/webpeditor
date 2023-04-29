@@ -35,8 +35,8 @@
                     id="{{ form.images_to_convert.auto_id }}"
                     size="image">
 
-            {% if validation_file_size_error %}
-                <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ validation_file_size_error }}</p>
+            {% if error %}
+                <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ error }}</p>
             {% else %}
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-300 font-light">
                     Image size should be lower than 6 MB
@@ -69,7 +69,7 @@
             <div class="flex flex-row justify-between mt-8">
                 <button type="submit"
                         id="upload-image"
-                        class="relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
+                        class="relative inline-flex disabled:opacity-25 items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 cursor-not-allowed"
                         disabled>
                     <span
                             class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">

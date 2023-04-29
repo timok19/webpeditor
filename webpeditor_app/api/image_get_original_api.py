@@ -33,4 +33,4 @@ def image_get_original_api(request: WSGIRequest):
             "image_name": image_name_with_extension
         }
 
-        return JsonResponse(response_data)
+        return JsonResponse(response_data, status=200)

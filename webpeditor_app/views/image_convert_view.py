@@ -9,22 +9,15 @@ from webpeditor_app.models.database.forms import ImagesToConvertForm
 @requires_csrf_token
 @require_http_methods(['GET'])
 def image_convert_view(request: WSGIRequest):
-    image_form = ImagesToConvertForm()
+    if request.method == 'GET':
+        image_form = ImagesToConvertForm()
+        error_message = request.session.get('error_message')
+        converted_images = request.session.get('converted_images')
 
-    validation_file_size_error = request.session.pop('validation_file_size_error', None)
-    if validation_file_size_error:
-        context: dict = {
+        context = {
             'form': image_form,
-            'validation_file_size_error': validation_file_size_error
+            'error': error_message,
+            'converted_images': converted_images
         }
 
-        return render(request, 'imageConvert.html', context)
-
-    converted_images = request.session.get('converted_images')
-    context = {
-        'form': image_form,
-        'validation_file_size_error': validation_file_size_error,
-        'converted_images': converted_images
-    }
-
-    return render(request, 'imageConvert.html', context)
+        return render(request, 'imageConvert.html', context, status=200)

@@ -35,18 +35,19 @@ def create_and_save_edited_image(user_id: str,
         "folder": folder_path,
         "use_filename": True,
         "filename_override": image_name,
+        "unique_filename": False,
         "overwrite": True
     }
     cloudinary_image = cloudinary.uploader.upload_image(original_image_url, **cloudinary_parameters)
 
     edited_image_init = EditedImage(
+        user_id=user_id,
+        original_image=original_image,
         image_url=cloudinary_image.url,
         image_name=image_name,
         content_type=original_image.content_type,
         session_key=session_key,
-        session_key_expiration_date=request.session.get_expiry_date(),
-        original_image=original_image,
-        user_id=user_id
+        session_key_expiration_date=request.session.get_expiry_date()
     )
     edited_image_init.save()
 
@@ -102,7 +103,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     original_image_file.close()
 
-    return render(request, 'imageEdit.html', context)
+    return render(request, 'imageEdit.html', context, status=200)
 
 
 @requires_csrf_token

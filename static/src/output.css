@@ -2667,6 +2667,10 @@ input:checked + .toggle-bg {
   --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
 }
 
+.disabled\:opacity-25:disabled {
+  opacity: 0.25;
+}
+
 .group:hover .group-hover\:bg-opacity-0 {
   --tw-bg-opacity: 0;
 }

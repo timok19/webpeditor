@@ -2,14 +2,13 @@ import os
 from io import BytesIO
 
 from PIL.Image import Image as ImageClass
-from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse, HttpResponse
+from django.http.response import ResponseHeaders
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.services.image_services.image_service import get_file_extension, get_original_image, \
-    get_edited_image
+from webpeditor_app.services.image_services.image_service import get_file_extension
 from webpeditor_app.services.api_services.request_service import get_json_request_body
 from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
 
@@ -44,11 +43,14 @@ def image_download_api(request: WSGIRequest) -> HttpResponse | JsonResponse:
 
         # Reset the buffer position to the beginning
         buffer.seek(0)
-
-        response = HttpResponse(buffer, content_type=mime_type)
-        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_name)}"'
-
         update_session(request=request, user_id=user_id)
+
+        response = HttpResponse()
+        response.content = buffer
+        response.headers = ResponseHeaders({
+            'Content-Type': mime_type,
+            'Content-Disposition': f'attachment; filename="{os.path.basename(file_name)}"'
+        })
 
         return response
 
