@@ -7,12 +7,11 @@ from django.core.handlers.wsgi import WSGIRequest
 from webpeditor.settings import \
     MAX_IMAGE_FILE_SIZE, \
     MAX_SUM_SIZE_OF_IMAGE_FILES, \
-    DATA_UPLOAD_MAX_NUMBER_FILES, \
     ONE_MEGABYTE, \
     VALID_IMAGE_FORMATS
 
 
-def are_images_valid(request: WSGIRequest, image_files: List[InMemoryUploadedFile]) -> bool:
+def validate_images(request: WSGIRequest, image_files: List[InMemoryUploadedFile]) -> bool:
     total_size = 0
 
     for image_file in image_files:
@@ -26,18 +25,10 @@ def are_images_valid(request: WSGIRequest, image_files: List[InMemoryUploadedFil
                     f'Invalid file format. {str(VALID_IMAGE_FORMATS)} files are allowed.'
                 return False
 
-            image.close()
-
             if image_file.size > MAX_IMAGE_FILE_SIZE:
                 request.session.pop('error_message', None)
                 request.session['error_message'] = \
                     f"Image size should not exceed {MAX_IMAGE_FILE_SIZE / ONE_MEGABYTE} MB."
-                return False
-
-            if len(image_files) > DATA_UPLOAD_MAX_NUMBER_FILES:
-                request.session.pop('error_message', None)
-                request.session['error_message'] = \
-                    f"The number of files exceeded {DATA_UPLOAD_MAX_NUMBER_FILES}."
                 return False
 
             if total_size > MAX_SUM_SIZE_OF_IMAGE_FILES:

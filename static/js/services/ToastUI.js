@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const dataUrl = convertedData[1]
 
     if (imageBlob.size > maxImageBlobSize) {
-      toastifyMessage("Failed to download. Image size cannot be more than 6 MB", false);
+      toastifyMessage("Failed to download: image size cannot be more than 6 MB", false);
     } else {
 
       fetch("/api/image_download/", {
@@ -405,6 +405,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageBlob = convertedData[0]
     const dataUrl = convertedData[1]
 
+    showProgressBarAndMessage("Saving image...", true);
+
     fetch("/api/image_save/", {
       method: "POST",
       headers: {
@@ -418,23 +420,22 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then((response) => {
         if (!response.ok) {
-          toastifyMessage("Failed to save image", false);
+          toastifyMessage("Error: failed to save image", false);
           throw new Error("Network response was not ok");
         }
 
         if (imageBlob.size > maxImageBlobSize) {
-          const errorMessage = "Image size should not exceed 6 MB";
+          const errorMessage = "Error: image size should not exceed 6 MB";
           toastifyMessage(errorMessage, false);
 
           throw new Error(errorMessage);
         } else {
           toastifyMessage("Image has been saved successfully", true);
         }
-
         location.reload();
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Error: ", error);
       });
   }
 

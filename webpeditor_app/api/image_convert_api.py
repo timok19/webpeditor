@@ -1,8 +1,5 @@
-from typing import List
-
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -11,12 +8,13 @@ from webpeditor_app.models.database.forms import ImagesToConvertForm
 from webpeditor_app.services.image_services.image_converter_service import convert_images
 from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id, \
     add_signed_user_id_to_session_store
-from webpeditor_app.services.validators.image_file_validator import are_images_valid
+from webpeditor_app.services.validators.image_file_validator import validate_images
 
 
 @requires_csrf_token
 @require_http_methods(['POST'])
 def image_convert_api(request: WSGIRequest):
+
     if request.method == 'POST':
         user_id = get_unsigned_user_id(request)
         if user_id is None:
@@ -25,12 +23,14 @@ def image_convert_api(request: WSGIRequest):
 
         image_form = ImagesToConvertForm(request.POST, request.FILES)
         if not image_form.is_valid():
-            return redirect('ImageConvertView')
+            request.session.pop('error_message', None)
+            request.session['error_message'] = f"This field is required"
+            return HttpResponseRedirect(reverse('ImageConvertView'))
 
         image_files = request.FILES.getlist('images_to_convert')
 
         # Validate image size
-        if (image_files is List) and (are_images_valid(request, image_files) is False):
+        if validate_images(request, image_files) is False:
             return HttpResponseRedirect(reverse('ImageConvertView'))
 
         output_format = request.POST.get('output_format')

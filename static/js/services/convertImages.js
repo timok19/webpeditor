@@ -7,22 +7,38 @@ const inputId = inputIdElement ? JSON.parse(inputIdElement.textContent) : null;
 const outputFormatIdElement = document.getElementById("outputFormatId");
 const outputFormatId = inputIdElement ? JSON.parse(outputFormatIdElement.textContent) : null;
 
+const form = document.getElementById('imageFormConvertId');
+const outputFormatInput = document.getElementById(`${outputFormatId}`);
+const imageFilesInput = document.getElementById(`${inputId}`);
+
 const uploadAndConvertButton = document.getElementById("upload-image");
-uploadAndConvertButton.addEventListener("click", () => uploadAndConvert())
+uploadAndConvertButton.addEventListener("click", () => uploadAndConvert());
 
 function uploadAndConvert() {
-  const form = document.getElementById('imageFormConvertId');
   form.addEventListener("submit", (event) => event.preventDefault());
 
+  const maxFileSize = 6_000_000;
+
   const formData = new FormData();
-  const imageFiles = document.getElementById(`${inputId}`).files;
+  const imageFiles = imageFilesInput.files;
 
-  for (let i = 0; i < imageFiles.length; i++) {
-    formData.append('images_to_convert', imageFiles[i]);
+  if (imageFiles.length <= 15) {
+    for (let i = 0; i < imageFiles.length; i++) {
+      if (imageFiles[i].size <= maxFileSize) {
+        formData.append('images_to_convert', imageFiles[i]);
+      } else {
+        showProgressBarAndMessage(`Error, file size should not exceed ${maxFileSize / 1_000_000} MB`, false);
+        location.reload();
+      }
+    }
+    const outputFormat = outputFormatInput.value;
+    formData.append('output_format', outputFormat);
+    showProgressBarAndMessage("Uploading image(s)...", true);
+
+  } else {
+    showProgressBarAndMessage("Error, number of files to upload should not exceed 15", false);
+    location.reload();
   }
-
-  const outputFormat = document.getElementById(`${outputFormatId}`).value;
-  formData.append('output_format', outputFormat);
 
   fetch('/api/image_convert/', {
     method: 'POST',
@@ -33,18 +49,15 @@ function uploadAndConvert() {
   })
     .then(response => {
       if (response.status === 400 || response.status === 500) {
+        toastifyMessage('Error: something unexpected happened', false);
+        location.reload()
         throw new Error('An error occurred while processing the images');
       }
       return response.blob();
     })
     .then(data => {
-      if (data.status === 'error') {
-        toastifyMessage(data.message, false);
-        location.reload()
-      } else {
-        toastifyMessage('Images has been converted', true);
-        location.reload()
-      }
+      toastifyMessage('Image(s) has been converted', true);
+      location.reload()
     })
     .catch(error => {
       toastifyMessage(error.message, false);

@@ -15,9 +15,10 @@
     {% compress css %}
         <link rel="stylesheet" href="{% static 'src/output.css' %}"/>
     {% endcompress %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
-
-    <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.css">
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/tui-image-editor/3.15.0/tui-image-editor.min.css">
     <script>
@@ -123,7 +124,7 @@
     </div>
 </nav>
 
-<div class="container mx-auto mt-[5.5rem]">
+<div class="mx-auto mt-[5.5rem] w-full">
     {% block content %}
     {% endblock content %}
 </div>

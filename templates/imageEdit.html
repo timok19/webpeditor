@@ -4,6 +4,10 @@
 {% load exif_decode %}
 
 {% block content %}
+    <div id="progress-bar-container">
+        <div id="bar"></div>
+    </div>
+
     <div class="flex justify-center items-center h-[calc(80vh)]">
         <main class="container mx-auto">
             <div class="px-4 py-4 sm:px-0">
@@ -18,8 +22,8 @@
     <div data-popover id="popover-description" role="tooltip"
          class="absolute z-40 invisible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
         <div class="max-w-sm p-4 bg-white border  border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Image
-                properties:</h5>
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Image properties:</h5>
             <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Name: &nbsp;<span
                     class="font-normal dark:text-gray-400 whitespace-pre-line"
                     style="font-family: Consolas, monospace">{{ edited_image_name_short }}</span>
@@ -61,18 +65,18 @@
                 </p>
             {% endif %}
 
-{#            {% if edited_image_metadata %}#}
-{#                {% for key, value in edited_image_metadata.items %}#}
-{#                    {% with key|replace_with_space:"_"|capfirst as formatted_key %}#}
-{#                        {% if not value|is_instance:"bytes" %}#}
-{#                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">#}
-{#                                {{ formatted_key }}: &nbsp;#}
-{#                                <span class="font-normal dark:text-gray-400 whitespace-pre-line" style="font-family: Consolas, monospace">{{ value }}</span>#}
-{#                            </p>#}
-{#                        {% endif %}#}
-{#                    {% endwith %}#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
+            {#            {% if edited_image_metadata %}#}
+            {#                {% for key, value in edited_image_metadata.items %}#}
+            {#                    {% with key|replace_with_space:"_"|capfirst as formatted_key %}#}
+            {#                        {% if not value|is_instance:"bytes" %}#}
+            {#                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">#}
+            {#                                {{ formatted_key }}: &nbsp;#}
+            {#                                <span class="font-normal dark:text-gray-400 whitespace-pre-line" style="font-family: Consolas, monospace">{{ value }}</span>#}
+            {#                            </p>#}
+            {#                        {% endif %}#}
+            {#                    {% endwith %}#}
+            {#                {% endfor %}#}
+            {#            {% endif %}#}
 
         </div>
         <div data-popper-arrow></div>
@@ -87,5 +91,6 @@
     <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="{% static 'js/services/ToastUI.js' %}" type="text/javascript"></script>
-    <script src=".{% static 'js/services/Toastify.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/services/Toastify.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/services/showProgressBarAndMessage.js' %}"></script>
 {% endblock content %}

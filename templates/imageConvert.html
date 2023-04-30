@@ -2,6 +2,10 @@
 {% load static %}
 
 {% block content %}
+    <div id="progress-bar-container">
+        <div id="bar"></div>
+    </div>
+
     <div class="flex flex-row justify-evenly items-center pt-6">
         {% if form.errors %}
             <div class="alert alert-danger">
@@ -206,4 +210,5 @@
     <script src="{% static 'js/services/openImageModal.js' %}"></script>
     <script src="{% static 'js/services/Toastify.js' %}"></script>
     <script src="{% static 'js/services/convertImages.js' %}"></script>
+    <script src="{% static 'js/services/showProgressBarAndMessage.js' %}"></script>
 {% endblock content %}
