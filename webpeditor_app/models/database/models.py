@@ -39,3 +39,19 @@ class EditedImage(models.Model):
 
     def __str__(self):
         return str(self.image_id)
+
+
+class ConvertedImage(models.Model):
+    user_id = models.CharField(max_length=32, null=True)
+    image_set = models.JSONField()
+    session_key = models.CharField(max_length=120, null=True)
+    session_key_expiration_date = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Converted Image'
+        verbose_name_plural = 'Converted Images'
+
+    def __str__(self):
+        return str(self.image_set)

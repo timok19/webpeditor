@@ -113,10 +113,10 @@
                     </thead>
                     <tbody>
 
-                    {% for img_data, new_filename in converted_images %}
+                    {% for image_url, new_filename in converted_images %}
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <td class="w-32 p-4">
-                                <img src="{{ img_data }}" alt="Uploaded image">
+                                <img src="{{ image_url }}" alt="Uploaded image">
                             </td>
                             <td class="px-6 py-4 w-[10rem] font-semibold text-gray-900 dark:text-white">
                                 <p>{{ new_filename }}</p>

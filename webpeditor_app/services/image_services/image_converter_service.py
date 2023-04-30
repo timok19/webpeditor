@@ -1,19 +1,26 @@
-import base64
+import cloudinary.uploader
+
 from io import BytesIO
 from typing import List, Tuple
 
 from PIL import Image
 from PIL.Image import Image as ImageClass
 from django.core.files.uploadedfile import UploadedFile
+from django.core.handlers.wsgi import WSGIRequest
 
+from webpeditor_app.models.database.models import ConvertedImage
+from webpeditor_app.services.api_services.cloudinary_service import delete_assets_in_user_folder
 from webpeditor_app.services.image_services.image_service import get_file_extension
 
 
-def convert_images(images_files: list[UploadedFile], output_format: str) -> List[Tuple]:
+def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: list[UploadedFile], output_format: str) \
+        -> List[Tuple]:
     """
     Covert image formats into chosen one by user
 
     Args:
+        user_id: User ID as a name of folder, where will be stored converted image(s)
+        request: WSGIRequest
         images_files: Image files from the form
         output_format: The format, that images should be converted
 
@@ -21,9 +28,17 @@ def convert_images(images_files: list[UploadedFile], output_format: str) -> List
         Returns error about image conversion or converted list of image files
     """
 
-    converted_images = []
+    converted_image: ConvertedImage | None = ConvertedImage.objects.filter(user_id=user_id).first()
+    converted_images_list = []
+    image_id = 0
+
+    # Delete previous content
+    if converted_image:
+        converted_image.delete()
+        delete_assets_in_user_folder(f"{user_id}/converted")
 
     for image_file in images_files:
+        image_id += 1
         try:
             pil_image = Image.open(image_file)
             buffer = BytesIO()
@@ -35,15 +50,48 @@ def convert_images(images_files: list[UploadedFile], output_format: str) -> List
             image_file_converted = convert_rgba_image_with_background(pil_image, file_extension, output_format)
 
             image_file_converted.save(buffer, format=output_format, quality=100)
+            buffer.seek(0)
         except Exception as e:
             raise e
 
-        converted_image = base64.b64encode(buffer.getvalue()).decode()
-        img_data = f'data:image/{output_format.lower()};base64,{converted_image}'
         new_filename = f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}'
-        converted_images.append((img_data, new_filename))
+        cloudinary_options: dict = {
+            "folder": f"{user_id}/converted",
+            "use_filename": True,
+            "unique_filename": True,
+            "filename_override": new_filename,
+            "overwrite": False
+        }
+        cloudinary_image = cloudinary.uploader.upload_image(buffer, **cloudinary_options)
 
-    return converted_images
+        converted_images_list.append((cloudinary_image.url, new_filename))
+
+        if converted_image is None:
+            converted_image = ConvertedImage(
+                user_id=user_id,
+                image_set=[{
+                    "image_id": image_id,
+                    "image_name": new_filename,
+                    "image_url": cloudinary_image.url,
+                    "content_type": f"image/{output_format.lower()}"
+                }],
+                session_key=request.session.session_key
+            )
+            converted_image.save()
+        else:
+            existing_image_set = converted_image.image_set
+            new_image_data = {
+                "image_id": image_id,
+                "image_name": new_filename,
+                "image_url": cloudinary_image.url,
+                "content_type": f"image/{output_format.lower()}"
+            }
+            updated_image_set = existing_image_set.copy()
+            updated_image_set.append(new_image_data)
+
+            ConvertedImage.objects.filter(user_id=user_id).update(image_set=updated_image_set)
+
+    return converted_images_list
 
 
 def convert_rgba_image_with_background(pil_image: ImageClass, file_extension: str, output_format: str) -> ImageClass:
@@ -59,7 +107,8 @@ def convert_rgba_image_with_background(pil_image: ImageClass, file_extension: st
         ImageClass: The converted image, which can be one of the following:
 
             - rgba_image: An image with an alpha channel (RGBA) if both input and output formats are 'WEBP' or 'PNG'.
-            - white_background: The rgba_image converted to RGB with a white background if the input format is 'WEBP' or 'PNG' and the output format is different.
+            - white_background: The rgba_image converted to RGB with a white background
+              if the input format is 'WEBP' or 'PNG' and the output format is different.
             - pil_image: The input image converted to RGB if the input format is not 'WEBP' or 'PNG'.
     """
 

@@ -112,12 +112,6 @@ def get_file_name(image_name: str) -> str:
     return os.path.splitext(image_name)[0]
 
 
-def change_file_extension(image_name: str, extension: str) -> str:
-    base_name, _ = os.path.splitext(image_name)
-
-    return base_name + f".{extension.lower()}"
-
-
 def get_data_from_image_url(image_url: str) -> BytesIO | None:
     response = requests.get(image_url)
     if response.status_code == 200:
@@ -125,6 +119,9 @@ def get_data_from_image_url(image_url: str) -> BytesIO | None:
     else:
         logging.error(f"Failed to download image: {response.status_code}")
         return None
+
+
+
 
 
 def get_image_file_size(image: ImageClass) -> str:

@@ -2,7 +2,6 @@ import logging
 import cloudinary.uploader
 from copy import copy
 
-from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
@@ -61,8 +60,8 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         return redirect("NoContentView")
 
     original_image = get_original_image(user_id)
-    if original_image.user_id != user_id:
-        raise PermissionDenied("You do not have permission to view this image.")
+    if original_image is None or original_image.user_id != user_id:
+        return redirect("NoContentView")
 
     edited_image = get_edited_image(user_id)
     if edited_image is None and original_image is not None:
