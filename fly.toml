@@ -26,4 +26,4 @@ primary_region = "ams"
   url_prefix = "/static/"
 
 [deploy]
-  release_command = "python3 manage.py migrate --noinput"
+  release_command = "python manage.py migrate --noinput"
