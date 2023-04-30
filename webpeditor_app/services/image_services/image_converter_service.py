@@ -75,7 +75,8 @@ def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: li
                     "image_url": cloudinary_image.url,
                     "content_type": f"image/{output_format.lower()}"
                 }],
-                session_key=request.session.session_key
+                session_key=request.session.session_key,
+                session_key_expiration_date=request.session.get_expiry_date()
             )
             converted_image.save()
         else:

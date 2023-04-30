@@ -7,7 +7,7 @@ from django.urls import reverse
 from webpeditor_app.models.database.forms import ImagesToConvertForm
 from webpeditor_app.services.image_services.image_converter_service import convert_and_save_images
 from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id, \
-    add_signed_user_id_to_session_store
+    add_signed_user_id_to_session_store, set_session_expiry
 from webpeditor_app.services.validators.image_file_validator import validate_images
 
 
@@ -20,6 +20,8 @@ def image_convert_api(request: WSGIRequest):
         if user_id is None:
             add_signed_user_id_to_session_store(request)
             user_id = get_unsigned_user_id(request)
+
+        set_session_expiry(request, 900)
 
         image_form = ImagesToConvertForm(request.POST, request.FILES)
         if not image_form.is_valid():

@@ -68,8 +68,6 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    print("POST request received")  # Debug print
-    print(request.FILES)  # Debug print
     if "user_id" not in request.session:
         add_signed_user_id_to_session_store(request)
 

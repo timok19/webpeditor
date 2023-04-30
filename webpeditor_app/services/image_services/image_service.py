@@ -11,8 +11,9 @@ from _decimal import ROUND_UP, Decimal
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer
+from webpeditor_app.models.database.models import OriginalImage, EditedImage, ConvertedImage
+from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer, \
+    ConvertedImageSerializer
 from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
 
 logging.basicConfig(level=logging.INFO)
@@ -30,7 +31,23 @@ def delete_original_image_in_db(user_id: str) -> JsonResponse:
 
     return JsonResponse({
         'success': True,
-        'info': 'Images has been deleted in db'
+        'info': 'Original and Edited images have been deleted in db'
+    }, status=204)
+
+
+def delete_converted_image_in_db(user_id: str) -> JsonResponse:
+    converted_image = get_converted_image(user_id)
+    if converted_image is None:
+        logging.info("No converted image in db. Deleting user's folder...")
+        delete_user_folder_with_content(user_id)
+    else:
+        converted_image.delete()
+
+    logging.info("Converted image has been deleted from db")
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Converted image has been deleted in db'
     }, status=204)
 
 
@@ -46,6 +63,13 @@ def get_serialized_data_edited_image() -> ReturnDict:
     edited_image_serializer = EditedImageSerializer(edited_images, many=True)
 
     return edited_image_serializer.data
+
+
+def get_serialized_data_converted_image() -> ReturnDict:
+    converted_images = get_all_converted_images()
+    converted_image_serializer = ConvertedImageSerializer(converted_images, many=True)
+
+    return converted_image_serializer.data
 
 
 def get_all_original_images():
@@ -64,6 +88,14 @@ def get_all_edited_images():
     return edited_images
 
 
+def get_all_converted_images():
+    converted_images = ConvertedImage.objects.all()
+    if converted_images is None:
+        raise ValueError("Converted images do not exist in db")
+
+    return converted_images
+
+
 def get_original_image(user_id: str) -> OriginalImage | None:
     original_image = OriginalImage.objects.filter(user_id=user_id).first()
     if original_image is None:
@@ -78,6 +110,14 @@ def get_edited_image(user_id: str) -> EditedImage | None:
         return None
 
     return edited_image
+
+
+def get_converted_image(user_id: str) -> ConvertedImage | None:
+    converted_image = ConvertedImage.objects.filter(user_id=user_id).first()
+    if converted_image is None:
+        return None
+
+    return converted_image
 
 
 def data_url_to_binary(data_url: str) -> BytesIO:
@@ -119,9 +159,6 @@ def get_data_from_image_url(image_url: str) -> BytesIO | None:
     else:
         logging.error(f"Failed to download image: {response.status_code}")
         return None
-
-
-
 
 
 def get_image_file_size(image: ImageClass) -> str:
