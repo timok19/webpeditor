@@ -9,16 +9,13 @@
 
     <div class="flex flex-col justify-center items-center h-[calc(80vh)]">
         <div class="flex items-center justify-evenly transform-gpu">
-            <div
-                    class="p-5 bg-white max-w-screen-md border max-w-6xl border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="contents">
-                    <img
+            <div class="p-5 bg-white max-w-screen-lg border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex flex-row justify-center items-center">
+                    <img class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-96 rounded-t-lg rounded-b-lg"
+                         src="{{ original_image_url }}" alt="Uploaded Image"
+                         onclick="showImageModal('{{ original_image_url }}')"/>
 
-                            class="change-cursor z-50 aspect-square border border-orange-400 flex-1 float-left object-cover h-[calc(50vh)] rounded-t-lg rounded-b-lg"
-                            src="{{ original_image_url }}" alt="Uploaded Image"
-                            onclick="showImageModal('{{ original_image_url }}')"/>
-
-                    <div class="text-left flex flex-col justify-center pt-5 pb-5 pl-5 overscroll-contain md:h-[calc(50vh)]">
+                    <div class="text-left flex flex-col justify-center pt-5 pb-5 pl-5 overscroll-contain h-96">
 
                         <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Image
                             properties:</h5>
@@ -78,14 +75,14 @@
 
 
     <!-- The Modal -->
-    <div id="modal"
-         class="hidden fixed top-0 left-0 z-80 w-screen h-screen bg-black/70 flex justify-center items-center">
+    <div id="modal-image"
+         class="hidden fixed top-0 left-0 z-[999] w-screen h-screen bg-black/70 flex justify-center items-center">
 
         <!-- A big image will be displayed here -->
-        <img id="modal-img" class="max-w-[800px] max-h-[600px] object-cover" alt="Image Modal" src=""/>
+        <img id="{{ image_name }}" class="max-w-[800px] max-h-[600px] object-cover" alt="Image Modal" src=""/>
 
         <!-- The close button -->
-        <a class="flex z-90 pb-[22rem] text-white"
+        <a class="flex z-[999] ml-10 mb-[35rem] text-white"
            onclick="closeImageModal()">
             <svg class="w-12 h-12 ml-1 mr-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                  xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +98,7 @@
         }
     </style>
 
+    {{ image_name|json_script:'imageId' }}
     <script src="../static/js/services/showProgressBarAndMessage.js"></script>
     <script src="../static/js/services/openImageModal.js"></script>
     <script src="../static/js/services/Toastify.js"></script>
