@@ -35,11 +35,10 @@ def delete_user_folder_with_content(folder_path):
 
 
 def delete_all_folders():
-    user_folders = get_all_user_folders()
-
     i = 0
-    while i < len(user_folders):
-        delete_user_folder_with_content(user_folders[i])
+    user_folders: list = get_all_user_folders()
+    for user_folder in user_folders:
+        delete_user_folder_with_content(user_folder)
         i += 1
 
     logging.info(f"Deleted {i} user folders in Cloudinary storage")

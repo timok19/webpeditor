@@ -2,10 +2,11 @@ import logging
 import cloudinary.uploader
 from copy import copy
 
+from cloudinary import CloudinaryImage
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.csrf import requires_csrf_token, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
@@ -37,7 +38,14 @@ def create_and_save_edited_image(user_id: str,
         "unique_filename": False,
         "overwrite": True
     }
-    cloudinary_image = cloudinary.uploader.upload_image(original_image_url, **cloudinary_parameters)
+    try:
+        cloudinary_image: CloudinaryImage = cloudinary.uploader.upload_image(
+            original_image_url,
+            **cloudinary_parameters
+        )
+    except cloudinary.uploader.Error as e:
+        logging.error(e)
+        return redirect('ImageDoesNotExistView')
 
     edited_image_init = EditedImage(
         user_id=user_id,
@@ -66,10 +74,12 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     edited_image = get_edited_image(user_id)
     if edited_image is None and original_image is not None:
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
+    elif edited_image is None:
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     edited_image_data = get_data_from_image_url(edited_image.image_url)
     if edited_image_data is None:
-        return redirect("ImageDoesNotExistView")
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     image_info = get_image_info(copy(edited_image_data))
     edited_image_size = image_info[2]
@@ -88,7 +98,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     context: dict = {
         'edited_image_url': edited_image.image_url,
-        'edited_image_name_short': image_name_shorter(original_image_name_with_extension),
+        'edited_image_name_short': image_name_shorter(original_image_name_with_extension, 20),
         'edited_image_size': edited_image_size,
         'edited_image_resolution': edited_image_resolution,
         'edited_image_aspect_ratio': edited_image_aspect_ratio,
@@ -106,6 +116,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
 
 @requires_csrf_token
+@csrf_protect
 @require_http_methods(['GET', 'POST'])
 def image_edit_view(
         request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:

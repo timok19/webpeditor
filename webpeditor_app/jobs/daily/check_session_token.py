@@ -18,7 +18,8 @@ from webpeditor_app.services.image_services.image_service import \
     delete_converted_image_in_db
 from webpeditor_app.services.other_services.session_service import clear_expired_session_store
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class Job(DailyJob):
@@ -35,15 +36,15 @@ class Job(DailyJob):
         converted_images = get_all_converted_images()
         user_folders: list = get_all_user_folders()
 
-        logging.info(
+        logger.info(
             f"\n--- Original Image object(s) in db ---"
             f"\n{json.dumps(original_images_serialized, indent=4)}"
         )
-        logging.info(
+        logger.info(
             f"\n--- Edited Image object(s) in db ---"
             f"\n{json.dumps(edited_images_serialized, indent=4)}"
         )
-        logging.info(
+        logger.info(
             f"\n--- Converted Image object(s) in db ---"
             f"\n{json.dumps(converted_images_serialized, indent=4)}"
         )
@@ -59,8 +60,8 @@ class Job(DailyJob):
                 session_key: str = image.session_key
                 session_key_expiration_date: datetime = image.session_key_expiration_date
 
-                if (timezone.now() > session_key_expiration_date) and (user_id in user_folders):
-                    logging.info("Session is expired. Deleting converted images...")
+                if timezone.now() > session_key_expiration_date and user_id in user_folders:
+                    logger.info("Session is expired. Deleting converted images...")
                     delete_converted_image_in_db(user_id)
                     delete_user_folder_with_content(user_id)
                     clear_expired_session_store(session_key)
@@ -76,8 +77,8 @@ class Job(DailyJob):
                 session_key: str = image.session_key
                 session_key_expiration_date: datetime = image.session_key_expiration_date
 
-                if (timezone.now() > session_key_expiration_date) and (user_id in user_folders):
-                    logging.info("Session is expired. Deleting original images, edited images and session store...")
+                if timezone.now() > session_key_expiration_date and user_id in user_folders:
+                    logger.info("Session is expired. Deleting original images, edited images and session store...")
                     delete_original_image_in_db(user_id)
                     delete_user_folder_with_content(user_id)
                     clear_expired_session_store(session_key)
@@ -87,4 +88,4 @@ class Job(DailyJob):
                     delete_original_image_in_db(user_id)
                     counter += 1
 
-        logging.info(f"Deleted {counter} collections in db")
+        logger.info(f"Deleted {counter} collections in db")

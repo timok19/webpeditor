@@ -10,7 +10,7 @@ from django.core.handlers.wsgi import WSGIRequest
 
 from webpeditor_app.models.database.models import ConvertedImage
 from webpeditor_app.services.api_services.cloudinary_service import delete_assets_in_user_folder
-from webpeditor_app.services.image_services.image_service import get_image_file_extension
+from webpeditor_app.services.image_services.image_service import get_image_file_extension, image_name_shorter
 
 
 def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: list[UploadedFile], output_format: str) \
@@ -25,7 +25,7 @@ def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: li
         output_format: The format, that images should be converted
 
     Returns:
-        Returns error about image conversion or converted list of image files
+        Returns converted list of image files
     """
 
     converted_image: ConvertedImage | None = ConvertedImage.objects.filter(user_id=user_id).first()
@@ -35,7 +35,7 @@ def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: li
     # Delete previous content
     if converted_image:
         converted_image.delete()
-        delete_assets_in_user_folder(f"{user_id}/converted")
+        delete_assets_in_user_folder(f"{user_id}/converted/")
 
     for image_file in images_files:
         image_id += 1
@@ -54,7 +54,11 @@ def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: li
         except Exception as e:
             raise e
 
-        new_filename = f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}'
+        new_filename = image_name_shorter(
+            f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}',
+            32
+        )
+
         cloudinary_options: dict = {
             "folder": f"{user_id}/converted",
             "use_filename": True,

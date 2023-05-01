@@ -40,7 +40,7 @@ def image_info_view(request) -> HttpResponse:
 
     context: dict = {
         'original_image_url': original_image.image_url,
-        'image_name': image_name_shorter(f"{original_image.image_name}.{image_format.lower()}"),
+        'image_name': image_name_shorter(f"{original_image.image_name}.{image_format.lower()}", 20),
         'image_format': image_format_description,
         'image_size': image_size,
         'image_resolution': image_resolution,

@@ -1,6 +1,6 @@
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.csrf import requires_csrf_token, csrf_protect
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 
@@ -12,6 +12,7 @@ from webpeditor_app.services.validators.image_file_validator import validate_ima
 
 
 @requires_csrf_token
+@csrf_protect
 @require_http_methods(['POST'])
 def image_convert_api(request: WSGIRequest):
 

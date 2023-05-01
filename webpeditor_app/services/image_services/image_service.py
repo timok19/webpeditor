@@ -1,9 +1,7 @@
 import base64
 import logging
 import os
-import sys
 from io import BytesIO
-from time import sleep
 from typing import Tuple
 
 import requests
@@ -138,10 +136,10 @@ def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
         return None
 
 
-def image_name_shorter(image_name: str) -> str:
+def image_name_shorter(image_name: str, min_size: int) -> str:
     basename, ext = os.path.splitext(image_name)
-    if len(basename) > 20:
-        basename = basename[:17] + "..."
+    if len(basename) > min_size:
+        basename = basename[:(min_size - 3)] + "..."
 
     return basename + ext
 
@@ -155,8 +153,10 @@ def get_image_file_name(image_name: str) -> str:
 
 
 def get_data_from_image_url(image_url: str) -> BytesIO | None:
+    if image_url is None:
+        return None
+
     response = requests.get(image_url)
-    sleep(0.25)
     if response.status_code == 200:
         return BytesIO(response.content)
     else:

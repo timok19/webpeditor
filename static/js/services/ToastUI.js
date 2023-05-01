@@ -241,8 +241,11 @@ document.addEventListener("DOMContentLoaded", function () {
   imageEditorContainer.classList.add("shadow");
   imageEditorContainer.classList.add("border");
   imageEditorContainer.classList.add("border-gray-200");
-  imageEditorContainer.classList.add("dark:bg-gray-800");
-  imageEditorContainer.classList.add("dark:border-gray-700");
+
+  if (localStorage.getItem("color-theme") === "dark") {
+    imageEditorContainer.classList.add("dark:bg-gray-800");
+    imageEditorContainer.classList.add("dark:border-gray-700");
+  }
 
   applyDarkModeOnEditorContainer(imageEditorContainer);
 
