@@ -15,7 +15,7 @@ from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
-from webpeditor_app.services.image_services.image_service import get_original_image, get_file_name
+from webpeditor_app.services.image_services.image_service import get_original_image, get_image_file_name
 from webpeditor_app.services.image_services.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import \
     update_session, \
@@ -39,7 +39,7 @@ def upload_original_image_to_cloudinary(
 
     folder_path: str = f"{user_id}/"
 
-    image_name: str = get_file_name(str(image.name))
+    image_name: str = get_image_file_name(str(image.name))
     image_name_after_re: str = replace_with_underscore(image_name)
     new_original_image_name: str = f"webpeditor_{image_name_after_re}"
 
@@ -68,11 +68,12 @@ def check_image_existence(request: WSGIRequest) -> bool:
 
 
 def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    if "user_id" not in request.session:
+    user_id = get_unsigned_user_id(request)
+    if user_id is None:
         add_signed_user_id_to_session_store(request)
+        user_id = get_unsigned_user_id(request)
 
     set_session_expiry(request, 900)
-    user_id = get_unsigned_user_id(request)
 
     clean_up_previous_images(user_id)
 

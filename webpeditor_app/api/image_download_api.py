@@ -8,7 +8,7 @@ from django.http.response import ResponseHeaders
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.services.image_services.image_service import get_file_extension
+from webpeditor_app.services.image_services.image_service import get_image_file_extension
 from webpeditor_app.services.api_services.request_service import get_json_request_body
 from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
 
@@ -29,7 +29,7 @@ def image_download_api(request: WSGIRequest) -> HttpResponse | JsonResponse:
             file_name = request_body[2]
             image_file = request_body[3]
 
-        file_extension: str = get_file_extension(file_name).upper()
+        file_extension: str = get_image_file_extension(file_name).upper()
         if file_extension in ['JPG', 'JFIF']:
             file_extension = 'JPEG'
 

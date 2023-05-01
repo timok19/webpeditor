@@ -48,7 +48,7 @@
             {% endif %}
 
             <p class="mt-3 text-sm text-gray-500 dark:text-gray-300 font-light">
-                Supports .WEBP, .JPEG, .JPG, .PNG, .RAW, .JFIF, .ICO and other...
+                Supports .WEBP, .JPEG, .JPG, .PNG, .GIF, .BMP, .ICO, .TIFF
             </p>
 
             <label class="block mb-2 mt-8 text-sm font-medium text-gray-900 dark:text-white"
@@ -60,10 +60,10 @@
                 <select name="output_format"
                         id="{{ form.output_format.auto_id }}"
                         class="block w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="WEBP">WEBP</option>
                     <option value="JPEG">JPEG</option>
                     <option value="PNG">PNG</option>
                     <option value="GIF">GIF</option>
-                    <option value="WEBP">WEBP</option>
                     <option value="BMP">BMP</option>
                     <option value="ICO">ICO</option>
                     <option value="TIFF">TIFF</option>

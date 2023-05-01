@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.services.image_services.image_service import \
-    get_original_image, image_name_shorter, get_info_about_image, get_data_from_image_url
+    get_original_image, image_name_shorter, get_image_info, get_data_from_image_url
 
 from webpeditor_app.services.other_services.session_service import \
     update_session, get_unsigned_user_id
@@ -18,18 +18,18 @@ logging.basicConfig(level=logging.INFO)
 def image_info_view(request) -> HttpResponse:
     user_id = get_unsigned_user_id(request)
     if user_id is None:
-        return redirect("NoContentView")
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     original_image = get_original_image(user_id)
     if original_image is None or original_image.user_id != user_id:
-        return redirect("NoContentView")
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     image_data = get_data_from_image_url(original_image.image_url)
     if image_data is None:
         return redirect("ImageDoesNotExistView")
 
     # Image info taken from file
-    image_info = get_info_about_image(image_data)
+    image_info = get_image_info(image_data)
 
     image_format_description: str = image_info[0]
     image_format: str = image_info[1]

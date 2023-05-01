@@ -13,7 +13,7 @@ from webpeditor_app.services.image_services.image_service import \
     get_original_image, \
     get_edited_image, \
     get_image_file_instance, \
-    get_info_about_image, \
+    get_image_info, \
     get_data_from_image_url, \
     image_name_shorter
 from webpeditor_app.services.other_services.session_service import get_session_key, get_unsigned_user_id
@@ -57,11 +57,11 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     session_key = get_session_key(request)
     user_id = get_unsigned_user_id(request)
     if user_id is None:
-        return redirect("NoContentView")
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     original_image = get_original_image(user_id)
     if original_image is None or original_image.user_id != user_id:
-        return redirect("NoContentView")
+        return render(request, "imageIsNotUploadedView.html", status=401)
 
     edited_image = get_edited_image(user_id)
     if edited_image is None and original_image is not None:
@@ -71,7 +71,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     if edited_image_data is None:
         return redirect("ImageDoesNotExistView")
 
-    image_info = get_info_about_image(copy(edited_image_data))
+    image_info = get_image_info(copy(edited_image_data))
     edited_image_size = image_info[2]
     edited_image_resolution = image_info[3]
     edited_image_aspect_ratio = image_info[4]

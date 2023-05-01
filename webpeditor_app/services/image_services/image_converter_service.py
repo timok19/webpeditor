@@ -10,7 +10,7 @@ from django.core.handlers.wsgi import WSGIRequest
 
 from webpeditor_app.models.database.models import ConvertedImage
 from webpeditor_app.services.api_services.cloudinary_service import delete_assets_in_user_folder
-from webpeditor_app.services.image_services.image_service import get_file_extension
+from webpeditor_app.services.image_services.image_service import get_image_file_extension
 
 
 def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: list[UploadedFile], output_format: str) \
@@ -43,7 +43,7 @@ def convert_and_save_images(user_id: str, request: WSGIRequest, images_files: li
             pil_image = Image.open(image_file)
             buffer = BytesIO()
 
-            file_extension: str = get_file_extension(image_file.name).upper()
+            file_extension: str = get_image_file_extension(image_file.name).upper()
             if file_extension == 'JPG':
                 file_extension = 'JPEG'
 

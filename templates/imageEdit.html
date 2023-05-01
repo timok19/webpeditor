@@ -87,10 +87,10 @@
     {{ edited_image_content_type|json_script:'imageContentType' }}
 
     <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.min.js"></script>
-    <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.js"></script>
+    <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
     <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="{% static 'js/services/ToastUI.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/services/Toastify.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/services/showProgressBarAndMessage.js' %}"></script>
+    <script src="../static/js/services/ToastUI.js" type="text/javascript"></script>
+    <script src="../static/js/services/Toastify.js" type="text/javascript"></script>
+    <script src="../static/js/services/showProgressBarAndMessage.js" type="text/javascript"></script>
 {% endblock content %}
