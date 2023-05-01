@@ -1825,8 +1825,80 @@ input:checked + .toggle-bg {
   height: 3rem;
 }
 
+.h-\[65vh\] {
+  height: 65vh;
+}
+
+.h-\[40vh\] {
+  height: 40vh;
+}
+
+.h-\[calc\(40vh\)\] {
+  height: calc(40vh);
+}
+
+.h-\[calc\(52vh\)\] {
+  height: calc(52vh);
+}
+
+.h-96 {
+  height: 24rem;
+}
+
+.h-\[60rem\] {
+  height: 60rem;
+}
+
+.h-\[55rem\] {
+  height: 55rem;
+}
+
 .max-h-\[600px\] {
   max-height: 600px;
+}
+
+.max-h-fit {
+  max-height: -moz-fit-content;
+  max-height: fit-content;
+}
+
+.max-h-max {
+  max-height: -moz-max-content;
+  max-height: max-content;
+}
+
+.max-h-20 {
+  max-height: 5rem;
+}
+
+.max-h-64 {
+  max-height: 16rem;
+}
+
+.max-h-96 {
+  max-height: 24rem;
+}
+
+.max-h-\[40vh\] {
+  max-height: 40vh;
+}
+
+.max-h-\[65vh\] {
+  max-height: 65vh;
+}
+
+.min-h-fit {
+  min-height: -moz-fit-content;
+  min-height: fit-content;
+}
+
+.min-h-0 {
+  min-height: 0px;
+}
+
+.min-h-min {
+  min-height: -moz-min-content;
+  min-height: min-content;
 }
 
 .w-full {

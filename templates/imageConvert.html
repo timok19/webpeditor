@@ -6,7 +6,7 @@
         <div id="bar"></div>
     </div>
 
-    <div class="flex flex-row justify-evenly items-center pt-6">
+    <div class="flex flex-row justify-center items-center pt-6">
         {% if form.errors %}
             <div class="alert alert-danger">
                 <strong>Errors:</strong>
@@ -91,7 +91,7 @@
         </div>
 
         {% if converted_images %}
-            <div class="ml-12 mr-6 flex justify-center relative overflow-y-auto shadow-md rounded-lg w-[60rem] h-[calc(65vh)]">
+            <div class="ml-12 mr-6 flex justify-center relative overflow-y-auto shadow-md rounded-lg w-[60rem] min-h-min max-h-[65vh] h-[55rem]">
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0">
                     <tr>
@@ -121,8 +121,8 @@
                                 <p>{{ new_filename }}</p>
                             </td>
                             <td class="px-6 py-4 w-[5rem]">
-                                <button class="font-medium text-black dark:text-sky-600 hover:underline m-4"
-                                        data-popover-target="{{ new_filename }}"
+                                <button class="font-medium text-black dark:text-sky-600 hover:underline m-4 ml-1"
+                                        data-popover-target="popover-{{ new_filename }}"
                                         data-popover-trigger="click"
                                         data-popover-placement="left"
                                         type="button">
@@ -134,7 +134,7 @@
                                 </button>
                             </td>
                             <td class="px-6 py-4 w-[5rem]">
-                                <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline">
+                                <a href="#" class="flex justify-center font-medium text-red-600 dark:text-red-500 hover:underline">
                                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-8 w-8">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -144,7 +144,7 @@
                             </td>
                         </tr>
 
-                        <div data-popover id="{{ new_filename }}"
+                        <div data-popover id="popover-{{ new_filename }}"
                              role="tooltip"
                              class="absolute z-50 invisible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
                             <div class="p-3">
