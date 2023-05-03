@@ -41,7 +41,7 @@ def image_convert_api(request: WSGIRequest):
         output_format = request.POST.get('output_format')
 
         try:
-            converted_images = convert_and_save_images(user_id, request, image_files, 100, output_format)
+            converted_images = convert_and_save_images(user_id, request, image_files, 95, output_format)
             update_session(request=request, user_id=user_id)
             request.session.pop('error_message', None)
             request.session.pop('converted_images', None)
