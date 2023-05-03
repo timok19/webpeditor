@@ -10,13 +10,13 @@ from django.views.decorators.csrf import requires_csrf_token, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import \
-    get_original_image, \
-    get_edited_image, \
-    get_image_file_instance, \
-    get_image_info, \
-    get_data_from_image_url, \
-    image_name_shorter
+from webpeditor_app.services.image_services.image_service import (get_original_image,
+                                                                  get_edited_image,
+                                                                  get_image_file_instance,
+                                                                  get_image_info,
+                                                                  get_data_from_image_url,
+                                                                  image_name_shorter)
+
 from webpeditor_app.services.other_services.session_service import get_session_key, get_unsigned_user_id
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +26,6 @@ def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
                                  request: WSGIRequest) -> EditedImage:
-
     original_image_url = original_image.image_url
     image_name = original_image.image_name
     folder_path = f"{user_id}/edited/"
@@ -86,7 +85,6 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     edited_image_resolution = image_info[3]
     edited_image_aspect_ratio = image_info[4]
     edited_image_exif_data = image_info[6]
-    edited_image_metadata = image_info[7]
 
     # Original image format description to show on FE
     original_image_data = get_data_from_image_url(original_image.image_url)
@@ -105,7 +103,6 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
         'edited_image_format': original_image_format_description,
         'edited_image_mode': original_image_mode,
         'edited_image_exif_data': edited_image_exif_data,
-        'edited_image_metadata': edited_image_metadata,
         'edited_image_name_with_extension': original_image_name_with_extension,
         'edited_image_content_type': original_image.content_type
     }

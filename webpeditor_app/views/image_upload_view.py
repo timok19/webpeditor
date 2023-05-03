@@ -4,6 +4,8 @@ from typing import Tuple
 import cloudinary.uploader
 import cloudinary.api
 
+from PIL import Image as PilImage
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
@@ -16,12 +18,11 @@ from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
 from webpeditor_app.services.image_services.image_service import get_original_image, get_image_file_name
-from webpeditor_app.services.image_services.text_utils import replace_with_underscore
-from webpeditor_app.services.other_services.session_service import \
-    update_session, \
-    get_unsigned_user_id, \
-    set_session_expiry, \
-    add_signed_user_id_to_session_store
+from webpeditor_app.utils.text_utils import replace_with_underscore
+from webpeditor_app.services.other_services.session_service import (update_session,
+                                                                    get_unsigned_user_id,
+                                                                    set_session_expiry,
+                                                                    add_signed_user_id_to_session_store)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,7 +37,6 @@ def clean_up_previous_images(user_id: str):
 
 def upload_original_image_to_cloudinary(
         image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
-
     folder_path: str = f"{user_id}/"
 
     image_name: str = get_image_file_name(str(image.name))
@@ -86,14 +86,26 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         return render(request, 'imageUpload.html', context)
 
     uploaded_original_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
-    if uploaded_original_image_file.size > MAX_IMAGE_FILE_SIZE:
+    image = PilImage.open(uploaded_original_image_file)
+
+    are_image_dimensions_more: bool = image.width > 2500 or image.height > 2500
+    is_image_file_size_more: bool = uploaded_original_image_file.size > MAX_IMAGE_FILE_SIZE
+
+    if is_image_file_size_more or are_image_dimensions_more:
+        f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB'
+        if is_image_file_size_more:
+            error = f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB'
+        else:
+            error = f'Image dimensions should not be more than 2000x2000px'
+
         is_image_exist = check_image_existence(request)
         context: dict = {
-            'error': f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB',
+            'error': error,
             'is_image_exist': is_image_exist
         }
         return render(request, 'imageUpload.html', context)
 
+    uploaded_original_image_file.seek(0)
     cloudinary_image_url, new_image_name = upload_original_image_to_cloudinary(
         uploaded_original_image_file,
         user_id
@@ -108,6 +120,7 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         session_key_expiration_date=request.session.get_expiry_date()
     )
     original_image.save()
+    image.close()
 
     update_session(request=request, user_id=user_id)
 

@@ -5,8 +5,8 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.forms import ImagesToConvertForm
-from webpeditor_app.services.image_services.image_service import get_all_converted_images
-
+from webpeditor_app.services.image_services.image_service import get_converted_image
+from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,10 +16,14 @@ logging.basicConfig(level=logging.INFO)
 def image_convert_view(request: WSGIRequest):
     if request.method == 'GET':
         image_form = ImagesToConvertForm()
+        user_id = get_unsigned_user_id(request)
+
         error_message = request.session.get('error_message')
         try:
-            get_all_converted_images()
-            converted_images_in_session_store = request.session.get('converted_images')
+            if get_converted_image(user_id):
+                converted_images_in_session_store = request.session.get('converted_images')
+            else:
+                converted_images_in_session_store = None
         except ValueError as e:
             logging.error(e)
             converted_images_in_session_store = None

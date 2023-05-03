@@ -5,15 +5,19 @@ from io import BytesIO
 from typing import Tuple
 
 import requests
-from PIL import Image as PilImage, ExifTags
+from PIL import Image as PilImage
+from PIL.ExifTags import TAGS
 from PIL.Image import Image as ImageClass
+from PIL.TiffImagePlugin import IFDRational
 from _decimal import ROUND_UP, Decimal
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage, ConvertedImage
-from webpeditor_app.models.database.serializers import OriginalImageSerializer, EditedImageSerializer, \
-    ConvertedImageSerializer
+from webpeditor_app.models.database.serializers import (OriginalImageSerializer,
+                                                        EditedImageSerializer,
+                                                        ConvertedImageSerializer)
+
 from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
 
 logging.basicConfig(level=logging.INFO)
@@ -179,8 +183,13 @@ def get_image_file_size(image: ImageClass) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
-def get_image_info(image_data: BytesIO) \
-        -> None | Tuple:
+def get_image_info(image_data: BytesIO) -> None | Tuple:
+    def decode_value(value):
+        try:
+            return value.decode()
+        except UnicodeDecodeError:
+            return "<undecodable_bytes>"
+
     image_file = get_image_file_instance(image_data)
     if image_file is None:
         return None
@@ -191,7 +200,6 @@ def get_image_info(image_data: BytesIO) \
     image_aspect_ratio = get_image_aspect_ratio(image_file)
     image_mode = image_file.mode
     image_format = image_file.format
-    metadata = image_file.info
 
     # Get structured exif data, if exists
     exif_data = image_file.getexif()
@@ -199,21 +207,32 @@ def get_image_info(image_data: BytesIO) \
         exif_data = "No exif data was found"
     else:
         exif_data = {
-            ExifTags.TAGS[k]: v
-            for k, v in exif_data.items()
-            if k in ExifTags.TAGS
+            # TAGS.get(tag_id, tag_id): exif_data.get(tag_id).decode()
+            # if isinstance(exif_data.get(tag_id), bytes)
+            # else exif_data.get(tag_id)
+            # for tag_id in exif_data
+
+            TAGS.get(tag_id, tag_id): (
+                decode_value(exif_data.get(tag_id))
+                if isinstance(exif_data.get(tag_id), bytes)
+                else int(exif_data.get(tag_id).numerator / exif_data.get(tag_id).denominator)
+                if isinstance(exif_data.get(tag_id), IFDRational)
+                else exif_data.get(tag_id)
+            )
+            for tag_id in exif_data
         }
 
     image_file.close()
 
-    return image_format_description, \
-        image_format, \
-        image_size, \
-        image_resolution, \
-        image_aspect_ratio, \
-        image_mode, \
-        exif_data, \
-        metadata
+    return (
+        image_format_description,
+        image_format,
+        image_size,
+        image_resolution,
+        image_aspect_ratio,
+        image_mode,
+        exif_data
+    )
 
 
 def get_image_aspect_ratio(image_file: ImageClass) -> Decimal:

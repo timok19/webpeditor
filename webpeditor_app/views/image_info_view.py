@@ -5,11 +5,13 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.services.image_services.image_service import \
-    get_original_image, image_name_shorter, get_image_info, get_data_from_image_url
+from webpeditor_app.services.image_services.image_service import (get_original_image,
+                                                                  image_name_shorter,
+                                                                  get_image_info,
+                                                                  get_data_from_image_url)
 
-from webpeditor_app.services.other_services.session_service import \
-    update_session, get_unsigned_user_id
+from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
+
 
 logging.basicConfig(level=logging.INFO)
 

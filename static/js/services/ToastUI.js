@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       menu: ["resize", "crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
       uiSize: {
-        width: window.innerWidth < 1600? "56rem" : "62rem",
+        width: window.innerWidth < 1600 ? "56rem" : "62rem",
         height: window.innerHeight < 768 ? "36rem" : "42rem",
       },
       menuBarPosition: "left",
@@ -63,8 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
   svgDownloadPath.setAttribute(
     "d",
     "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
-      "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
-      "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+    "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
+    "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
   );
   svgDownloadIcon.appendChild(svgDownloadPath);
 
@@ -238,14 +238,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const imageEditorContainer = document.querySelector("#tui-image-editor");
   imageEditorContainer.style.borderRadius = "1rem";
-  imageEditorContainer.classList.add("shadow");
-  imageEditorContainer.classList.add("border");
-  imageEditorContainer.classList.add("border-gray-200");
-
-  if (localStorage.getItem("color-theme") === "dark") {
-    imageEditorContainer.classList.add("dark:bg-gray-800");
-    imageEditorContainer.classList.add("dark:border-gray-700");
-  }
+  imageEditorContainer.classList.add("shadow",
+    "border",
+    "border-gray-200",
+    "dark:bg-gray-800",
+    "dark:border-gray-700"
+  );
 
   applyDarkModeOnEditorContainer(imageEditorContainer);
 
@@ -362,7 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
       view[i] = data.charCodeAt(i) & 0xff;
     }
 
-    return [new Blob([arrayBuffer], { type: mimeType }), dataUrl];
+    return [new Blob([arrayBuffer], {type: mimeType}), dataUrl];
   }
 
   function downloadImage(mimeType, quality, fileName) {
@@ -446,7 +444,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/api/image_get_original/", {
       method: "GET",
       headers: {
-         "Content-Type": "application/json",
+        "Content-Type": "application/json",
       },
     })
       .then((response) => {

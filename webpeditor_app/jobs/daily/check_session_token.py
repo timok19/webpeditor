@@ -5,17 +5,19 @@ from datetime import datetime
 from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.api_services.cloudinary_service import \
-    delete_all_folders, \
-    get_all_user_folders, \
-    delete_user_folder_with_content
-from webpeditor_app.services.image_services.image_service import \
-    get_serialized_data_original_image, \
-    get_serialized_data_edited_image, \
-    get_all_original_images, \
-    get_all_edited_images, \
-    delete_original_image_in_db, get_serialized_data_converted_image, get_all_converted_images, \
-    delete_converted_image_in_db
+from webpeditor_app.services.api_services.cloudinary_service import (delete_all_folders,
+                                                                     get_all_user_folders,
+                                                                     delete_user_folder_with_content)
+
+from webpeditor_app.services.image_services.image_service import (get_serialized_data_original_image,
+                                                                  get_serialized_data_edited_image,
+                                                                  get_all_original_images,
+                                                                  get_all_edited_images,
+                                                                  delete_original_image_in_db,
+                                                                  get_serialized_data_converted_image,
+                                                                  get_all_converted_images,
+                                                                  delete_converted_image_in_db)
+
 from webpeditor_app.services.other_services.session_service import clear_expired_session_store
 
 logger = logging.getLogger()

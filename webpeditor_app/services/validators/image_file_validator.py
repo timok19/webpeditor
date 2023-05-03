@@ -4,11 +4,10 @@ from PIL import Image
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 
-from webpeditor.settings import \
-    MAX_IMAGE_FILE_SIZE, \
-    MAX_SUM_SIZE_OF_IMAGE_FILES, \
-    ONE_MEGABYTE, \
-    VALID_IMAGE_FORMATS
+from webpeditor.settings import (MAX_IMAGE_FILE_SIZE,
+                                 MAX_SUM_SIZE_OF_IMAGE_FILES,
+                                 ONE_MEGABYTE,
+                                 VALID_IMAGE_FORMATS)
 
 
 def validate_images(request: WSGIRequest, image_files: List[InMemoryUploadedFile]) -> bool:
