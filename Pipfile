@@ -35,7 +35,7 @@ django-cors-headers = "*"
 pymongo = "==3.12.1"
 django-environ = "*"
 django-extensions = "*"
-requests = "*"
+requests = "==2.29.0"
 cython = "*"
 ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
@@ -50,6 +50,7 @@ python-dotenv = "*"
 cloudinary = "*"
 raven = "*"
 django = "==4.1.7"
+redis = "==4.5.4"
 
 [dev-packages]
 autopep8 = "*"
