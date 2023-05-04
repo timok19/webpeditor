@@ -152,7 +152,7 @@ def create_image_set(image_id: int,
 
 
 def convert_color_mode(pil_image: ImageClass, input_file_format: str, output_file_format: str) -> ImageClass:
-    image_formats_with_alpha_channel = {'WEBP', 'PNG', 'GIF'}
+    image_formats_with_alpha_channel: set[str] = {'WEBP', 'PNG', 'GIF'}
 
     if input_file_format in image_formats_with_alpha_channel:
         rgba_image = pil_image.convert('RGBA')
@@ -239,6 +239,6 @@ def run_conversion_and_saving_in_threads(user_id: str,
                 result: tuple = future.result()
                 converted_images_list.append(result)
             except Exception as e:
-                print("An error occurred in a parallel task:", e)
+                print(f"An error occurred in a parallel task: {e}")
 
     return converted_images_list

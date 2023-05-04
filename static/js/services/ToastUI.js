@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
       toastifyMessage("Failed to download: image size cannot be more than 6 MB", false);
     } else {
 
-      fetch("/api/image_download/", {
+      fetch("/api/image_download_edited/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -451,7 +451,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!response.ok) {
           throw new Error("Failed to fetch the original image");
         }
-
         return response.json();
       })
       .then((data) => {

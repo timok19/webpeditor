@@ -15,7 +15,7 @@ from webpeditor_app.services.other_services.session_service import update_sessio
 
 @csrf_exempt
 @require_http_methods(['POST'])
-def image_download_api(request: WSGIRequest) -> HttpResponse | JsonResponse:
+def image_download_edited_api(request: WSGIRequest) -> HttpResponse | JsonResponse:
     if request.method == 'POST':
         mime_type = ""
         file_name = ""
