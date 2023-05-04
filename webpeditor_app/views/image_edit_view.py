@@ -1,4 +1,6 @@
 import logging
+from types import NoneType
+
 import cloudinary.uploader
 from copy import copy
 
@@ -10,14 +12,14 @@ from django.views.decorators.csrf import requires_csrf_token, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import (get_original_image,
-                                                                  get_edited_image,
+from webpeditor_app.services.image_services.image_service import (get_edited_image,
                                                                   get_image_file_instance,
                                                                   get_image_info,
                                                                   get_data_from_image_url,
                                                                   image_name_shorter)
 
-from webpeditor_app.services.other_services.session_service import get_session_key, get_unsigned_user_id
+from webpeditor_app.services.other_services.session_service import get_session_key
+from webpeditor_app.views.view_utils.get_user_data import get_user_id_or_401, get_original_image_or_401
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,7 +27,8 @@ logging.basicConfig(level=logging.INFO)
 def create_and_save_edited_image(user_id: str,
                                  original_image: OriginalImage,
                                  session_key: str,
-                                 request: WSGIRequest) -> EditedImage:
+                                 request: WSGIRequest) \
+        -> EditedImage | HttpResponsePermanentRedirect | HttpResponseRedirect:
     original_image_url = original_image.image_url
     image_name = original_image.image_name
     folder_path = f"{user_id}/edited/"
@@ -62,22 +65,25 @@ def create_and_save_edited_image(user_id: str,
 
 def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
     session_key = get_session_key(request)
-    user_id = get_unsigned_user_id(request)
-    if user_id is None:
-        return render(request, "imageIsNotUploadedView.html", status=401)
 
-    original_image = get_original_image(user_id)
-    if original_image is None or original_image.user_id != user_id:
-        return render(request, "imageIsNotUploadedView.html", status=401)
+    user_id: str | HttpResponse = get_user_id_or_401(request)
+    if isinstance(user_id, HttpResponse):
+        return user_id
 
-    edited_image = get_edited_image(user_id)
-    if edited_image is None and original_image is not None:
+    original_image: OriginalImage | HttpResponse = get_original_image_or_401(request, user_id)
+    if isinstance(original_image, HttpResponse):
+        return original_image
+
+    edited_image: EditedImage | None = get_edited_image(user_id)
+    if isinstance(edited_image, NoneType) and isinstance(original_image, OriginalImage):
         edited_image = create_and_save_edited_image(user_id, original_image, session_key, request)
-    elif edited_image is None:
+    elif isinstance(edited_image, NoneType):
+        return render(request, "imageIsNotUploadedView.html", status=401)
+    elif edited_image.image_url is None:
         return render(request, "imageIsNotUploadedView.html", status=401)
 
     edited_image_data = get_data_from_image_url(edited_image.image_url)
-    if edited_image_data is None:
+    if isinstance(edited_image_data, NoneType):
         return render(request, "imageIsNotUploadedView.html", status=401)
 
     image_info = get_image_info(copy(edited_image_data))
@@ -115,8 +121,8 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 @requires_csrf_token
 @csrf_protect
 @require_http_methods(['GET', 'POST'])
-def image_edit_view(
-        request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+def image_edit_view(request: WSGIRequest) \
+        -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
     if request.method == "GET":
         response = get(request)
         return response

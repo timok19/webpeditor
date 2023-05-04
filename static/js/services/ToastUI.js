@@ -209,11 +209,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Svg icon (Show image info button)
   const svgImageInfoIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svgImageInfoIcon.setAttribute("fill", "none");
-  svgImageInfoIcon.setAttribute("stroke", "currentColor");
+  svgImageInfoIcon.setAttribute("stroke", "rgb(156, 163, 155)");
   svgImageInfoIcon.setAttribute("stroke-width", "1.2");
   svgImageInfoIcon.setAttribute("viewBox", "0 0 24 24");
   svgImageInfoIcon.setAttribute("aria-hidden", "true");
-  svgImageInfoIcon.setAttribute("class", "w-6 h-6 ml-1 mr-1 text-gray-400 hover:text-gray-500");
+  svgImageInfoIcon.setAttribute("class", "w-8 h-8 ml-1 mr-1");
 
   // Path icon (Show image info button)
   const svgImageInfoPath = document.createElementNS("http://www.w3.org/2000/svg", "path");

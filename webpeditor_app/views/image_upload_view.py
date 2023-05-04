@@ -16,7 +16,7 @@ from django.views.decorators.http import require_http_methods
 from webpeditor.settings import MAX_IMAGE_FILE_SIZE
 from webpeditor_app.models.database.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
+from webpeditor_app.services.api_services.cloudinary_service import delete_cloudinary_original_and_edited_images
 from webpeditor_app.services.image_services.image_service import get_original_image, get_image_file_name
 from webpeditor_app.utils.text_utils import replace_with_underscore
 from webpeditor_app.services.other_services.session_service import (update_session,
@@ -28,15 +28,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 def clean_up_previous_images(user_id: str):
-    previous_original_image = get_original_image(user_id)
-    if previous_original_image is not None:
+    previous_original_image: OriginalImage | None = get_original_image(user_id)
+    if isinstance(previous_original_image, OriginalImage):
         previous_original_image.delete()
 
-    delete_user_folder_with_content(user_id)
+    delete_cloudinary_original_and_edited_images(user_id)
 
 
-def upload_original_image_to_cloudinary(
-        image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
+def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
     folder_path: str = f"{user_id}/"
 
     image_name: str = get_image_file_name(str(image.name))
@@ -96,7 +95,7 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
         if is_image_file_size_more:
             error = f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB'
         else:
-            error = f'Image dimensions should not be more than 2000x2000px'
+            error = f'Image dimensions should not be more than 2500x2500px'
 
         is_image_exist = check_image_existence(request)
         context: dict = {

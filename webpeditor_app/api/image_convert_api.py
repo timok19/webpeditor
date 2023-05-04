@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 
 from webpeditor_app.models.database.forms import ImagesToConvertForm
-from webpeditor_app.services.image_services.image_converter_service import convert_and_save_images
+from webpeditor_app.services.image_services.image_converter_service import run_conversion_and_saving_in_threads
 from webpeditor_app.services.other_services.session_service import (update_session,
                                                                     get_unsigned_user_id,
                                                                     add_signed_user_id_to_session_store,
@@ -41,7 +41,7 @@ def image_convert_api(request: WSGIRequest):
         output_format = request.POST.get('output_format')
 
         try:
-            converted_images = convert_and_save_images(user_id, request, image_files, 95, output_format)
+            converted_images = run_conversion_and_saving_in_threads(user_id, request, image_files, 100, output_format)
             update_session(request=request, user_id=user_id)
             request.session.pop('error_message', None)
             request.session.pop('converted_images', None)

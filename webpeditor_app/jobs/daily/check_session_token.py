@@ -5,9 +5,11 @@ from datetime import datetime
 from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.api_services.cloudinary_service import (delete_all_folders,
-                                                                     get_all_user_folders,
-                                                                     delete_user_folder_with_content)
+from webpeditor_app.services.api_services.cloudinary_service import (delete_all_cloudinary_folders,
+                                                                     get_all_cloudinary_user_folders,
+                                                                     delete_cloudinary_original_and_edited_images,
+                                                                     delete_cloudinary_converted_images,
+                                                                     delete_cloudinary_folder)
 
 from webpeditor_app.services.image_services.image_service import (get_serialized_data_original_image,
                                                                   get_serialized_data_edited_image,
@@ -36,7 +38,7 @@ class Job(DailyJob):
         original_images = get_all_original_images()
         edited_images = get_all_edited_images()
         converted_images = get_all_converted_images()
-        user_folders: list = get_all_user_folders()
+        user_folders: list = get_all_cloudinary_user_folders()
 
         logger.info(
             f"\n--- Original Image object(s) in db ---"
@@ -54,7 +56,7 @@ class Job(DailyJob):
         counter = 0
 
         if len(original_images) == 0 or len(edited_images) == 0 or len(converted_images) == 0:
-            delete_all_folders()
+            delete_all_cloudinary_folders()
 
         if len(converted_images) > 0:
             for image in converted_images:
@@ -65,7 +67,8 @@ class Job(DailyJob):
                 if timezone.now() > session_key_expiration_date and user_id in user_folders:
                     logger.info("Session is expired. Deleting converted images...")
                     delete_converted_image_in_db(user_id)
-                    delete_user_folder_with_content(user_id)
+                    delete_cloudinary_converted_images(user_id)
+                    delete_cloudinary_folder(user_id)
                     clear_expired_session_store(session_key)
                     counter += 1
 
@@ -82,7 +85,8 @@ class Job(DailyJob):
                 if timezone.now() > session_key_expiration_date and user_id in user_folders:
                     logger.info("Session is expired. Deleting original images, edited images and session store...")
                     delete_original_image_in_db(user_id)
-                    delete_user_folder_with_content(user_id)
+                    delete_cloudinary_original_and_edited_images(user_id)
+                    delete_cloudinary_folder(user_id)
                     clear_expired_session_store(session_key)
                     counter += 1
 

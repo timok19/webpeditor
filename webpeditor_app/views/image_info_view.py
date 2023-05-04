@@ -1,33 +1,36 @@
 import logging
+from io import BytesIO
+from types import NoneType
 
 from _decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.services.image_services.image_service import (get_original_image,
-                                                                  image_name_shorter,
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.image_services.image_service import (image_name_shorter,
                                                                   get_image_info,
                                                                   get_data_from_image_url)
 
-from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
 
+from webpeditor_app.services.other_services.session_service import update_session
+from webpeditor_app.views.view_utils.get_user_data import get_user_id_or_401, get_original_image_or_401
 
 logging.basicConfig(level=logging.INFO)
 
 
 @require_http_methods(['GET'])
 def image_info_view(request) -> HttpResponse:
-    user_id = get_unsigned_user_id(request)
-    if user_id is None:
-        return render(request, "imageIsNotUploadedView.html", status=401)
+    user_id: str | HttpResponse = get_user_id_or_401(request)
+    if isinstance(user_id, HttpResponse):
+        return user_id
 
-    original_image = get_original_image(user_id)
-    if original_image is None or original_image.user_id != user_id:
-        return render(request, "imageIsNotUploadedView.html", status=401)
+    original_image: OriginalImage | HttpResponse = get_original_image_or_401(request, user_id)
+    if isinstance(original_image, HttpResponse):
+        return original_image
 
-    image_data = get_data_from_image_url(original_image.image_url)
-    if image_data is None:
+    image_data: BytesIO | None = get_data_from_image_url(original_image.image_url)
+    if isinstance(image_data, NoneType):
         return redirect("ImageDoesNotExistView")
 
     # Image info taken from file

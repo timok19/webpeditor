@@ -18,7 +18,8 @@ from webpeditor_app.models.database.serializers import (OriginalImageSerializer,
                                                         EditedImageSerializer,
                                                         ConvertedImageSerializer)
 
-from webpeditor_app.services.api_services.cloudinary_service import delete_user_folder_with_content
+from webpeditor_app.services.api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
+    delete_cloudinary_converted_images
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +28,7 @@ def delete_original_image_in_db(user_id: str) -> JsonResponse:
     original_image = get_original_image(user_id)
     if original_image is None:
         logging.info("No original image in db. Deleting user's folder...")
-        delete_user_folder_with_content(user_id)
+        delete_cloudinary_original_and_edited_images(user_id)
     else:
         original_image.delete()
 
@@ -43,7 +44,7 @@ def delete_converted_image_in_db(user_id: str) -> JsonResponse:
     converted_image = get_converted_image(user_id)
     if converted_image is None:
         logging.info("No converted image in db. Deleting user's folder...")
-        delete_user_folder_with_content(user_id)
+        delete_cloudinary_converted_images(user_id)
     else:
         converted_image.delete()
 
@@ -156,7 +157,7 @@ def get_image_file_name(image_name: str) -> str:
     return os.path.splitext(image_name)[0]
 
 
-def get_data_from_image_url(image_url: str) -> BytesIO | None:
+def get_data_from_image_url(image_url: str | None) -> BytesIO | None:
     if image_url is None:
         return None
 
@@ -168,10 +169,7 @@ def get_data_from_image_url(image_url: str) -> BytesIO | None:
         return None
 
 
-def get_image_file_size(image: ImageClass) -> str:
-    buffer = BytesIO()
-    image.save(buffer, format=image.format)
-
+def get_image_file_size(buffer: BytesIO) -> str:
     size_in_bytes: int = buffer.tell()
     size_in_kb: float = size_in_bytes / 1024
 
@@ -190,12 +188,16 @@ def get_image_info(image_data: BytesIO) -> None | Tuple:
         except UnicodeDecodeError:
             return "<undecodable_bytes>"
 
+    buffer = BytesIO()
+
     image_file = get_image_file_instance(image_data)
     if image_file is None:
         return None
 
+    image_file.save(buffer, format=image_file.format)
+
     image_format_description = image_file.format_description
-    image_size = get_image_file_size(image_file)
+    image_size = get_image_file_size(buffer)
     image_resolution = f"{image_file.width}px ⨯ {image_file.height}px"
     image_aspect_ratio = get_image_aspect_ratio(image_file)
     image_mode = image_file.mode
@@ -207,11 +209,6 @@ def get_image_info(image_data: BytesIO) -> None | Tuple:
         exif_data = "No exif data was found"
     else:
         exif_data = {
-            # TAGS.get(tag_id, tag_id): exif_data.get(tag_id).decode()
-            # if isinstance(exif_data.get(tag_id), bytes)
-            # else exif_data.get(tag_id)
-            # for tag_id in exif_data
-
             TAGS.get(tag_id, tag_id): (
                 decode_value(exif_data.get(tag_id))
                 if isinstance(exif_data.get(tag_id), bytes)

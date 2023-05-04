@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3150e99ecb4de4fd3644513c610c74c4defffe90eb936612924133b4c8e85090"
+            "sha256": "0b56216d1751143a71789e471756a91aa1000dc8c91407704a87ad90bd8a7d18"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -521,6 +521,13 @@
             "index": "pypi",
             "version": "==1.9.0"
         },
+        "libtiff": {
+            "hashes": [
+                "sha256:8b80660541bfc51309b22dd676bcc94a8d77324b00fba3d331b7f564775f17a6"
+            ],
+            "index": "pypi",
+            "version": "==0.4.2"
+        },
         "matplotlib-inline": {
             "hashes": [
                 "sha256:f1f41aab5328aa5aaea9b16d083b128102f8712542f819fe7e6a420ff581b311",
@@ -568,7 +575,7 @@
                 "sha256:ecde0f8adef7dfdec993fd54b0f78183051b6580f606111a6d789cd14c61ea0c",
                 "sha256:f21c442fdd2805e91799fbe044a7b999b8571bb0ab0f7850d0cb9641a687092b"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_version >= '3.10'",
             "version": "==1.24.3"
         },
         "opencv-python": {
@@ -707,6 +714,19 @@
                 "sha256:2b45320af6dfaa1750f543d714b6d1c520a1688dec6fd24d339063ce0aaa9ac3"
             ],
             "version": "==0.2.2"
+        },
+        "py-spy": {
+            "hashes": [
+                "sha256:3e8e48032e71c94c3dd51694c39e762e4bbfec250df5bf514adcdd64e79371e0",
+                "sha256:590905447241d789d9de36cff9f52067b6f18d8b5e9fb399242041568d414461",
+                "sha256:5b342cc5feb8d160d57a7ff308de153f6be68dcf506ad02b4d67065f2bae7f45",
+                "sha256:8f5b311d09f3a8e33dbd0d44fc6e37b715e8e0c7efefafcda8bfd63b31ab5a31",
+                "sha256:f59b0b52e56ba9566305236375e6fc68888261d0d36b5addbe3cf85affbefc0e",
+                "sha256:fd6211fe7f587b3532ba9d300784326d9a6f2b890af7bf6fff21a029ebbc812b",
+                "sha256:fe7efe6c91f723442259d428bf1f9ddb9c1679828866b353d539345ca40d9dd2"
+            ],
+            "index": "pypi",
+            "version": "==0.3.14"
         },
         "pyasn1": {
             "hashes": [
