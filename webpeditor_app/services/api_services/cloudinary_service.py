@@ -22,8 +22,10 @@ def delete_assets_in_specific_user_folder(folder_path: str, asset_folder: str):
 def delete_original_asset(folder_path: str):
     try:
         assets = cloudinary.api.resources(folder=folder_path, max_results=500)
-        cloudinary.api.delete_resources([assets['resources'][0]['public_id']])
-        logging.info(f"Deleted asset from {folder_path}")
+
+        for asset in assets['resources']:
+            cloudinary.api.delete_resources([asset['public_id']])
+            logging.info(f"Deleted asset from {folder_path}")
 
     except cloudinary.api.NotFound as e:
         logging.error(e)
