@@ -2,7 +2,7 @@ import base64
 import logging
 import os
 from io import BytesIO
-from typing import Tuple
+from typing import Tuple, Any
 
 import requests
 from PIL import Image as PilImage
@@ -123,6 +123,14 @@ def get_converted_image(user_id: str) -> ConvertedImage | None:
         return None
 
     return converted_image
+
+
+def get_converted_image_set_data(user_id: str) -> Any:
+    converted_image_set_data = ConvertedImage.objects.filter(user_id=user_id)[0].data
+    if converted_image_set_data is None:
+        return None
+
+    return converted_image_set_data
 
 
 def data_url_to_binary(data_url: str) -> BytesIO:
