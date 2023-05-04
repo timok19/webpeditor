@@ -14,6 +14,9 @@ const imageFilesInput = document.getElementById(`${inputId}`);
 const uploadAndConvertButton = document.getElementById("upload-image");
 uploadAndConvertButton.addEventListener("click", () => uploadAndConvert());
 
+const downloadConvertedButton = document.getElementById("download-converted");
+downloadConvertedButton.addEventListener("click", () => downloadConvertedImage())
+
 function uploadAndConvert() {
   form.addEventListener("submit", (event) => event.preventDefault());
 
@@ -55,12 +58,36 @@ function uploadAndConvert() {
       }
       return response.blob();
     })
-    .then(data => {
+    .then(_ => {
       toastifyMessage('Image(s) has been converted', true);
       location.reload()
     })
     .catch(error => {
       toastifyMessage(error.message, false);
       location.reload()
+    });
+}
+
+function downloadConvertedImage(imageName) {
+  fetch("/api/get_converted_image/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch the converted image");
+      }
+      return response.json();
+    })
+    .then((data) => {
+
+      // saveAs(data, fileName);
+      toastifyMessage("Image has been downloaded", true);
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+      toastifyMessage("Failed to open the original image", false);
     });
 }

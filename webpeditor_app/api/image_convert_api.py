@@ -41,6 +41,7 @@ def image_convert_api(request: WSGIRequest):
         output_format = request.POST.get('output_format')
 
         try:
+            # TODO: add possibility for the user to set the quality with scroller
             converted_images = run_conversion_and_saving_in_threads(user_id, request, image_files, 100, output_format)
             update_session(request=request, user_id=user_id)
             request.session.pop('error_message', None)
