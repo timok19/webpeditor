@@ -153,7 +153,7 @@ function deleteConvertedImage(publicId) {
     .then((data) => {
       const successMessage = data["message"];
       toastifyMessage(successMessage, true);
-      // location.reload();
+      location.reload();
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);

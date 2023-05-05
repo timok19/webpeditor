@@ -38,6 +38,12 @@ def image_delete_converted_api(request: WSGIRequest) -> JsonResponse:
         converted_image.image_set = filtered_image_set_list
         converted_image.save()
 
+        converted_images: list[tuple] = request.session.get("converted_images")
+        if isinstance(converted_images, NoneType):
+            return JsonResponse({"error": "Converted images not found"}, status=404)
+
+        request.session["converted_images"] = [t for t in converted_images if public_id not in t]
+
         update_session(request=request, user_id=user_id)
 
         return JsonResponse({"success": True, "message": "Image has been deleted successfully"}, status=200)

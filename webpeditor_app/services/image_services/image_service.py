@@ -2,7 +2,7 @@ import base64
 import logging
 import os
 from io import BytesIO
-from typing import Tuple, Any
+from typing import Tuple
 
 import requests
 from PIL import Image as PilImage
@@ -10,7 +10,6 @@ from PIL.ExifTags import TAGS
 from PIL.Image import Image as ImageClass
 from PIL.TiffImagePlugin import IFDRational
 from _decimal import ROUND_UP, Decimal
-from django.db.models import JSONField
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -18,9 +17,9 @@ from webpeditor_app.models.database.models import OriginalImage, EditedImage, Co
 from webpeditor_app.models.database.serializers import (OriginalImageSerializer,
                                                         EditedImageSerializer,
                                                         ConvertedImageSerializer)
-
-from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
-    delete_cloudinary_converted_images
+from webpeditor_app.services.external_api_services.cloudinary_service import \
+    (delete_cloudinary_original_and_edited_images,
+     delete_cloudinary_converted_images)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -152,7 +151,7 @@ def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
 def image_name_shorter(image_name: str, min_size: int) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > min_size:
-        basename = basename[:(min_size - 3)] + "..."
+        basename = f"{basename[:(min_size - 3)]}...{basename[-5:]}"
 
     return basename + ext
 

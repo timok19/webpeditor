@@ -169,7 +169,7 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
 
     try:
         new_image_name: str = f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}'
-        new_image_name_shorter: str = image_name_shorter(new_image_name, 32)
+        new_image_name_shorter: str = image_name_shorter(new_image_name, 25)
 
         pil_image, pil_image_converted, buffer = convert_image(image_file, quality, output_format)
         cloudinary_image, public_id = save_image_into_cloudinary(buffer, user_id, new_image_name)
