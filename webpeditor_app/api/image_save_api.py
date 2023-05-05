@@ -1,3 +1,5 @@
+from types import NoneType
+
 import cloudinary.uploader
 import cloudinary.api
 from io import BytesIO
@@ -5,14 +7,14 @@ from PIL.Image import Image as ImageClass
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
-from django.http.response import ResponseHeaders
-from django.shortcuts import redirect
+from django.http.response import ResponseHeaders, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from webpeditor_app.api.api_utils.response_presets import unauthorized_access_response
 from webpeditor_app.models.database.models import EditedImage
 from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
-from webpeditor_app.services.api_services.request_service import get_json_request_body
+from webpeditor_app.services.external_api_services.request_service import extract_image_edit_data_from_request_body
 from webpeditor_app.services.other_services.session_service import get_unsigned_user_id, update_session
 
 
@@ -20,26 +22,26 @@ from webpeditor_app.services.other_services.session_service import get_unsigned_
 @require_http_methods(['POST'])
 def image_save_api(request: WSGIRequest):
     if request.method == 'POST':
-        image_file = ImageClass()
-        
-        user_id = get_unsigned_user_id(request)
-        if user_id is None:
-            return redirect('NoContentView')
+        user_id: str | None = get_unsigned_user_id(request)
+        if isinstance(user_id, NoneType):
+            return unauthorized_access_response()
 
         if request.session.get_expiry_age() == 0:
-            return redirect('NoContentView')
+            return unauthorized_access_response()
 
         original_image = get_original_image(user_id)
         if original_image is None or original_image.user_id != user_id:
-            return redirect("ImageDoesNotExistView")
+            return unauthorized_access_response()
 
         edited_image = get_edited_image(user_id)
         if edited_image is None:
-            return redirect("ImageDoesNotExistView")
+            return unauthorized_access_response()
 
-        request_body = get_json_request_body(request)
-        if isinstance(request_body, tuple):
-            image_file: ImageClass = request_body[3]
+        request_body = extract_image_edit_data_from_request_body(request)
+        if isinstance(request_body, JsonResponse):
+            return request_body
+
+        image_file: ImageClass = request_body[3]
 
         buffer = BytesIO()
         image_file.save(buffer, format=image_file.format)

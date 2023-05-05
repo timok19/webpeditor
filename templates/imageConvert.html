@@ -45,7 +45,7 @@
                 <p class="mt-1 text-xs font-thin text-red-600 dark:text-red-500">{{ error }}</p>
             {% else %}
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-300 font-light">
-                    Image size should be lower than 6 MB
+                    Image size should be lower than 6 MB and max. 15 files to upload
                 </p>
             {% endif %}
 
@@ -112,24 +112,24 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for image_url, new_filename, original_image_format, converted_image_format, original_file_size, converted_file_size, original_image_mode, original_image_info, converted_image_mode, converted_image_info in converted_images %}
+                    {% for image_url, image_name_shorter, original_image_format, converted_image_format, original_file_size, converted_file_size, original_image_mode, original_image_info, converted_image_mode, converted_image_info in converted_images %}
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <td class="w-32 p-4">
                                 <img class="change-cursor aspect-square border border-orange-400 flex-1 float-left object-cover h-[11rem] rounded-t-lg rounded-b-lg"
-                                     id="{{ new_filename }}"
+                                     id="{{ image_name_shorter }}"
                                      onclick="showImageModal('{{ image_url }}')"
                                      src="{{ image_url }}"
                                      alt="Uploaded image">
                             </td>
                             <td class="px-6 py-4 w-[10rem] max-w-[16rem] font-semibold text-gray-900 dark:text-white">
                                 <div class="container">
-                                    <p class="text-justify overflow-x-hidden">{{ new_filename }}</p>
+                                    <p class="text-justify overflow-x-hidden">{{ image_name_shorter }}</p>
                                 </div>
                             </td>
                             <td class="px-6 py-4 w-[5rem]">
                                 <div class="flex justify-start items-center">
                                     <button class="font-medium text-black dark:text-sky-600 hover:underline"
-                                            data-popover-target="popover-{{ new_filename }}"
+                                            data-popover-target="popover-{{ image_name_shorter }}"
                                             data-popover-trigger="click"
                                             data-popover-placement="left"
                                             type="button">
@@ -143,7 +143,8 @@
                             </td>
                             <td class="px-6 py-4 w-[5rem]">
                                 <div class="flex justify-start items-center">
-                                    <button class="font-medium text-red-600 dark:text-red-500 hover:underline">
+                                    <button class="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                            id="delete-button-{{ image_name_shorter }}">
                                         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                                              xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-8 w-8">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -154,7 +155,7 @@
                             </td>
                         </tr>
 
-                        <div data-popover id="popover-{{ new_filename }}"
+                        <div data-popover id="popover-{{ image_name_shorter }}"
                              role="tooltip"
                              class="absolute z-50 invisible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-[36rem] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
                             <div class="p-6">
@@ -162,7 +163,7 @@
                                     <div>
                                         <div class="w-full flex justify-end mb-4">
                                             <button type="button"
-                                                    id="download-converted"
+                                                    id="download-button-{{ image_name_shorter }}"
                                                     class="inline-flex items-center justify-center px-5 py-2 mr-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                                                 <svg class="w-8 h-8"
                                                      fill="none"
@@ -173,10 +174,11 @@
                                                      aria-hidden="true">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
                                                 </svg>
-
                                             </button>
+
                                             <button class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shrink-0 focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                                                    type="button">
+                                                    type="button"
+                                                    id="close-button-{{ image_name_shorter }}">
                                                 <svg class="w-8 h-8"
                                                      fill="none"
                                                      stroke="currentColor"
@@ -316,7 +318,7 @@
                              class="hidden fixed top-0 left-0 z-[999] w-screen h-screen bg-black/70 flex justify-center items-center">
 
                             <!-- A big image will be displayed here -->
-                            <img id="{{ new_filename }}" class="max-w-[800px] max-h-[600px] object-cover"
+                            <img id="{{ image_name_shorter }}" class="max-w-[800px] max-h-[600px] object-cover"
                                  alt="Image Modal"
                                  src=""/>
 
@@ -339,7 +341,7 @@
                             }
                         </style>
 
-                        {{ new_filename|json_script:"imageId" }}
+                         {{ image_name_shorter|json_script:'imageId' }}
                     {% endfor %}
                     </tbody>
                 </table>

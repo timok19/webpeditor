@@ -10,6 +10,7 @@ from PIL.ExifTags import TAGS
 from PIL.Image import Image as ImageClass
 from PIL.TiffImagePlugin import IFDRational
 from _decimal import ROUND_UP, Decimal
+from django.db.models import JSONField
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -18,7 +19,7 @@ from webpeditor_app.models.database.serializers import (OriginalImageSerializer,
                                                         EditedImageSerializer,
                                                         ConvertedImageSerializer)
 
-from webpeditor_app.services.api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
+from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
     delete_cloudinary_converted_images
 
 logging.basicConfig(level=logging.INFO)
@@ -56,23 +57,30 @@ def delete_converted_image_in_db(user_id: str) -> JsonResponse:
     }, status=204)
 
 
-def get_serialized_data_original_image() -> ReturnDict:
+def get_serialized_data_of_all_original_images() -> ReturnDict:
     original_images = get_all_original_images()
     original_image_serializer = OriginalImageSerializer(original_images, many=True)
 
     return original_image_serializer.data
 
 
-def get_serialized_data_edited_image() -> ReturnDict:
+def get_serialized_data_of_all_edited_images() -> ReturnDict:
     edited_images = get_all_edited_images()
     edited_image_serializer = EditedImageSerializer(edited_images, many=True)
 
     return edited_image_serializer.data
 
 
-def get_serialized_data_converted_image() -> ReturnDict:
+def get_serialized_data_of_all_converted_images() -> ReturnDict:
     converted_images = get_all_converted_images()
     converted_image_serializer = ConvertedImageSerializer(converted_images, many=True)
+
+    return converted_image_serializer.data
+
+
+def get_serialized_data_of_converted_image(user_id: str) -> ReturnDict:
+    converted_image = get_converted_image(user_id)
+    converted_image_serializer = ConvertedImageSerializer(converted_image)
 
     return converted_image_serializer.data
 
@@ -123,14 +131,6 @@ def get_converted_image(user_id: str) -> ConvertedImage | None:
         return None
 
     return converted_image
-
-
-def get_converted_image_set_data(user_id: str) -> Any:
-    converted_image_set_data = ConvertedImage.objects.filter(user_id=user_id)[0].data
-    if converted_image_set_data is None:
-        return None
-
-    return converted_image_set_data
 
 
 def data_url_to_binary(data_url: str) -> BytesIO:

@@ -363,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return [new Blob([arrayBuffer], {type: mimeType}), dataUrl];
   }
 
-  function downloadImage(mimeType, quality, fileName) {
+  function downloadImage(mimeType, quality, imageName) {
     const convertedData = dataURLtoBlob(mimeType, quality);
     const imageBlob = convertedData[0]
     const dataUrl = convertedData[1]
@@ -380,7 +380,7 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({
           data_url: dataUrl,
           mime_type: mimeType,
-          file_name: fileName
+          image_name: imageName
         }),
       })
         .then((response) => {
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return response.blob();
         })
         .then((convertedBlob) => {
-          saveAs(convertedBlob, fileName);
+          saveAs(convertedBlob, imageName);
           toastifyMessage("Image has been downloaded", true);
         })
         .catch((error) => {
@@ -401,7 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function saveImage(mimeType, quality, fileName) {
+  function saveImage(mimeType, quality, imageName) {
     const convertedData = dataURLtoBlob(mimeType, quality);
     const imageBlob = convertedData[0]
     const dataUrl = convertedData[1]
@@ -415,7 +415,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({
         data_url: dataUrl,
-        file_name: fileName,
+        image_name: imageName,
         mime_type: mimeType,
       }),
     })

@@ -5,18 +5,18 @@ from datetime import datetime
 from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.api_services.cloudinary_service import (delete_all_cloudinary_folders,
-                                                                     get_all_cloudinary_user_folders,
-                                                                     delete_cloudinary_original_and_edited_images,
-                                                                     delete_cloudinary_converted_images,
-                                                                     delete_cloudinary_folder)
+from webpeditor_app.services.external_api_services.cloudinary_service import (delete_all_cloudinary_folders,
+                                                                              get_all_cloudinary_user_folders,
+                                                                              delete_cloudinary_original_and_edited_images,
+                                                                              delete_cloudinary_converted_images,
+                                                                              delete_cloudinary_folder)
 
-from webpeditor_app.services.image_services.image_service import (get_serialized_data_original_image,
-                                                                  get_serialized_data_edited_image,
+from webpeditor_app.services.image_services.image_service import (get_serialized_data_of_all_original_images,
+                                                                  get_serialized_data_of_all_edited_images,
                                                                   get_all_original_images,
                                                                   get_all_edited_images,
                                                                   delete_original_image_in_db,
-                                                                  get_serialized_data_converted_image,
+                                                                  get_serialized_data_of_all_converted_images,
                                                                   get_all_converted_images,
                                                                   delete_converted_image_in_db)
 
@@ -31,9 +31,9 @@ class Job(DailyJob):
            "delete expired session, images from db and images in Cloudinary storage"
 
     def execute(self):
-        original_images_serialized = get_serialized_data_original_image()
-        edited_images_serialized = get_serialized_data_edited_image()
-        converted_images_serialized = get_serialized_data_converted_image()
+        original_images_serialized = get_serialized_data_of_all_original_images()
+        edited_images_serialized = get_serialized_data_of_all_edited_images()
+        converted_images_serialized = get_serialized_data_of_all_converted_images()
 
         original_images = get_all_original_images()
         edited_images = get_all_edited_images()

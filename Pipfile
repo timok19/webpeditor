@@ -53,6 +53,8 @@ redis = "==4.5.4"
 py-spy = "*"
 pillow = "*"
 libtiff = "*"
+mongoengine = "*"
+django-jsonfield = "*"
 
 [dev-packages]
 autopep8 = "*"

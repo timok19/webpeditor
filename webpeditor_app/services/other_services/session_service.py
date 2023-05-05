@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
-from webpeditor_app.services.api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
+from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_original_and_edited_images, \
     delete_cloudinary_converted_images
 from webpeditor_app.services.image_services.image_service import delete_original_image_in_db
 

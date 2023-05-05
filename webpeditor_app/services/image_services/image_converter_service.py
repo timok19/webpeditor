@@ -15,7 +15,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import QuerySet
 
 from webpeditor_app.models.database.models import ConvertedImage
-from webpeditor_app.services.api_services.cloudinary_service import delete_cloudinary_converted_images
+from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_converted_images
 
 from webpeditor_app.services.image_services.image_service import (image_name_shorter,
                                                                   get_image_info,
@@ -25,9 +25,8 @@ from webpeditor_app.services.image_services.image_service import (image_name_sho
 
 def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format: str) \
         -> Tuple[ImageClass, ImageClass, BytesIO]:
-
     buffer = BytesIO()
-    min_quality, max_quality, max_safe_quality, new_quality = 1, 100, 95, 0
+    min_quality, max_quality, max_safe_quality = 1, 100, 95
 
     pil_image: ImageClass = PilImage.open(image_file)
 
@@ -58,7 +57,6 @@ def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format:
                 buffer,
                 format=output_format,
             )
-
         else:
             pil_image_converted.save(
                 buffer,
@@ -73,16 +71,9 @@ def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format:
     return pil_image, pil_image_converted, buffer
 
 
-def save_image_into_cloudinary(image_file: InMemoryUploadedFile,
-                               image_bytes: BytesIO,
+def save_image_into_cloudinary(image_bytes: BytesIO,
                                user_id: str,
-                               output_format: str) -> Tuple[CloudinaryImage, str]:
-    new_image_name = image_name_shorter(
-        f'webpeditor_'
-        f'{image_file.name.rsplit(".", 1)[0]}.'
-        f'{output_format.lower()}',
-        32
-    )
+                               new_image_name: str) -> Tuple[CloudinaryImage, str]:
 
     cloudinary_options: dict = {
         "folder": f"{user_id}/converted/",
@@ -93,25 +84,25 @@ def save_image_into_cloudinary(image_file: InMemoryUploadedFile,
     }
     cloudinary_image = cloudinary.uploader.upload_image(image_bytes, **cloudinary_options)
 
-    return cloudinary_image, new_image_name
+    return cloudinary_image, str(cloudinary_image.public_id)
 
 
-def update_converted_image_object(user_id: str,
-                                  request: WSGIRequest,
-                                  image_set: dict):
+def update_converted_image(user_id: str,
+                           request: WSGIRequest,
+                           image_set: dict):
     converted_image_query_set: QuerySet[ConvertedImage] = ConvertedImage.objects.filter(user_id=user_id)
-    converted_image_object: ConvertedImage = converted_image_query_set.first()
+    converted_image: ConvertedImage = converted_image_query_set.first()
 
-    if converted_image_object is None:
-        converted_image_object = ConvertedImage(
+    if converted_image is None:
+        converted_image = ConvertedImage(
             user_id=user_id,
             image_set=[image_set],
             session_key=request.session.session_key,
             session_key_expiration_date=request.session.get_expiry_date()
         )
-        converted_image_object.save()
+        converted_image.save()
     else:
-        updated_image_set = copy(converted_image_object.image_set)
+        updated_image_set = copy(converted_image.image_set)
         updated_image_set.append(image_set)
         converted_image_query_set.update(image_set=updated_image_set)
 
@@ -123,7 +114,10 @@ def create_image_set(image_id: int,
                      original_image_file: InMemoryUploadedFile,
                      cloudinary_image_url: str,
                      new_image_name: str,
+                     new_image_name_shorter: str,
+                     public_id: str,
                      output_format: str) -> Dict:
+
     original_image_file_size: str = get_image_file_size(original_image_file.file)
     converted_image_file_size: str = get_image_file_size(converted_image_buffer)
 
@@ -132,17 +126,19 @@ def create_image_set(image_id: int,
 
     image_set: dict = {
         "image_id": image_id,
+        "image_name_shorter": new_image_name_shorter,
+        "public_id": public_id,
         "image_name": new_image_name,
         "image_url": cloudinary_image_url,
         "original_image_data": {
             "content_type": f"image/{str(pil_image.format).lower()}",
-            "image_file_size_in_kb": original_image_file_size,
+            "image_file_size": original_image_file_size,
             "image_mode": str(pil_image.mode),
             "image_exif_data": original_image_exif_data,
         },
         "converted_image_data": {
             "content_type": f"image/{output_format.lower()}",
-            "image_file_size_in_kb": converted_image_file_size,
+            "image_file_size": converted_image_file_size,
             "image_mode": str(pil_image_converted.mode),
             "image_exif_data": converted_image_exif_data,
         }
@@ -172,40 +168,45 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
     image_id, user_id, request, image_file, quality, output_format = arguments
 
     try:
-        pil_image, image_file_converted, buffer = convert_image(image_file, quality, output_format)
-        cloudinary_image, new_image_name = save_image_into_cloudinary(image_file, buffer, user_id, output_format)
+        new_image_name: str = f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}'
+        new_image_name_shorter: str = image_name_shorter(new_image_name, 32)
+
+        pil_image, pil_image_converted, buffer = convert_image(image_file, quality, output_format)
+        cloudinary_image, public_id = save_image_into_cloudinary(buffer, user_id, new_image_name)
 
         image_set: dict = create_image_set(
             image_id,
             pil_image,
-            image_file_converted,
+            pil_image_converted,
             buffer,
             image_file,
             cloudinary_image.url,
             new_image_name,
+            new_image_name_shorter,
+            public_id,
             output_format
         )
 
         original_image_data: dict = image_set.get("original_image_data")
         converted_image_data: dict = image_set.get("converted_image_data")
 
-        original_image_file_size: str = original_image_data.get("image_file_size_in_kb")
-        converted_image_file_size: str = converted_image_data.get("image_file_size_in_kb")
+        original_image_file_size: str = original_image_data.get("image_file_size")
+        converted_image_file_size: str = converted_image_data.get("image_file_size")
         original_image_exif_data: Exif | str = original_image_data.get("image_exif_data")
         converted_image_exif_data: Exif | str = converted_image_data.get("image_exif_data")
 
-        update_converted_image_object(user_id, request, image_set)
+        update_converted_image(user_id, request, image_set)
 
         return (
             cloudinary_image.url,
-            new_image_name,
+            new_image_name_shorter,
             str(pil_image.format).upper(),
             output_format.upper(),
             original_image_file_size,
             converted_image_file_size,
             str(pil_image.mode),
             original_image_exif_data,
-            str(image_file_converted.mode),
+            str(pil_image_converted.mode),
             converted_image_exif_data
         )
 
@@ -214,16 +215,16 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
         raise e
 
 
-def run_conversion_and_saving_in_threads(user_id: str,
-                                         request: WSGIRequest,
-                                         images_files: List[InMemoryUploadedFile],
-                                         quality: int,
-                                         output_format: str) -> List:
+def run_conversion_task(user_id: str,
+                        request: WSGIRequest,
+                        images_files: List[InMemoryUploadedFile],
+                        quality: int,
+                        output_format: str) -> List:
 
     converted_image = get_converted_image(user_id)
     converted_images_list = []
 
-    # Delete previous content
+    # Delete previous content if exist
     if converted_image:
         converted_image.delete()
         delete_cloudinary_converted_images(f"{user_id}/converted/")

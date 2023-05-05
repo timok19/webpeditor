@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0b56216d1751143a71789e471756a91aa1000dc8c91407704a87ad90bd8a7d18"
+            "sha256": "ec9994225f2ac07b7cb675119ccbbd448efec676aef16c367012c713f82f9277"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -393,6 +393,14 @@
             "index": "pypi",
             "version": "==4.1.0"
         },
+        "django-jsonfield": {
+            "hashes": [
+                "sha256:ccb2fe623e1bf7799e49c593b0a89a85084ef8d3debbf26d92a54e27b5305d72",
+                "sha256:f789a0ea1f80b48aff7d6c36dd356ce125dbf1b7cd97a82d315607ac758f50ff"
+            ],
+            "index": "pypi",
+            "version": "==1.4.1"
+        },
         "djangorestframework": {
             "hashes": [
                 "sha256:579a333e6256b09489cbe0a067e66abe55c6595d8926be6b99423786334350c8",
@@ -457,11 +465,11 @@
         },
         "ipython": {
             "hashes": [
-                "sha256:1c80d08f04144a1994cda25569eab07fbdc4989bd8d8793e3a4ff643065ccb51",
-                "sha256:9c8487ac18f330c8a683fc50ab6d7bc0fcf9ef1d7a9f6ce7926938261067b81f"
+                "sha256:7dff3fad32b97f6488e02f87b970f309d082f758d7b7fc252e3b19ee0e432dbb",
+                "sha256:ffca270240fbd21b06b2974e14a86494d6d29290184e788275f55e0b55914926"
             ],
             "index": "pypi",
-            "version": "==8.13.1"
+            "version": "==8.13.2"
         },
         "isort": {
             "hashes": [
@@ -544,6 +552,14 @@
             "index": "pypi",
             "version": "==0.7.0"
         },
+        "mongoengine": {
+            "hashes": [
+                "sha256:8f38df7834dc4b192d89f2668dcf3091748d12f74d55648ce77b919167a4a49b",
+                "sha256:c3523b8f886052f3deb200b3218bcc13e4b781661e3bea38587cc936c80ea358"
+            ],
+            "index": "pypi",
+            "version": "==0.27.0"
+        },
         "numpy": {
             "hashes": [
                 "sha256:0ec87a7084caa559c36e0a2309e4ecb1baa03b687201d0a847c8b0ed476a7187",
@@ -575,7 +591,7 @@
                 "sha256:ecde0f8adef7dfdec993fd54b0f78183051b6580f606111a6d789cd14c61ea0c",
                 "sha256:f21c442fdd2805e91799fbe044a7b999b8571bb0ab0f7850d0cb9641a687092b"
             ],
-            "markers": "python_version >= '3.10'",
+            "markers": "python_version >= '3.8'",
             "version": "==1.24.3"
         },
         "opencv-python": {

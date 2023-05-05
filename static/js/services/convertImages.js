@@ -14,8 +14,10 @@ const imageFilesInput = document.getElementById(`${inputId}`);
 const uploadAndConvertButton = document.getElementById("upload-image");
 uploadAndConvertButton.addEventListener("click", () => uploadAndConvert());
 
-const downloadConvertedButton = document.getElementById("download-converted");
-downloadConvertedButton.addEventListener("click", () => getImagesFromDb())
+document.addEventListener("DOMContentLoaded", () => {
+  getImagesFromDb();
+})
+
 
 function uploadAndConvert() {
   form.addEventListener("submit", (event) => event.preventDefault());
@@ -69,9 +71,6 @@ function uploadAndConvert() {
 }
 
 function getImagesFromDb() {
-  let imageUrl = "";
-  let imageName = "";
-  
   fetch("/api/image_download_converted/", {
     method: "GET",
     headers: {
@@ -85,26 +84,79 @@ function getImagesFromDb() {
       return response.json();
     })
     .then((data) => {
-      imageUrl = data["image_url"];
-      imageName = data["image_name"];
-      downloadConvertedImage(imageUrl, imageName);
+      const imageConvertedDataSetList = data["image_converted_data_set_list"]
+      console.log(imageConvertedDataSetList)
+      setupPopoverListeners(imageConvertedDataSetList)
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
     });
 }
 
-function downloadConvertedImage(imageUrl, imageName) {
-  fetch(imageUrl).then((response) => {
-    if (response.status !== 200) {
-      throw new Error(`Unable to download file. HTTP status: ${response.status}`);
+function setupPopoverListeners(imageConvertedDataSetList) {
+  for (let i = 0; i < imageConvertedDataSetList.length; i++) {
+    const imageUrl = imageConvertedDataSetList[i][0];
+    const imageName = imageConvertedDataSetList[i][1];
+    const publicId = imageConvertedDataSetList[i][2];
+    const downloadButton = document.getElementById(`download-button-${imageName}`);
+    const deleteButton = document.getElementById(`delete-button-${imageName}`);
+
+    if (downloadButton) {
+      downloadButton.addEventListener("click", () => {
+        downloadConvertedImage(imageUrl, imageName);
+      });
     }
-    return response.blob();
-  }).then((blob) => {
-    saveAs(blob, imageName);
-    toastifyMessage("Converted image has been downloaded", true);
-  }).catch((error) => {
-    console.error("There was a problem with the fetch operation:", error);
-    toastifyMessage("Failed to download converted image", false);
+
+    if (deleteButton) {
+      deleteButton.addEventListener("click", () => {
+        deleteConvertedImage(publicId);
+      })
+    }
+  }
+}
+
+function downloadConvertedImage(imageUrl, imageName) {
+  fetch(imageUrl)
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(`Unable to download file. HTTP status: ${response.status}`);
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      saveAs(blob, imageName);
+      toastifyMessage("Converted image has been downloaded", true);
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+      toastifyMessage("Failed to download converted image", false);
+    })
+}
+
+function deleteConvertedImage(publicId) {
+  fetch("/api/image_delete_converted/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      public_id: publicId
+    }),
   })
+    .then((response) => {
+      if (!response.ok || response.status !== 200) {
+        throw new Error(`Unable to delete file. HTTP status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const successMessage = data["message"];
+      getImagesFromDb();
+      toastifyMessage(successMessage, true);
+      location.reload();
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+      toastifyMessage("Failed to delete converted image", false);
+    })
 }

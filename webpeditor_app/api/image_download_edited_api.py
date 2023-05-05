@@ -1,35 +1,42 @@
 import os
 from io import BytesIO
+from types import NoneType
 
 from PIL.Image import Image as ImageClass
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
 from django.http.response import ResponseHeaders
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from webpeditor_app.api.api_utils.response_presets import unauthorized_access_response
 from webpeditor_app.services.image_services.image_service import get_image_file_extension
-from webpeditor_app.services.api_services.request_service import get_json_request_body
+from webpeditor_app.services.external_api_services.request_service import extract_image_edit_data_from_request_body
 from webpeditor_app.services.other_services.session_service import update_session, get_unsigned_user_id
 
 
 @csrf_exempt
 @require_http_methods(['POST'])
-def image_download_edited_api(request: WSGIRequest) -> HttpResponse | JsonResponse:
+def image_download_edited_api(request: WSGIRequest) -> HttpResponse:
     if request.method == 'POST':
         mime_type = ""
-        file_name = ""
+        image_name = ""
         image_file = ImageClass()
 
-        user_id: str = get_unsigned_user_id(request)
+        user_id: str | None = get_unsigned_user_id(request)
+        if isinstance(user_id, NoneType):
+            return unauthorized_access_response()
 
-        request_body = get_json_request_body(request)
+        if request.session.get_expiry_age() == 0:
+            return unauthorized_access_response()
+
+        request_body = extract_image_edit_data_from_request_body(request)
         if isinstance(request_body, tuple):
             mime_type = request_body[1]
-            file_name = request_body[2]
+            image_name = request_body[2]
             image_file = request_body[3]
 
-        file_extension: str = get_image_file_extension(file_name).upper()
+        file_extension: str = get_image_file_extension(image_name).upper()
         if file_extension in ['JPG', 'JFIF']:
             file_extension = 'JPEG'
 
@@ -49,9 +56,9 @@ def image_download_edited_api(request: WSGIRequest) -> HttpResponse | JsonRespon
         response.content = buffer
         response.headers = ResponseHeaders({
             'Content-Type': mime_type,
-            'Content-Disposition': f'attachment; filename="{os.path.basename(file_name)}"'
+            'Content-Disposition': f'attachment; filename="{os.path.basename(image_name)}"'
         })
 
         return response
-
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+    else:
+        return HttpResponse(content="Forbidden request", status=405)
