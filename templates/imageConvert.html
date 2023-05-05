@@ -112,7 +112,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for image_url, image_name_shorter, original_image_format, converted_image_format, original_file_size, converted_file_size, original_image_mode, original_image_info, converted_image_mode, converted_image_info in converted_images %}
+                    {% for image_url, image_name, public_id, image_name_shorter, original_image_format, converted_image_format, original_file_size, converted_file_size, original_image_mode, original_image_info, converted_image_mode, converted_image_info in converted_images %}
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <td class="w-32 p-4">
                                 <img class="change-cursor aspect-square border border-orange-400 flex-1 float-left object-cover h-[11rem] rounded-t-lg rounded-b-lg"

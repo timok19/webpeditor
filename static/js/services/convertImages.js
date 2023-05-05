@@ -84,22 +84,22 @@ function getImagesFromDb() {
       return response.json();
     })
     .then((data) => {
-      const imageConvertedDataSetList = data["image_converted_data_set_list"]
-      console.log(imageConvertedDataSetList)
-      setupPopoverListeners(imageConvertedDataSetList)
+      const convertedImages = data["converted_images"]
+      setupPopoverListeners(convertedImages)
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
     });
 }
 
-function setupPopoverListeners(imageConvertedDataSetList) {
-  for (let i = 0; i < imageConvertedDataSetList.length; i++) {
-    const imageUrl = imageConvertedDataSetList[i][0];
-    const imageName = imageConvertedDataSetList[i][1];
-    const publicId = imageConvertedDataSetList[i][2];
-    const downloadButton = document.getElementById(`download-button-${imageName}`);
-    const deleteButton = document.getElementById(`delete-button-${imageName}`);
+function setupPopoverListeners(convertedImages) {
+  for (let i = 0; i < convertedImages.length; i++) {
+    const imageUrl = convertedImages[i][0];
+    const imageName = convertedImages[i][1];
+    const publicId = convertedImages[i][2];
+    const imageNameShorter = convertedImages[i][3];
+    const downloadButton = document.getElementById(`download-button-${imageNameShorter}`);
+    const deleteButton = document.getElementById(`delete-button-${imageNameShorter}`);
 
     if (downloadButton) {
       downloadButton.addEventListener("click", () => {
@@ -118,6 +118,7 @@ function setupPopoverListeners(imageConvertedDataSetList) {
 function downloadConvertedImage(imageUrl, imageName) {
   fetch(imageUrl)
     .then((response) => {
+      console.log(response)
       if (response.status !== 200) {
         throw new Error(`Unable to download file. HTTP status: ${response.status}`);
       }
@@ -151,9 +152,8 @@ function deleteConvertedImage(publicId) {
     })
     .then((data) => {
       const successMessage = data["message"];
-      getImagesFromDb();
       toastifyMessage(successMessage, true);
-      location.reload();
+      // location.reload();
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);

@@ -199,6 +199,8 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
 
         return (
             cloudinary_image.url,
+            new_image_name,
+            public_id,
             new_image_name_shorter,
             str(pil_image.format).upper(),
             output_format.upper(),
