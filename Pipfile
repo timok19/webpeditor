@@ -52,7 +52,6 @@ django = "==4.1.7"
 redis = "==4.5.4"
 py-spy = "*"
 pillow = "*"
-libtiff = "*"
 mongoengine = "*"
 django-jsonfield = "*"
 
