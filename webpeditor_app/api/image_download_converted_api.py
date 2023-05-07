@@ -34,7 +34,6 @@ def image_download_converted_api(request: WSGIRequest) -> JsonResponse:
 def download_all_converted_api(request: WSGIRequest) -> JsonResponse | FileResponse:
     converted_images: list = []
     converted_images_name_and_urls: list[str] = []
-    # user_id: str = ""
 
     if request.method == 'GET':
         response: JsonResponse | tuple[str, list] = get_user_id_and_converted_images(request)
@@ -42,7 +41,6 @@ def download_all_converted_api(request: WSGIRequest) -> JsonResponse | FileRespo
             return response
 
         if isinstance(response, tuple):
-            # user_id = response[0]
             converted_images = response[1]
 
         for image in converted_images:

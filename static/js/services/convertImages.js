@@ -32,7 +32,6 @@ function uploadAndConvert() {
     }
     const outputFormat = outputFormatInput.value;
     const quality = qualityIdInput.value;
-    console.log(quality)
     formData.append('output_format', outputFormat);
     formData.append('quality', quality);
     showProgressBarAndMessage("Uploading image(s)...", true);

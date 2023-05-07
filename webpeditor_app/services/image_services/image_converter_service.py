@@ -41,7 +41,7 @@ def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format:
                 buffer,
                 format=output_format,
                 quality=quality,
-                subsampling=0 if quality == max_quality else None,
+                subsampling=0 if quality == max_quality else 2,
                 exif=pil_image_exif_data
             )
         elif output_format == 'TIFF':

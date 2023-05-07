@@ -21,12 +21,11 @@ class ImagesToConvertForm(forms.Form):
                  ('BMP', 'BMP'),
                  ('ICO', 'ICO'),
                  ('TIFF', 'TIFF')],
-
-        required=True,
+        required=True
     )
     quality = forms.IntegerField(
         required=True,
-        min_value=1,
+        min_value=5,
         max_value=100,
         initial=50,
         widget=forms.NumberInput(attrs={'type': 'range'})
