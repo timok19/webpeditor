@@ -5,6 +5,8 @@ from django.urls import re_path
 from webpeditor_app.api.image_delete_converted_api import image_delete_converted_api
 from webpeditor_app.api.image_download_converted_api import (image_download_converted_api,
                                                              download_all_converted_api)
+from webpeditor_app.views.contact_view import contact_view
+from webpeditor_app.views.about_view import about_view
 
 from webpeditor_app.views.image_does_not_exist_view import image_does_not_exist_view
 from webpeditor_app.api.image_convert_api import image_convert_api
@@ -25,6 +27,8 @@ urlpatterns = [
     re_path(r'^unauthorized_access/?$', unauthorized_access_view, name='UnauthorizedAccessView'),
     re_path(r'^image_edit/?$', image_edit_view, name='ImageEditView'),
     re_path(r'^image_convert/?$', image_convert_view, name='ImageConvertView'),
+    re_path(r'^about/?$', about_view, name='AboutView'),
+    re_path(r'^contact/?$', contact_view, name='ContactView'),
 
     re_path(r'^api/image_download_edited/?$', image_download_edited_api, name='ImageDownloadEditedApi'),
     re_path(r'^api/image_save/?$', image_save_api, name='ImageSaveApi'),
