@@ -39,10 +39,10 @@ def image_convert_api(request: WSGIRequest):
             return HttpResponseRedirect(reverse('ImageConvertView'))
 
         output_format: str = request.POST.get('output_format')
+        quality: str = request.POST.get('quality')
 
         try:
-            # TODO: add possibility for the user to set the quality with scroller
-            converted_images: list = run_conversion_task(user_id, request, image_files, 100, output_format)
+            converted_images: list = run_conversion_task(user_id, request, image_files, int(quality), output_format)
             update_session(request=request, user_id=user_id)
             request.session.pop('error_message', None)
             request.session.pop('converted_images', None)

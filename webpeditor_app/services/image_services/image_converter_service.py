@@ -213,7 +213,6 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
         )
 
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
         raise e
 
 
@@ -242,6 +241,7 @@ def run_conversion_task(user_id: str,
                 result: tuple = future.result()
                 converted_images_list.append(result)
             except Exception as e:
-                print(f"An error occurred in a parallel task: {e}")
+                logging.error(f"An error occurred in a parallel task: {e}")
+                raise e
 
     return converted_images_list

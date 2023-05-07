@@ -8,15 +8,18 @@
         <div id="bar"></div>
     </div>
 
-    <div class="flex justify-center items-center h-[calc(80vh)]">
-        <main class="container mx-auto">
-            <div class="px-4 py-4 sm:px-0">
-                <div class="flex items-center justify-center">
-                    <div id="tui-image-editor"></div>
+    <div id="image-editor">
+        <div class="flex justify-center items-center h-[calc(80vh)]">
+            <main class="container mx-auto">
+                <div class="px-4 py-4 sm:px-0">
+                    <div class="flex items-center justify-center">
+                        <div id="tui-image-editor"></div>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
+
 
     {# Popover info about image #}
     <div data-popover id="popover-description" role="tooltip"
@@ -76,6 +79,7 @@
     <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.min.js"></script>
     <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
     <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="../static/js/services/ToastUI.js" type="text/javascript"></script>
     <script src="../static/js/services/Toastify.js" type="text/javascript"></script>

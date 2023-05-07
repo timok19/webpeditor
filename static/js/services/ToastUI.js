@@ -385,9 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => {
           if (!response.ok) {
-            const errorMessage = "Error: image cannot be saved";
-            toastifyMessage(errorMessage, false);
-            throw new Error(errorMessage);
+            throw new Error("Error: image cannot be saved");
           }
           return response.blob();
         })
@@ -397,6 +395,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch((error) => {
           console.error("There was a problem with the fetch operation:", error);
+          toastifyMessage(error, false)
         });
     }
   }
@@ -426,17 +425,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (imageBlob.size > maxImageBlobSize) {
-          const errorMessage = "Error: image size should not exceed 6 MB";
-          toastifyMessage(errorMessage, false);
-
-          throw new Error(errorMessage);
+          throw new Error("Error: image size should not exceed 6 MB");
         } else {
           toastifyMessage("Image has been saved successfully", true);
         }
         location.reload();
       })
       .catch((error) => {
-        console.error("Error: ", error);
+        console.error(error);
+        toastifyMessage(error, false);
       });
   }
 

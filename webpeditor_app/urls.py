@@ -3,7 +3,9 @@ from django.conf.urls.static import static
 from django.urls import re_path
 
 from webpeditor_app.api.image_delete_converted_api import image_delete_converted_api
-from webpeditor_app.api.image_download_converted_api import image_download_converted_api
+from webpeditor_app.api.image_download_converted_api import (image_download_converted_api,
+                                                             download_all_converted_api)
+
 from webpeditor_app.views.image_does_not_exist_view import image_does_not_exist_view
 from webpeditor_app.api.image_convert_api import image_convert_api
 from webpeditor_app.api.image_download_edited_api import image_download_edited_api
@@ -29,6 +31,7 @@ urlpatterns = [
     re_path(r'^api/image_get_original/?$', image_get_original_api, name='ImageGetOriginalApi'),
     re_path(r'^api/image_convert/?$', image_convert_api, name='ImageConvertApi'),
     re_path(r'^api/image_download_converted/?$', image_download_converted_api, name='ImageDownloadConvertedApi'),
+    re_path(r'^api/download_all_converted/?$', download_all_converted_api, name='DownloadAllConvertedApi'),
     re_path(r'^api/image_delete_converted/?$', image_delete_converted_api, name='ImageDeleteConvertedApi'),
 
     # For all non-existing (not allowed) urls

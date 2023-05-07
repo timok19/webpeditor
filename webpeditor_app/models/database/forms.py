@@ -24,3 +24,10 @@ class ImagesToConvertForm(forms.Form):
 
         required=True,
     )
+    quality = forms.IntegerField(
+        required=True,
+        min_value=1,
+        max_value=100,
+        initial=50,
+        widget=forms.NumberInput(attrs={'type': 'range'})
+    )
