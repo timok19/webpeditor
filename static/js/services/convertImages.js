@@ -1,7 +1,7 @@
 const csrfTokenElement = document.getElementsByName("csrfmiddlewaretoken")[0];
 const csrfToken = csrfTokenElement ? csrfTokenElement.value : null;
 
-const form = document.getElementById('imageFormConvertId');
+const form = document.getElementById("imageFormConvertId");
 const outputFormatInput = document.getElementById("id_output_format");
 const imageFilesInput = document.getElementById("id_images_to_convert");
 const qualityIdInput = document.getElementById("id_quality");
@@ -11,7 +11,7 @@ uploadAndConvertButton.addEventListener("click", () => uploadAndConvert());
 
 document.addEventListener("DOMContentLoaded", () => {
   getImagesFromDb();
-})
+});
 
 function uploadAndConvert() {
   form.addEventListener("submit", (event) => event.preventDefault());
@@ -24,45 +24,48 @@ function uploadAndConvert() {
   if (imageFiles.length <= 15) {
     for (let i = 0; i < imageFiles.length; i++) {
       if (imageFiles[i].size <= maxFileSize) {
-        formData.append('images_to_convert', imageFiles[i]);
+        formData.append("images_to_convert", imageFiles[i]);
       } else {
         showProgressBarAndMessage(`Error, file size should not exceed ${maxFileSize / 1_000_000} MB`, false);
-        location.reload();
+        setTimeout(function () {
+          location.reload();
+        }, 5000);
       }
     }
     const outputFormat = outputFormatInput.value;
     const quality = qualityIdInput.value;
-    formData.append('output_format', outputFormat);
-    formData.append('quality', quality);
+    formData.append("output_format", outputFormat);
+    formData.append("quality", quality);
     showProgressBarAndMessage("Uploading image(s)...", true);
-
   } else {
     showProgressBarAndMessage("Error, number of files to upload should not exceed 15", false);
-    location.reload();
+    setTimeout(function () {
+      location.reload();
+    }, 5000);
   }
 
-  fetch('/api/image_convert/', {
-    method: 'POST',
+  fetch("/api/image_convert/", {
+    method: "POST",
     headers: {
-      'X-CSRFToken': csrfToken
+      "X-CSRFToken": csrfToken,
     },
     body: formData,
   })
-    .then(response => {
+    .then((response) => {
       if (response.status === 400 || response.status === 500) {
-        throw new Error('Error: After converting image(s), one or more file has size more than 6 MB');
+        throw new Error("Error: After converting image(s), one or more file has size more than 6 MB");
       }
       return response.blob();
     })
-    .then(_ => {
-      toastifyMessage('Image(s) has been converted', true);
-      location.reload()
+    .then((_) => {
+      toastifyMessage("Image(s) has been converted", true);
+      location.reload();
     })
-    .catch(error => {
+    .catch((error) => {
       toastifyMessage(error.message, false);
       setTimeout(function () {
-        location.reload()
-      }, 5000)
+        location.reload();
+      }, 5000);
     });
 }
 
@@ -81,14 +84,14 @@ function getImagesFromDb() {
     })
     .then((data) => {
       const downloadAllConvertedButtonId = "download-all-converted";
-      const downloadAllConvertedButton = document.getElementById(downloadAllConvertedButtonId)
-      const convertedImages = data["converted_images"]
-      setupPopoverListeners(convertedImages)
+      const downloadAllConvertedButton = document.getElementById(downloadAllConvertedButtonId);
+      const convertedImages = data["converted_images"];
+      setupPopoverListeners(convertedImages);
 
       if (downloadAllConvertedButton) {
         downloadAllConvertedButton.addEventListener("click", () => {
-          getZipUrl()
-        })
+          getZipUrl();
+        });
       }
     })
     .catch((error) => {
@@ -119,13 +122,12 @@ function setupPopoverListeners(convertedImages) {
 
     if (deleteButton) {
       deleteButton.addEventListener("click", () => {
-        deleteConvertedImage(publicId, deleteButtonId, tableRowId)
-          .then(() => {
-            const remainingRows = $('table#converted-images-table tr').length - 1;
-            if (remainingRows === 0) {
-              $("#converter").load(location.href + " #converter");
-            }
-          });
+        deleteConvertedImage(publicId, deleteButtonId, tableRowId).then(() => {
+          const remainingRows = $("table#converted-images-table tr").length - 1;
+          if (remainingRows === 0) {
+            $("#converter").load(location.href + " #converter");
+          }
+        });
       });
     }
   }
@@ -146,7 +148,7 @@ function downloadConvertedImage(imageUrl, imageName) {
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
       toastifyMessage("Failed to download converted image", false);
-    })
+    });
 }
 
 function deleteConvertedImage(publicId, deleteButtonId, tableRowId) {
@@ -156,7 +158,7 @@ function deleteConvertedImage(publicId, deleteButtonId, tableRowId) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      public_id: publicId
+      public_id: publicId,
     }),
   })
     .then((response) => {
@@ -173,7 +175,7 @@ function deleteConvertedImage(publicId, deleteButtonId, tableRowId) {
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
       toastifyMessage("Failed to delete converted image", false);
-    })
+    });
 }
 
 function getZipUrl() {
@@ -190,13 +192,13 @@ function getZipUrl() {
       return response.json();
     })
     .then((data) => {
-      const url = data["zip_url"]
-      downloadAllConvertedImages(url)
+      const url = data["zip_url"];
+      downloadAllConvertedImages(url);
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
       toastifyMessage("Failed to download zip with converted images", false);
-    })
+    });
 }
 
 function downloadAllConvertedImages(url) {
@@ -208,11 +210,11 @@ function downloadAllConvertedImages(url) {
       return response.blob();
     })
     .then((blob) => {
-      saveAs(blob, "webpeditor_converted_images.zip")
+      saveAs(blob, "webpeditor_converted_images.zip");
       toastifyMessage("Zip with converted images has been downloaded", true);
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
       toastifyMessage("Failed to download converted image", false);
-    })
+    });
 }
