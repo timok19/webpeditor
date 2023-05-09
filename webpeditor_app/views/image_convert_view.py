@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.models.database.forms import ImagesToConvertForm
+from webpeditor_app.forms.forms import ImagesToConvertForm
 from webpeditor_app.services.image_services.image_service import get_converted_image
 from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 

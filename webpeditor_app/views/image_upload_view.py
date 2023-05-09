@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor.settings import MAX_IMAGE_FILE_SIZE
-from webpeditor_app.models.database.forms import OriginalImageForm
+from webpeditor_app.forms.forms import OriginalImageForm
 from webpeditor_app.models.database.models import OriginalImage
 from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_original_and_edited_images
 from webpeditor_app.services.image_services.image_service import get_original_image, get_image_file_name
