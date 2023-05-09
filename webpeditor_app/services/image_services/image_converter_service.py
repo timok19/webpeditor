@@ -17,10 +17,11 @@ from django.db.models import QuerySet
 from webpeditor_app.models.database.models import ConvertedImage
 from webpeditor_app.services.external_api_services.cloudinary_service import delete_cloudinary_converted_images
 
-from webpeditor_app.services.image_services.image_service import (image_name_shorter,
+from webpeditor_app.services.image_services.image_service import (cut_image_name,
                                                                   get_image_info,
                                                                   get_converted_image,
                                                                   get_image_file_size)
+from webpeditor_app.utils.text_utils import replace_with_underscore
 
 
 def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format: str) \
@@ -168,8 +169,11 @@ def convert_and_save_image(arguments: Tuple[int, str, WSGIRequest, InMemoryUploa
     image_id, user_id, request, image_file, quality, output_format = arguments
 
     try:
-        new_image_name: str = f'webpeditor_{image_file.name.rsplit(".", 1)[0]}.{output_format.lower()}'
-        new_image_name_shorter: str = image_name_shorter(new_image_name, 25)
+        new_image_name: str = f'webpeditor_' \
+                              f'{replace_with_underscore(image_file.name).rsplit(".", 1)[0]}' \
+                              f'.{output_format.lower()}'
+
+        new_image_name_shorter: str = cut_image_name(new_image_name, 25)
 
         pil_image, pil_image_converted, buffer = convert_image(image_file, quality, output_format)
         cloudinary_image, public_id = save_image_into_cloudinary(buffer, user_id, new_image_name)

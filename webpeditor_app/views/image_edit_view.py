@@ -16,7 +16,7 @@ from webpeditor_app.services.image_services.image_service import (get_edited_ima
                                                                   get_image_file_instance,
                                                                   get_image_info,
                                                                   get_data_from_image_url,
-                                                                  image_name_shorter)
+                                                                  cut_image_name)
 
 from webpeditor_app.services.other_services.session_service import get_session_key
 from webpeditor_app.views.view_utils.get_user_data import get_user_id_or_401, get_original_image_or_401
@@ -102,7 +102,7 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
 
     context: dict = {
         'edited_image_url': edited_image.image_url,
-        'edited_image_name_short': image_name_shorter(original_image_name_with_extension, 20),
+        'edited_image_name_short': cut_image_name(original_image_name_with_extension, 20),
         'edited_image_size': edited_image_size,
         'edited_image_resolution': edited_image_resolution,
         'edited_image_aspect_ratio': edited_image_aspect_ratio,

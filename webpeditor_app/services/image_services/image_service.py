@@ -148,7 +148,7 @@ def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
         return None
 
 
-def image_name_shorter(image_name: str, min_size: int) -> str:
+def cut_image_name(image_name: str, min_size: int) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > min_size:
         basename = f"{basename[:(min_size - 3)]}...{basename[-5:]}"
