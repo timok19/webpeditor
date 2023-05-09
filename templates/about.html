@@ -2,80 +2,68 @@
 {% load static %}
 
 {% block content %}
-
     <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full z-[1]">
-        <div class="w-[calc(80vw)] h-[calc(66vh)] p-4 text-center overflow-y-scroll bg-white border border-gray-200 rounded-2xl shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
+        <div class="w-[90rem] h-[44rem] md:w-[75rem] md:h-[33rem] sm:w-[60rem] sm:h-[22rem] p-4 text-center overflow-y-scroll bg-white border border-gray-200 rounded-2xl shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
             <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"><span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400">WebP</span>
                 Editor</h1>
-            <div class="max-w-screen-xl sm:mx-auto">
+            <div class="max-w-screen-xl mt-14 sm:mx-auto">
                 <div class="grid grid-cols-1 gap-16 row-gap-8 lg:grid-cols-2">
                     <div class="space-y-8">
                         <div>
                             <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
-                                The quick, brown fox jumps over a lazy dog?
+                                What this application is about?
                             </p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                Space, the final frontier. These are the voyages of the Starship Enterprise. Its
-                                five-year mission: to explore strange new worlds.<br/>
-                                <br/>
-                                Many say exploration is part of our destiny, but it’s actually our duty to future
-                                generations.
+                                This is a modern and ease to use web application to edit images in limited formats
+                                and also allows to convert images in some specific formats. All in one place.
                             </p>
                         </div>
                         <div>
                             <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
-                                The first mate and his Skipper too will do?
+                                Is this application is free to use?
                             </p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                Well, the way they make shows is, they make one show. That show's called a pilot.<br/>
-                                <br/>
-                                Then they show that show to the people who make shows, and on the strength of that one
-                                show they decide if they're going to make more shows. Some pilots get picked and become
-                                television programs.Some don't, become nothing. She
-                                starred in one of the ones that became nothing.
+                                Yes, it is 100% free to use. No payments whatsoever.
                             </p>
                         </div>
                         <div>
-                            <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">Is the Space Pope reptilian!?</p>
+                            <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
+                                What kind of information can I get from uploaded picture/image?
+                            </p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                A flower in my garden, a mystery in my panties. Heart attack never stopped old Big Bear.
-                                I didn't even know we were calling him Big Bear.
+                                After uploading image, you will be able to see specification of the image on Info page.
+                                Those infos are file name, file size, resolution, format, color mode, aspect ratio and even further
+                                you will see an EXIF data of the image (if exists).
                             </p>
                         </div>
                     </div>
                     <div class="space-y-8">
                         <div>
-                            <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">How much money you got on you?</p>
+                            <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">How many files can I upload?</p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                The first mate and his Skipper too will do their very best to make the others
-                                comfortable in their tropic island nest.<br/>
-                                <br/>
-                                Michael Knight a young loner on a crusade to champion the cause of the innocent. The
-                                helpless. The powerless in a world of criminals who operate above the law. Here he comes
-                                Here comes Speed Racer. He's a demon on wheels.
+                                Maximum amount of files to be uploaded is 15 with specific restrictions. Individual file should have max.
+                                6 MB and sum of all file size should not overflow 50 MB.
                             </p>
                         </div>
                         <div>
                             <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
-                                Galaxies Orion's sword globular star cluster?
+                                Can I change quality of the output image on convert?
                             </p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                A business big enough that it could be listed on the NASDAQ goes belly up.
-                                Disappears!<br/>
-                                <br/>
-                                It ceases to exist without me. No, you clearly don't know who you're talking to, so let
-                                me clue you in.
+                                Yes, you can do it. On Converter page under format input, you can choose between minimum and
+                                maximum quality from 5 to 100 points. Depending on your choice, file size and quality will be
+                                increased or decreased.
                             </p>
                         </div>
                         <div>
                             <p class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
-                                When has justice ever been as simple as a rule book?
+                                What is image editor is capable of?
                             </p>
                             <p class="text-gray-700 dark:text-gray-400">
-                                This is not about revenge. This is about justice. A lot of things can change in twelve
-                                years, Admiral. Well, that's certainly good to know. About four years. I got tired of
-                                hearing how young I looked.
+                                WebP Editor can provide basic image editing with popular instruments such as cropper, rotation, resizing,
+                                adding objects such as text, geometric shapes. Also, there is some filters that you can apply on the image.
+                                For more information just <a href="/" class="font-semibold text-gray-900 underline dark:text-white decoration-indigo-500">upload</a> your first image.
                             </p>
                         </div>
                     </div>
@@ -150,7 +138,4 @@
             </svg>
         </div>
     </div>
-
-
-
 {% endblock content %}

@@ -13,3 +13,11 @@
     background: linear-gradient(109.6deg, rgb(255, 194, 48) 11.2%, rgb(255, 124, 0) 100.2%);
     visibility: hidden;
 }
+
+.nav-bar-opacity-light {
+    background: rgba(245, 245, 245, 0.75);
+}
+
+.dark .dark\:nav-bar-opacity-dark {
+    background: rgba(17, 24, 39, 0.75);
+}
