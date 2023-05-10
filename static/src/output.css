@@ -2730,6 +2730,23 @@ input:checked + .toggle-bg {
   background: rgba(17, 24, 39, 0.75);
 }
 
+.contact-me-link {
+  text-decoration: none;
+  color: rgb(156 163 175 / 1);
+  background: rgba(17, 24, 39, 0.75);
+  border-radius: 1rem;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-weight: normal;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+}
+
+.glow-contact-me-link:hover {
+  color: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 25px rgba(145, 92, 182, .4);
+}
+
 .hover\:border-gray-300:hover {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
@@ -2757,11 +2774,6 @@ input:checked + .toggle-bg {
 .hover\:bg-white:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.hover\:text-orange-400:hover {
-  --tw-text-opacity: 1;
-  color: rgb(255 138 76 / var(--tw-text-opacity));
 }
 
 .hover\:text-white:hover {
