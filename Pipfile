@@ -40,9 +40,7 @@ ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 djangorestframework-jwt = "==1.0.1"
 django-imagekit = "*"
-django-cropperjs = "*"
 opencv-python = "*"
-django-crispy-forms = "*"
 gunicorn = "*"
 whitenoise = "*"
 python-dotenv = "*"
@@ -54,6 +52,7 @@ py-spy = "*"
 pillow = "*"
 mongoengine = "*"
 django-jsonfield = "*"
+deptry = "*"
 
 [dev-packages]
 autopep8 = "*"
