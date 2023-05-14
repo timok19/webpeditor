@@ -28,7 +28,7 @@ def create_and_save_edited_image(user_id: str,
                                  session_key: str,
                                  request: WSGIRequest) \
         -> EditedImage | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    
+
     original_image_url = original_image.image_url
     image_name = original_image.image_name
     folder_path = f"{user_id}/edited/"
