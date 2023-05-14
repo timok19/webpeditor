@@ -3,7 +3,7 @@ from io import BytesIO
 from types import NoneType
 
 from _decimal import Decimal
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -12,7 +12,6 @@ from webpeditor_app.services.image_services.image_service import (cut_image_name
                                                                   get_image_info,
                                                                   get_data_from_image_url)
 
-
 from webpeditor_app.services.other_services.session_service import update_session
 from webpeditor_app.views.view_utils.get_user_data import get_user_id_or_401, get_original_image_or_401
 
@@ -20,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 @require_http_methods(['GET'])
-def image_info_view(request) -> HttpResponse:
+def image_info_view(request) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id: str | HttpResponse = get_user_id_or_401(request)
     if isinstance(user_id, HttpResponse):
         return user_id
@@ -34,7 +33,9 @@ def image_info_view(request) -> HttpResponse:
         return redirect("ImageDoesNotExistView")
 
     # Image info taken from file
-    image_info = get_image_info(image_data)
+    image_info: tuple | None = get_image_info(image_data)
+    if isinstance(image_info, NoneType):
+        return redirect("ImageDoesNotExistView")
 
     image_format_description: str = image_info[0]
     image_format: str = image_info[1]
