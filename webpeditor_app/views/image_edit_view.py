@@ -8,7 +8,6 @@ from cloudinary import CloudinaryImage
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import requires_csrf_token, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage, EditedImage
@@ -63,7 +62,10 @@ def create_and_save_edited_image(user_id: str,
     return edited_image_init
 
 
-def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+@require_http_methods(['GET'])
+def image_edit_view(request: WSGIRequest) \
+        -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
+
     session_key = get_session_key(request)
 
     user_id: str | HttpResponse = get_user_id_or_401(request)
@@ -116,15 +118,3 @@ def get(request: WSGIRequest) -> HttpResponsePermanentRedirect | HttpResponseRed
     original_image_file.close()
 
     return render(request, 'imageEdit.html', context, status=200)
-
-
-@requires_csrf_token
-@csrf_protect
-@require_http_methods(['GET', 'POST'])
-def image_edit_view(request: WSGIRequest) \
-        -> HttpResponsePermanentRedirect | HttpResponseRedirect | HttpResponse:
-    if request.method == "GET":
-        response = get(request)
-        return response
-    else:
-        return HttpResponse(status=405)

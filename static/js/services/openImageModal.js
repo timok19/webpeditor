@@ -5,7 +5,11 @@ let imageId = imageIdElement ? JSON.parse(imageIdElement.textContent) : null;
 const image = document.getElementById(imageId)
 
 if (document.querySelector("[modal-backdrop]") !== null) {
-  document.querySelector("[modal-backdrop]").setAttribute("class", "hidden bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40");
+  document.querySelector("[modal-backdrop]")
+    .setAttribute(
+      "class",
+      "hidden bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40"
+    );
 }
 
 function showImageModal(src) {
