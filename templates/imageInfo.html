@@ -7,7 +7,7 @@
         <div id="bar"></div>
     </div>
 
-    <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full z-[1]">
+    <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full">
         <div class="flex items-center justify-evenly transform-gpu">
             <div class="p-5 bg-white max-w-screen-lg border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex flex-row justify-center items-center">
@@ -79,7 +79,9 @@
          class="hidden fixed top-0 left-0 z-[999] w-screen h-screen bg-black/70 flex justify-center items-center">
 
         <!-- A big image will be displayed here -->
-        <img id="{{ image_name }}" class="max-w-[800px] max-h-[600px] object-cover" alt="Image Modal" src=""/>
+        <img id="{{ image_name }}"
+             class="max-w-[800px] max-h-[600px] object-cover"
+             alt="Image Modal" src=""/>
 
         <!-- The close button -->
         <a class="flex z-[999] ml-10 mb-[35rem] text-white"

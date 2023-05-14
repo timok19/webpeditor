@@ -7,7 +7,7 @@
     <div id="progress-bar-container">
         <div id="bar"></div>
     </div>
-    <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full z-[1]">
+    <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full">
         <div class="flex flex-row justify-center items-center pt-6">
             {% if form.errors %}
                 <div class="alert alert-danger">
@@ -372,20 +372,17 @@
                                      class="hidden fixed top-0 left-0 z-[999] w-screen h-screen bg-black/70 flex justify-center items-center">
 
                                     <!-- A big image will be displayed here -->
-                                    <img id="{{ image_name_shorter }}" class="max-w-[800px] max-h-[600px] object-cover"
-                                         alt="Image Modal"
-                                         src=""/>
+                                    <img id="{{ image_name_shorter }}"
+                                         class="max-w-[800px] max-h-[600px] object-cover"
+                                         alt="Image Modal" src=""/>
 
                                     <!-- The close button -->
                                     <a class="flex z-[999] ml-10 mb-[35rem] text-white"
                                        onclick="closeImageModal()">
-                                        <svg class="w-12 h-12 ml-1 mr-1" fill="none" stroke="currentColor"
-                                             stroke-width="1.5"
-                                             viewBox="0 0 24 24"
+                                        <svg class="w-12 h-12 ml-1 mr-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                                              xmlns="http://www.w3.org/2000/svg"
                                              aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M6 18L18 6M6 6l12 12"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </a>
                                 </div>
