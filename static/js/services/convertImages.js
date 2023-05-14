@@ -90,6 +90,7 @@ function getImagesFromDb() {
 
       if (downloadAllConvertedButton) {
         downloadAllConvertedButton.addEventListener("click", () => {
+          toastifyMessage("Zipping files...", true);
           getZipUrl();
         });
       }
