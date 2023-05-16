@@ -110,26 +110,20 @@ def get_all_converted_images():
 
 def get_original_image(user_id: str) -> OriginalImage | None:
     original_image = OriginalImage.objects.filter(user_id=user_id).first()
-    if original_image is None:
-        return None
 
-    return original_image
+    return original_image if isinstance(original_image, OriginalImage) else None
 
 
 def get_edited_image(user_id: str) -> EditedImage | None:
     edited_image = EditedImage.objects.filter(user_id=user_id).first()
-    if edited_image is None:
-        return None
 
-    return edited_image
+    return edited_image if isinstance(edited_image, EditedImage) else None
 
 
 def get_converted_image(user_id: str) -> ConvertedImage | None:
     converted_image = ConvertedImage.objects.filter(user_id=user_id).first()
-    if converted_image is None:
-        return None
 
-    return converted_image
+    return converted_image if isinstance(converted_image, ConvertedImage) else None
 
 
 def data_url_to_binary(data_url: str) -> BytesIO:

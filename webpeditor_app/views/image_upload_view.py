@@ -5,6 +5,7 @@ import cloudinary.uploader
 import cloudinary.api
 
 from PIL import Image as PilImage
+from PIL.Image import Image as ImageClass
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
@@ -77,15 +78,23 @@ def handle_user_session(request: WSGIRequest) -> str:
     return user_id
 
 
-def handle_image_upload(request: WSGIRequest) -> tuple[InMemoryUploadedFile, PilImage]:
+def handle_image_upload(request: WSGIRequest) -> HttpResponse | Tuple[InMemoryUploadedFile, ImageClass]:
+    form = OriginalImageForm(request.POST, request.FILES)
+    if not form.is_valid():
+        context: dict = {
+            'error': 'Unknown file format',
+            'is_image_exist': check_image_existence(request)
+        }
+        return render(request, 'imageUpload.html', context, status=200)
+
     uploaded_original_image_file: InMemoryUploadedFile = request.FILES['original_image_form']
-    image: PilImage = PilImage.open(uploaded_original_image_file)
+    image: ImageClass = PilImage.open(uploaded_original_image_file)
 
     return uploaded_original_image_file, image
 
 
 def check_image_constraints(request: WSGIRequest,
-                            image: PilImage,
+                            image: ImageClass,
                             uploaded_original_image_file: InMemoryUploadedFile) -> None | HttpResponse:
     are_image_dimensions_more: bool = image.width > 2500 or image.height > 2500
     is_image_file_size_more: bool = uploaded_original_image_file.size > MAX_IMAGE_FILE_SIZE
@@ -94,7 +103,7 @@ def check_image_constraints(request: WSGIRequest,
             'error':
                 f'Image should not exceed {MAX_IMAGE_FILE_SIZE / 1_000_000} MB'
                 if is_image_file_size_more
-                else f'Image dimensions should not be more than 2500x2500px',
+                else 'Image dimensions should not be more than 2500x2500px',
             'is_image_exist': check_image_existence(request)
         }
         return render(request, 'imageUpload.html', context)
@@ -132,7 +141,13 @@ def post(request: WSGIRequest) \
         }
         return render(request, 'imageUpload.html', context)
 
-    (uploaded_original_image_file, image) = handle_image_upload(request)
+    response = handle_image_upload(request)
+    if isinstance(response, HttpResponse):
+        return response
+
+    uploaded_original_image_file: InMemoryUploadedFile = response[0]
+    image: ImageClass = response[1]
+
     constraints_response: HttpResponse | None = check_image_constraints(
         request,
         image,
@@ -162,13 +177,10 @@ def post(request: WSGIRequest) \
 
 
 def get(request: WSGIRequest) -> HttpResponse:
-    form = OriginalImageForm()
-    is_image_exist = check_image_existence(request)
     context: dict = {
-        'form': form,
-        'is_image_exist': is_image_exist
+        'form': OriginalImageForm(),
+        'is_image_exist': check_image_existence(request)
     }
-
     return render(request, 'imageUpload.html', context, status=200)
 
 

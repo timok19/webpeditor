@@ -52,8 +52,13 @@ function uploadAndConvert() {
     body: formData,
   })
     .then((response) => {
-      if (response.status === 400 || response.status === 500) {
-        throw new Error("Error: After converting image(s), one or more file has size more than 6 MB");
+      switch (response.status) {
+        case 400:
+          throw new Error("Error: One or more image(s) has been failed on upload");
+        case 500:
+          throw new Error("Error: One or more image(s) has been failed on conversion");
+        default:
+          break;
       }
       return response.blob();
     })

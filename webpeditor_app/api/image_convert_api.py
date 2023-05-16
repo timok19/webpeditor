@@ -28,15 +28,15 @@ def image_convert_api(request: WSGIRequest):
 
         image_form = ImagesToConvertForm(request.POST, request.FILES)
         if not image_form.is_valid():
-            request.session.pop('error_message', None)
-            request.session['error_message'] = f"This field is required"
-            return HttpResponseRedirect(reverse('ImageConvertView'))
+            request.session['error_message'] = "One or many unknown file format(s)"
+            request.session['converted_images'] = None
+            return HttpResponseRedirect(reverse('ImageConvertView'), status=400)
 
         image_files = request.FILES.getlist('images_to_convert')
 
         # Validate image size
         if isinstance(image_files, list) and validate_images(request, image_files) is False:
-            return HttpResponseRedirect(reverse('ImageConvertView'))
+            return HttpResponseRedirect(reverse('ImageConvertView'), status=500)
 
         output_format: str = request.POST.get('output_format')
         quality: str = request.POST.get('quality')

@@ -78,10 +78,10 @@
                 <input id="{{ form.quality.auto_id }}"
                        type="range"
                        name="quality"
-                       min="5"
-                       max="100"
-                       step="5"
-                       value="{{ form.quality.value|default:'50' }}"
+                       min="{{ form.quality.min_value }}"
+                       max="{{ form.quality.max_value }}"
+                       step="{{ form.quality.step_size }}"
+                       value="{{ form.quality.initial }}"
                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none dark:bg-gray-700 cursor-not-allowed"
                        disabled>
 

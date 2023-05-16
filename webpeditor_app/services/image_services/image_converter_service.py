@@ -26,8 +26,11 @@ from webpeditor_app.utils.text_utils import replace_with_underscore
 
 def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format: str) \
         -> Tuple[ImageClass, ImageClass, BytesIO]:
+
     buffer = BytesIO()
-    min_quality, max_quality, max_safe_quality = 5, 100, 95
+    min_quality = 5
+    max_quality = 100
+    max_safe_quality = 95
 
     pil_image: ImageClass = PilImage.open(image_file)
 
