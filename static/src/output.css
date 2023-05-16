@@ -1709,6 +1709,10 @@ input:checked + .toggle-bg {
   margin-left: 3rem;
 }
 
+.mr-\[-5rem\] {
+  margin-right: -5rem;
+}
+
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -1721,8 +1725,8 @@ input:checked + .toggle-bg {
   margin-bottom: 35rem;
 }
 
-.mt-\[5\.5rem\] {
-  margin-top: 5.5rem;
+.mt-5 {
+  margin-top: 1.25rem;
 }
 
 .mr-4 {
@@ -1755,22 +1759,6 @@ input:checked + .toggle-bg {
 
 .mb-1 {
   margin-bottom: 0.25rem;
-}
-
-.mt-5 {
-  margin-top: 1.25rem;
-}
-
-.ml-5 {
-  margin-left: 1.25rem;
-}
-
-.ml-\[-5rem\] {
-  margin-left: -5rem;
-}
-
-.mr-\[-5rem\] {
-  margin-right: -5rem;
 }
 
 .block {
@@ -1821,10 +1809,6 @@ input:checked + .toggle-bg {
   height: 5rem;
 }
 
-.h-\[calc\(80vh\)\] {
-  height: calc(80vh);
-}
-
 .h-2 {
   height: 0.5rem;
 }
@@ -1845,6 +1829,10 @@ input:checked + .toggle-bg {
   height: 11rem;
 }
 
+.h-12 {
+  height: 3rem;
+}
+
 .h-64 {
   height: 16rem;
 }
@@ -1857,12 +1845,17 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
-.h-12 {
-  height: 3rem;
+.h-\[calc\(80vh\)\] {
+  height: calc(80vh);
 }
 
 .h-60 {
   height: 15rem;
+}
+
+.h-max {
+  height: -moz-max-content;
+  height: max-content;
 }
 
 .h-96 {
@@ -1877,19 +1870,6 @@ input:checked + .toggle-bg {
   height: 1rem;
 }
 
-.h-max {
-  height: -moz-max-content;
-  height: max-content;
-}
-
-.h-\[80vh\] {
-  height: 80vh;
-}
-
-.h-\[8rem\] {
-  height: 8rem;
-}
-
 .max-h-\[65vh\] {
   max-height: 65vh;
 }
@@ -1901,10 +1881,6 @@ input:checked + .toggle-bg {
 .min-h-min {
   min-height: -moz-min-content;
   min-height: min-content;
-}
-
-.min-h-screen {
-  min-height: 100vh;
 }
 
 .w-full {
@@ -1935,6 +1911,10 @@ input:checked + .toggle-bg {
   width: 8rem;
 }
 
+.w-12 {
+  width: 3rem;
+}
+
 .w-\[10rem\] {
   width: 10rem;
 }
@@ -1953,10 +1933,6 @@ input:checked + .toggle-bg {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-12 {
-  width: 3rem;
 }
 
 .w-60 {
@@ -2415,14 +2391,6 @@ input:checked + .toggle-bg {
   padding: 0.25rem;
 }
 
-.p-8 {
-  padding: 2rem;
-}
-
-.p-\[-8rem\] {
-  padding: -8rem;
-}
-
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
@@ -2489,10 +2457,6 @@ input:checked + .toggle-bg {
 
 .pt-2 {
   padding-top: 0.5rem;
-}
-
-.pl-\[-5rem\] {
-  padding-left: -5rem;
 }
 
 .text-left {
@@ -2633,14 +2597,14 @@ input:checked + .toggle-bg {
   color: rgb(224 36 36 / var(--tw-text-opacity));
 }
 
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-
 .text-gray-200 {
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .text-blue-600 {
