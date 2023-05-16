@@ -37,34 +37,35 @@ def convert_image(image_file: InMemoryUploadedFile, quality: int, output_format:
     pil_image_converted: ImageClass = convert_color_mode(pil_image, pil_image_format, output_format)
 
     if min_quality < quality <= max_quality:
-        if output_format == 'JPEG':
-            pil_image_converted.save(
-                buffer,
-                format=output_format,
-                quality=quality,
-                subsampling=0 if quality == max_quality else 2,
-                exif=pil_image_exif_data
-            )
-        elif output_format == 'TIFF':
-            pil_image_converted.save(
-                buffer,
-                format=output_format,
-                quality=quality,
-                exif=pil_image_exif_data,
-                compression="jpeg"
-            )
-        elif output_format == 'BMP':
-            pil_image_converted.save(
-                buffer,
-                format=output_format,
-            )
-        else:
-            pil_image_converted.save(
-                buffer,
-                format=output_format,
-                quality=max_safe_quality if max_safe_quality < quality <= max_quality else quality,
-                exif=pil_image_exif_data
-            )
+        match output_format:
+            case 'JPEG':
+                pil_image_converted.save(
+                    buffer,
+                    format=output_format,
+                    quality=quality,
+                    subsampling=0 if quality == max_quality else 2,
+                    exif=pil_image_exif_data
+                )
+            case 'TIFF':
+                pil_image_converted.save(
+                    buffer,
+                    format=output_format,
+                    quality=quality,
+                    exif=pil_image_exif_data,
+                    compression="jpeg"
+                )
+            case 'BMP':
+                pil_image_converted.save(
+                    buffer,
+                    format=output_format,
+                )
+            case _:
+                pil_image_converted.save(
+                    buffer,
+                    format=output_format,
+                    quality=max_safe_quality if max_safe_quality < quality <= max_quality else quality,
+                    exif=pil_image_exif_data
+                )
         buffer.seek(0)
     else:
         raise ValueError("Image quality cannot be less than 1")
@@ -149,7 +150,7 @@ def create_image_set(image_id: int,
 
 
 def convert_color_mode(pil_image: ImageClass, input_file_format: str, output_file_format: str) -> ImageClass:
-    image_formats_with_alpha_channel: set[str] = {'WEBP', 'PNG', 'GIF'}
+    image_formats_with_alpha_channel: set[str] = {'WEBP', 'PNG', 'GIF', 'ICO'}
 
     if input_file_format in image_formats_with_alpha_channel:
         rgba_image = pil_image.convert('RGBA')
