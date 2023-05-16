@@ -115,7 +115,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10_485_760 * 4
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800 * 4
 
-VALID_IMAGE_FORMATS = ['WEBP', 'JPEG', 'JPG', 'PNG', 'JFIF', 'ICO']
+VALID_IMAGE_FORMATS = ['WEBP', 'JPEG', 'JPG', 'PNG', 'JFIF', 'ICO', 'BMP', 'GIF', 'TIFF']
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
