@@ -22,3 +22,5 @@
 1. `$ npm run update-css`
 
 **5. DONE 🚀**
+
+For any issues, problems and questions reach me on [LinkedIn](https://www.linkedin.com/in/temirkhan-amanzhanov-5b182b1b6/?locale=en_US)
