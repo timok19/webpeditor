@@ -44,4 +44,4 @@ Currently, this web application is deployed with service Fly.io on this link: ht
 
 **5. DONE 🚀**
 
-For any issues, problems and questions reach me on [LinkedIn](https://www.linkedin.com/in/temirkhan-amanzhanov-5b182b1b6/?locale=en_US)
+For any questions, problems, or issues, contact me on [LinkedIn](https://www.linkedin.com/in/temirkhan-amanzhanov-5b182b1b6/?locale=en_US).
