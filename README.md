@@ -1,5 +1,4 @@
-![image](https://github.com/timok19/webpeditor/assets/87667470/5e6c0f5a-535b-44f6-82a4-2af07de1a7b7)
-
+![image](https://github.com/timok19/webpeditor/assets/87667470/f1f19b1c-243a-4b57-80f7-34084145cdfb)
 
 ## ℹ️ About WebP Editor
 This Django application uses JS libraries (ToastUI image editor for editing images with essential tools such as cropping, scaling, etc., and Toastify for toast messages). 
