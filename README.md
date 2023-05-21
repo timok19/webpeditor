@@ -21,4 +21,4 @@
 
 1. `$ npm run update-css`
 
-**5. DONE :D**
+**5. DONE 🚀**
