@@ -1,0 +1,29 @@
+# fly.toml app configuration file generated for webpeditor on 2023-04-23T17:23:48+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "webpeditor"
+primary_region = "ams"
+
+[env]
+  PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_start_machines = true
+
+[checks]
+  [checks.alive]
+    type = "tcp"
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "8s"
+
+[[statics]]
+  guest_path = "/code/static"
+  url_prefix = "/static/"
+
+[deploy]
+  release_command = "python manage.py migrate --noinput"
