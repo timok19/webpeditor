@@ -22,8 +22,6 @@ Currently, this web application is deployed with service Fly.io on this link: ht
 
 ## ▶️ Project setup
 
----
-
 **Steps to run project:**
 
 **1. Clone repo:**
