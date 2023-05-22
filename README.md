@@ -8,7 +8,7 @@ On the back-end, one external service CoudinaryAPI has been used for storing/del
 Image converter was created with the Python library Pillow. It can be changed because of format support issues.
 
 How does it works:
-1) User lands to the Home page and upload image with allowed format.
+1) User lands on the Home page and upload image with allowed format.
 2) After upload user will see an Info page with image information such as size, file name, aspect ratio etc.
 3) After clicking on "Edit image" user will be redirected to the Editor page, where he can save, restore original and download image.
 
