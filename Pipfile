@@ -34,7 +34,7 @@ django-cors-headers = "*"
 pymongo = "==3.12.1"
 django-environ = "*"
 django-extensions = "*"
-requests = "==2.29.0"
+requests = "==2.31.0"
 cython = "*"
 ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
