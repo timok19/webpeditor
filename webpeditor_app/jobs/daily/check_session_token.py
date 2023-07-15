@@ -5,20 +5,24 @@ from datetime import datetime
 from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.external_api_services.cloudinary_service import (delete_all_cloudinary_folders,
-                                                                              get_all_cloudinary_user_folders,
-                                                                              delete_cloudinary_original_and_edited_images,
-                                                                              delete_cloudinary_converted_images,
-                                                                              delete_cloudinary_folder)
+from webpeditor_app.services.external_api_services.cloudinary_service import (
+    delete_all_cloudinary_folders,
+    get_all_cloudinary_user_folders,
+    delete_cloudinary_original_and_edited_images,
+    delete_cloudinary_converted_images,
+    delete_cloudinary_folder
+)
 
-from webpeditor_app.services.image_services.image_service import (get_serialized_data_of_all_original_images,
-                                                                  get_serialized_data_of_all_edited_images,
-                                                                  get_all_original_images,
-                                                                  get_all_edited_images,
-                                                                  delete_original_image_in_db,
-                                                                  get_serialized_data_of_all_converted_images,
-                                                                  get_all_converted_images,
-                                                                  delete_converted_image_in_db)
+from webpeditor_app.services.image_services.image_service import (
+    get_serialized_data_of_all_original_images,
+    get_serialized_data_of_all_edited_images,
+    get_all_original_images,
+    get_all_edited_images,
+    delete_original_image_in_db,
+    get_serialized_data_of_all_converted_images,
+    get_all_converted_images,
+    delete_converted_image_in_db
+)
 
 from webpeditor_app.services.other_services.session_service import clear_expired_session_store
 
