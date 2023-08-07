@@ -8,14 +8,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_service import get_data_from_image_url, get_original_image
+from webpeditor_app.services.image_services.image_service import (
+    get_data_from_image_url,
+    get_original_image,
+)
 from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
 
 @csrf_exempt
-@require_http_methods(['GET'])
+@require_http_methods(["GET"])
 def image_get_original_api(request: WSGIRequest):
-    if request.method == 'GET':
+    if request.method == "GET":
         user_id: str | None = get_unsigned_user_id(request)
         if isinstance(user_id, NoneType):
             return JsonResponse({"error": "User Id was not found"}, status=401)
@@ -33,7 +36,7 @@ def image_get_original_api(request: WSGIRequest):
 
         response_data = {
             "image_url": image_url,
-            "image_name": image_name_with_extension
+            "image_name": image_name_with_extension,
         }
 
         return JsonResponse(response_data, status=200)

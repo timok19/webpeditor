@@ -13,13 +13,20 @@ from _decimal import ROUND_UP, Decimal
 from django.http import JsonResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from webpeditor_app.models.database.models import OriginalImage, EditedImage, ConvertedImage
-from webpeditor_app.models.database.serializers import (OriginalImageSerializer,
-                                                        EditedImageSerializer,
-                                                        ConvertedImageSerializer)
-from webpeditor_app.services.external_api_services.cloudinary_service import \
-    (delete_cloudinary_original_and_edited_images,
-     delete_cloudinary_converted_images)
+from webpeditor_app.models.database.models import (
+    OriginalImage,
+    EditedImage,
+    ConvertedImage,
+)
+from webpeditor_app.models.database.serializers import (
+    OriginalImageSerializer,
+    EditedImageSerializer,
+    ConvertedImageSerializer,
+)
+from webpeditor_app.services.external_api_services.cloudinary_service import (
+    delete_cloudinary_original_and_edited_images,
+    delete_cloudinary_converted_images,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,10 +41,10 @@ def delete_original_image_in_db(user_id: str) -> JsonResponse:
 
     logging.info("Original image has been deleted from db")
 
-    return JsonResponse({
-        'success': True,
-        'info': 'Original and Edited images have been deleted in db'
-    }, status=204)
+    return JsonResponse(
+        {"success": True, "info": "Original and Edited images have been deleted in db"},
+        status=204,
+    )
 
 
 def delete_converted_image_in_db(user_id: str) -> JsonResponse:
@@ -50,10 +57,9 @@ def delete_converted_image_in_db(user_id: str) -> JsonResponse:
 
     logging.info("Converted image has been deleted from db")
 
-    return JsonResponse({
-        'success': True,
-        'info': 'Converted image has been deleted in db'
-    }, status=204)
+    return JsonResponse(
+        {"success": True, "info": "Converted image has been deleted in db"}, status=204
+    )
 
 
 def get_serialized_data_of_all_original_images() -> ReturnDict:
@@ -127,7 +133,7 @@ def get_converted_image(user_id: str) -> ConvertedImage | None:
 
 
 def data_url_to_binary(data_url: str) -> BytesIO:
-    data_url = data_url.split(',')[1]
+    data_url = data_url.split(",")[1]
     image_data = base64.b64decode(data_url)
 
     return BytesIO(image_data)
@@ -213,7 +219,9 @@ def get_image_info(image_data: BytesIO) -> None | Tuple:
             TAGS.get(tag_id, tag_id): (
                 decode_value(exif_data.get(tag_id))
                 if isinstance(exif_data.get(tag_id), bytes)
-                else int(exif_data.get(tag_id).numerator / exif_data.get(tag_id).denominator)
+                else int(
+                    exif_data.get(tag_id).numerator / exif_data.get(tag_id).denominator
+                )
                 if isinstance(exif_data.get(tag_id), IFDRational)
                 else exif_data.get(tag_id)
             )
@@ -229,9 +237,11 @@ def get_image_info(image_data: BytesIO) -> None | Tuple:
         image_resolution,
         image_aspect_ratio,
         image_mode,
-        exif_data
+        exif_data,
     )
 
 
 def get_image_aspect_ratio(image_file: ImageClass) -> Decimal:
-    return Decimal(image_file.width / image_file.height).quantize(Decimal('.1'), rounding=ROUND_UP)
+    return Decimal(image_file.width / image_file.height).quantize(
+        Decimal(".1"), rounding=ROUND_UP
+    )

@@ -5,11 +5,11 @@ from django.shortcuts import render
 
 def unauthorized_access_view(request: WSGIRequest):
     response = HttpResponse(status=401)
-    response_message = 'Unauthorized access'
+    response_message = "Unauthorized access"
 
     context = {
-        'status_code': response.status_code,
-        'response_message': response_message
+        "status_code": response.status_code,
+        "response_message": response_message,
     }
 
-    return render(request, 'noContent.html', context, status=401)
+    return render(request, "noContent.html", context, status=401)

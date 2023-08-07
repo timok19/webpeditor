@@ -12,18 +12,16 @@ logging.basicConfig(level=logging.INFO)
 
 
 @requires_csrf_token
-@require_http_methods(['GET'])
+@require_http_methods(["GET"])
 def image_convert_view(request: WSGIRequest):
     image_form = ImagesToConvertForm()
     user_id = get_unsigned_user_id(request)
 
     context = {
-        'form': image_form,
-        'error': request.session.get('error_message'),
-        'converted_images':
-            request.session.get('converted_images')
-            if get_converted_image(user_id)
-            else None
+        "form": image_form,
+        "error": request.session.get("error_message"),
+        "converted_images": request.session.get("converted_images")
+        if get_converted_image(user_id)
+        else None,
     }
-    return render(request, 'imageConvert.html', context, status=200)
-
+    return render(request, "imageConvert.html", context, status=200)

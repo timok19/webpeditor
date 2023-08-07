@@ -13,15 +13,23 @@ from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.api.api_utils.response_presets import unauthorized_access_response
 from webpeditor_app.models.database.models import EditedImage
-from webpeditor_app.services.image_services.image_service import get_original_image, get_edited_image
-from webpeditor_app.services.external_api_services.request_service import extract_image_edit_data_from_request_body
-from webpeditor_app.services.other_services.session_service import get_unsigned_user_id, update_session
+from webpeditor_app.services.image_services.image_service import (
+    get_original_image,
+    get_edited_image,
+)
+from webpeditor_app.services.external_api_services.request_service import (
+    extract_image_edit_data_from_request_body,
+)
+from webpeditor_app.services.other_services.session_service import (
+    get_unsigned_user_id,
+    update_session,
+)
 
 
 @csrf_exempt
-@require_http_methods(['POST'])
+@require_http_methods(["POST"])
 def image_save_api(request: WSGIRequest):
-    if request.method == 'POST':
+    if request.method == "POST":
         user_id: str | None = get_unsigned_user_id(request)
         if isinstance(user_id, NoneType):
             return unauthorized_access_response()
@@ -47,23 +55,23 @@ def image_save_api(request: WSGIRequest):
         image_file.save(buffer, format=image_file.format)
         buffer.seek(0)
 
-        resources = cloudinary.api.resources(
-            prefix=f"{user_id}/edited",
-            type="upload"
-        )
+        resources = cloudinary.api.resources(prefix=f"{user_id}/edited", type="upload")
 
-        public_ids: list = [resource["public_id"] for resource in resources["resources"]]
+        public_ids: list = [
+            resource["public_id"] for resource in resources["resources"]
+        ]
 
         # Save image to Cloudinary
-        cloudinary_parameters: dict = {
-            "public_id": public_ids[0],
-            "overwrite": True
-        }
-        cloudinary_image = cloudinary.uploader.upload_image(file=buffer, **cloudinary_parameters)
+        cloudinary_parameters: dict = {"public_id": public_ids[0], "overwrite": True}
+        cloudinary_image = cloudinary.uploader.upload_image(
+            file=buffer, **cloudinary_parameters
+        )
 
         update_session(request=request, user_id=user_id)
         # Update edited image in DB
-        EditedImage.objects.filter(user_id=user_id).update(image_url=cloudinary_image.url)
+        EditedImage.objects.filter(user_id=user_id).update(
+            image_url=cloudinary_image.url
+        )
 
         response = HttpResponse()
         response.status_code = 200

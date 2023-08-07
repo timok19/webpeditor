@@ -3,6 +3,7 @@ from django.urls import path, include
 from webpeditor.views import service_worker
 
 urlpatterns = [
-    path('sw.js', service_worker),
-    path('', include('webpeditor_app.urls'))
+    path("sw.js", service_worker),
+    path("", include("webpeditor_app.urls")),
+    path("reactpy/", include("reactpy_django.http.urls")),
 ]

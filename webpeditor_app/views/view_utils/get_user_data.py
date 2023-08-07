@@ -17,7 +17,9 @@ def get_user_id_or_401(request: WSGIRequest) -> str | HttpResponse:
     return user_id
 
 
-def get_original_image_or_401(request: WSGIRequest, user_id: str) -> OriginalImage | HttpResponse:
+def get_original_image_or_401(
+    request: WSGIRequest, user_id: str
+) -> OriginalImage | HttpResponse:
     original_image: OriginalImage | None = get_original_image(user_id)
     if isinstance(original_image, NoneType) or original_image.user_id != user_id:
         return render(request, "imageIsNotUploadedView.html", status=401)

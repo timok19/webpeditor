@@ -34,7 +34,7 @@ django-cors-headers = "*"
 pymongo = "==3.12.1"
 django-environ = "*"
 django-extensions = "*"
-requests = "==2.29.0"
+requests = "==2.31.0"
 cython = "*"
 ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
@@ -46,13 +46,18 @@ whitenoise = "*"
 python-dotenv = "*"
 cloudinary = "*"
 raven = "*"
-django = "==4.1.7"
+django = "==4.1.10"
 redis = "==4.5.4"
 py-spy = "*"
 pillow = "*"
 mongoengine = "*"
 django-jsonfield = "*"
 deptry = "*"
+cryptography = "==41.0.3"
+certifi = "==2023.7.22"
+reactpy-django = "*"
+channels = {version = "*", extras = ["daphne"]}
+twisted = {version = "*", extras = ["http2", "tls"]}
 
 [dev-packages]
 autopep8 = "*"

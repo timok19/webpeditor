@@ -9,9 +9,9 @@ logging.basicConfig(level=logging.INFO)
 def delete_assets_in_specific_user_folder(folder_path: str, asset_folder: str):
     try:
         assets = cloudinary.api.resources(folder=folder_path, max_results=500)
-        for asset in assets['resources']:
-            if asset_folder in asset['public_id']:
-                cloudinary.api.delete_resources([asset['public_id']])
+        for asset in assets["resources"]:
+            if asset_folder in asset["public_id"]:
+                cloudinary.api.delete_resources([asset["public_id"]])
                 logging.info(f"Asset(s) has/have been deleted from {folder_path}")
 
     except cloudinary.api.NotFound as e:
@@ -23,8 +23,8 @@ def delete_original_asset(folder_path: str):
     try:
         assets = cloudinary.api.resources(folder=folder_path, max_results=500)
 
-        for asset in assets['resources']:
-            cloudinary.api.delete_resources([asset['public_id']])
+        for asset in assets["resources"]:
+            cloudinary.api.delete_resources([asset["public_id"]])
             logging.info(f"Deleted asset from {folder_path}")
 
     except cloudinary.api.NotFound as e:
@@ -62,8 +62,8 @@ def get_all_cloudinary_user_folders() -> List:
     user_folders = []
 
     response = cloudinary.api.root_folders()
-    for folder in response['folders']:
-        user_folders.append(folder['path'])
+    for folder in response["folders"]:
+        user_folders.append(folder["path"])
         continue
 
     return user_folders

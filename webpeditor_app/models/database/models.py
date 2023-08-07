@@ -13,9 +13,9 @@ class OriginalImage(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Original Image'
-        verbose_name_plural = 'Original Images'
+        ordering = ["-created_at"]
+        verbose_name = "Original Image"
+        verbose_name_plural = "Original Images"
 
     def __str__(self):
         return str(self.image_id)
@@ -33,9 +33,9 @@ class EditedImage(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Edited Image'
-        verbose_name_plural = 'Edited Images'
+        ordering = ["-created_at"]
+        verbose_name = "Edited Image"
+        verbose_name_plural = "Edited Images"
 
     def __str__(self):
         return str(self.image_id)
@@ -49,9 +49,9 @@ class ConvertedImage(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Converted Image'
-        verbose_name_plural = 'Converted Images'
+        ordering = ["-created_at"]
+        verbose_name = "Converted Image"
+        verbose_name_plural = "Converted Images"
 
     def __str__(self):
         return str(self.image_set)

@@ -3,28 +3,41 @@ from io import BytesIO
 from types import NoneType
 
 from _decimal import Decimal
-from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.http import (
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.models.database.models import OriginalImage
-from webpeditor_app.services.image_services.image_service import (cut_image_name,
-                                                                  get_image_info,
-                                                                  get_data_from_image_url)
+from webpeditor_app.services.image_services.image_service import (
+    cut_image_name,
+    get_image_info,
+    get_data_from_image_url,
+)
 
 from webpeditor_app.services.other_services.session_service import update_session
-from webpeditor_app.views.view_utils.get_user_data import get_user_id_or_401, get_original_image_or_401
+from webpeditor_app.views.view_utils.get_user_data import (
+    get_user_id_or_401,
+    get_original_image_or_401,
+)
 
 logging.basicConfig(level=logging.INFO)
 
 
-@require_http_methods(['GET'])
-def image_info_view(request) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
+@require_http_methods(["GET"])
+def image_info_view(
+    request,
+) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
     user_id: str | HttpResponse = get_user_id_or_401(request)
     if isinstance(user_id, HttpResponse):
         return user_id
 
-    original_image: OriginalImage | HttpResponse = get_original_image_or_401(request, user_id)
+    original_image: OriginalImage | HttpResponse = get_original_image_or_401(
+        request, user_id
+    )
     if isinstance(original_image, HttpResponse):
         return original_image
 
@@ -45,15 +58,17 @@ def image_info_view(request) -> HttpResponse | HttpResponsePermanentRedirect | H
     image_mode: str = image_info[5]
 
     context: dict = {
-        'original_image_url': original_image.image_url,
-        'image_name': cut_image_name(f"{original_image.image_name}.{image_format.lower()}", 20),
-        'image_format': image_format_description,
-        'image_size': image_size,
-        'image_resolution': image_resolution,
-        'aspect_ratio': image_aspect_ratio,
-        'image_mode': image_mode
+        "original_image_url": original_image.image_url,
+        "image_name": cut_image_name(
+            f"{original_image.image_name}.{image_format.lower()}", 20
+        ),
+        "image_format": image_format_description,
+        "image_size": image_size,
+        "image_resolution": image_resolution,
+        "aspect_ratio": image_aspect_ratio,
+        "image_mode": image_mode,
     }
 
     update_session(request=request, user_id=user_id)
 
-    return render(request, 'imageInfo.html', context, status=200)
+    return render(request, "imageInfo.html", context, status=200)
