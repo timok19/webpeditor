@@ -3,76 +3,111 @@ from typing import List
 
 import cloudinary.api
 
-logging.basicConfig(level=logging.INFO)
 
+class CloudinaryService:
+    logging.basicConfig(level=logging.INFO)
 
-def delete_assets_in_specific_user_folder(folder_path: str, asset_folder: str):
-    try:
-        assets = cloudinary.api.resources(folder=folder_path, max_results=500)
-        for asset in assets["resources"]:
-            if asset_folder in asset["public_id"]:
+    # TODO: add other cloudinary method for adding images etc
+
+    @staticmethod
+    def delete_all_assets_in_root_folder(user_folder_name: str):
+        number_of_deleted_assets: int = 0
+
+        try:
+            assets = cloudinary.api.resources(folder=user_folder_name, max_results=500)
+
+            for i, asset in enumerate(assets["resources"]):
+                number_of_deleted_assets += i
                 cloudinary.api.delete_resources([asset["public_id"]])
-                logging.info(f"Asset(s) has/have been deleted from {folder_path}")
 
-    except cloudinary.api.NotFound as e:
-        logging.error(e)
-        pass
+            logging.info(
+                f"{number_of_deleted_assets} assets "
+                f"have been deleted in {user_folder_name} folder"
+            )
 
+        except cloudinary.api.NotFound as e:
+            logging.error(e)
+            pass
 
-def delete_original_asset(folder_path: str):
-    try:
-        assets = cloudinary.api.resources(folder=folder_path, max_results=500)
+    @staticmethod
+    def delete_all_assets_in_subfolder(user_folder_name: str, user_subfolder_name: str):
+        """
+        Deletes assets located in a specific subfolder of a user's folder in Cloudinary.
 
-        for asset in assets["resources"]:
-            cloudinary.api.delete_resources([asset["public_id"]])
-            logging.info(f"Deleted asset from {folder_path}")
+        Parameters:
+            user_folder_name (str):
+                The name of the user's folder where assets are stored.
+            user_subfolder_name (str):
+                The name of the subfolder within the user's folder where the assets to be deleted are located.
 
-    except cloudinary.api.NotFound as e:
-        logging.error(e)
-        pass
+        Returns:
+            None
+        """
 
+        number_of_deleted_assets: int = 0
 
-def delete_cloudinary_folder(folder_path: str):
-    try:
-        cloudinary.api.delete_folder(folder_path)
-        logging.info(f"Folder '{folder_path}' and its content have been deleted")
+        try:
+            assets = cloudinary.api.resources(folder=user_folder_name, max_results=500)
+            for i, asset in enumerate(assets["resources"]):
+                if user_subfolder_name in asset["public_id"]:
+                    number_of_deleted_assets += i
+                    cloudinary.api.delete_resources([asset["public_id"]])
 
-        # response = cloudinary.api.subfolders(folder_path)
-        # for folder in response['folders']:
-        #     delete_cloudinary_folder(folder['path'])
+            logging.info(
+                f"{number_of_deleted_assets} assets "
+                f"have been deleted in {user_folder_name}/{user_subfolder_name} folder"
+            )
 
-    except cloudinary.api.NotFound:
-        logging.error(f"Folder '{folder_path}' not found")
-        pass
+        except cloudinary.api.NotFound as e:
+            logging.error(e)
+            pass
 
+    @staticmethod
+    def delete_folder(user_folder_name: str):
+        try:
+            cloudinary.api.delete_folder(user_folder_name)
+            logging.info(f"Folder {user_folder_name} and its content have been deleted")
 
-def delete_all_cloudinary_folders():
-    i = 0
-    user_folders: list = get_all_cloudinary_user_folders()
-    for user_folder in user_folders:
-        delete_cloudinary_original_and_edited_images(user_folder)
-        delete_cloudinary_converted_images(user_folder)
-        delete_cloudinary_folder(user_folder)
-        i += 1
+            # TODO: check if deleted subfolder's content as well
+            # response = cloudinary.api.subfolders(folder_path)
+            # for folder in response['folders']:
+            #     delete_cloudinary_folder(folder['path'])
 
-    logging.info(f"Deleted {i} user folders in Cloudinary storage")
+        except cloudinary.api.NotFound:
+            logging.error(f"Folder {user_folder_name} not found")
+            pass
 
+    @staticmethod
+    def get_all_folders() -> List[str]:
+        user_folders: list[str] = []
 
-def get_all_cloudinary_user_folders() -> List:
-    user_folders = []
+        response = cloudinary.api.root_folders()
+        for folder in response["folders"]:
+            user_folders.append(folder["path"])
 
-    response = cloudinary.api.root_folders()
-    for folder in response["folders"]:
-        user_folders.append(folder["path"])
-        continue
+        return user_folders
 
-    return user_folders
+    @classmethod
+    def delete_all_folders(cls):
+        number_of_deleted_folders: int = 0
+        user_folders = cls.get_all_folders()
 
+        for i, user_folder in enumerate(user_folders):
+            cls.delete_original_and_edited_images(user_folder)
+            cls.delete_converted_images(user_folder)
+            cls.delete_folder(user_folder)
+            number_of_deleted_folders += i
 
-def delete_cloudinary_original_and_edited_images(folder_path: str):
-    delete_assets_in_specific_user_folder(folder_path, "edited/")
-    delete_original_asset(folder_path)
+        logging.info(
+            f"{number_of_deleted_folders} user folders "
+            f"has been deleted in Cloudinary storage"
+        )
 
+    @classmethod
+    def delete_original_and_edited_images(cls, user_folder_name: str):
+        cls.delete_all_assets_in_subfolder(user_folder_name, "edited/")
+        cls.delete_all_assets_in_root_folder(user_folder_name)
 
-def delete_cloudinary_converted_images(folder_path: str):
-    delete_assets_in_specific_user_folder(folder_path, "converted/")
+    @classmethod
+    def delete_converted_images(cls, user_folder_name: str):
+        cls.delete_all_assets_in_subfolder(user_folder_name, "converted/")
