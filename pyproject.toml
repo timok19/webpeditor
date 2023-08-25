@@ -60,6 +60,7 @@ channels = {version = "*", extras = ["daphne"]}
 twisted = {version = "*", extras = ["http2", "tls"]}
 black = "^23.7.0"
 beanie = "^1.21.0"
+django-asgi-lifespan = "^0.1.0"
 
 
 [build-system]

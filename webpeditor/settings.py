@@ -15,6 +15,7 @@ import cloudinary
 from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
+from reactpy.config import REACTPY_DEBUG_MODE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,7 +36,7 @@ MEDIA_ROOT = BASE_DIR / "media" / "uploaded_images"
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0").lower() in ["true", "t", "1"]
+DEBUG = bool(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
 
@@ -133,7 +134,15 @@ VALID_IMAGE_FORMATS = [
 ]
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+DATABASES = {}
+
+DATABASE_NAME: str = os.getenv("DATABASE_NAME")
+
+DATABASE_URL: str = (
+    f"mongodb+srv://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}"
+    f"{os.getenv('HOST_LINK')}/?retryWrites=true&w=majority"
+)
+
 
 # Path for future migrations
 MIGRATION_MODULES = {"webpeditor_app": "webpeditor_app.models.database.migrations"}

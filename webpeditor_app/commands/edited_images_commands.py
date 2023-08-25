@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from webpeditor_app.models.database.models import EditedImage
+from webpeditor_app.database.models.models import EditedImage
 
 
 class EditedImagesCommands:

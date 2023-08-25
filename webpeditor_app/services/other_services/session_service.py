@@ -1,134 +1,135 @@
 import logging
-import uuid
+from uuid import UUID, uuid4
 
+from beanie.odm.operators.update.general import Set
 from django.contrib.sessions.backends.db import SessionStore
-from django.core.handlers.wsgi import WSGIRequest
+from django.core.handlers.asgi import ASGIRequest
 from django.core import signing
 from django.http import JsonResponse
-from django.utils import timezone
 
-from webpeditor_app.models.database.models import OriginalImage, EditedImage
+from datetime import datetime, timedelta
+
 from webpeditor_app.services.external_api_services.cloudinary_service import (
-    delete_cloudinary_original_and_edited_images,
-    delete_cloudinary_converted_images,
+    CloudinaryService,
 )
-from webpeditor_app.services.image_services.image_service import (
-    delete_original_image_in_db,
-)
-
-logging.basicConfig(level=logging.INFO)
+from webpeditor_app.commands.original_images_commands import OriginalImagesCommands
+from webpeditor_app.commands.edited_images_commands import EditedImagesCommands
 
 
-def set_session_expiry(request: WSGIRequest, num_of_seconds: int):
-    request.session.set_expiry(num_of_seconds)
+class SessionService:
+    logging.basicConfig(level=logging.INFO)
 
+    user_id: UUID | None = None
 
-def get_session_key(request: WSGIRequest) -> str | None:
-    try:
-        return request.session.session_key
-    except Exception as e:
-        logging.error(e)
-        return None
+    def __init__(self, request: ASGIRequest):
+        self.request = request
+        self.session_store = SessionStore(session_key=self.request.session.session_key)
 
+    def set_session_expiry(self, number_of_seconds: int):
+        self.request.session.set_expiry(number_of_seconds)
 
-def create_signed_user_id() -> str:
-    user_id = str(uuid.uuid4())
-    return signing.dumps(user_id)
+    def add_signed_user_id_to_session_store(self):
+        self.request.session["user_id"] = signing.dumps(uuid4())
 
+    def get_unsigned_user_id(self):
+        try:
+            signed_user_id = self.request.session.get("user_id")
+            if signed_user_id is not None:
+                self.user_id = signing.loads(signed_user_id)
+        except Exception as e:
+            logging.error(e)
 
-def add_signed_user_id_to_session_store(request: WSGIRequest):
-    request.session["user_id"] = create_signed_user_id()
-
-
-def get_unsigned_user_id(request: WSGIRequest) -> str | None:
-    try:
-        return signing.loads(request.session["user_id"])
-    except Exception as e:
-        logging.error(e)
-        return None
-
-
-def update_session_store(
-    session_store: SessionStore, request: WSGIRequest
-) -> SessionStore:
-    session_store.encode(session_dict={"user_id": request.session["user_id"]})
-    update_expiration = timezone.now() + timezone.timedelta(seconds=900)
-    session_store.set_expiry(value=update_expiration)
-
-    return session_store
-
-
-def clear_expired_session_store(session_key: str):
-    session_store = SessionStore(session_key=session_key)
-    session_store.clear_expired()
-    logging.info("Session has been cleared")
-
-
-def log_session_expiration_times(
-    user_id: str, current_time_expiration_minutes: int, new_time_expiration_minutes: int
-):
-    logging.info(
-        f"Current session expiration time of user '{user_id}': "
-        f"{current_time_expiration_minutes} minute(s)"
-    )
-
-    logging.info(
-        f"Updated session expiration time of user '{user_id}': "
-        f"{new_time_expiration_minutes} minute(s)"
-    )
-
-
-def update_image_expiration_dates(user_id: str, session_store: SessionStore):
-    original_image = OriginalImage.objects.filter(user_id=user_id)
-    if original_image is None:
-        return JsonResponse(
-            {"success": False, "error": "Original image was not found"}, status=404
+    def update_session_store(self):
+        self.session_store.encode(
+            session_dict={
+                "user_id": self.request.session.get("user_id"),
+            }
         )
 
-    edited_image = EditedImage.objects.filter(user_id=user_id)
-    if edited_image is None:
-        return JsonResponse(
-            {"success": False, "error": "Edited image was not found"}, status=404
+        update_expiration = datetime.utcnow() + timedelta(seconds=900)
+
+        self.session_store.set_expiry(value=update_expiration)
+
+    def clear_expired_session_store(self):
+        self.session_store.clear_expired()
+        logging.info("Session has been cleared")
+
+    def log_session_expiration_times(
+        self,
+        current_time_expiration_minutes: int,
+        new_time_expiration_minutes: int,
+    ):
+        logging.info(
+            f"Current session expiration time of user '{self.user_id}': "
+            f"{current_time_expiration_minutes} minute(s)"
         )
 
-    expiry_date = session_store.get_expiry_date()
-    original_image.update(session_key_expiration_date=expiry_date)
-    edited_image.update(session_key_expiration_date=expiry_date)
-
-
-def update_session(request: WSGIRequest, user_id: str) -> JsonResponse:
-    session_key = get_session_key(request)
-
-    session_store = SessionStore(session_key=session_key)
-    if session_store is None:
-        return JsonResponse(
-            {"success": False, "error": f"Session store does not exist"}, status=404
+        logging.info(
+            f"Updated session expiration time of user '{self.user_id}': "
+            f"{new_time_expiration_minutes} minute(s)"
         )
 
-    current_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+    async def update_session_expiration_date_in_db(self):
+        original_image = await OriginalImagesCommands.get_original_image(self.user_id)
+        if original_image is None:
+            return JsonResponse(
+                data={
+                    "success": False,
+                    "error": "Original image was not found",
+                },
+                status=404,
+            )
 
-    expiry_date = timezone.localtime(session_store.get_expiry_date())
-    now = timezone.localtime(timezone.now())
-    if now > expiry_date:
-        delete_original_image_in_db(user_id)
-        delete_cloudinary_original_and_edited_images(user_id)
-        delete_cloudinary_converted_images(user_id)
-        clear_expired_session_store(session_key)
+        edited_image = await EditedImagesCommands.get_edited_image(self.user_id)
+        if edited_image is None:
+            return JsonResponse(
+                data={
+                    "success": False,
+                    "error": "Edited image was not found",
+                },
+                status=404,
+            )
 
-    session_store = update_session_store(session_store, request)
-    new_time_expiration_minutes = round(session_store.get_expiry_age() / 60)
+        expiry_date = self.session_store.get_expiry_date()
+        original_image.update(
+            Set({original_image.item.session_key_expiration_date: expiry_date})
+        )
+        edited_image.update(
+            Set({edited_image.item.session_key_expiration_date: expiry_date})
+        )
 
-    log_session_expiration_times(
-        user_id, current_time_expiration_minutes, new_time_expiration_minutes
-    )
+        return
 
-    update_image_expiration_dates(user_id, session_store)
+    async def update_session(self):
+        current_time_expiration_minutes = round(
+            self.session_store.get_expiry_age() / 60
+        )
 
-    return JsonResponse(
-        {
-            "success": True,
-            "info": "Session is alive",
-            "estimated_time_of_session_id": current_time_expiration_minutes,
-        },
-        status=200,
-    )
+        expiry_date = self.session_store.get_expiry_date()
+        now = datetime.utcnow()
+
+        if now > expiry_date:
+            await OriginalImagesCommands.delete_original_image(self.user_id)
+            CloudinaryService.delete_original_and_edited_images(self.user_id.__str__())
+            CloudinaryService.delete_converted_images(self.user_id.__str__())
+            self.clear_expired_session_store()
+
+        self.update_session_store()
+
+        new_time_expiration_minutes = round(self.session_store.get_expiry_age() / 60)
+
+        self.log_session_expiration_times(
+            current_time_expiration_minutes,
+            new_time_expiration_minutes,
+        )
+
+        await self.update_session_expiration_date_in_db()
+
+        return JsonResponse(
+            data={
+                "success": True,
+                "info": "Session is alive",
+                "estimated_time_of_session_id": current_time_expiration_minutes,
+            },
+            status=200,
+        )

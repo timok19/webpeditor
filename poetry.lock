@@ -765,6 +765,20 @@ files = [
 django = "*"
 
 [[package]]
+name = "django-asgi-lifespan"
+version = "0.1.0"
+description = "Django ASGI handler with Lifespan Protocol support."
+optional = false
+python-versions = ">=3.10,<4.0"
+files = [
+    {file = "django-asgi-lifespan-0.1.0.tar.gz", hash = "sha256:a8b2ce01c34def525d3acb494710ed944986e9e799c597b8382dae8fe54ba1b5"},
+    {file = "django_asgi_lifespan-0.1.0-py3-none-any.whl", hash = "sha256:23b0d7f649367111d383388e4ca207de8f38424c5a1549156abc309233f4690b"},
+]
+
+[package.dependencies]
+Django = ">=4,<5"
+
+[[package]]
 name = "django-compressor"
 version = "4.4"
 description = "('Compresses linked and inline JavaScript or CSS into single cached files.',)"
@@ -2733,4 +2747,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2e023e26b3b78c4551c1d1b1f74b21251217d59c5ce9add000988ec8dbdfde0e"
+content-hash = "623ce7f05c277745fbe4cc71a0cf2e4efb2989644100e7cd5ddedb213d87fb32"
