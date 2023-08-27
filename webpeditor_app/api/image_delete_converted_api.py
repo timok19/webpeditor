@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.image_editor_models import ConvertedImage
+from webpeditor_app.database.models.edited_image_model import ConvertedImage
 from webpeditor_app.commands.converted_images_commands import ConvertedImagesCommands
 
 from webpeditor_app.services.external_api_services.cloudinary_service import (

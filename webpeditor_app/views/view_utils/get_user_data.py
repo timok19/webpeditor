@@ -4,7 +4,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from webpeditor_app.database.models.image_editor_models import OriginalImage
+from webpeditor_app.database.models.edited_image_model import OriginalImage
 from webpeditor_app.services.image_services.image_editor_service import (
     get_original_image,
 )

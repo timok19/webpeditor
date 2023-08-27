@@ -3,7 +3,7 @@ import logging
 from django.http import JsonResponse
 from uuid import UUID
 
-from webpeditor_app.database.models.image_editor_models import OriginalImage
+from webpeditor_app.database.models.original_image_model import OriginalImage
 from webpeditor_app.services.external_api_services.cloudinary_service import (
     CloudinaryService,
 )
