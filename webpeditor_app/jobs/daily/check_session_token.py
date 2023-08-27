@@ -5,7 +5,7 @@ from datetime import datetime
 from django.utils import timezone
 from django_extensions.management.jobs import DailyJob
 
-from webpeditor_app.services.external_api_services.cloudinary_service import (
+from webpeditor_app.services.other_services.cloudinary_service import (
     delete_all_cloudinary_folders,
     get_all_cloudinary_user_folders,
     delete_cloudinary_original_and_edited_images,

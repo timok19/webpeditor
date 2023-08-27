@@ -1,15 +1,15 @@
-from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.core.handlers.asgi import ASGIRequest
+from django.views.generic import TemplateView
 
 
-def no_content_view(request: WSGIRequest):
-    response = HttpResponse(status=404)
-    response_message = "Not found"
-
-    context = {
-        "status_code": response.status_code,
-        "response_message": response_message,
+class NoContentView(TemplateView):
+    template_name = "noContent.html"
+    http_method_names = ["get"]
+    extra_context = {
+        "status_code": 404,
+        "response_message": "Not found",
     }
 
-    return render(request, "noContent.html", context, status=404)
+    def get(self, request: ASGIRequest, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)

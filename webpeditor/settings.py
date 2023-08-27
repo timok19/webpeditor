@@ -33,8 +33,6 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media" / "uploaded_images"
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("DEBUG"))
 
@@ -46,14 +44,13 @@ CSRF_TRUSTED_ORIGINS = [str(os.getenv("CSRF_TRUSTED_ORIGINS"))]
 # In development mode. Delete this in production mode (add domains in white list)
 INSTALLED_APPS = [
     "daphne",
-    "channels",
     "django_extensions",
+    "whitenoise.runserver_nostatic",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "cloudinary",
     "reactpy_django",
@@ -143,9 +140,6 @@ DATABASE_URL: str = (
     f"{os.getenv('HOST_LINK')}/?retryWrites=true&w=majority"
 )
 
-
-# Path for future migrations
-MIGRATION_MODULES = {"webpeditor_app": "webpeditor_app.models.database.migrations"}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -241,10 +235,18 @@ DATABASE_ROUTERS = ["reactpy_django.database.Router", ...]
 
 # Maximum seconds between reconnection attempts before giving up.
 # Use `0` to prevent component reconnection.
-REACTPY_RECONNECT_MAX = 259200
+
+REACTPY_RECONNECT_INTERVAL = 750
+
+REACTPY_RECONNECT_MAX_INTERVAL = 60000
+
+REACTPY_RECONNECT_MAX_RETRIES = 150
+
+REACTPY_RECONNECT_BACKOFF_MULTIPLIER = 1.25
+
 
 # The URL for ReactPy to serve the component rendering websocket.
-REACTPY_WEBSOCKET_URL = "reactpy/"
+REACTPY_URL_PREFIX = "reactpy/"
 
 # Dotted path to the default `reactpy_django.hooks.use_query` postprocessor function,
 # or `None`.

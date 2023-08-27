@@ -4,12 +4,19 @@ from django.http import JsonResponse
 from uuid import UUID
 
 from webpeditor_app.database.models.original_image_model import OriginalImage
-from webpeditor_app.services.external_api_services.cloudinary_service import (
+from webpeditor_app.services.other_services.cloudinary_service import (
     CloudinaryService,
 )
 
 
 class OriginalImagesCommands:
+    def __init__(self, user_id: UUID):
+        self.user_id = user_id
+
+    @staticmethod
+    async def create_original_image(original_image: OriginalImage):
+        await OriginalImage.insert_one(original_image)
+
     @staticmethod
     async def get_all_original_images():
         original_images: list[OriginalImage] = await OriginalImage.find_all().to_list()
@@ -18,22 +25,20 @@ class OriginalImagesCommands:
 
         return original_images
 
-    @staticmethod
-    async def get_original_image(user_id: UUID):
+    async def get_original_image(self):
         original_image: OriginalImage | None = await OriginalImage.find_one(
-            OriginalImage.item.user_id == user_id
+            OriginalImage.image.user_id == self.user_id
         )
 
         return original_image if not None else None
 
-    @classmethod
-    async def delete_original_image(cls, user_id: UUID):
-        original_image = await cls.get_original_image(user_id)
+    async def delete_original_image(self):
+        original_image = await self.get_original_image()
         if original_image is None:
             logging.info(
-                f"Original image of user {user_id} not found. Deleting user's folder..."
+                f"Original image of user {self.user_id} not found. Deleting user's folder..."
             )
-            CloudinaryService.delete_original_and_edited_images(user_id.__str__())
+            CloudinaryService.delete_original_and_edited_images(self.user_id.__str__())
         else:
             await original_image.delete()
 

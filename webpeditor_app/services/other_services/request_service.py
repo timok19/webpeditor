@@ -4,7 +4,7 @@ from typing import Tuple
 
 from PIL.Image import Image as ImageClass
 
-from django.core.handlers.wsgi import WSGIRequest
+from django.core.handlers.asgi import ASGIRequest
 from django.http import JsonResponse
 
 from webpeditor_app.services.image_services.image_editor_service import (
@@ -13,8 +13,9 @@ from webpeditor_app.services.image_services.image_editor_service import (
 )
 
 
+# TODO: rewrite to async
 def extract_image_edit_data_from_request_body(
-    request: WSGIRequest,
+    request: ASGIRequest,
 ) -> JsonResponse | Tuple[str | None, str, str, ImageClass | None]:
     data = json.loads(request.body)
     data_url: str | None = data.get("data_url", None)
@@ -30,7 +31,7 @@ def extract_image_edit_data_from_request_body(
     return data_url, mime_type, image_name, image_file
 
 
-def extract_image_name_from_request_body(request: WSGIRequest) -> JsonResponse | str:
+def extract_image_name_from_request_body(request: ASGIRequest) -> JsonResponse | str:
     data = json.loads(request.body)
     public_id: str | None = data.get("public_id", None)
 

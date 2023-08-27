@@ -2,11 +2,9 @@ from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from webpeditor.settings import DATABASE_URL, DATABASE_NAME
-from webpeditor_app.database.models.edited_image_model import (
-    OriginalImage,
-    EditedImage,
-    ConvertedImage,
-)
+from webpeditor_app.database.models.edited_image_model import EditedImage
+from webpeditor_app.database.models.original_image_model import OriginalImage
+from webpeditor_app.database.models.converted_image_model import ConvertedImage
 
 
 class MongoDBHandler:

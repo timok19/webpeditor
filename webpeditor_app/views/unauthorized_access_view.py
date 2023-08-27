@@ -1,15 +1,16 @@
-from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.core.handlers.asgi import ASGIRequest
+from django.views.generic import TemplateView
+from django.http.response import HttpResponseForbidden
 
 
-def unauthorized_access_view(request: WSGIRequest):
-    response = HttpResponse(status=401)
-    response_message = "Unauthorized access"
-
-    context = {
-        "status_code": response.status_code,
-        "response_message": response_message,
+class UnauthorizedAccessView(TemplateView):
+    template_name = "noContent.html"
+    http_method_names = ["get"]
+    extra_context = {
+        "status_code": HttpResponseForbidden.status_code,
+        "response_message": "Not found",
     }
 
-    return render(request, "noContent.html", context, status=401)
+    def get(self, request: ASGIRequest, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)

@@ -11,14 +11,14 @@ from django.http import (
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.edited_image_model import OriginalImage
+from webpeditor_app.database.models.original_image_model import OriginalImage
 from webpeditor_app.services.image_services.image_editor_service import (
     slice_image_name,
     get_image_info,
     get_data_from_image_url,
 )
 
-from webpeditor_app.services.other_services.session_service import update_session
+from webpeditor_app.services.other_services.session_service import SessionService
 from webpeditor_app.views.view_utils.get_user_data import (
     get_user_id_or_401,
     get_original_image_or_401,
@@ -28,14 +28,16 @@ logging.basicConfig(level=logging.INFO)
 
 
 @require_http_methods(["GET"])
-def image_info_view(
+async def image_info_view(
     request,
 ) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    user_id: str | HttpResponse = get_user_id_or_401(request)
+    user_id = get_user_id_or_401(request)
     if isinstance(user_id, HttpResponse):
         return user_id
 
-    original_image: OriginalImage | HttpResponse = get_original_image_or_401(
+    session_service = SessionService(request)
+
+    original_image: OriginalImage | HttpResponse = await get_original_image_or_401(
         request, user_id
     )
     if isinstance(original_image, HttpResponse):
@@ -69,6 +71,6 @@ def image_info_view(
         "image_mode": image_mode,
     }
 
-    update_session(request=request, user_id=user_id)
+    await session_service.update_session()
 
     return render(request, "imageInfo.html", context, status=200)
