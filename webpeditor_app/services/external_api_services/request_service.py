@@ -7,7 +7,7 @@ from PIL.Image import Image as ImageClass
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 
-from webpeditor_app.services.image_services.image_service import (
+from webpeditor_app.services.image_services.image_editor_service import (
     data_url_to_binary,
     get_image_file_instance,
 )

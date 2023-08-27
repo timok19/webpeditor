@@ -14,13 +14,16 @@ from django.http import (
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.models import OriginalImage, EditedImage
-from webpeditor_app.services.image_services.image_service import (
+from webpeditor_app.database.models.image_editor_models import (
+    OriginalImage,
+    EditedImage,
+)
+from webpeditor_app.services.image_services.image_editor_service import (
     get_edited_image,
     get_image_file_instance,
     get_image_info,
     get_data_from_image_url,
-    cut_image_name,
+    slice_image_name,
 )
 
 from webpeditor_app.services.other_services.session_service import get_session_key
@@ -116,7 +119,7 @@ def image_edit_view(
 
     context: dict = {
         "edited_image_url": edited_image.image_url,
-        "edited_image_name_short": cut_image_name(
+        "edited_image_name_short": slice_image_name(
             original_image_name_with_extension, 20
         ),
         "edited_image_size": edited_image_size,

@@ -1,289 +1,265 @@
 import logging
+from uuid import UUID, uuid4
 
-import cloudinary.uploader
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from io import BytesIO
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 from copy import copy
 
-from PIL import Image as PilImage
-from PIL.Image import Image as ImageClass, Exif
-from cloudinary import CloudinaryImage
+from PIL.Image import Image, open, new, Exif
+from beanie.odm.operators.update.general import Set
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.handlers.wsgi import WSGIRequest
-from django.db.models import QuerySet
+from django.core.handlers.asgi import ASGIRequest
 
-from webpeditor_app.database.models.models import ConvertedImage
-from webpeditor_app.services.external_api_services.cloudinary_service import (
-    delete_cloudinary_converted_images,
+from webpeditor_app.commands.converted_images_commands import ConvertedImagesCommands
+from webpeditor_app.utils.text_utils import replace_with_underscore
+from webpeditor_app.database.models.image_converter_models import (
+    ConvertedImage,
+    ImageSet,
+    ImageData,
 )
-
-from webpeditor_app.services.image_services.image_service import (
-    cut_image_name,
+from webpeditor_app.services.external_api_services.cloudinary_service import (
+    CloudinaryService,
+)
+from webpeditor_app.services.image_services.image_editor_service import (
+    slice_image_name,
     get_image_info,
-    get_converted_image,
     get_image_file_size,
 )
-from webpeditor_app.utils.text_utils import replace_with_underscore
+from webpeditor_app.services.image_services.types import (
+    RGBImageFormat,
+    RGBAImageFormat,
+    AllowedImageFormats,
+)
 
 
-def convert_image(
-    image_file: InMemoryUploadedFile, quality: int, output_format: str
-) -> Tuple[ImageClass, ImageClass, BytesIO]:
-    buffer = BytesIO()
-    min_quality = 5
-    max_quality = 100
-    max_safe_quality = 95
+class ImageConverterService:
+    MIN_QUALITY: int = 5
+    MAX_QUALITY: int = 100
+    SAFE_QUALITY: int = 95
 
-    pil_image: ImageClass = PilImage.open(image_file)
+    image: Image | None = None
+    converted_image: Image | None = None
+    exif_data: Exif | None = None
 
-    pil_image_exif_data = pil_image.getexif()
-    pil_image_format: str = pil_image.format
+    def __init__(
+        self,
+        user_id: UUID,
+        request: ASGIRequest,
+        image_files: List[InMemoryUploadedFile],
+        quality: int | None = 50,
+        output_format: AllowedImageFormats | None = RGBAImageFormat.WEBP,
+    ):
+        self.user_id = user_id
+        self.request = request
+        self.image_files = image_files
+        self.quality = quality
+        self.output_format = output_format
+        self.converted_images_commands = ConvertedImagesCommands(user_id)
 
-    pil_image_converted: ImageClass = convert_color_mode(
-        pil_image, pil_image_format, output_format
-    )
+    def convert_image(self, image_file: InMemoryUploadedFile) -> BytesIO:
+        if self.MIN_QUALITY > self.quality > self.MAX_QUALITY:
+            raise ValueError(
+                f"Image quality cannot be less than {self.MIN_QUALITY} "
+                f"and more than {self.MAX_QUALITY}"
+            )
 
-    if min_quality < quality <= max_quality:
-        match output_format:
-            case "JPEG":
-                pil_image_converted.save(
-                    buffer,
-                    format=output_format,
-                    quality=quality,
-                    subsampling=0 if quality == max_quality else 2,
-                    exif=pil_image_exif_data,
+        image_buffer = BytesIO()
+
+        self.image = open(image_file)
+        self.exif_data = self.image.getexif()
+
+        self.converted_image: Image = self.convert_color_mode(
+            self.image.format,
+            self.output_format,
+        )
+
+        match self.output_format:
+            case RGBImageFormat.JPEG:
+                self.converted_image.save(
+                    fp=image_buffer,
+                    format=self.output_format,
+                    quality=self.quality,
+                    subsampling=0 if self.quality == self.MAX_QUALITY else 2,
+                    exif=self.exif_data,
                 )
-            case "TIFF":
-                pil_image_converted.save(
-                    buffer,
-                    format=output_format,
-                    quality=quality,
-                    exif=pil_image_exif_data,
+            case RGBImageFormat.TIFF:
+                self.converted_image.save(
+                    fp=image_buffer,
+                    format=self.output_format,
+                    quality=self.quality,
+                    exif=self.exif_data,
                     compression="jpeg",
                 )
-            case "BMP":
-                pil_image_converted.save(
-                    buffer,
-                    format=output_format,
+            case RGBImageFormat.BMP:
+                self.converted_image.save(
+                    fp=image_buffer,
+                    format=self.output_format,
                 )
             case _:
-                pil_image_converted.save(
-                    buffer,
-                    format=output_format,
-                    quality=max_safe_quality
-                    if max_safe_quality < quality <= max_quality
-                    else quality,
-                    exif=pil_image_exif_data,
+                self.converted_image.save(
+                    fp=image_buffer,
+                    format=self.output_format,
+                    quality=self.SAFE_QUALITY
+                    if self.SAFE_QUALITY < self.quality <= self.MAX_QUALITY
+                    else self.quality,
+                    exif=self.exif_data,
                 )
-        buffer.seek(0)
-    else:
-        raise ValueError("Image quality cannot be less than 1")
+        # Set buffer pointer to start
+        image_buffer.seek(0)
 
-    return pil_image, pil_image_converted, buffer
+        return image_buffer
 
+    async def update_converted_image(self, image_set: ImageSet):
+        converted_image = await self.converted_images_commands.get_converted_image()
 
-def save_image_into_cloudinary(
-    image_bytes: BytesIO, user_id: str, new_image_name: str
-) -> Tuple[CloudinaryImage, str]:
-    cloudinary_options: dict = {
-        "folder": f"{user_id}/converted/",
-        "use_filename": True,
-        "unique_filename": True,
-        "filename_override": new_image_name,
-        "overwrite": False,
-    }
-    cloudinary_image = cloudinary.uploader.upload_image(
-        image_bytes, **cloudinary_options
-    )
+        if converted_image is None:
+            await ConvertedImage.insert_one(
+                ConvertedImage(
+                    user_id=self.user_id,
+                    image_set=[image_set],
+                    session_key=self.request.session.session_key,
+                    session_key_expiration_date=self.request.session.get_expiry_date(),
+                )
+            )
+        else:
+            updated_image_set = copy(converted_image.image_set)
+            updated_image_set.append(image_set)
+            await self.converted_images_commands.update_converted_image(
+                values=Set({ConvertedImage.image_set: [updated_image_set]}),
+            )
 
-    return cloudinary_image, str(cloudinary_image.public_id)
+    def create_image_set(
+        self,
+        image_id: UUID,
+        image_file: InMemoryUploadedFile,
+        converted_image_buffer: BytesIO,
+        cloudinary_image_url: str,
+        new_image_name: str,
+        new_short_image_name: str,
+        public_id: str,
+        output_format: AllowedImageFormats,
+    ) -> ImageSet:
+        original_image_exif_data = get_image_info(image_file.file)[6]
+        converted_image_exif_data = get_image_info(converted_image_buffer)[6]
 
-
-def update_converted_image(user_id: str, request: WSGIRequest, image_set: dict):
-    converted_image_query_set: QuerySet[ConvertedImage] = ConvertedImage.objects.filter(
-        user_id=user_id
-    )
-    converted_image: ConvertedImage = converted_image_query_set.first()
-
-    if converted_image is None:
-        converted_image = ConvertedImage(
-            user_id=user_id,
-            image_set=[image_set],
-            session_key=request.session.session_key,
-            session_key_expiration_date=request.session.get_expiry_date(),
+        return ImageSet(
+            image_id=image_id,
+            short_image_name=new_short_image_name,
+            public_id=public_id,
+            image_name=new_image_name,
+            image_url=cloudinary_image_url,
+            original_image_data=ImageData(
+                content_type=f"image/{str(self.image.format).lower()}",
+                format=str(self.image.format),
+                file_size=get_image_file_size(image_file.file),
+                color_mode=str(self.image.mode),
+                exif_data=original_image_exif_data,
+            ),
+            converted_image_data=ImageData(
+                content_type=f"image/{str(output_format.value)}",
+                format=str(output_format.value),
+                file_size=get_image_file_size(converted_image_buffer),
+                color_mode=str(self.converted_image.mode),
+                exif_data=converted_image_exif_data,
+            ),
         )
-        converted_image.save()
-    else:
-        updated_image_set = copy(converted_image.image_set)
-        updated_image_set.append(image_set)
-        converted_image_query_set.update(image_set=updated_image_set)
 
+    def convert_color_mode(
+        self,
+        input_format: AllowedImageFormats,
+        output_format: AllowedImageFormats,
+    ) -> Image:
+        if input_format in (image_format.value for image_format in RGBImageFormat):
+            return self.image.convert("RGB")
 
-def create_image_set(
-    image_id: int,
-    pil_image: ImageClass,
-    pil_image_converted: ImageClass,
-    converted_image_buffer: BytesIO,
-    original_image_file: InMemoryUploadedFile,
-    cloudinary_image_url: str,
-    new_image_name: str,
-    new_image_name_shorter: str,
-    public_id: str,
-    output_format: str,
-) -> Dict:
-    original_image_file_size: str = get_image_file_size(original_image_file.file)
-    converted_image_file_size: str = get_image_file_size(converted_image_buffer)
+        rgba_image = self.image.convert("RGBA")
 
-    original_image_exif_data: Exif | str = get_image_info(original_image_file.file)[6]
-    converted_image_exif_data: Exif | str = get_image_info(converted_image_buffer)[6]
-
-    image_set: dict = {
-        "image_id": image_id,
-        "image_name_shorter": new_image_name_shorter,
-        "public_id": public_id,
-        "image_name": new_image_name,
-        "image_url": cloudinary_image_url,
-        "original_image_data": {
-            "content_type": f"image/{str(pil_image.format).lower()}",
-            "image_file_size": original_image_file_size,
-            "image_mode": str(pil_image.mode),
-            "image_exif_data": original_image_exif_data,
-        },
-        "converted_image_data": {
-            "content_type": f"image/{output_format.lower()}",
-            "image_file_size": converted_image_file_size,
-            "image_mode": str(pil_image_converted.mode),
-            "image_exif_data": converted_image_exif_data,
-        },
-    }
-
-    return image_set
-
-
-def convert_color_mode(
-    pil_image: ImageClass, input_file_format: str, output_file_format: str
-) -> ImageClass:
-    image_formats_with_alpha_channel: set[str] = {"WEBP", "PNG", "GIF", "ICO"}
-
-    if input_file_format in image_formats_with_alpha_channel:
-        rgba_image = pil_image.convert("RGBA")
-
-        if output_file_format in image_formats_with_alpha_channel:
+        if output_format == RGBAImageFormat:
             return rgba_image
 
-        image_with_white_background = PilImage.new(
-            "RGB", rgba_image.size, (255, 255, 255)
+        image_with_white_bg = new(
+            mode="RGB",
+            size=rgba_image.size,
+            color=(255, 255, 255),
         )
-        image_with_white_background.paste(
-            rgba_image, mask=rgba_image.split()[3]
-        )  # Use the alpha channel as a mask
-        return image_with_white_background
 
-    else:
-        return pil_image.convert("RGB")
+        # Use the alpha channel as a mask
+        image_with_white_bg.paste(
+            im=rgba_image,
+            mask=rgba_image.split()[3],
+        )
 
+        return image_with_white_bg
 
-def convert_and_save_image(
-    arguments: Tuple[int, str, WSGIRequest, InMemoryUploadedFile, int, str]
-) -> Tuple:
-    image_id, user_id, request, image_file, quality, output_format = arguments
+    async def convert_and_save_image(
+        self,
+        arguments: Tuple[UUID, InMemoryUploadedFile],
+    ):
+        image_id, image_file = arguments
 
-    try:
         new_image_name: str = (
             f"webpeditor_"
             f'{replace_with_underscore(image_file.name).rsplit(".", 1)[0]}'
-            f".{output_format.lower()}"
+            f".{self.output_format.value}"
         )
+        new_short_image_name: str = slice_image_name(new_image_name, 25)
 
-        new_image_name_shorter: str = cut_image_name(new_image_name, 25)
+        try:
+            converted_image_buffer: BytesIO = self.convert_image(image_file)
 
-        pil_image, pil_image_converted, buffer = convert_image(
-            image_file, quality, output_format
-        )
-        cloudinary_image, public_id = save_image_into_cloudinary(
-            buffer, user_id, new_image_name
-        )
+            cloudinary_image = CloudinaryService.upload_image(
+                file=converted_image_buffer,
+                parameters={
+                    "folder": f"{self.user_id.__str__()}/converted/",
+                    "use_filename": True,
+                    "unique_filename": True,
+                    "filename_override": new_image_name,
+                    "overwrite": False,
+                },
+            )
 
-        image_set: dict = create_image_set(
-            image_id,
-            pil_image,
-            pil_image_converted,
-            buffer,
-            image_file,
-            cloudinary_image.url,
-            new_image_name,
-            new_image_name_shorter,
-            public_id,
-            output_format,
-        )
+            image_set: ImageSet = self.create_image_set(
+                image_id=image_id,
+                image_file=image_file,
+                converted_image_buffer=converted_image_buffer,
+                cloudinary_image_url=cloudinary_image.url,
+                new_image_name=new_image_name,
+                new_short_image_name=new_short_image_name,
+                public_id=str(cloudinary_image.public_id),
+                output_format=self.output_format,
+            )
+            await self.update_converted_image(image_set)
 
-        original_image_data: dict = image_set.get("original_image_data")
-        converted_image_data: dict = image_set.get("converted_image_data")
+            return image_set
 
-        original_image_file_size: str = original_image_data.get("image_file_size")
-        converted_image_file_size: str = converted_image_data.get("image_file_size")
-        original_image_exif_data: Exif | str = original_image_data.get(
-            "image_exif_data"
-        )
-        converted_image_exif_data: Exif | str = converted_image_data.get(
-            "image_exif_data"
-        )
+        except Exception as e:
+            raise e
 
-        update_converted_image(user_id, request, image_set)
+    async def run_conversion_task(self):
+        converted_images = []
+        converted_image = await self.converted_images_commands.get_converted_image()
 
-        return (
-            cloudinary_image.url,
-            new_image_name,
-            public_id,
-            new_image_name_shorter,
-            str(pil_image.format).upper(),
-            output_format.upper(),
-            original_image_file_size,
-            converted_image_file_size,
-            str(pil_image.mode),
-            original_image_exif_data,
-            str(pil_image_converted.mode),
-            converted_image_exif_data,
-        )
+        if converted_image:
+            await converted_image.delete()
+            CloudinaryService.delete_converted_images(
+                f"{self.user_id.__str__()}/converted/"
+            )
 
-    except Exception as e:
-        raise e
+        with ThreadPoolExecutor() as executor:
+            args_list = [(uuid4(), image_file) for image_file in self.image_files]
 
+            futures = [
+                executor.submit(self.convert_and_save_image, arguments)
+                for arguments in args_list
+            ]
 
-def run_conversion_task(
-    user_id: str,
-    request: WSGIRequest,
-    images_files: List[InMemoryUploadedFile],
-    quality: int,
-    output_format: str,
-) -> List:
-    converted_image = get_converted_image(user_id)
-    converted_images_list = []
+            for future in as_completed(futures):
+                try:
+                    converted_images.append(future.result())
+                except Exception as e:
+                    logging.error(f"An error occurred in a parallel task: {e}")
+                    raise e
 
-    # Delete previous content if exist
-    if converted_image:
-        converted_image.delete()
-        delete_cloudinary_converted_images(f"{user_id}/converted/")
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        args_list = [
-            (i + 1, user_id, request, image_file, quality, output_format)
-            for i, image_file in enumerate(images_files)
-        ]
-
-        futures = [
-            executor.submit(convert_and_save_image, arguments)
-            for arguments in args_list
-        ]
-
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                result: tuple = future.result()
-                converted_images_list.append(result)
-            except Exception as e:
-                logging.error(f"An error occurred in a parallel task: {e}")
-                raise e
-
-    return converted_images_list
+            return converted_images
