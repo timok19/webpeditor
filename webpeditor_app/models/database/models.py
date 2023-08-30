@@ -1,25 +1,28 @@
-from datetime import datetime
-from typing import Optional
-
-from uuid import UUID, uuid4
-
-from beanie import Document
-from pydantic import Field
+from django.db import models
+from django.utils import timezone
 
 
-class OriginalImage(Document):
-    image_id: Optional[UUID] = Field(default_factory=uuid4, alias="_id")
-    image_name: str = Field(..., max_length=255)
-    content_type: str = Field(..., max_length=255)
-    image_url: str = Field(...)
-    user_id: Optional[UUID] = Field(default_factory=uuid4)
-    session_key: str = Field(...)
-    session_key_expiration_date: Optional[datetime] = Field(default=datetime.utcnow())
-    created_at: Optional[datetime] = Field(default=datetime.utcnow())
+class OriginalImage(models.Model):
+    image_id = models.AutoField(primary_key=True)
+    image_name = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=350, default="")
+    user_id = models.CharField(max_length=32, null=True)
+    session_key = models.CharField(max_length=120, null=True)
+    session_key_expiration_date = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
 
-# TODO: Rewrite models for async MongoEngine
-class EditedImage(Document):
-    image_id: Optional[UUID] = Field(default_factory=uuid4, alias="_id")
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Original Image"
+        verbose_name_plural = "Original Images"
+
+    def __str__(self):
+        return str(self.image_id)
+
+
+class EditedImage(models.Model):
+    image_id = models.AutoField(primary_key=True)
     original_image = models.ForeignKey(OriginalImage, on_delete=models.CASCADE)
     image_name = models.CharField(max_length=255, default="")
     content_type = models.CharField(max_length=255)
@@ -29,10 +32,26 @@ class EditedImage(Document):
     session_key_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Edited Image"
+        verbose_name_plural = "Edited Images"
 
-class ConvertedImage(Document):
+    def __str__(self):
+        return str(self.image_id)
+
+
+class ConvertedImage(models.Model):
     user_id = models.CharField(max_length=32, null=True)
     image_set = models.JSONField()
     session_key = models.CharField(max_length=120, null=True)
     session_key_expiration_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Converted Image"
+        verbose_name_plural = "Converted Images"
+
+    def __str__(self):
+        return str(self.image_set)
