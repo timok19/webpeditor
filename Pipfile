@@ -1,22 +1,21 @@
-[tool.poetry]
-name = "webpeditor"
-version = "0.1.0"
-description = "Web application for editing WebP images"
-authors = ["timok19 <tima1199@gmail.com>"]
-readme = "README.md"
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-astroid = "^2.15.6"
-dill = "^0.3.7"
+[packages]
+astroid = "==2.13.3"
+autopep8 = "==2.0.2"
+dill = "==0.3.6"
 isort = "==5.12.0"
 lazy-object-proxy = "==1.9.0"
-tomlkit = "^0.12.1"
-platformdirs = "^3.10.0"
+tomlkit = "==0.11.6"
+platformdirs = "==2.6.2"
 asgiref = "*"
 django-appconf = "*"
 django-compressor = "*"
 djangorestframework = "*"
+djongo = "*"
 dnspython = "*"
 mccabe = "*"
 pip = "*"
@@ -25,29 +24,30 @@ pytz = "*"
 rcssmin = "*"
 rjsmin = "*"
 setuptools = "*"
-sqlparse = "^0.4.4"
+sqlparse = "*"
 toml = "*"
 tomli = "*"
 typing-extensions = "*"
 wheel = "*"
 wrapt = "*"
 django-cors-headers = "*"
-pymongo = "^4.5.0"
+pymongo = "==3.12.1"
 django-environ = "*"
 django-extensions = "*"
 requests = "==2.31.0"
 cython = "*"
 ipython = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
+djangorestframework-jwt = "==1.0.1"
 django-imagekit = "*"
 opencv-python = "*"
 gunicorn = "*"
 whitenoise = "*"
 python-dotenv = "*"
-cloudinary = "^1.33.0"
+cloudinary = "*"
 raven = "*"
-django = "^4.2.4"
-redis = "^5.0.0"
+django = "==4.1.10"
+redis = "==4.5.4"
 py-spy = "*"
 pillow = "*"
 mongoengine = "*"
@@ -58,12 +58,9 @@ certifi = "==2023.7.22"
 reactpy-django = "*"
 channels = {version = "*", extras = ["daphne"]}
 twisted = {version = "*", extras = ["http2", "tls"]}
-black = "^23.7.0"
-beanie = "^1.21.0"
-django-asgi-lifespan = "^0.1.0"
-pydantic = "1.10.12"
 
+[dev-packages]
+autopep8 = "*"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[requires]
+python_version = "3.10"
