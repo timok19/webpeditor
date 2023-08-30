@@ -4,7 +4,7 @@ from uuid import UUID
 from beanie.odm.operators.update.general import Set
 from django.http import JsonResponse
 
-from webpeditor_app.database.models.converted_image_model import ConvertedImage
+from webpeditor_app.database.models.image_converter_models import ConvertedImage
 from webpeditor_app.services.external_api_services.cloudinary_service import (
     CloudinaryService,
 )

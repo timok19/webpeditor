@@ -14,7 +14,7 @@ from django.http import (
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.edited_image_model import (
+from webpeditor_app.database.models.image_editor_models import (
     OriginalImage,
     EditedImage,
 )

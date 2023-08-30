@@ -14,7 +14,7 @@ from django.core.handlers.asgi import ASGIRequest
 
 from webpeditor_app.commands.converted_images_commands import ConvertedImagesCommands
 from webpeditor_app.utils.text_utils import replace_with_underscore
-from webpeditor_app.database.models.converted_image_model import (
+from webpeditor_app.database.models.image_converter_models import (
     ConvertedImage,
     ImageSet,
     ImageData,

@@ -19,3 +19,8 @@ class Image(BaseModel):
 
 class OriginalImage(Document):
     item: Image
+
+
+class EditedImage(Document):
+    item: Image
+    original_image_id: UUID = Field(...)
