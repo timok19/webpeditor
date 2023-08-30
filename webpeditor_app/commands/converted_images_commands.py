@@ -3,7 +3,7 @@ from uuid import UUID
 
 from django.http import JsonResponse
 
-from webpeditor_app.database.models.models import ConvertedImage
+from webpeditor_app.models.database.models import ConvertedImage
 from webpeditor_app.services.external_api_services.cloudinary_service import (
     CloudinaryService,
 )

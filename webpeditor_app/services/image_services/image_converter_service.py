@@ -14,7 +14,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import QuerySet
 
-from webpeditor_app.database.models.models import ConvertedImage
+from webpeditor_app.models.database.models import ConvertedImage
 from webpeditor_app.services.external_api_services.cloudinary_service import (
     delete_cloudinary_converted_images,
 )
