@@ -13,7 +13,7 @@ from webpeditor_app.services.external_api_services.cloudinary_service import (
     delete_cloudinary_folder,
 )
 
-from webpeditor_app.services.image_services.image_editor_service import (
+from webpeditor_app.services.image_services.image_service import (
     get_serialized_data_of_all_original_images,
     get_serialized_data_of_all_edited_images,
     get_all_original_images,

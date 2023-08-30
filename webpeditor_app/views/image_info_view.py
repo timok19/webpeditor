@@ -11,9 +11,9 @@ from django.http import (
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.image_editor_models import OriginalImage
-from webpeditor_app.services.image_services.image_editor_service import (
-    slice_image_name,
+from webpeditor_app.database.models.models import OriginalImage
+from webpeditor_app.services.image_services.image_service import (
+    cut_image_name,
     get_image_info,
     get_data_from_image_url,
 )
@@ -59,7 +59,7 @@ def image_info_view(
 
     context: dict = {
         "original_image_url": original_image.image_url,
-        "image_name": slice_image_name(
+        "image_name": cut_image_name(
             f"{original_image.image_name}.{image_format.lower()}", 20
         ),
         "image_format": image_format_description,

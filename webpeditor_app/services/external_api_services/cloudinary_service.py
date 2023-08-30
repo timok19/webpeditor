@@ -1,39 +1,31 @@
 import logging
-from typing import List, Dict, Any
+from typing import List
 
-from io import BytesIO
-from cloudinary import uploader, api, CloudinaryImage
-
-from django.core.files import File
+import cloudinary.api
 
 
 class CloudinaryService:
     logging.basicConfig(level=logging.INFO)
 
-    @staticmethod
-    def upload_image(file: File | BytesIO, parameters: Dict[Any]) -> CloudinaryImage:
-        return uploader.upload_image(
-            file.file if isinstance(file, File) else file,
-            **parameters,
-        )
+    # TODO: add other cloudinary method for adding images etc
 
     @staticmethod
     def delete_all_assets_in_root_folder(user_folder_name: str):
         number_of_deleted_assets: int = 0
 
         try:
-            assets = api.resources(folder=user_folder_name, max_results=500)
+            assets = cloudinary.api.resources(folder=user_folder_name, max_results=500)
 
             for i, asset in enumerate(assets["resources"]):
                 number_of_deleted_assets += i
-                api.delete_resources([asset["public_id"]])
+                cloudinary.api.delete_resources([asset["public_id"]])
 
             logging.info(
                 f"{number_of_deleted_assets} assets "
                 f"have been deleted in {user_folder_name} folder"
             )
 
-        except api.NotFound as e:
+        except cloudinary.api.NotFound as e:
             logging.error(e)
             pass
 
@@ -55,25 +47,25 @@ class CloudinaryService:
         number_of_deleted_assets: int = 0
 
         try:
-            assets = api.resources(folder=user_folder_name, max_results=500)
+            assets = cloudinary.api.resources(folder=user_folder_name, max_results=500)
             for i, asset in enumerate(assets["resources"]):
                 if user_subfolder_name in asset["public_id"]:
                     number_of_deleted_assets += i
-                    api.delete_resources([asset["public_id"]])
+                    cloudinary.api.delete_resources([asset["public_id"]])
 
             logging.info(
                 f"{number_of_deleted_assets} assets "
                 f"have been deleted in {user_folder_name}/{user_subfolder_name} folder"
             )
 
-        except api.NotFound as e:
+        except cloudinary.api.NotFound as e:
             logging.error(e)
             pass
 
     @staticmethod
     def delete_folder(user_folder_name: str):
         try:
-            api.delete_folder(user_folder_name)
+            cloudinary.api.delete_folder(user_folder_name)
             logging.info(f"Folder {user_folder_name} and its content have been deleted")
 
             # TODO: check if deleted subfolder's content as well
@@ -81,7 +73,7 @@ class CloudinaryService:
             # for folder in response['folders']:
             #     delete_cloudinary_folder(folder['path'])
 
-        except api.NotFound:
+        except cloudinary.api.NotFound:
             logging.error(f"Folder {user_folder_name} not found")
             pass
 
@@ -89,7 +81,7 @@ class CloudinaryService:
     def get_all_folders() -> List[str]:
         user_folders: list[str] = []
 
-        response = api.root_folders()
+        response = cloudinary.api.root_folders()
         for folder in response["folders"]:
             user_folders.append(folder["path"])
 

@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 from io import BytesIO
+from typing import Tuple
 
 import requests
 from PIL import Image as PilImage
@@ -30,7 +31,7 @@ def get_image_file_instance(image_data: BytesIO) -> ImageClass | None:
         return None
 
 
-def slice_image_name(image_name: str, min_size: int) -> str:
+def cut_image_name(image_name: str, min_size: int) -> str:
     basename, ext = os.path.splitext(image_name)
     if len(basename) > min_size:
         basename = f"{basename[:(min_size - 3)]}...{basename[-5:]}"
@@ -70,7 +71,7 @@ def get_image_file_size(buffer: BytesIO) -> str:
         return f"{size_in_kb:.1f} KB"
 
 
-def get_image_info(image_data: BytesIO):
+def get_image_info(image_data: BytesIO) -> None | Tuple:
     def decode_value(value):
         try:
             return value.decode()

@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 from uuid import UUID, uuid4
-
 from beanie import Document
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, Json
 
 
 class Image(BaseModel):
@@ -24,3 +23,11 @@ class OriginalImage(Document):
 class EditedImage(Document):
     item: Image
     original_image_id: UUID = Field(...)
+
+
+class ConvertedImage(Document):
+    user_id: Optional[UUID] = Field(default_factory=uuid4)
+    image_set: Json[Any] = Field(...)
+    session_key: str = Field(...)
+    session_key_expiration_date: Optional[datetime] = Field(default=datetime.utcnow())
+    created_at: Optional[datetime] = Field(default=datetime.utcnow())

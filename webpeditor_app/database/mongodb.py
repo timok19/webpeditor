@@ -2,7 +2,7 @@ from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from webpeditor.settings import DATABASE_URL, DATABASE_NAME
-from webpeditor_app.database.models.image_editor_models import (
+from webpeditor_app.database.models.models import (
     OriginalImage,
     EditedImage,
     ConvertedImage,

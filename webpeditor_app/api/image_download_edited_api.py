@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.api.api_utils.response_presets import unauthorized_access_response
-from webpeditor_app.services.image_services.image_editor_service import (
+from webpeditor_app.services.image_services.image_service import (
     get_image_file_extension,
 )
 from webpeditor_app.services.external_api_services.request_service import (
