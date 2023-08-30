@@ -135,6 +135,20 @@ VALID_IMAGE_FORMATS = [
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASES = {
+    "default": {
+        "ENGINE": "djongo",
+        "CLIENT": {
+            # Add local env variables to store host string
+            "host": f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
+            f'{os.getenv("DATABASE_PASSWORD")}'
+            f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+            "name": str(os.getenv("DATABASE_NAME")),
+            "authMechanism": str(os.getenv("AUTH_MECHANISM")),  # For atlas cloud db
+        },
+    }
+}
+
 # Path for future migrations
 MIGRATION_MODULES = {"webpeditor_app": "webpeditor_app.models.database.migrations"}
 
