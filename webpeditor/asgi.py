@@ -8,20 +8,10 @@ https://docs.djangoproject.com/en/4.1/howto/deployment/asgi/
 """
 
 import os
-
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.sessions import SessionMiddlewareStack
 from django.core.asgi import get_asgi_application
 
-from reactpy_django import REACTPY_WEBSOCKET_PATH
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpeditor.settings")
 
-django_asgi_app = get_asgi_application()
 
-application = ProtocolTypeRouter(
-    {
-        "http": django_asgi_app,
-        "websocket": SessionMiddlewareStack(URLRouter([REACTPY_WEBSOCKET_PATH])),
-    }
-)
+application = get_asgi_application()

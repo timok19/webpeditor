@@ -55,7 +55,6 @@ django-jsonfield = "*"
 deptry = "*"
 cryptography = "==41.0.3"
 certifi = "==2023.7.22"
-reactpy-django = "*"
 channels = {version = "*", extras = ["daphne"]}
 twisted = {version = "*", extras = ["http2", "tls"]}
 
