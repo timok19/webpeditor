@@ -9,9 +9,9 @@ RUN mkdir -p /code
 
 WORKDIR /code
 
-RUN pip install poetry
-COPY pyproject.toml poetry.lock /code/
-RUN poetry install --without dev --sync
+RUN pip install pipenv
+COPY Pipfile Pipfile.lock /code/
+RUN pipenv install --deploy --system
 COPY . /code
 
 RUN python manage.py collectstatic --noinput
