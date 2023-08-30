@@ -1,5 +1,3 @@
-import asyncio
-
 from django.apps import AppConfig
 from django_asgi_lifespan.signals import asgi_startup, asgi_shutdown
 
@@ -10,17 +8,5 @@ class WebpeditorAppConfig(AppConfig):
     name = "webpeditor_app"
 
     def ready(self):
-        asgi_startup.connect(self.sync_mongodb_init)
-        asgi_shutdown.connect(self.sync_mongodb_close)
-
-    @staticmethod
-    def sync_mongodb_init(*_args, **_kwargs):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(MongoDBHandler.mongodb_init())
-
-    @staticmethod
-    def sync_mongodb_close(*_args, **_kwargs):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(MongoDBHandler.mongodb_close())
+        asgi_startup.connect(MongoDBHandler.mongodb_init())
+        asgi_shutdown.connect(MongoDBHandler.mongodb_close())

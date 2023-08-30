@@ -5,17 +5,13 @@ from io import BytesIO
 from cloudinary import uploader, api, CloudinaryImage
 
 from django.core.files import File
-from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class CloudinaryService:
     logging.basicConfig(level=logging.INFO)
 
     @staticmethod
-    def upload_image(
-        file: File | BytesIO | InMemoryUploadedFile,
-        parameters: Dict[str, Any],
-    ) -> CloudinaryImage:
+    def upload_image(file: File | BytesIO, parameters: Dict[Any]) -> CloudinaryImage:
         return uploader.upload_image(
             file.file if isinstance(file, File) else file,
             **parameters,

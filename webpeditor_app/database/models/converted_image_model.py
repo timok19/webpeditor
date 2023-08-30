@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Optional, List
-from typing_extensions import TypedDict
+from typing import TypedDict, Optional, List
 from uuid import UUID, uuid4
 
 from PIL.Image import Exif
 from beanie import Document
-from pydantic import Field, BaseConfig
+from pydantic import Field
 
 
 class ImageData(TypedDict):
@@ -32,8 +31,3 @@ class ConvertedImage(Document):
     session_key: str = Field(...)
     session_key_expiration_date: Optional[datetime] = Field(default=datetime.utcnow())
     created_at: Optional[datetime] = Field(default=datetime.utcnow())
-
-    class Config(BaseConfig):
-        validate_all = True
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True

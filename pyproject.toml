@@ -61,7 +61,6 @@ twisted = {version = "*", extras = ["http2", "tls"]}
 black = "^23.7.0"
 beanie = "^1.21.0"
 django-asgi-lifespan = "^0.1.0"
-pydantic = "1.10.12"
 
 
 [build-system]

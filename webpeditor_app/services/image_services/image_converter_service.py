@@ -19,7 +19,7 @@ from webpeditor_app.database.models.converted_image_model import (
     ImageSet,
     ImageData,
 )
-from webpeditor_app.services.other_services.cloudinary_service import (
+from webpeditor_app.services.external_api_services.cloudinary_service import (
     CloudinaryService,
 )
 from webpeditor_app.services.image_services.image_editor_service import (
@@ -64,9 +64,6 @@ class ImageConverterService:
                 f"Image quality cannot be less than {self.MIN_QUALITY} "
                 f"and more than {self.MAX_QUALITY}"
             )
-
-        if self.output_format is None:
-            raise ValueError("Output format was not provided")
 
         image_buffer = BytesIO()
 

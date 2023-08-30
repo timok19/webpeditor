@@ -3,10 +3,10 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from beanie import Document
-from pydantic import Field, BaseModel, BaseConfig
+from pydantic import Field, BaseModel
 
 
-class ImageModel(BaseModel):
+class Image(BaseModel):
     image_id: Optional[UUID] = Field(default_factory=uuid4, alias="_id")
     image_name: str = Field(..., max_length=255)
     content_type: str = Field(..., max_length=255)
@@ -18,9 +18,4 @@ class ImageModel(BaseModel):
 
 
 class OriginalImage(Document):
-    image: ImageModel
-
-    class Config(BaseConfig):
-        validate_all = True
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
+    item: Image

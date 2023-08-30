@@ -1,17 +1,8 @@
 from enum import Enum
-from typing import Union
+from typing import Literal
 
 
-class BaseImageFormat(Enum):
-    @classmethod
-    def from_str(cls, image_format: str):
-        try:
-            return cls[image_format]
-        except KeyError:
-            return None
-
-
-class RGBImageFormat(BaseImageFormat):
+class RGBImageFormat(Enum):
     JPEG = "JPEG"
     JPG = "JPG"
     JFIF = "JFIF"
@@ -19,14 +10,21 @@ class RGBImageFormat(BaseImageFormat):
     TIFF = "TIFF"
 
 
-class RGBAImageFormat(BaseImageFormat):
+class RGBAImageFormat(Enum):
     WEBP = "WEBP"
     PNG = "PNG"
     ICO = "ICO"
     GIF = "GIF"
 
 
-AllowedImageFormats = Union[
-    *RGBImageFormat,
-    *RGBAImageFormat,
+AllowedImageFormats = Literal[
+    RGBImageFormat.JPEG,
+    RGBImageFormat.JPG,
+    RGBImageFormat.JFIF,
+    RGBImageFormat.BMP,
+    RGBImageFormat.TIFF,
+    RGBAImageFormat.WEBP,
+    RGBAImageFormat.PNG,
+    RGBAImageFormat.ICO,
+    RGBAImageFormat.GIF,
 ]

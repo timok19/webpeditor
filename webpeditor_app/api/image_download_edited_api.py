@@ -3,7 +3,7 @@ from io import BytesIO
 from types import NoneType
 
 from PIL.Image import Image as ImageClass
-from django.core.handlers.asgi import ASGIRequest
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.http.response import ResponseHeaders
 from django.views.decorators.csrf import csrf_exempt
@@ -13,23 +13,24 @@ from webpeditor_app.api.api_utils.response_presets import unauthorized_access_re
 from webpeditor_app.services.image_services.image_editor_service import (
     get_image_file_extension,
 )
-from webpeditor_app.services.other_services.request_service import (
+from webpeditor_app.services.external_api_services.request_service import (
     extract_image_edit_data_from_request_body,
 )
-from webpeditor_app.services.other_services.session_service import SessionService
+from webpeditor_app.services.other_services.session_service import (
+    update_session,
+    get_unsigned_user_id,
+)
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
-def image_download_edited_api(request: ASGIRequest) -> HttpResponse:
-    session_service = SessionService(request)
-    user_id = session_service.user_id
-
+def image_download_edited_api(request: WSGIRequest) -> HttpResponse:
     if request.method == "POST":
         mime_type = ""
         image_name = ""
         image_file = ImageClass()
 
+        user_id: str | None = get_unsigned_user_id(request)
         if isinstance(user_id, NoneType):
             return unauthorized_access_response()
 
@@ -56,7 +57,7 @@ def image_download_edited_api(request: ASGIRequest) -> HttpResponse:
 
         # Reset the buffer position to the beginning
         buffer.seek(0)
-        session_service.update_session()
+        update_session(request=request, user_id=user_id)
 
         response = HttpResponse()
         response.content = buffer

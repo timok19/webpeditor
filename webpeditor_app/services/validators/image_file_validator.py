@@ -2,7 +2,7 @@ from typing import List
 
 from PIL import Image
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.handlers.asgi import ASGIRequest
+from django.core.handlers.wsgi import WSGIRequest
 
 from webpeditor.settings import (
     MAX_IMAGE_FILE_SIZE,
@@ -13,7 +13,7 @@ from webpeditor.settings import (
 
 
 def validate_images(
-    request: ASGIRequest, image_files: List[InMemoryUploadedFile]
+    request: WSGIRequest, image_files: List[InMemoryUploadedFile]
 ) -> bool:
     total_size = 0
 

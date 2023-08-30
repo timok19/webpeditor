@@ -4,9 +4,6 @@ from webpeditor_app.database.models.edited_image_model import EditedImage
 
 
 class EditedImagesCommands:
-    def __init__(self, user_id: UUID):
-        self.user_id = user_id
-
     @staticmethod
     async def get_all_edited_images():
         edited_images: list[EditedImage] = await EditedImage.find_all().to_list()
@@ -15,9 +12,10 @@ class EditedImagesCommands:
 
         return edited_images
 
-    async def get_edited_image(self):
+    @staticmethod
+    async def get_edited_image(user_id: UUID):
         edited_image: EditedImage | None = await EditedImage.find_one(
-            EditedImage.image.user_id == self.user_id
+            EditedImage.item.user_id == user_id
         )
 
         return edited_image if not None else None
