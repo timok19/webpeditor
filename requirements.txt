@@ -10,14 +10,14 @@ automat==22.10.0
 autopep8==2.0.2; python_version >= '3.6'
 backcall==0.2.0
 certifi==2023.7.22; python_version >= '3.6'
-cffi==1.15.1
+cffi==1.16.0; python_version >= '3.8'
 channels[daphne]==4.0.0; python_version >= '3.7'
 chardet==5.2.0; python_version >= '3.7'
 charset-normalizer==3.2.0; python_full_version >= '3.7.0'
 click==8.1.7; python_version >= '3.7'
 cloudinary==1.34.0
 constantly==15.1.0
-cryptography==41.0.3; python_version >= '3.7'
+cryptography==41.0.6; python_version >= '3.7'
 cython==3.0.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 daphne==4.0.0
 decorator==5.1.1; python_version >= '3.5'
