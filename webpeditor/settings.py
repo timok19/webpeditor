@@ -15,7 +15,6 @@ import cloudinary
 from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
-from reactpy.config import REACTPY_DEBUG_MODE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,8 +32,10 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media" / "uploaded_images"
 
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG"))
+DEBUG = os.getenv("DEBUG", "0").lower() in ["true", "t", "1"]
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
 
@@ -43,24 +44,20 @@ CSRF_TRUSTED_ORIGINS = [str(os.getenv("CSRF_TRUSTED_ORIGINS"))]
 # Application definition
 # In development mode. Delete this in production mode (add domains in white list)
 INSTALLED_APPS = [
-    "daphne",
     "django_extensions",
-    "whitenoise.runserver_nostatic",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "cloudinary",
-    "reactpy_django",
     "compressor",
     "rest_framework",
     "corsheaders",
     "webpeditor_app.apps.WebpeditorAppConfig",
 ]
-
-ASGI_APPLICATION = "webpeditor.asgi.application"
 
 # Delete in production
 # CORS_ORIGIN_ALLOW_ALL = True
@@ -131,15 +128,24 @@ VALID_IMAGE_FORMATS = [
 ]
 
 # Database
-DATABASES = {}
+# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASE_NAME: str = os.getenv("DATABASE_NAME")
+DATABASES = {
+    "default": {
+        "ENGINE": "djongo",
+        "CLIENT": {
+            # Add local env variables to store host string
+            "host": f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
+            f'{os.getenv("DATABASE_PASSWORD")}'
+            f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+            "name": str(os.getenv("DATABASE_NAME")),
+            "authMechanism": str(os.getenv("AUTH_MECHANISM")),  # For atlas cloud db
+        },
+    }
+}
 
-DATABASE_URL: str = (
-    f"mongodb+srv://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}"
-    f"{os.getenv('HOST_LINK')}/?retryWrites=true&w=majority"
-)
-
+# Path for future migrations
+MIGRATION_MODULES = {"webpeditor_app": "webpeditor_app.models.database.migrations"}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -197,9 +203,6 @@ STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "static"
 
-# Static files directory
-STATICFILES_DIRS = [BASE_DIR / "static"]
-
 # Cloudinary's storage config
 cloudinary.config(
     cloud_name=str(os.getenv("CLOUDINARY_CLOUD_NAME")),
@@ -207,58 +210,3 @@ cloudinary.config(
     api_secret=str(os.getenv("CLOUDINARY_API_SECRET")),
     secure=True,
 )
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Compressor settings
-COMPRESS_ROOT = BASE_DIR / "static"
-
-COMPRESS_ENABLED = True
-
-STATICFILES_FINDERS = ("compressor.finders.CompressorFinder",)
-
-# Allow slash in url paths
-APPEND_SLASH = False
-
-# Cache used to store ReactPy web modules.
-# ReactPy benefits from a fast, well indexed cache.
-# We recommend redis or python-diskcache.
-REACTPY_CACHE = "default"
-
-# Database ReactPy uses to store session data.
-# ReactPy requires a multiprocessing-safe and thread-safe database.
-# DATABASE_ROUTERS is mandatory if REACTPY_DATABASE is configured.
-REACTPY_DATABASE = "default"
-DATABASE_ROUTERS = ["reactpy_django.database.Router", ...]
-
-# Maximum seconds between reconnection attempts before giving up.
-# Use `0` to prevent component reconnection.
-
-REACTPY_RECONNECT_INTERVAL = 750
-
-REACTPY_RECONNECT_MAX_INTERVAL = 60000
-
-REACTPY_RECONNECT_MAX_RETRIES = 150
-
-REACTPY_RECONNECT_BACKOFF_MULTIPLIER = 1.25
-
-
-# The URL for ReactPy to serve the component rendering websocket.
-REACTPY_URL_PREFIX = "reactpy/"
-
-# Dotted path to the default `reactpy_django.hooks.use_query` postprocessor function,
-# or `None`.
-REACTPY_DEFAULT_QUERY_POSTPROCESSOR = "reactpy_django.utils.django_query_postprocessor"
-
-# Dotted path to the Django authentication backend to use for ReactPy components.
-# This is only needed if:
-#   1. You are using `AuthMiddlewareStack` and...
-#   2. You are using Django's `AUTHENTICATION_BACKENDS` setting and...
-#   3. Your Django user model does not define a `backend` attribute
-REACTPY_AUTH_BACKEND = "django.contrib.auth.backends.ModelBackend"
-
-# Whether to enable rendering ReactPy via a dedicated backhaul thread
-# This allows the webserver to process traffic while during ReactPy rendering
-REACTPY_BACKHAUL_THREAD = True

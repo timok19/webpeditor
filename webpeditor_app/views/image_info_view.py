@@ -11,14 +11,14 @@ from django.http import (
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.original_image_model import OriginalImage
-from webpeditor_app.services.image_services.image_editor_service import (
-    slice_image_name,
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.image_services.image_service import (
+    cut_image_name,
     get_image_info,
     get_data_from_image_url,
 )
 
-from webpeditor_app.services.other_services.session_service import SessionService
+from webpeditor_app.services.other_services.session_service import update_session
 from webpeditor_app.views.view_utils.get_user_data import (
     get_user_id_or_401,
     get_original_image_or_401,
@@ -28,16 +28,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 @require_http_methods(["GET"])
-async def image_info_view(
+def image_info_view(
     request,
 ) -> HttpResponse | HttpResponsePermanentRedirect | HttpResponseRedirect:
-    user_id = get_user_id_or_401(request)
+    user_id: str | HttpResponse = get_user_id_or_401(request)
     if isinstance(user_id, HttpResponse):
         return user_id
 
-    session_service = SessionService(request)
-
-    original_image: OriginalImage | HttpResponse = await get_original_image_or_401(
+    original_image: OriginalImage | HttpResponse = get_original_image_or_401(
         request, user_id
     )
     if isinstance(original_image, HttpResponse):
@@ -61,7 +59,7 @@ async def image_info_view(
 
     context: dict = {
         "original_image_url": original_image.image_url,
-        "image_name": slice_image_name(
+        "image_name": cut_image_name(
             f"{original_image.image_name}.{image_format.lower()}", 20
         ),
         "image_format": image_format_description,
@@ -71,6 +69,6 @@ async def image_info_view(
         "image_mode": image_mode,
     }
 
-    await session_service.update_session()
+    update_session(request=request, user_id=user_id)
 
     return render(request, "imageInfo.html", context, status=200)

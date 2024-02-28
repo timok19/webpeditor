@@ -2,35 +2,28 @@ from io import BytesIO
 import imghdr
 from types import NoneType
 
-from django.core.handlers.asgi import ASGIRequest
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.database.models.original_image_model import OriginalImage
-from webpeditor_app.commands.original_images_commands import OriginalImagesCommands
-
-from webpeditor_app.services.image_services.image_editor_service import (
+from webpeditor_app.models.database.models import OriginalImage
+from webpeditor_app.services.image_services.image_service import (
     get_data_from_image_url,
+    get_original_image,
 )
-from webpeditor_app.services.other_services.session_service import SessionService
+from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
 
 @csrf_exempt
 @require_http_methods(["GET"])
-async def image_get_original_api(request: ASGIRequest):
-    session_service = SessionService(request)
-    user_id = session_service.user_id
-
-    original_images_commands = OriginalImagesCommands(user_id)
-
+def image_get_original_api(request: WSGIRequest):
     if request.method == "GET":
+        user_id: str | None = get_unsigned_user_id(request)
         if isinstance(user_id, NoneType):
             return JsonResponse({"error": "User Id was not found"}, status=401)
 
-        original_image: OriginalImage | None = (
-            await original_images_commands.get_original_image()
-        )
+        original_image: OriginalImage | None = get_original_image(user_id)
         if isinstance(original_image, NoneType):
             return JsonResponse({"error": "Original image was not found"}, status=404)
 

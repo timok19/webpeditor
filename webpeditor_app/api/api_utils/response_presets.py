@@ -1,10 +1,10 @@
 from types import NoneType
 from typing import Tuple
 
-from django.core.handlers.asgi import ASGIRequest
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponseRedirect, JsonResponse
 
-from webpeditor_app.services.other_services.session_service import SessionService
+from webpeditor_app.services.other_services.session_service import get_unsigned_user_id
 
 
 def unauthorized_access_response() -> HttpResponseRedirect:
@@ -16,11 +16,9 @@ def unauthorized_access_response() -> HttpResponseRedirect:
 
 
 def get_user_id_and_converted_images(
-    request: ASGIRequest,
+    request: WSGIRequest,
 ) -> JsonResponse | Tuple[str, list]:
-    session_service = SessionService(request)
-    user_id = session_service.user_id
-
+    user_id: str | None = get_unsigned_user_id(request)
     if isinstance(user_id, NoneType):
         return JsonResponse({"error": "User Id was not found"}, status=401)
 
