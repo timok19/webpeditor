@@ -1,0 +1,34 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+- repo: https://github.com/python-poetry/poetry
+  rev: 1.8.3
+  hooks:
+  - id: poetry-check
+    name: "Check Poetry configuration"
+    args: ["--lock"]
+  - id: poetry-export
+    name: "Export all non-dev dependencies"
+    args: ["--without", "dev", "--without-hashes", "-f", "requirements.txt", "--output", "requirements.txt"]
+    verbose: true
+  - id: poetry-export
+    name: "Export only dev dependencies"
+    args: ["--only", "dev", "--without-hashes", "-f", "requirements.txt", "--output", "requirements-dev.txt"]
+    verbose: true
+- repo: https://github.com/pypa/pip-audit
+  rev: v2.7.3
+  hooks:
+  - id: pip-audit
+    name: "Audit dependencies"
+    args: ["-r", "requirements.txt"]
+    verbose: true
+  - id: pip-audit
+    name: "Audit dev dependencies"
+    args: ["-r", "requirements-dev.txt"]
+    verbose: true
+ci:
+  skip: [pip-audit]

@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.10-slim-buster
+ARG PYTHON_VERSION=3.12-slim-bullseye
 
 FROM python:${PYTHON_VERSION}
 
@@ -9,9 +9,9 @@ RUN mkdir -p /code
 
 WORKDIR /code
 
-RUN pip install pipenv
-COPY Pipfile Pipfile.lock /code/
-RUN pipenv install --deploy --system
+RUN pip install poetry
+COPY pyproject.toml poetry.lock /code/
+RUN poetry install --no-dev -n -v
 COPY . /code
 
 RUN python manage.py collectstatic --noinput

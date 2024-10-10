@@ -1,9 +1,9 @@
 ![image](https://github.com/timok19/webpeditor/assets/87667470/f1f19b1c-243a-4b57-80f7-34084145cdfb)
 
 ## ℹ️ About WebP Editor
-This Django application uses JS libraries (ToastUI image editor for editing images with essential tools such as cropping, scaling, etc., and Toastify for toast messages). 
+This Django application uses JS libraries (ToastUI image editor for editing images with essential tools such as cropping, scaling, etc., and Toastify for toast messages).
 
-On the back-end, one external service CoudinaryAPI has been used for storing/deleting images for users on external FileStorage. MongoDB was chosen as a primary database where users' data is stored. 
+On the back-end, one external service CoudinaryAPI has been used for storing/deleting images for users on external FileStorage. MongoDB was chosen as a primary database where users' data is stored.
 
 Image converter was created with the Python library Pillow. It can be changed because of format support issues.
 
@@ -17,7 +17,7 @@ On Converter page:
 2) User will choose an image format what he wants to convert and then click on convert
 3) After conversion finished user is able to see difference between original and converted image and download all converted images
 
-Currently, this web application is deployed with service Fly.io on this link: https://webpeditor.fly.dev/. Please fill free to try it out. 
+Currently, this web application is deployed with service Fly.io on this link: https://webpeditor.fly.dev/. Please fill free to try it out.
 
 ---
 

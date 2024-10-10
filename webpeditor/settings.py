@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+
 import os
 from pathlib import Path
 import cloudinary
@@ -19,7 +20,7 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / "webpeditor" / ".env")
+load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -115,32 +116,23 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10_485_760 * 4
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800 * 4
 
-VALID_IMAGE_FORMATS = [
-    "WEBP",
-    "JPEG",
-    "JPG",
-    "PNG",
-    "JFIF",
-    "ICO",
-    "BMP",
-    "GIF",
-    "TIFF",
-]
+VALID_IMAGE_FORMATS = ["WEBP", "JPEG", "JPG", "PNG", "JFIF", "ICO", "BMP", "GIF", "TIFF"]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     "default": {
-        "ENGINE": "djongo",
-        "CLIENT": {
-            # Add local env variables to store host string
-            "host": f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
-            f'{os.getenv("DATABASE_PASSWORD")}'
-            f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
-            "name": str(os.getenv("DATABASE_NAME")),
-            "authMechanism": str(os.getenv("AUTH_MECHANISM")),  # For atlas cloud db
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+        # "CLIENT": {
+        #     # Add local env variables to store host string
+        #     "host": f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
+        #     f'{os.getenv("DATABASE_PASSWORD")}'
+        #     f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
+        #     "name": str(os.getenv("DATABASE_NAME")),
+        #     "authMechanism": str(os.getenv("AUTH_MECHANISM")),  # For atlas cloud db
+        # },
     }
 }
 
@@ -202,6 +194,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "static"
+
+STATICFILES_FINDERS = ["compressor.finders.CompressorFinder"]
 
 # Cloudinary's storage config
 cloudinary.config(

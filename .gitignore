@@ -21,5 +21,6 @@ yarn-error.log.DS_Store
 .idea
 .vscode
 
-webpeditor/.env
+.env
 .vercel
+*.sqlite3

@@ -15,10 +15,9 @@ def unauthorized_access_response() -> HttpResponseRedirect:
     return response
 
 
-def get_user_id_and_converted_images(
-    request: WSGIRequest,
-) -> JsonResponse | Tuple[str, list]:
+def get_user_id_and_converted_images(request: WSGIRequest) -> JsonResponse | Tuple[str, list]:
     user_id: str | None = get_unsigned_user_id(request)
+
     if isinstance(user_id, NoneType):
         return JsonResponse({"error": "User Id was not found"}, status=401)
 
