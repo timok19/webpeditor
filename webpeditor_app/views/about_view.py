@@ -4,4 +4,4 @@ from django.shortcuts import render
 
 
 def about_view(request: WSGIRequest) -> HttpResponse:
-    return render(request, "about.html")
+    return render(request, "webpeditor_app/about.html")

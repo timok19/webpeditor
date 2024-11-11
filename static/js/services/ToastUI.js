@@ -63,8 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
   svgDownloadPath.setAttribute(
     "d",
     "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 " +
-      "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
-      "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+    "1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 " +
+    "0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
   );
   svgDownloadIcon.appendChild(svgDownloadPath);
 
@@ -122,9 +122,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   downloadButton.className =
     "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+  "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+  "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   downloadButton.appendChild(addIconIntoButton(svgDownloadIcon));
   document.body.appendChild(tooltipDownload);
 
@@ -146,9 +146,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   saveButton.className =
     "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+  "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+  "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   saveButton.appendChild(addIconIntoButton(svgSaveIcon));
   document.body.appendChild(tooltipSave);
 
@@ -170,9 +170,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   originalImageButton.className =
     "relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 ml-2 mt-2 overflow-hidden " +
-    "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
-    "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
-    "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
+  "text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 " +
+  "group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 " +
+  "focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-center";
   originalImageButton.appendChild(addIconIntoButton(svgOriginalImageIcon));
   document.body.appendChild(tooltipRestore);
 
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const span = document.createElement("span");
     span.className =
       "relative px-2 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 " +
-      "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
+    "rounded-md group-hover:bg-opacity-0 text-center inline-flex items-center";
     span.appendChild(icon);
 
     return span;
@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
     divTooltip.setAttribute("role", "tooltip");
     divTooltip.className =
       "absolute tooltip z-10 invisible px-3 py-2 font-light transition-opacity " +
-      "duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700";
+    "duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700";
 
     let divTooltipText = document.createElement("div");
     divTooltipText.className = "text-sm text-white";
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error(error);
         toastifyMessage(error, false);
         setTimeout(function () {
-          location.reload();
+          // location.reload();
         }, 5000);
       });
   }

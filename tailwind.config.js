@@ -1,6 +1,4 @@
 /** @type {import("tailwindcss").Config} */
-const {InjectManifest} = require("workbox-webpack-plugin");
-
 module.exports = {
     content: [
         "./templates/**/*.html",
@@ -12,9 +10,6 @@ module.exports = {
     },
     plugins: [
         require("flowbite/plugin"),
-        require('flowbite-typography'),
-        new InjectManifest({
-            swSrc: "./static/js/sw.js"
-        })
+        require('flowbite-typography')
     ]
 };

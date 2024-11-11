@@ -8,63 +8,60 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
-pipenv-poetry-migrate = "^0.5.10"
-astroid = "^3.3.5"
+python = ">=3.12,<3.13"
 dill = "^0.3.9"
-isort = "^5.13.2"
 lazy-object-proxy = "^1.10.0"
-tomlkit = "*"
+tomlkit = "^0.13.2"
 platformdirs = "^4.3.6"
-asgiref = "*"
-django-appconf = "*"
-django-compressor = "^4.5.1"
-dnspython = "*"
-mccabe = "*"
-pip = "*"
-pycodestyle = "*"
+asgiref = "^3.8.1"
+django-appconf = "^1.0.6"
+dnspython = "^2.7.0"
+mccabe = "^0.7.0"
+pycodestyle = "^2.12.1"
 pytz = "^2024.2"
-rcssmin = "^1.1.2"
-rjsmin = "^1.2.2"
-setuptools = "*"
-toml = "*"
-tomli = "*"
-typing-extensions = "*"
-wheel = "*"
-wrapt = "*"
-django-cors-headers = "*"
-pymongo = "^4.10.1"
-django-environ = "*"
-django-extensions = "*"
+toml = "^0.10.2"
+tomli = "^2.0.2"
+typing-extensions = "^4.12.2"
+wrapt = "^1.16.0"
+django-cors-headers = "^4.6.0"
+django-environ = "^0.11.2"
+django-extensions = "^3.2.3"
 requests = "^2.32.3"
-cython = "*"
-ipython = "*"
-django-imagekit = "*"
-opencv-python = "*"
-gunicorn = "*"
-whitenoise = "*"
-python-dotenv = "*"
-cloudinary = "*"
-raven = "*"
-redis = "^5.1.1"
-py-spy = "*"
-pillow = "^10.4.0"
-mongoengine = "*"
-django-jsonfield = "*"
-deptry = "*"
-cryptography = "^43.0.1"
+gunicorn = "^23.0.0"
+whitenoise = "^6.8.2"
+cloudinary = "^1.41.0"
+pillow = "^11.0.0"
+django-jsonfield = "^1.4.1"
+deptry = "^0.21.0"
+cryptography = "^43.0.3"
 certifi = "^2024.8.30"
 channels = {extras = ["daphne"], version = "^4.1.0"}
-twisted = {extras = ["http2", "tls"], version = "^24.7.0"}
-djangorestframework = "^3.15.2"
-django = "^5.1.2"
+twisted = {extras = ["http2", "tls"], version = "^24.10.0"}
+django = "^5.1.3"
 sqlparse = "^0.5.1"
-
+basedpyright = "^1.21.0"
+django-compressor = "^4.5.1"
+loguru = "^0.7.2"
+returns = "^0.23.0"
+django-injector = "^0.3.1"
+djangorestframework = "^3.15.2"
+djangorestframework-stubs = "^3.15.1"
+django-crispy-forms = "^2.3"
+crispy-tailwind = "^1.0.3"
+drf-spectacular = {extras = ["sidecar"], version = "^0.27.2"}
+djhtml = "^3.0.7"
+django-jazzmin = "^3.0.1"
+qrcode = "^8.0"
+django-otp = "^1.5.4"
+docutils = "^0.21.2"
+django-cloudinary-storage = "^0.3.0"
+django-types = "^0.19.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff-lsp = "^0.0.57"
 pip-audit = "^2.7.3"
 pre-commit = "^4.0.1"
+poetry-core = "^1.9.1"
 
 [tool.ruff]
 exclude = [
@@ -100,9 +97,30 @@ indent-width = 4
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "B"]
+select = ["E4", "E7", "E9", "F", "B", "F401"]
 ignore = ["E501", "B008"]
 unfixable = ["B"]
+
+[tool.basedpyright]
+include = [
+    "webpeditor",
+    "webpeditor_app",
+]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "htmlcov"
+]
+
+reportMissingImports = true
+reportMissingTypeStubs = true
+reportIncompatibleVariableOverride = false
+
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
+
+typeCheckingMode = "standard"
 
 [build-system]
 requires = ["poetry-core"]

@@ -10,74 +10,95 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from dataclasses import dataclass, field
+from datetime import timedelta
+from enum import StrEnum
 import os
-from pathlib import Path
+from typing import Any, Union
+
 import cloudinary
-from dotenv import load_dotenv
+
+from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
+from environ import Env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / ".env")
+env: Env = Env(
+    APP_VERSION=(str, "your_app_version"),
+    DEBUG=(str, "1"),
+    SECRET_KEY=(str, get_random_secret_key()),
+    CLOUDINARY_CLOUD_NAME=(str, "your_cloud_name"),
+    CLOUDINARY_API_KEY=(str, "your_api_key"),
+    CLOUDINARY_API_SECRET=(str, "your_api_secret"),
+    CSRF_TRUSTED_ORIGINS=(str, "your_trusted_origins_separated_by_comma"),
+)
+
+Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(os.getenv(key="SECRET_KEY", default=get_random_secret_key()))
-
-# Default file storage
-MEDIA_URL = "/media/"
-
-MEDIA_ROOT = BASE_DIR / "media" / "uploaded_images"
-
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+SECRET_KEY: str = str(env("SECRET_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0").lower() in ["true", "t", "1"]
+DEBUG: bool = bool(int(env("DEBUG")))
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
+APP_VERSION: str = str(env("APP_VERSION"))
 
-CSRF_TRUSTED_ORIGINS = [str(os.getenv("CSRF_TRUSTED_ORIGINS"))]
+ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
 
-# Application definition
-# In development mode. Delete this in production mode (add domains in white list)
-INSTALLED_APPS = [
-    "django_extensions",
+CSRF_TRUSTED_ORIGINS: list[str] = str(env("CSRF_TRUSTED_ORIGINS")).split(",")
+
+INSTALLED_APPS: list[str | Any] = [
+    "jazzmin",
     "django.contrib.admin",
+    "django.contrib.admindocs",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
-    "cloudinary",
-    "compressor",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_extensions",
     "rest_framework",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "corsheaders",
-    "webpeditor_app.apps.WebpeditorAppConfig",
+    "compressor",
+    "django_injector",
+    "crispy_forms",
+    "crispy_tailwind",
+    "cloudinary",
+    "cloudinary_storage",
+    "webpeditor_app",
 ]
 
-# Delete in production
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST: list[str] = str(env("CORS_ORIGIN_WHITELIST")).split(",")
 
-CORS_ORIGIN_WHITELIST = (
-    "https://localhost:8000",
-    "https://127.0.0.1:8000",
-    "https://webpeditor.fly.dev",
-    "https://res.cloudinary.com",
-)
+INJECTOR_MODULES: list[str] = [
+    "webpeditor_app.common.di.DiModule",
+    "webpeditor_app.core.di.DiModule",
+    "webpeditor_app.infrastructure.di.DiModule",
+]
 
-MIDDLEWARE = [
+MIDDLEWARE: list[str | Any] = [
+    "django_injector.apps.inject_request_middleware",
+    "webpeditor_app.middlewares.exceptions.ExceptionHandlingMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -102,21 +123,55 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "webpeditor.wsgi.application"
 
-ONE_MEGABYTE = 1_000_000
 
-MAX_IMAGE_FILE_SIZE = 6_000_000
+@dataclass(frozen=True, init=False)
+class ImageEditorSettings:
+    class OutputFormats(StrEnum):
+        JPEG = "JPEG"
+        JPG = "JPG"
+        JFIF = "JFIF"
+        BMP = "BMP"
+        TIFF = "TIFF"
 
-MAX_SUM_SIZE_OF_IMAGE_FILES = 50_000_000
+    class OutputFormatsWithAlphaChannel(StrEnum):
+        WEBP = "WEBP"
+        PNG = "PNG"
+        ICO = "ICO"
+        GIF = "GIF"
 
-DATA_UPLOAD_MAX_NUMBER_FILES = 15
+    output_formats: list[Union[OutputFormats, OutputFormatsWithAlphaChannel]] = field(
+        default_factory=lambda: list(ImageEditorSettings.OutputFormats) + list(ImageEditorSettings.OutputFormatsWithAlphaChannel)
+    )
+    max_file_size: int = field(default=6_291_456)
 
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10_485_760 * 4
+@dataclass(frozen=True, init=False)
+class ImageConverterSettings:
+    class OutputFormats(StrEnum):
+        JPEG = "JPEG"
+        JPG = "JPG"
+        BMP = "BMP"
+        TIFF = "TIFF"
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800 * 4
+    class OutputFormatsWithAlphaChannel(StrEnum):
+        WEBP = "WEBP"
+        PNG = "PNG"
+        GIF = "GIF"
+        ICO = "ICO"
 
-VALID_IMAGE_FORMATS = ["WEBP", "JPEG", "JPG", "PNG", "JFIF", "ICO", "BMP", "GIF", "TIFF"]
+    output_formats: list[Union[OutputFormats, OutputFormatsWithAlphaChannel]] = field(
+        default_factory=lambda: list(ImageConverterSettings.OutputFormats) + list(ImageConverterSettings.OutputFormatsWithAlphaChannel)
+    )
+    max_file_size: int = field(default=6_291_456)
+    max_total_files_count: int = field(default=15)
+    max_total_files_sizes: int = field(default=52_428_800)
+
+
+ONE_MEGABYTE: int = 1_048_576
+
+FILE_UPLOAD_MAX_MEMORY_SIZE: int = 10_485_760 * 4
+
+DATA_UPLOAD_MAX_MEMORY_SIZE: int = 52_428_800 * 4
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -125,24 +180,18 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        # "CLIENT": {
-        #     # Add local env variables to store host string
-        #     "host": f'mongodb+srv://{os.getenv("DATABASE_USER")}:'
-        #     f'{os.getenv("DATABASE_PASSWORD")}'
-        #     f'{os.getenv("HOST_LINK")}/?retryWrites=true&w=majority',
-        #     "name": str(os.getenv("DATABASE_NAME")),
-        #     "authMechanism": str(os.getenv("AUTH_MECHANISM")),  # For atlas cloud db
-        # },
-    }
+    },
 }
 
 # Path for future migrations
-MIGRATION_MODULES = {"webpeditor_app": "webpeditor_app.models.database.migrations"}
+MIGRATION_MODULES: dict[str, str] = {
+    "webpeditor_app": "webpeditor_app.infrastructure.database.migrations",
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS: list[dict[str, str]] = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
@@ -160,47 +209,272 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE: str = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE: str = "UTC"
 
-USE_I18N = True
+USE_I18N: bool = True
 
-USE_TZ = True
+USE_TZ: bool = True
+
+# TODO: change to real EmailBackend
+EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
 
 # Session handling
+SESSION_SAVE_EVERY_REQUEST: bool = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE: bool = True
+SESSION_COOKIE_SAMESITE: str = "Strict"
+SESSION_COOKIE_HTTPONLY: bool = True
+SESSION_COOKIE_SECURE: bool = True
+SESSION_COOKIE_AGE: int = int(timedelta(minutes=15).total_seconds())  # 15 minutes
 
-SESSION_SAVE_EVERY_REQUEST = True
+# CSRF
+CSRF_COOKIE_SAMESITE: str = "Strict"
+CSRF_COOKIE_SECURE: bool = True
+CSRF_COOKIE_AGE: int = int(timedelta(minutes=15).total_seconds())  # 15 minutes
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# HSTS
+SECURE_HSTS_SECONDS: int = int(timedelta(days=365).total_seconds())  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS: bool = True
+SECURE_HSTS_PRELOAD: bool = True
+# SECURE_SSL_REDIRECT: bool = True
 
-SESSION_COOKIE_SAMESITE = "Strict"
-
-CSRF_COOKIE_SAMESITE = "Strict"
-
-SESSION_COOKIE_HTTPONLY = True
-
-CSRF_COOKIE_HTTPONLY = True
-
-# PROD ONLY
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# Additional security settings
+SECURE_CONTENT_TYPE_NOSNIFF: bool = True
+X_FRAME_OPTIONS: str = "SAMEORIGIN"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STORAGES: dict[str, dict[str, str]] = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
-STATIC_URL = "static/"
+STATIC_URL: str = "static/"
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT: Path = BASE_DIR / "static"
 
-STATICFILES_FINDERS = ["compressor.finders.CompressorFinder"]
+STATICFILES_FINDERS: list[str] = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
 
-# Cloudinary's storage config
+COMPRESS_ENABLED: bool = True if DEBUG else False
+
+MEDIA_URL: str = "webpeditor/"
+
+# Cloudinary API config
 cloudinary.config(
-    cloud_name=str(os.getenv("CLOUDINARY_CLOUD_NAME")),
-    api_key=str(os.getenv("CLOUDINARY_API_KEY")),
-    api_secret=str(os.getenv("CLOUDINARY_API_SECRET")),
+    cloud_name=str(env("CLOUDINARY_CLOUD_NAME")),
+    api_key=str(env("CLOUDINARY_API_KEY")),
+    api_secret=str(env("CLOUDINARY_API_SECRET")),
     secure=True,
 )
+
+# Cloudinary storage config
+CLOUDINARY_STORAGE: dict[str, Any] = {
+    "CLOUD_NAME": str(env("CLOUDINARY_CLOUD_NAME")),
+    "API_KEY": str(env("CLOUDINARY_API_KEY")),
+    "API_SECRET": str(env("CLOUDINARY_API_SECRET")),
+    "SECURE": True,
+}
+
+REST_FRAMEWORK: dict[str, Any] = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.AdminRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+    # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    # "PAGE_SIZE": 100,
+}
+
+# Application definition
+APP_VERBOSE_NAME: str = f"WebP Editor V{APP_VERSION}"
+
+SPECTACULAR_SETTINGS: dict[str, Any] = {
+    "TITLE": f"{APP_VERBOSE_NAME} API",
+    "DESCRIPTION": "API for managing image assets in Converter module",
+    "VERSION": APP_VERSION,
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+    "COMPONENT_SPLIT_REQUEST": True,
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS: str = "tailwind"
+CRISPY_TEMPLATE_PACK: str = "tailwind"
+
+JAZZMIN_SETTINGS: dict[str, Any] = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": f"{APP_VERBOSE_NAME} Admin",
+    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": APP_VERBOSE_NAME,
+    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_brand": APP_VERBOSE_NAME,
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    "site_logo": "logo/pixoicon_32x32.svg",
+    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
+    "login_logo": "logo/pixoicon_100x100.svg",
+    # Logo to use for login form in dark themes (defaults to login_logo)
+    "login_logo_dark": None,
+    # CSS classes that are applied to the logo above
+    "site_logo_classes": "img-square",
+    # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
+    "site_icon": "logo/pixoicon_32x32.svg",
+    # Welcome text on the login screen
+    "welcome_sign": f"Welcome to {APP_VERBOSE_NAME}",
+    # Copyright on the footer
+    "copyright": "Temirkhan Amanzhanov - WebP Editor",
+    # List of model admins to search from the search bar, search bar omitted if excluded
+    # If you want to use a single search field you dont need to use a list, you can use a simple string
+    "search_model": [
+        "webpeditor_app.OriginalImageAsset",
+        "webpeditor_app.EditedImageAsset",
+        "webpeditor_app.ConvertedImageAsset",
+    ],
+    # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
+    "user_avatar": None,
+    ############
+    # Top Menu #
+    ############
+    # Links to put along the top menu
+    "topmenu_links": [
+        # Url that gets reversed (Permissions can be added)
+        {
+            "name": "Home",
+            "url": "admin:index",
+            "permissions": ["auth.view_user"],
+        },
+        # model admin to link to (Permissions checked against model)
+        {"model": "auth.User"},
+        {"model": "auth.Group"},
+        # App with dropdown menu to all its models pages (Permissions checked against models)
+        {"app": "webpeditor_app"},
+        # external url that opens in a new window (Permissions can be added)
+        {
+            "name": "Support",
+            "url": "https://github.com/farridav/django-jazzmin/issues",
+            "new_window": True,
+        },
+    ],
+    #############
+    # User Menu #
+    #############
+    # Additional links to include in the user menu on the top right ("app" url type is not allowed)
+    "usermenu_links": [
+        {"model": "auth.User"},
+        {"model": "auth.Group"},
+        {
+            "name": "Support",
+            "url": "https://github.com/farridav/django-jazzmin/issues",
+            "icon": "fa-solid fa-question",
+            "new_window": True,
+        },
+    ],
+    #############
+    # Side Menu #
+    #############
+    # Whether to display the side menu
+    "show_sidebar": True,
+    # Whether to aut expand the menu
+    "navigation_expanded": True,
+    # Hide these apps when generating side menu e.g (auth)
+    "hide_apps": [],
+    # Hide these models when generating side menu (e.g auth.user)
+    "hide_models": [],
+    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
+    "order_with_respect_to": ["auth", "webpeditor_app"],
+    # Custom links to append to app groups, keyed on app name
+    "custom_links": {},
+    # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
+    # for the full list of 5.13.0 free icon classes
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "webpeditor_app.OriginalImageAsset": "fa-regular fa-images",
+        "webpeditor_app.OriginalImageAssetFile": "fa-regular fa-file-image",
+        "webpeditor_app.EditedImageAsset": "fa-regular fa-object-group",
+        "webpeditor_app.EditedImageAssetFile": "fa-solid fa-file-pen",
+        "webpeditor_app.ConvertedImageAsset": "fa-solid fa-arrow-right-arrow-left",
+        "webpeditor_app.ConvertedImageAssetFile": "fa-solid fa-file-code",
+        "otp_totp.TOTPDevice": "fa-solid fa-shield",
+    },
+    # Icons that are used when one is not manually specified
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    #################
+    # Related Modal #
+    #################
+    # Use modals instead of popups
+    "related_modal_active": True,
+    #############
+    # UI Tweaks #
+    #############
+    # Relative paths to custom CSS/JS scripts (must be present in static files)
+    "custom_css": None,
+    "custom_js": None,
+    # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
+    "use_google_fonts_cdn": True,
+    # Whether to show the UI customizer on the sidebar
+    "show_ui_builder": False,
+    ###############
+    # Change view #
+    ###############
+    # Render out the change view as a single form, or in tabs, current options are
+    # - single
+    # - horizontal_tabs (default)
+    # - vertical_tabs
+    # - collapsible
+    # - carousel
+    "changeform_format": "horizontal_tabs",
+    # override change forms on a per modeladmin basis
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
+    },
+    # Add a language dropdown into the admin
+    "language_chooser": False,
+}
+
+JAZZMIN_UI_TWEAKS: dict[str, Any] = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": True,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-warning",
+    "navbar": "navbar-dark",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": True,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-warning",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": True,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+    "actions_sticky_top": False,
+}

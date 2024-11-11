@@ -4,4 +4,4 @@ from django.shortcuts import render
 
 
 def contact_view(request: WSGIRequest) -> HttpResponse:
-    return render(request, "contact.html")
+    return render(request, "webpeditor_app/contact.html")

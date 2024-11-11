@@ -1,0 +1,88 @@
+{% extends 'webpeditor_app/_base.html' %}
+{% load static %}
+{% load string_manipulations %}
+{% load exif_decode %}
+
+{% block content %}
+    <div id="progress-bar-container">
+        <div id="bar"></div>
+    </div>
+
+    <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full z-[1]">
+        <div id="image-editor" class="mt-5">
+            <main class="container mx-auto h-max">
+                <div class="px-4 py-4 sm:px-0">
+                    <div class="flex items-center justify-center">
+                        <div id="tui-image-editor"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+
+    {# Popover info about image #}
+    <div data-popover id="popover-description" role="tooltip"
+         class="absolute z-40 invisible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
+        <div class="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Image properties:
+            </h5>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Name: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_name_short }}</span>
+            </p>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Format: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_format }}</span>
+            </p>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Resolution: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_resolution }}</span>
+            </p>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Size: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_size }}</span>
+            </p>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Aspect ratio: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_aspect_ratio }}</span>
+            </p>
+            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Color mode: &nbsp;<span
+                class="font-normal dark:text-gray-400 whitespace-pre-line"
+                style="font-family: Consolas, monospace">{{ edited_image_mode }}</span>
+            </p>
+
+            {% if not edited_image_exif_data|is_instance:"str" %}
+                {% for key, value in edited_image_exif_data.items %}
+                    {% with value|decode_exif_value as formatted_value %}
+                        <p class="font-bold text-sm text-gray-700 dark:text-gray-200">{{ key }}: &nbsp;<span
+                            class="font-normal dark:text-gray-400 whitespace-pre-line"
+                            style="font-family: Consolas, monospace">{{ formatted_value }}</span>
+                        </p>
+                    {% endwith %}
+                {% endfor %}
+            {% else %}
+                <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Exif data: &nbsp;<span
+                    class="font-normal dark:text-gray-400 whitespace-pre-line"
+                    style="font-family: Consolas, monospace">{{ edited_image_exif_data }}</span>
+                </p>
+            {% endif %}
+        </div>
+        <div data-popper-arrow></div>
+    </div>
+
+    {{ edited_image_url|json_script:'imageUrl' }}
+    {{ edited_image_name_with_extension|json_script:'imageName' }}
+    {{ edited_image_content_type|json_script:'imageContentType' }}
+
+    <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.min.js"></script>
+    <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
+    <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="../../static/js/services/ToastUI.js" type="text/javascript"></script>
+    <script src="../../static/js/services/Toastify.js" type="text/javascript"></script>
+    <script src="../../static/js/services/showProgressBarAndMessage.js" type="text/javascript"></script>
+{% endblock content %}

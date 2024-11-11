@@ -22,7 +22,7 @@ primary_region = "ams"
     grace_period = "8s"
 
 [[statics]]
-  guest_path = "/code/static"
+  guest_path = "/app/static"
   url_prefix = "/static/"
 
 [deploy]

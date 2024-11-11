@@ -1,7 +1,8 @@
 from django import template
+from django.template import Library
 from django.template.defaultfilters import stringfilter
 
-register = template.Library()
+register: Library = template.Library()
 
 
 @register.filter

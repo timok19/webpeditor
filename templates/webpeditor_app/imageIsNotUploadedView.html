@@ -1,0 +1,19 @@
+{% extends 'webpeditor_app/_base.html' %}
+
+{% block content %}
+
+    <div class="flex flex-col justify-center items-center h-[calc(80vh)]">
+        <div>
+            <p class="text-6xl font-extrabold text-gray-700 dark:text-gray-400 text-left">Oops...</p>
+            <p class="text-4xl pt-5 text-black dark:text-gray-200 font-semibold leading-relaxed text-center">
+                Looks like you haven't uploaded an image yet.
+            </p>
+        </div>
+
+        <button onclick="location.href='/'"
+                class="mt-20 mb-2 mr-4 text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+            Back to the Home page
+        </button>
+    </div>
+
+{% endblock content %}

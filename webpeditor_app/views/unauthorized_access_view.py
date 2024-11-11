@@ -12,4 +12,4 @@ def unauthorized_access_view(request: WSGIRequest):
         "response_message": response_message,
     }
 
-    return render(request, "noContent.html", context, status=401)
+    return render(request, "webpeditor_app/noContent.html", context, status=401)

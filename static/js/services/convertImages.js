@@ -90,7 +90,7 @@ function getImagesFromDb() {
     .then((data) => {
       const downloadAllConvertedButtonId = "download-all-converted";
       const downloadAllConvertedButton = document.getElementById(downloadAllConvertedButtonId);
-      const convertedImages = data["converted_images"];
+      const convertedImages = data.data["converted_images"];
       setupPopoverListeners(convertedImages);
 
       if (downloadAllConvertedButton) {

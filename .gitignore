@@ -14,7 +14,6 @@ static/CACHE/
 static/*.css
 static/*.js
 static/*.map
-media/uploaded_images/
 
 .DS_Store
 yarn-error.log.DS_Store
