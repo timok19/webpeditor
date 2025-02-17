@@ -3,14 +3,15 @@ from decimal import Decimal
 from io import BytesIO
 from typing import Collection, Final, Type, final
 
+from PIL.Image import Exif, Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
 from ninja import UploadedFile
-from PIL.Image import Exif, Image, alpha_composite, new, open
 from returns.pipeline import is_successful
 from returns.result import Failure, Success, Result
 from types_linq import Enumerable
 
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
+from webpeditor_app.common.asyncio_utils import complete
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 from webpeditor_app.common.result_extensions import FailureContext, ValueResult
 from webpeditor_app.common.validator_abc import ValidatorABC
@@ -46,7 +47,6 @@ class ImageConverter(ImageConverterABC):
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = DiContainer.get_dependency(
             ValidatorABC[ConversionRequest]
         )
-        self.__number_of_threads_for_batch_processing: Final[int] = 2
 
     async def convert_async(
         self,
@@ -81,27 +81,21 @@ class ImageConverter(ImageConverterABC):
             self.__cloudinary_service.delete_converted_images(user_id_result.unwrap())
 
         # Process images
-        future_results = (
+        results = (
             Enumerable(request.files)
-            .chunk(min(len(request.files), self.__number_of_threads_for_batch_processing))
+            .chunk(4)
             .select_many(
-                lambda image_files_batch: [
-                    self.__convert_async(
-                        user_id_result.unwrap(),
-                        image_file,
-                        options=request.options,
+                lambda image_files_batch: Enumerable(image_files_batch).select(
+                    lambda image_file: complete(
+                        self.__convert_async(user_id_result.unwrap(), image_file, options=request.options),
                     )
-                    for image_file in image_files_batch
-                ]
+                )
             )
         )
 
-        # Get results
-        results = Enumerable([await future_result for future_result in future_results])
-
         # Get failed results
-        if results.any(lambda result: not is_successful(result)):
-            errors = results.where(lambda result: not is_successful(result))
+        errors = results.where(lambda result: not is_successful(result))
+        if errors.any():
             error_messages = errors.select(
                 lambda error: f"Error code: {error.failure().error_code}, Message: {error.failure().message or ''}"
             )

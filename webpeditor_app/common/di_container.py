@@ -14,10 +14,10 @@ from webpeditor_app.core.converter.image_converter import ImageConverter
 from webpeditor_app.core.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.core.converter.validators.conversion_request_validator import ConversionRequestValidator
 from webpeditor_app.core.webpeditorlogger import WebPEditorLogger
-from webpeditor_app.domain.abc.converter.queries import ConverterImageAssetQueriesABC
-from webpeditor_app.domain.abc.editor.queries import EditorImageAssetsQueriesABC
-from webpeditor_app.domain.converter.queries import ConverterImageAssetQueries
-from webpeditor_app.domain.editor.queries import EditorImageAssetsQueries
+from webpeditor_app.domain.abc.converter.queries import ConverterQueriesABC
+from webpeditor_app.domain.abc.editor.queries import EditorQueriesABC
+from webpeditor_app.domain.converter.queries import ConverterQueries
+from webpeditor_app.domain.editor.queries import EditorQueries
 from webpeditor_app.infrastructure.cloudinary.cloudinary_service import CloudinaryService
 from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC
 
@@ -37,8 +37,8 @@ class DiContainer:
         cls.__di_container.register(ImageConverterABC, factory=ImageConverter, scope=Scope.transient)
 
         # Domain
-        cls.__di_container.register(EditorImageAssetsQueriesABC, factory=EditorImageAssetsQueries, scope=Scope.transient)
-        cls.__di_container.register(ConverterImageAssetQueriesABC, factory=ConverterImageAssetQueries, scope=Scope.transient)
+        cls.__di_container.register(EditorQueriesABC, factory=EditorQueries, scope=Scope.transient)
+        cls.__di_container.register(ConverterQueriesABC, factory=ConverterQueries, scope=Scope.transient)
 
         # Validators
         cls.__di_container.register(ValidatorABC[ConversionRequest], ConversionRequestValidator, scope=Scope.transient)

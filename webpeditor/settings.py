@@ -227,6 +227,31 @@ CLOUDINARY_STORAGE: dict[str, Any] = {
 
 FILENAME_MAX_SIZE: int = 255
 
+RESERVED_WINDOWS_FILENAMES: set[str] = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    "COM1",
+    "COM2",
+    "COM3",
+    "COM4",
+    "COM5",
+    "COM6",
+    "COM7",
+    "COM8",
+    "COM9",
+    "LPT1",
+    "LPT2",
+    "LPT3",
+    "LPT4",
+    "LPT5",
+    "LPT6",
+    "LPT7",
+    "LPT8",
+    "LPT9",
+}
+
 # Application definition
 APP_VERBOSE_NAME: str = f"WebP Editor V{APP_VERSION}"
 
