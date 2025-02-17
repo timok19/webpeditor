@@ -1,24 +1,27 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from types_linq import Enumerable
 
-class ValidationResult:
+
+class ValidationResult(Enumerable[str]):
     def __init__(self) -> None:
-        self.__errors: list[str] = []
-
-    @property
-    def message(self) -> Optional[str]:
-        return f"Validation failed. Errors: [{', '.join(self.__errors)}]" if len(self.__errors) > 0 else None
+        super().__init__([])
 
     @property
     def errors(self) -> list[str]:
-        return self.__errors
+        return self.to_list()
 
-    def add_error(self, message: str) -> None:
-        self.__errors.append(message)
+    @property
+    def message(self) -> Optional[str]:
+        return f"Validation failed. Errors: [{', '.join(self.errors)}]" if self.any() else None
+
+    def add_error(self, message: str) -> "ValidationResult":
+        self.append(message)
+        return self
 
     def is_successful(self) -> bool:
-        return len(self.__errors) == 0
+        return not self.any()
 
 
 class ValidatorABC[TModel: object](ABC):
