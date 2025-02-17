@@ -1,25 +1,35 @@
-from cloudinary.exceptions import Error as CloudinaryError
-from typing import Callable
+import json
+from typing import Callable, Final
+
 
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBase, HttpResponseServerError
+from django.http.response import HttpResponse
+from ninja.responses import codes_4xx, codes_5xx
 
-from webpeditor_app.core import get_dependency
-from webpeditor_app.core.logging import LoggerABC
+from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
 
 
 class ExceptionHandlingMiddleware:
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
-        self.get_response = get_response
-        self.__logger: LoggerABC = get_dependency(LoggerABC)
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+        from webpeditor_app.common.di_container import DiContainer
 
-    def __call__(self, request: HttpRequest) -> HttpResponseBase:
-        try:
-            return self.get_response(request)
-        except CloudinaryError as ce:
-            self.__logger.log_exception(ce, f"Cloudinary error: {ce}")
-            # TODO: Change to a specific response such as ResultantResponse() etc...
-            return HttpResponseServerError("Cloudinary error occurred")
-        except Exception as e:
-            self.__logger.log_request_exception_500(request, e)
-            return HttpResponseServerError("An unexpected error occurred")
+        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        return self.__process_response(request, self.get_response(request))
+
+    def __process_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+        if response.status_code in codes_4xx or response.status_code in codes_5xx:
+            response_data: object = json.loads(response.content)
+
+            if isinstance(response_data, list):
+                for item in response_data:
+                    if isinstance(item, dict) and "message" in item:
+                        self.__logger.log_request_error(request, item["message"])
+
+            if isinstance(response_data, dict):
+                if "message" in response_data:
+                    self.__logger.log_request_error(request, response_data["message"])
+
+        return response

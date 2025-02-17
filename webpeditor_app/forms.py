@@ -25,7 +25,6 @@ class ConvertedImageAssetForm(forms.Form):
     )
     quality = forms.IntegerField(
         required=True,
-        step_size=5,
         min_value=5,
         max_value=100,
         initial=50,

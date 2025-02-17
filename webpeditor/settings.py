@@ -10,18 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from dataclasses import dataclass, field
-from datetime import timedelta
-from enum import StrEnum
 import os
-from typing import Any, Union
 
-import cloudinary
-
-from pathlib import Path
+from datetime import timedelta
 
 from django.core.management.utils import get_random_secret_key
 from environ import Env
+from pathlib import Path
+from typing import Any
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
@@ -44,6 +41,8 @@ Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY: str = str(env("SECRET_KEY"))
 
+WEBPEDITOR_API_KEY: str = str(env("WEBPEDITOR_API_KEY"))
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG: bool = bool(int(env("DEBUG")))
 
@@ -53,7 +52,8 @@ ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
 
 CSRF_TRUSTED_ORIGINS: list[str] = str(env("CSRF_TRUSTED_ORIGINS")).split(",")
 
-INSTALLED_APPS: list[str | Any] = [
+INSTALLED_APPS: list[str] = [
+    "daphne",
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.admindocs",
@@ -66,30 +66,22 @@ INSTALLED_APPS: list[str | Any] = [
     "django_otp",
     "django_otp.plugins.otp_totp",
     "django_extensions",
-    "rest_framework",
-    "drf_spectacular",
-    "drf_spectacular_sidecar",
+    "silk",
     "corsheaders",
     "compressor",
-    "django_injector",
     "crispy_forms",
     "crispy_tailwind",
     "cloudinary",
     "cloudinary_storage",
+    "ninja_extra",
     "webpeditor_app",
 ]
 
 CORS_ORIGIN_WHITELIST: list[str] = str(env("CORS_ORIGIN_WHITELIST")).split(",")
 
-INJECTOR_MODULES: list[str] = [
-    "webpeditor_app.common.di.DiModule",
-    "webpeditor_app.core.di.DiModule",
-    "webpeditor_app.infrastructure.di.DiModule",
-]
-
 MIDDLEWARE: list[str | Any] = [
-    "django_injector.apps.inject_request_middleware",
     "webpeditor_app.middlewares.exceptions.ExceptionHandlingMiddleware",
+    "silk.middleware.SilkyMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -121,51 +113,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "webpeditor.wsgi.application"
-
-
-@dataclass(frozen=True, init=False)
-class ImageEditorSettings:
-    class OutputFormats(StrEnum):
-        JPEG = "JPEG"
-        JPG = "JPG"
-        JFIF = "JFIF"
-        BMP = "BMP"
-        TIFF = "TIFF"
-
-    class OutputFormatsWithAlphaChannel(StrEnum):
-        WEBP = "WEBP"
-        PNG = "PNG"
-        ICO = "ICO"
-        GIF = "GIF"
-
-    output_formats: list[Union[OutputFormats, OutputFormatsWithAlphaChannel]] = field(
-        default_factory=lambda: list(ImageEditorSettings.OutputFormats) + list(ImageEditorSettings.OutputFormatsWithAlphaChannel)
-    )
-    max_file_size: int = field(default=6_291_456)
-
-
-@dataclass(frozen=True, init=False)
-class ImageConverterSettings:
-    class OutputFormats(StrEnum):
-        JPEG = "JPEG"
-        JPG = "JPG"
-        BMP = "BMP"
-        TIFF = "TIFF"
-
-    class OutputFormatsWithAlphaChannel(StrEnum):
-        WEBP = "WEBP"
-        PNG = "PNG"
-        GIF = "GIF"
-        ICO = "ICO"
-
-    output_formats: list[Union[OutputFormats, OutputFormatsWithAlphaChannel]] = field(
-        default_factory=lambda: list(ImageConverterSettings.OutputFormats) + list(ImageConverterSettings.OutputFormatsWithAlphaChannel)
-    )
-    max_file_size: int = field(default=6_291_456)
-    max_total_files_count: int = field(default=15)
-    max_total_files_sizes: int = field(default=52_428_800)
-
+ASGI_APPLICATION = "webpeditor.asgi.application"
 
 ONE_MEGABYTE: int = 1_048_576
 
@@ -234,7 +182,7 @@ CSRF_COOKIE_SECURE: bool = True
 CSRF_COOKIE_AGE: int = int(timedelta(minutes=15).total_seconds())  # 15 minutes
 
 # HSTS
-SECURE_HSTS_SECONDS: int = int(timedelta(days=365).total_seconds())  # 1 year
+SECURE_HSTS_SECONDS: int = int(timedelta(days=365 * 5).total_seconds())  # 5 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS: bool = True
 SECURE_HSTS_PRELOAD: bool = True
 # SECURE_SSL_REDIRECT: bool = True
@@ -267,15 +215,7 @@ STATICFILES_FINDERS: list[str] = [
 
 COMPRESS_ENABLED: bool = True if DEBUG else False
 
-MEDIA_URL: str = "webpeditor/"
-
-# Cloudinary API config
-cloudinary.config(
-    cloud_name=str(env("CLOUDINARY_CLOUD_NAME")),
-    api_key=str(env("CLOUDINARY_API_KEY")),
-    api_secret=str(env("CLOUDINARY_API_SECRET")),
-    secure=True,
-)
+MEDIA_URL: str = "/"
 
 # Cloudinary storage config
 CLOUDINARY_STORAGE: dict[str, Any] = {
@@ -285,91 +225,47 @@ CLOUDINARY_STORAGE: dict[str, Any] = {
     "SECURE": True,
 }
 
-REST_FRAMEWORK: dict[str, Any] = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_RENDERER_CLASSES": [
-        "rest_framework.renderers.JSONRenderer",
-        "rest_framework.renderers.AdminRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-    ],
-    # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    # "PAGE_SIZE": 100,
-}
+FILENAME_MAX_SIZE: int = 255
 
 # Application definition
 APP_VERBOSE_NAME: str = f"WebP Editor V{APP_VERSION}"
 
-SPECTACULAR_SETTINGS: dict[str, Any] = {
-    "TITLE": f"{APP_VERBOSE_NAME} API",
-    "DESCRIPTION": "API for managing image assets in Converter module",
-    "VERSION": APP_VERSION,
-    "SERVE_INCLUDE_SCHEMA": False,
-    "SWAGGER_UI_DIST": "SIDECAR",
-    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
-    "REDOC_DIST": "SIDECAR",
-    "COMPONENT_SPLIT_REQUEST": True,
-}
-
 CRISPY_ALLOWED_TEMPLATE_PACKS: str = "tailwind"
 CRISPY_TEMPLATE_PACK: str = "tailwind"
 
+# Jazzmin settings
 JAZZMIN_SETTINGS: dict[str, Any] = {
-    # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": f"{APP_VERBOSE_NAME} Admin",
-    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_header": APP_VERBOSE_NAME,
-    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_brand": APP_VERBOSE_NAME,
-    # Logo to use for your site, must be present in static files, used for brand on top left
     "site_logo": "logo/pixoicon_32x32.svg",
-    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
     "login_logo": "logo/pixoicon_100x100.svg",
-    # Logo to use for login form in dark themes (defaults to login_logo)
     "login_logo_dark": None,
-    # CSS classes that are applied to the logo above
     "site_logo_classes": "img-square",
-    # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
     "site_icon": "logo/pixoicon_32x32.svg",
-    # Welcome text on the login screen
     "welcome_sign": f"Welcome to {APP_VERBOSE_NAME}",
-    # Copyright on the footer
     "copyright": "Temirkhan Amanzhanov - WebP Editor",
-    # List of model admins to search from the search bar, search bar omitted if excluded
-    # If you want to use a single search field you dont need to use a list, you can use a simple string
     "search_model": [
         "webpeditor_app.OriginalImageAsset",
         "webpeditor_app.EditedImageAsset",
         "webpeditor_app.ConvertedImageAsset",
     ],
-    # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
     "user_avatar": None,
-    ############
-    # Top Menu #
-    ############
-    # Links to put along the top menu
     "topmenu_links": [
-        # Url that gets reversed (Permissions can be added)
         {
             "name": "Home",
             "url": "admin:index",
             "permissions": ["auth.view_user"],
         },
-        # model admin to link to (Permissions checked against model)
         {"model": "auth.User"},
         {"model": "auth.Group"},
-        # App with dropdown menu to all its models pages (Permissions checked against models)
         {"app": "webpeditor_app"},
-        # external url that opens in a new window (Permissions can be added)
         {
             "name": "Support",
             "url": "https://github.com/farridav/django-jazzmin/issues",
             "new_window": True,
         },
     ],
-    #############
-    # User Menu #
-    #############
-    # Additional links to include in the user menu on the top right ("app" url type is not allowed)
     "usermenu_links": [
         {"model": "auth.User"},
         {"model": "auth.Group"},
@@ -380,69 +276,38 @@ JAZZMIN_SETTINGS: dict[str, Any] = {
             "new_window": True,
         },
     ],
-    #############
-    # Side Menu #
-    #############
-    # Whether to display the side menu
     "show_sidebar": True,
-    # Whether to aut expand the menu
     "navigation_expanded": True,
-    # Hide these apps when generating side menu e.g (auth)
     "hide_apps": [],
-    # Hide these models when generating side menu (e.g auth.user)
     "hide_models": [],
-    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
     "order_with_respect_to": ["auth", "webpeditor_app"],
-    # Custom links to append to app groups, keyed on app name
     "custom_links": {},
-    # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
-    # for the full list of 5.13.0 free icon classes
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.User": "fas fa-user",
         "auth.Group": "fas fa-users",
-        "webpeditor_app.OriginalImageAsset": "fa-regular fa-images",
-        "webpeditor_app.OriginalImageAssetFile": "fa-regular fa-file-image",
-        "webpeditor_app.EditedImageAsset": "fa-regular fa-object-group",
-        "webpeditor_app.EditedImageAssetFile": "fa-solid fa-file-pen",
-        "webpeditor_app.ConvertedImageAsset": "fa-solid fa-arrow-right-arrow-left",
-        "webpeditor_app.ConvertedImageAssetFile": "fa-solid fa-file-code",
+        "webpeditor_app.AppUser": "fas fa-user",
+        "webpeditor_app.EditorOriginalImageAsset": "fa-regular fa-images",
+        "webpeditor_app.EditorOriginalImageAssetFile": "fa-regular fa-file-image",
+        "webpeditor_app.EditorEditedImageAsset": "fa-regular fa-object-group",
+        "webpeditor_app.EditorEditedImageAssetFile": "fa-solid fa-file-pen",
+        "webpeditor_app.ConverterImageAsset": "fa-solid fa-arrow-right-arrow-left",
+        "webpeditor_app.ConverterConvertedImageAssetFile": "fa-solid fa-file-code",
+        "webpeditor_app.ConverterOriginalImageAssetFile": "fa-solid fa-file-code",
         "otp_totp.TOTPDevice": "fa-solid fa-shield",
     },
-    # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
-    #################
-    # Related Modal #
-    #################
-    # Use modals instead of popups
     "related_modal_active": True,
-    #############
-    # UI Tweaks #
-    #############
-    # Relative paths to custom CSS/JS scripts (must be present in static files)
     "custom_css": None,
     "custom_js": None,
-    # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
-    # Whether to show the UI customizer on the sidebar
     "show_ui_builder": False,
-    ###############
-    # Change view #
-    ###############
-    # Render out the change view as a single form, or in tabs, current options are
-    # - single
-    # - horizontal_tabs (default)
-    # - vertical_tabs
-    # - collapsible
-    # - carousel
     "changeform_format": "horizontal_tabs",
-    # override change forms on a per modeladmin basis
     "changeform_format_overrides": {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
     },
-    # Add a language dropdown into the admin
     "language_chooser": False,
 }
 

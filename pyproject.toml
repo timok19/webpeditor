@@ -1,67 +1,73 @@
-[tool.poetry]
+[project]
 name = "webpeditor"
-version = "0.1.0"
+version = "1.0.0"
+requires-python = ">=3.12,<3.13"
 description = ""
-authors = ["Temirkhan Amanzhanov <tima1199@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
-package-mode = false
+authors = [{name = "Temirkhan Amanzhanov", email = "tima1199@gmail.com"}]
+dependencies = [
+    "aiofiles>=24.1.0",
+    "asgiref>=3.8.1",
+    "certifi>=2024.12.14",
+    "channels[daphne]>=4.2.0",
+    "crispy-tailwind>=1.0.3",
+    "cryptography>=43.0.3",
+    "deptry>=0.21.2",
+    "dill>=0.3.9",
+    "django>=5.1.5",
+    "django-appconf>=1.0.6",
+    "django-cloudinary-storage>=0.3.0",
+    "django-compressor>=4.5.1",
+    "django-cors-headers>=4.6.0",
+    "django-crispy-forms>=2.3",
+    "django-environ>=0.11.2",
+    "django-extensions>=3.2.3",
+    "django-jazzmin>=3.0.1",
+    "django-jsonfield>=1.4.1",
+    "django-ninja>=1.3.0",
+    "django-ninja-extra>=0.21.8",
+    "django-otp>=1.5.4",
+    "django-silk>=5.3.2",
+    "django-stubs>=5.1.3",
+    "django-types>=0.19.1",
+    "djhtml>=3.0.7",
+    "dnspython>=2.7.0",
+    "docutils>=0.21.2",
+    "gunicorn>=23.0.0",
+    "httpx>=0.28.1",
+    "lazy-object-proxy>=1.10.0",
+    "loguru>=0.7.3",
+    "mccabe>=0.7.0",
+    "ninja-schema>=0.14.1",
+    "pillow>=11.1.0",
+    "platformdirs>=4.3.6",
+    "punq>=0.7.0",
+    "pycodestyle>=2.12.1",
+    "pytz>=2024.2",
+    "qrcode>=8.0",
+    "returns[compatible-mypy]>=0.23.0",
+    "shortuuid>=1.0.13",
+    "sqlparse>=0.5.3",
+    "twisted[http2, tls]>=24.11.0",
+    "types-linq>=1.2.1",
+    "typing-extensions>=4.12.2",
+    "varname>=0.13.5",
+    "whitenoise>=6.8.2",
+    "wrapt>=1.17.2",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.12,<3.13"
-dill = "^0.3.9"
-lazy-object-proxy = "^1.10.0"
-tomlkit = "^0.13.2"
-platformdirs = "^4.3.6"
-asgiref = "^3.8.1"
-django-appconf = "^1.0.6"
-dnspython = "^2.7.0"
-mccabe = "^0.7.0"
-pycodestyle = "^2.12.1"
-pytz = "^2024.2"
-toml = "^0.10.2"
-tomli = "^2.0.2"
-typing-extensions = "^4.12.2"
-wrapt = "^1.16.0"
-django-cors-headers = "^4.6.0"
-django-environ = "^0.11.2"
-django-extensions = "^3.2.3"
-requests = "^2.32.3"
-gunicorn = "^23.0.0"
-whitenoise = "^6.8.2"
-cloudinary = "^1.41.0"
-pillow = "^11.0.0"
-django-jsonfield = "^1.4.1"
-deptry = "^0.21.0"
-cryptography = "^43.0.3"
-certifi = "^2024.8.30"
-channels = {extras = ["daphne"], version = "^4.1.0"}
-twisted = {extras = ["http2", "tls"], version = "^24.10.0"}
-django = "^5.1.3"
-sqlparse = "^0.5.1"
-basedpyright = "^1.21.0"
-django-compressor = "^4.5.1"
-loguru = "^0.7.2"
-returns = "^0.23.0"
-django-injector = "^0.3.1"
-djangorestframework = "^3.15.2"
-djangorestframework-stubs = "^3.15.1"
-django-crispy-forms = "^2.3"
-crispy-tailwind = "^1.0.3"
-drf-spectacular = {extras = ["sidecar"], version = "^0.27.2"}
-djhtml = "^3.0.7"
-django-jazzmin = "^3.0.1"
-qrcode = "^8.0"
-django-otp = "^1.5.4"
-docutils = "^0.21.2"
-django-cloudinary-storage = "^0.3.0"
-django-types = "^0.19.1"
+[project.urls]
+Homepage = "https://webpeditor.fly.dev"
 
-[tool.poetry.group.dev.dependencies]
-ruff-lsp = "^0.0.57"
-pip-audit = "^2.7.3"
-pre-commit = "^4.0.1"
-poetry-core = "^1.9.1"
+[dependency-groups]
+dev = [
+    "ruff-lsp>=0.0.57",
+    "pip-audit>=2.7.3",
+    "pre-commit>=4.0.1",
+    "django-stubs>=5.1.3",
+    "basedpyright>=1.27.1",
+]
 
 [tool.ruff]
 exclude = [
@@ -92,7 +98,7 @@ exclude = [
     "site-packages",
     "venv",
 ]
-line-length = 150
+line-length = 120
 indent-width = 4
 target-version = "py312"
 
@@ -104,7 +110,7 @@ unfixable = ["B"]
 [tool.basedpyright]
 include = [
     "webpeditor",
-    "webpeditor_app",
+    "webpeditor_app"
 ]
 exclude = [
     "**/node_modules",
@@ -112,16 +118,7 @@ exclude = [
     "**/.*",
     "htmlcov"
 ]
-
 reportMissingImports = true
 reportMissingTypeStubs = true
-reportIncompatibleVariableOverride = false
-
 pythonVersion = "3.12"
-pythonPlatform = "Linux"
-
 typeCheckingMode = "standard"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

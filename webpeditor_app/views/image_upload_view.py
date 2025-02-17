@@ -1,26 +1,23 @@
 from typing import Tuple
 
-import cloudinary.uploader
 import cloudinary.api
-
-from PIL import Image as PilImage
-from PIL.Image import Image as ImageClass, Image
-
+import cloudinary.uploader
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
+from PIL import Image as PilImage
+from PIL.Image import Image
+from PIL.Image import Image as ImageClass
 
 from webpeditor_app.forms import OriginalImageAssetForm
-from webpeditor_app.models import OriginalImageAsset
-from webpeditor_app.utils.text_utils import replace_with_underscore
 
 
 def clean_up_previous_images(user_id: str):
-    previous_original_image: OriginalImageAsset | None = get_original_image(user_id)
-    if isinstance(previous_original_image, OriginalImageAsset):
+    previous_original_image: EditorOriginalImageAsset | None = get_original_image(user_id)
+    if isinstance(previous_original_image, EditorOriginalImageAsset):
         previous_original_image.delete()
 
     delete_cloudinary_original_and_edited_images(user_id)
@@ -30,7 +27,7 @@ def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: st
     folder_path: str = f"{user_id}/"
 
     image_name: str = get_image_file_name(str(image.name))
-    image_name_after_re: str = replace_with_underscore(image_name)
+    image_name_after_re: str = FileUtils.sanitize_filename(image_name)
     new_original_image_name: str = f"webpeditor_{image_name_after_re}"
 
     cloudinary_parameters: dict = {
@@ -47,7 +44,7 @@ def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: st
 
 def original_image_exist(request: WSGIRequest) -> bool:
     user_id: str | None = get_unsigned_user_id(request)
-    original_image: OriginalImageAsset | None = get_original_image(user_id)  # pyright: ignore [reportArgumentType]
+    original_image: EditorOriginalImageAsset | None = get_original_image(user_id)  # pyright: ignore [reportArgumentType]
 
     if original_image is None:
         return False
@@ -72,7 +69,7 @@ def handle_image_upload(request: WSGIRequest) -> HttpResponse | tuple[InMemoryUp
             "error": "Unknown file format",
             "original_image_exist": original_image_exist(request),
         }
-        return render(request, "webpeditor_app/imageUpload.html", context, status=200)
+        return render(request, "webpeditor_app/image-uploader.html", context, status=200)
 
     uploaded_original_image_file: InMemoryUploadedFile = request.FILES["original_image_form"]  # pyright: ignore [reportAssignmentType]
     image: ImageClass = PilImage.open(uploaded_original_image_file)
@@ -94,7 +91,7 @@ def check_image_constraints(
             else "Image dimensions should not be more than 2500x2500px",
             "original_image_exist": original_image_exist(request),
         }
-        return render(request, "webpeditor_app/imageUpload.html", context)
+        return render(request, "webpeditor_app/image-uploader.html", context)
 
     return None
 
@@ -106,7 +103,7 @@ def save_original_image(
     cloudinary_image_url: str,
     request: WSGIRequest,
 ) -> None:
-    original_image: OriginalImageAsset = OriginalImageAsset(
+    original_image: EditorOriginalImageAsset = EditorOriginalImageAsset(
         user_id=user_id,
         image_name=new_image_name,
         content_type=uploaded_original_image_file.content_type,
@@ -128,7 +125,7 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
             "error": "No image file was provided.",
             "original_image_exist": original_image_exist(request),
         }
-        return render(request, "webpeditor_app/imageUpload.html", context)
+        return render(request, "webpeditor_app/image-uploader.html", context)
 
     response: HttpResponse | tuple[InMemoryUploadedFile, Image] = handle_image_upload(request)
 
@@ -158,13 +155,13 @@ def post(request: WSGIRequest) -> HttpResponse | HttpResponsePermanentRedirect |
 
     update_session(request=request, user_id=user_id)
 
-    return redirect("ImageInfoView")
+    return redirect("image-info-view")
 
 
 def get(request: WSGIRequest) -> HttpResponse:
     return render(
         request,
-        "webpeditor_app/imageUpload.html",
+        "webpeditor_app/image-uploader.html",
         context={
             "form": OriginalImageAssetForm(),
             "original_image_exist": original_image_exist(request),

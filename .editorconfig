@@ -34,10 +34,6 @@ ij_css_space_before_opening_brace = true
 ij_css_use_double_quotes = true
 ij_css_value_alignment = do_not_align
 
-[*.feature]
-indent_size = 2
-ij_gherkin_keep_indents_on_empty_lines = false
-
 [*.less]
 indent_size = 2
 ij_less_align_closing_brace_with_properties = false

@@ -1,12 +1,12 @@
 {
   "devDependencies": {
-    "flowbite-typography": "^1.0.4",
-    "prettier": "^3.3.3",
-    "tailwindcss": "^3.4.14",
-    "typescript": "^5.6.3"
+    "flowbite-typography": "^1.0.5",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
   },
   "dependencies": {
-    "fabric": "^6.4.3",
+    "fabric": "^6.5.4",
     "file-saver": "^2.0.5",
     "flowbite": "^2.5.2",
     "jquery": "^3.7.1",
@@ -19,8 +19,7 @@
     "graceful-fs": "^4.2.11"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
-    "update-css": "npx tailwindcss -i static/src/input.css -o static/src/output.css --watch"
+    "update-css": "pnpx tailwindcss -i static/src/input.css -o static/src/output.css --watch"
   },
-  "packageManager": "pnpm@10.0.0-alpha.0+sha512.856941ef22665d2f3e41c04e8d86ed757ef057fb2bc35011698bfa988ef5817cc1cdd28bb883e7f23f0568c75de5544d4750211d4276b9ba6d55369eb207a549"
+  "packageManager": "pnpm@10.0.0-alpha.2+sha512.f18a59ca3611002321af7681e6d49234cb3ece8496b05818be5b1081168ec21b8c3d28cbb4351e2fdec66ca95e6516faaf08b95b755013c88cf5174d5029865c"
 }

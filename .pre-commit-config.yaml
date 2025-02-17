@@ -1,24 +1,35 @@
+default_install_hook_types:
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-rewrite
+
 repos:
+
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
   - id: check-yaml
   - id: end-of-file-fixer
   - id: trailing-whitespace
-- repo: https://github.com/python-poetry/poetry
-  rev: 1.8.4
+
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.5.20
   hooks:
-  - id: poetry-check
-    name: "Check Poetry configuration"
-    args: ["--lock"]
-  - id: poetry-export
-    name: "Export all non-dev dependencies"
-    args: ["--without", "dev", "--without-hashes", "-f", "requirements.txt", "--output", "requirements.txt"]
-    verbose: true
-  - id: poetry-export
-    name: "Export only dev dependencies"
-    args: ["--only", "dev", "--without-hashes", "-f", "requirements.txt", "--output", "requirements-dev.txt"]
-    verbose: true
+    - id: uv-sync
+      name: "synchronize pyproject.toml dependencies"
+      args: [ "--locked", "--all-packages" ]
+    - id: uv-lock
+      name: "ensure uv.lock file is up-to-date"
+    - id: uv-export
+      name: "export requirements.txt"
+      args: [ "--frozen", "--no-dev", "--no-hashes", "-o", "requirements.txt" ]
+      verbose: false
+    - id: uv-export
+      name: "export requirements-dev.txt"
+      args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
+      verbose: false
+
 #- repo: https://github.com/pypa/pip-audit
 #  rev: v2.7.3
 #  hooks:

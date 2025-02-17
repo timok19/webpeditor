@@ -10,13 +10,6 @@ from django.http import (
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from webpeditor_app.models import OriginalImageAsset
-
-from webpeditor_app.views.view_utils.get_user_data import (
-    get_user_id_or_401,
-    get_original_image_or_401,
-)
-
 
 @require_http_methods(["GET"])
 def image_info_view(
@@ -26,18 +19,18 @@ def image_info_view(
     if isinstance(user_id, HttpResponse):
         return user_id
 
-    original_image: OriginalImageAsset | HttpResponse = get_original_image_or_401(request, user_id)
+    original_image: EditorOriginalImageAsset | HttpResponse = get_original_image_or_401(request, user_id)
     if isinstance(original_image, HttpResponse):
         return original_image
 
     image_data: BytesIO | None = get_data_from_image_url(original_image.image_url)
     if isinstance(image_data, NoneType):
-        return redirect("ImageDoesNotExistView")
+        return redirect("image-not-found-view")
 
     # Image info taken from file
     image_info: tuple | None = get_image_info(image_data)
     if isinstance(image_info, NoneType):
-        return redirect("ImageDoesNotExistView")
+        return redirect("image-not-found-view")
 
     image_format_description: str = image_info[0]  # pyright: ignore [reportAssignmentType]
     image_format: str = image_info[1]  # pyright: ignore [reportAssignmentType]
@@ -58,4 +51,4 @@ def image_info_view(
 
     update_session(request=request, user_id=user_id)
 
-    return render(request, "webpeditor_app/imageInfo.html", context, status=200)
+    return render(request, "webpeditor_app/image-info.html", context, status=200)

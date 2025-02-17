@@ -1,7 +1,5 @@
-from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
 
-def contact_view(request: WSGIRequest) -> HttpResponse:
-    return render(request, "webpeditor_app/contact.html")
+class ContactView(TemplateView):
+    template_name = "webpeditor_app/contact.html"

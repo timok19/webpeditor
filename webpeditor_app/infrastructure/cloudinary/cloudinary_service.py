@@ -1,35 +1,32 @@
-from dataclasses import asdict
-from io import BytesIO
-from typing import Any, Callable
+from typing import Any, Callable, Final
 
 import cloudinary.api
 import cloudinary.uploader
-from cloudinary import CloudinaryImage
 from cloudinary.api_client.execute_request import Response
-from injector import inject
 
-from webpeditor_app.common.resultant import Resultant, ResultantValue
-from webpeditor_app.core.logging.logger_abc import LoggerABC
-from webpeditor_app.infrastructure.cloudinary.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.infrastructure.cloudinary.models import UploadOptions
+from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
+from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC
 
 
 class CloudinaryService(CloudinaryServiceABC):
-    @inject
-    def __init__(self, logger: LoggerABC) -> None:
-        self.__logger: LoggerABC = logger
+    def __init__(self) -> None:
+        from webpeditor_app.common.di_container import DiContainer
+
+        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+
+    # TODO: rework implementation according new folder structure
 
     def delete_assets(self, user_id: str, filter_func: Callable[[dict[str, Any]], bool] | None = None) -> None:
-        assets: Response = cloudinary.api.resources(folder=user_id, max_results=500)
+        response = cloudinary.api.resources(folder=user_id, max_results=500)
 
-        for asset in assets["resources"]:
-            if filter_func is None or filter_func(asset):
-                cloudinary.api.delete_resources([asset["public_id"]])
+        for resources in response["resources"]:
+            if filter_func is None or filter_func(resources):
+                cloudinary.api.delete_resources([resources["public_id"]])
 
         self.__logger.log_info(f"Assets have been deleted for user '{user_id}'")
 
     def delete_user_assets_in_subfolder(self, user_id: str, subfolder: str) -> None:
-        self.delete_assets(user_id, filter_func=lambda asset: subfolder in asset["public_id"])
+        self.delete_assets(user_id, lambda asset: subfolder in asset["public_id"])
 
     def delete_user_folder(self, user_id: str) -> None:
         cloudinary.api.delete_folder(user_id)
@@ -63,7 +60,3 @@ class CloudinaryService(CloudinaryServiceABC):
 
     def delete_converted_images(self, user_id: str) -> None:
         self.delete_user_assets_in_subfolder(user_id, "converted/")
-
-    def upload_image(self, file_buffer: BytesIO, *, options: UploadOptions) -> ResultantValue[CloudinaryImage]:
-        cloudinary_image: CloudinaryImage = cloudinary.uploader.upload_image(file_buffer, **asdict(options))
-        return Resultant.success(cloudinary_image)

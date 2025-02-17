@@ -1,11 +1,10 @@
 from typing import Any
 from django import template
+from django.template import Library
 
-register = template.Library()
+register: Library = template.Library()
 
 
 @register.filter
-def decode_exif_value(value: Any, encoding="utf-8"):
-    if isinstance(value, bytes):
-        value = value.decode(encoding, errors="ignore")
-    return value
+def decode_exif_value(value: Any) -> str:
+    return value.decode(errors="ignore") if isinstance(value, bytes) else str(value)
