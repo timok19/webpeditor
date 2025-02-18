@@ -109,12 +109,12 @@ class SessionService:
         if is_successful(await self.__get_signed_user_id_async()):
             return None
 
-        app_user: AppUser = await AppUser.objects.acreate(
+        user: AppUser = await AppUser.objects.acreate(
             session_key=self.__get_session_key().unwrap(),
             session_key_expiration_date=self.__request.session.get_expiry_date(),
         )
 
-        signed_id = self.__user_service.sign_id(app_user.id)
+        signed_id = self.__user_service.sign_id(user.id)
         await self.__request.session.aset(self.__user_id_key, signed_id)
 
         self.__logger.log_debug(f"Signed User ID '{signed_id}' has been added into session storage")
