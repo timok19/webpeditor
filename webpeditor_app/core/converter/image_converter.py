@@ -1,7 +1,7 @@
 import os.path
 from decimal import Decimal
 from io import BytesIO
-from typing import IO, Collection, Final, Type, cast, final
+from typing import IO, Collection, Final, Type, TypedDict, cast, final
 
 from PIL.Image import Exif, Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
@@ -31,6 +31,11 @@ from webpeditor_app.models.converter import (
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
 )
+
+
+class OriginalConvertedImageData(TypedDict):
+    original: ImageFileInfo
+    converted: ImageFileInfo
 
 
 @final
@@ -166,35 +171,32 @@ class ImageConverter(ImageConverterABC):
             output_format=options.output_format,
         )
 
-        # Get original and converted images
-        image_data_results = self.__get_original_and_converted_image_data(file, new_filename, options=options)
-        if not is_successful(image_data_results):
-            return Failure(image_data_results.failure())
+        # Get original and converted image data
+        original_converted_image_data_result = self.__get_original_and_converted_image_data(file, new_filename, options)
+        if not is_successful(original_converted_image_data_result):
+            return Failure(original_converted_image_data_result.failure())
 
-        original_image_data, converted_image_data = image_data_results.unwrap()
+        # Get or create converter image asset
+        converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
+        if not is_successful(converter_image_asset_result):
+            return Failure(converter_image_asset_result.failure())
 
-        # Fetch the user instance using the provided user_id
-        user = await AppUser.objects.filter(id=user_id).afirst()
-        if user is None:
-            return Failure(
-                FailureContext(
-                    message="Unable to find current user",
-                    error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                )
-            )
+        # Unwrap
+        original_converted_image_data = original_converted_image_data_result.unwrap()
+        converter_image_asset = converter_image_asset_result.unwrap()
 
-        converter_image_asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
-
+        # Create original image asset file
         original_image_data = await self.__create_asset_file_data_async(
-            original_image_data,
+            original_converted_image_data["original"],
             original_filename,
             original_trimmed_filename,
             converter_image_asset,
             ConverterOriginalImageAssetFile,
         )
 
+        # Create converted image asset file
         converted_image_data = await self.__create_asset_file_data_async(
-            converted_image_data,
+            original_converted_image_data["converted"],
             f"converted_{new_filename}",
             new_trimmed_filename,
             converter_image_asset,
@@ -228,18 +230,27 @@ class ImageConverter(ImageConverterABC):
         self,
         file: UploadedFile,
         new_filename: str,
-        *,
         options: ConversionRequest.Options,
-    ) -> ValueResult[tuple[ImageFileInfo, ImageFileInfo]]:
+    ) -> ValueResult[OriginalConvertedImageData]:
         return Result.do(
-            (original_image_data, converted_image_data)
+            OriginalConvertedImageData(original=original_image_data, converted=converted_image_data)
             for original_image_data in self.__get_original_image_data(file, new_filename)
-            for converted_image_data in self.__convert_image(
-                original_image_data.image_file,
-                new_filename,
-                options=options,
-            )
+            for converted_image_data in self.__convert_image(original_image_data.image_file, new_filename, options)
         )
+
+    @staticmethod
+    async def __get_or_create_image_asset_async(user_id: str) -> ValueResult[ConverterImageAsset]:
+        user = await AppUser.objects.filter(id=user_id).afirst()
+        if user is None:
+            return Failure(
+                FailureContext(
+                    message="Unable to find current user",
+                    error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
+                )
+            )
+
+        converter_image_asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
+        return Success(converter_image_asset)
 
     @staticmethod
     async def __create_asset_file_data_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
@@ -283,7 +294,6 @@ class ImageConverter(ImageConverterABC):
         self,
         original_image: ImageFile,
         new_filename: str,
-        *,
         options: ConversionRequest.Options,
     ) -> ValueResult[ImageFileInfo]:
         return (
@@ -346,7 +356,6 @@ class ImageConverter(ImageConverterABC):
     def __convert_color_mode(
         self,
         original_image: Image,
-        *,
         output_format: ImageConverterAllOutputFormats,
     ) -> ValueResult[Image]:
         if original_image.format is None:
