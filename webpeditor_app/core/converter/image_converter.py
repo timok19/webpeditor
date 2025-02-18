@@ -157,21 +157,18 @@ class ImageConverter(ImageConverterABC):
             max_length=max_length,
             output_format=options.output_format,
         )
-        new_trimmed_filename = f"converted_{self.__trim_filename_or_default(new_filename, max_length=max_length, output_format=options.output_format)}"
+        new_trimmed_filename = self.__trim_filename_or_default(
+            f"converted_{new_filename}",
+            max_length=max_length,
+            output_format=options.output_format,
+        )
 
         # Get original and converted images
-        if not is_successful(
-            original_and_converted_image_data_result := Result.do(
-                (original_image_data, converted_image_data)
-                for original_image_data in self.__get_original_image_data(file, new_filename)
-                for converted_image_data in self.__convert_image(
-                    original_image_data.image_file, new_filename, options=options
-                )
-            )
-        ):
-            return Failure(original_and_converted_image_data_result.failure())
+        image_data_results = self.__get_original_and_converted_image_data(file, new_filename, options=options)
+        if not is_successful(image_data_results):
+            return Failure(image_data_results.failure())
 
-        original_image_data, converted_image_data = original_and_converted_image_data_result.unwrap()
+        original_image_data, converted_image_data = image_data_results.unwrap()
 
         # Fetch the user instance using the provided user_id
         user = await AppUser.objects.filter(id=user_id).afirst()
@@ -222,6 +219,23 @@ class ImageConverter(ImageConverterABC):
     ) -> str:
         return self.__image_file_utility_service.trim_filename(filename, max_length=max_length).value_or(
             f"webpeditor.{output_format.lower()}"
+        )
+
+    def __get_original_and_converted_image_data(
+        self,
+        file: UploadedFile,
+        new_filename: str,
+        *,
+        options: ConversionRequest.Options,
+    ) -> ValueResult[tuple[ImageFileInfo, ImageFileInfo]]:
+        return Result.do(
+            (original_image_data, converted_image_data)
+            for original_image_data in self.__get_original_image_data(file, new_filename)
+            for converted_image_data in self.__convert_image(
+                original_image_data.image_file,
+                new_filename,
+                options=options,
+            )
         )
 
     @staticmethod
