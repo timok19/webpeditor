@@ -215,13 +215,7 @@ class ImageConverter(ImageConverterABC):
         basename, _ = os.path.splitext(filename)
         return f"webpeditor_{basename}.{options.output_format.lower()}"
 
-    def __trim_filename_or_default(
-        self,
-        filename: str,
-        *,
-        max_length: int,
-        output_format: str,
-    ) -> str:
+    def __trim_filename_or_default(self, filename: str, *, max_length: int, output_format: str) -> str:
         return self.__image_file_utility_service.trim_filename(filename, max_length=max_length).value_or(
             f"webpeditor.{output_format.lower()}"
         )
