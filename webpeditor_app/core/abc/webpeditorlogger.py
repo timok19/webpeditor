@@ -6,6 +6,10 @@ from django.http.request import HttpRequest
 class WebPEditorLoggerABC(ABC):
     @staticmethod
     @abstractmethod
+    def log_debug(message: str) -> None: ...
+
+    @staticmethod
+    @abstractmethod
     def log_info(message: str) -> None: ...
 
     @staticmethod

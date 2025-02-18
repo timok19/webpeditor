@@ -1,6 +1,8 @@
-from typing import Final, final
+from typing import Final, Optional, final
 
+from ninja import UploadedFile
 from returns.pipeline import is_successful
+from returns.result import Failure, Result, Success
 
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
 from webpeditor_app.common.validator_abc import ValidatorABC, ValidationResult
@@ -19,23 +21,18 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
         validation_result = ValidationResult()
+        files_count = len(value.files)
 
-        if len(value.files) == 0:
+        if files_count == 0:
             validation_result.add_error("No files uploaded")
 
-        if len(value.files) > IMAGE_CONVERTER_SETTINGS.max_total_files_count:
+        if files_count > IMAGE_CONVERTER_SETTINGS.max_total_files_count:
             validation_result.add_error("Too many files uploaded")
 
         for file in value.files:
-            validate_filename_result = self.__image_file_utility_service.validate_filename(file.name)
-            if not is_successful(validate_filename_result):
-                validation_result.add_error(validate_filename_result.failure().message or "Invalid filename")
-
-            if file.size is None or file.size == 0:
-                validation_result.add_error(f"File {file.name} is empty")
-
-            if file.size is not None and file.size > IMAGE_CONVERTER_SETTINGS.max_file_size:
-                validation_result.add_error(f"File {file.name} size exceeds the maximum allowed size")
+            self.__validate_filename(file.name).alt(validation_result.add_error)
+            self.__validate_empty_file_size(file).alt(validation_result.add_error)
+            self.__validate_max_file_size(file).alt(validation_result.add_error)
 
         if value.options.output_format.strip().upper() not in ImageConverterAllOutputFormats:
             validation_result.add_error(f"Invalid output format - {value.options.output_format}")
@@ -46,3 +43,26 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             )
 
         return validation_result
+
+    def __validate_filename(self, filename: Optional[str]) -> Result[None, str]:
+        return (
+            Failure(result.failure().message or "Invalid filename")
+            if not is_successful(result := self.__image_file_utility_service.validate_filename(filename))
+            else Success(None)
+        )
+
+    @staticmethod
+    def __validate_empty_file_size(file: UploadedFile) -> Result[None, str]:
+        return (
+            Failure(f"Provided file {file.name} does not have size")
+            if file.size is None or file.size == 0
+            else Success(None)
+        )
+
+    @staticmethod
+    def __validate_max_file_size(file: UploadedFile) -> Result[None, str]:
+        return (
+            Failure(f"File {file.name} size exceeds the maximum allowed size")
+            if file.size is not None and file.size > IMAGE_CONVERTER_SETTINGS.max_file_size
+            else Success(None)
+        )

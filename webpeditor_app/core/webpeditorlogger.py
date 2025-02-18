@@ -18,6 +18,10 @@ class WebPEditorLogger(WebPEditorLoggerABC):
         )
 
     @staticmethod
+    def log_debug(message: str) -> None:
+        logger.opt(depth=1).debug(message)
+
+    @staticmethod
     def log_info(message: str) -> None:
         logger.opt(depth=1).info(message)
 

@@ -1,7 +1,7 @@
 import os.path
 from decimal import Decimal
 from io import BytesIO
-from typing import Collection, Final, Type, final
+from typing import IO, Collection, Final, Type, cast, final
 
 from PIL.Image import Exif, Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
@@ -11,7 +11,6 @@ from returns.result import Failure, Success, Result
 from types_linq import Enumerable
 
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
-from webpeditor_app.common.asyncio_utils import complete
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 from webpeditor_app.common.result_extensions import FailureContext, ValueResult
 from webpeditor_app.common.validator_abc import ValidatorABC
@@ -81,37 +80,11 @@ class ImageConverter(ImageConverterABC):
             self.__cloudinary_service.delete_converted_images(user_id_result.unwrap())
 
         # Process images
-        results = (
-            Enumerable(request.files)
-            .chunk(4)
-            .select_many(
-                lambda image_files_batch: Enumerable(image_files_batch).select(
-                    lambda image_file: complete(
-                        self.__convert_async(user_id_result.unwrap(), image_file, options=request.options),
-                    )
-                )
-            )
-        )
+        results = await self.__process_image_files_async(request, user_id_result.unwrap())
 
         # Get failed results
-        errors = results.where(lambda result: not is_successful(result))
-        if errors.any():
-            error_messages = errors.select(
-                lambda error: f"Error code: {error.failure().error_code}, Message: {error.failure().message or ''}"
-            )
-
-            self.__logger.log_error(
-                f"Failed to convert images for user '{user_id_result.unwrap()}'. Reasons: [{', '.join(*error_messages)}] "
-            )
-
-            return [
-                Failure(
-                    FailureContext(
-                        message=f"Failed to convert images. Reasons: [{', '.join(*error_messages)}]",
-                        error_code=errors.select(lambda error: error.failure().error_code).first(),
-                    )
-                )
-            ]
+        if (errors := results).any(lambda result: not is_successful(result)):
+            return self.__process_errors(errors, user_id_result.unwrap())
 
         self.__logger.log_info(
             f"Successfully converted {results.count()} image(s) for user '{user_id_result.unwrap()}'"
@@ -130,23 +103,51 @@ class ImageConverter(ImageConverterABC):
 
         return Success(DownloadAllZipResponse(zip_file_url=""))
 
+    async def __process_image_files_async(self, request: ConversionRequest, user_id: str):
+        return Enumerable(
+            [
+                await result
+                for result in Enumerable(request.files)
+                .chunk(4)
+                .select_many(
+                    lambda files: Enumerable(files).select(
+                        lambda file: self.__convert_async(user_id, file, options=request.options)
+                    )
+                )
+            ]
+        )
+
+    def __process_errors(
+        self,
+        errors: Enumerable[ValueResult[ConversionResponse]],
+        user_id: str,
+    ) -> list[Failure[FailureContext]]:
+        error_messages = errors.select(
+            lambda error: f"Error code: {error.failure().error_code}, Message: {error.failure().message or ''}"
+        )
+
+        self.__logger.log_error(
+            f"Failed to convert images for user '{user_id}'. Reasons: [{', '.join(*error_messages)}] "
+        )
+
+        return [
+            Failure(
+                FailureContext(
+                    message=f"Failed to convert images. Reasons: [{', '.join(*error_messages)}]",
+                    error_code=errors.select(lambda error: error.failure().error_code).first(),
+                )
+            )
+        ]
+
     async def __convert_async(
         self,
         user_id: str,
-        uploaded_image_file: UploadedFile,
+        file: UploadedFile,
         *,
         options: ConversionRequest.Options,
     ) -> ValueResult[ConversionResponse]:
-        if uploaded_image_file.name is None:
-            return Failure(
-                FailureContext(
-                    error_code=FailureContext.ErrorCode.BAD_REQUEST,
-                    message="Invalid image file",
-                )
-            )
-
         # Get sanitized filenames
-        original_filename = self.__image_file_utility_service.sanitize_filename(uploaded_image_file.name)
+        original_filename = self.__image_file_utility_service.sanitize_filename(cast(str, file.name))
         new_filename = self.__create_new_filename(original_filename, options=options)
 
         # Trim original and new filenames
@@ -162,7 +163,7 @@ class ImageConverter(ImageConverterABC):
         if not is_successful(
             original_and_converted_image_data_result := Result.do(
                 (original_image_data, converted_image_data)
-                for original_image_data in self.__get_original_image_data(uploaded_image_file, new_filename)
+                for original_image_data in self.__get_original_image_data(file, new_filename)
                 for converted_image_data in self.__convert_image(
                     original_image_data.image_file, new_filename, options=options
                 )
@@ -320,15 +321,7 @@ class ImageConverter(ImageConverterABC):
             return open(buffer)
 
     def __get_original_image_data(self, image_file: UploadedFile, new_filename: str) -> ValueResult[ImageFileInfo]:
-        if image_file.file is None:
-            return Failure(
-                FailureContext(
-                    message="Invalid image file",
-                    error_code=FailureContext.ErrorCode.BAD_REQUEST,
-                )
-            )
-
-        with open(image_file.file) as original_image:
+        with open(cast(IO, image_file.file)) as original_image:
             return self.__image_file_utility_service.update_filename(original_image, new_filename).bind(
                 self.__image_file_utility_service.get_file_info
             )

@@ -33,7 +33,7 @@ class _ImageConverterSettings(BaseModel):
     min_quality: Final[int] = 5
     max_quality: Final[int] = 100
     max_file_size: Final[int] = 6_291_456
-    max_total_files_count: Final[int] = 15
+    max_total_files_count: Final[int] = 10
 
 
 IMAGE_CONVERTER_SETTINGS: _ImageConverterSettings = _ImageConverterSettings()
