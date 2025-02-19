@@ -3,8 +3,8 @@ from django.core import signing
 from returns.pipeline import is_successful
 from returns.result import Failure, Success, attempt, Result
 
-from webpeditor_app.common.result_extensions import FailureContext, ValueResult
-from webpeditor_app.core.abc.user_service import UserServiceABC
+from webpeditor_app.core.result_extensions import FailureContext, ValueResult
+from webpeditor_app.application.auth.abc.user_service import UserServiceABC
 
 
 @final

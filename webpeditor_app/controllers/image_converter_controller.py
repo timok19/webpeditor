@@ -4,14 +4,16 @@ from typing import Annotated, final, Final
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import ControllerBase, api_controller, http_post
+from returns.result import Failure
 
+from webpeditor_app.application.converter.commands.convert_images import ConvertImages
+from webpeditor_app.application.converter.schemas.conversion import ConversionResponse, ConversionRequest
+from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
+from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
+from webpeditor_app.core.result_extensions import FailureContext
 from webpeditor_app.controllers.mixins.controller_mixin import ControllerMixin
 from webpeditor_app.controllers.schemas.result_response import ResultResponse
-from webpeditor_app.core.abc.image_converter import ImageConverterABC
-from webpeditor_app.core.auth.session_service_factory import SessionServiceFactory
-from webpeditor_app.core.converter.schemas.conversion import ConversionRequest, ConversionResponse
-from webpeditor_app.core.converter.schemas.download import DownloadAllZipResponse
-from webpeditor_app.core.converter.settings import ImageConverterAllOutputFormats
+from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 
 # TODO: Add other endpoints from "__converter" folder
 
@@ -20,10 +22,10 @@ from webpeditor_app.core.converter.settings import ImageConverterAllOutputFormat
 @api_controller("/converter", tags=["Image Converter"])
 class ImageConverterController(ControllerMixin, ControllerBase):
     def __init__(self) -> None:
-        from webpeditor_app.common.di_container import DiContainer
+        from webpeditor_app.core.di_container import DiContainer
 
         self.__session_service_factory: Final[SessionServiceFactory] = DiContainer.get_dependency(SessionServiceFactory)
-        self.__image_converter: Final[ImageConverterABC] = DiContainer.get_dependency(ImageConverterABC)
+        self.__convert_images: Final[ConvertImages] = DiContainer.get_dependency(ConvertImages)
 
     @http_post(
         "/convert-images",
@@ -64,7 +66,7 @@ class ImageConverterController(ControllerMixin, ControllerBase):
     ) -> tuple[HTTPStatus, list[ResultResponse[ConversionResponse]]]:
         session_service = self.__session_service_factory.create(self.get_request(self.context))
         return ResultResponse[ConversionResponse].from_results(
-            await self.__image_converter.convert_async(
+            await self.__convert_images.handle_async(
                 request=ConversionRequest(
                     files=files,
                     options=ConversionRequest.Options(
@@ -87,5 +89,5 @@ class ImageConverterController(ControllerMixin, ControllerBase):
     async def download_all_as_zip_async(self) -> tuple[HTTPStatus, ResultResponse[DownloadAllZipResponse]]:
         session_service = self.__session_service_factory.create(self.get_request(self.context))
         return ResultResponse[DownloadAllZipResponse].from_result(
-            await self.__image_converter.download_all_as_zip_async(session_service)
+            Failure(FailureContext(error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR))
         )

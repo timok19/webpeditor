@@ -12,14 +12,12 @@ from types_linq import Enumerable
 
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.common.result_extensions import FailureContext, ValueResult
-from webpeditor_app.common.validator_abc import ValidatorABC
-from webpeditor_app.core.abc.image_converter import ImageConverterABC
+from webpeditor_app.core.result_extensions import FailureContext, ValueResult
+from webpeditor_app.common.abc.validator import ValidatorABC
 from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
-from webpeditor_app.core.auth.session_service import SessionService
-from webpeditor_app.core.converter.schemas.conversion import ConversionRequest, ConversionResponse
-from webpeditor_app.core.converter.schemas.download import DownloadAllZipResponse
-from webpeditor_app.core.converter.settings import (
+from webpeditor_app.application.auth.session_service import SessionService
+from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
+from webpeditor_app.application.converter.schemas.settings import (
     ImageConverterAllOutputFormats,
     ImageConverterOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,
@@ -33,15 +31,15 @@ from webpeditor_app.models.converter import (
 )
 
 
-class OriginalConvertedImageData(TypedDict):
+class _OriginalAndConvertedImageFileInfo(TypedDict):
     original: ImageFileInfo
     converted: ImageFileInfo
 
 
 @final
-class ImageConverter(ImageConverterABC):
+class ConvertImages:
     def __init__(self) -> None:
-        from webpeditor_app.common.di_container import DiContainer
+        from webpeditor_app.core.di_container import DiContainer
 
         self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
         self.__cloudinary_service: Final[CloudinaryServiceABC] = DiContainer.get_dependency(CloudinaryServiceABC)
@@ -52,7 +50,7 @@ class ImageConverter(ImageConverterABC):
             ValidatorABC[ConversionRequest]
         )
 
-    async def convert_async(
+    async def handle_async(
         self,
         request: ConversionRequest,
         session_service: SessionService,
@@ -95,17 +93,6 @@ class ImageConverter(ImageConverterABC):
         )
 
         return results
-
-    # TODO Finish the implementation
-    async def download_all_as_zip_async(self, session_service: SessionService) -> ValueResult[DownloadAllZipResponse]:
-        # Synchronize session
-        await session_service.synchronize_async()
-
-        (await session_service.get_user_id_async()).map(
-            lambda user_id: ConverterConvertedImageAssetFile.objects.filter(image_asset__user__id=user_id).all().aget()
-        )
-
-        return Success(DownloadAllZipResponse(zip_file_url=""))
 
     async def __process_image_files_async(
         self,
@@ -172,34 +159,34 @@ class ImageConverter(ImageConverterABC):
         )
 
         # Get original and converted image data
-        original_converted_image_data_result = self.__get_original_and_converted_image_data(file, new_filename, options)
-        if not is_successful(original_converted_image_data_result):
-            return Failure(original_converted_image_data_result.failure())
+        original_and_converted_image_data_result = self.__get_original_and_converted_image_data(
+            file,
+            new_filename,
+            options,
+        )
+        if not is_successful(original_and_converted_image_data_result):
+            return Failure(original_and_converted_image_data_result.failure())
 
         # Get or create converter image asset
         converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
         if not is_successful(converter_image_asset_result):
             return Failure(converter_image_asset_result.failure())
 
-        # Unwrap
-        original_converted_image_data = original_converted_image_data_result.unwrap()
-        converter_image_asset = converter_image_asset_result.unwrap()
-
         # Create original image asset file
         original_image_data = await self.__create_asset_file_data_async(
-            original_converted_image_data["original"],
+            original_and_converted_image_data_result.unwrap()["original"],
             original_filename,
             original_trimmed_filename,
-            converter_image_asset,
+            converter_image_asset_result.unwrap(),
             ConverterOriginalImageAssetFile,
         )
 
         # Create converted image asset file
         converted_image_data = await self.__create_asset_file_data_async(
-            original_converted_image_data["converted"],
+            original_and_converted_image_data_result.unwrap()["converted"],
             f"converted_{new_filename}",
             new_trimmed_filename,
-            converter_image_asset,
+            converter_image_asset_result.unwrap(),
             ConverterConvertedImageAssetFile,
         )
 
@@ -225,11 +212,11 @@ class ImageConverter(ImageConverterABC):
         file: UploadedFile,
         new_filename: str,
         options: ConversionRequest.Options,
-    ) -> ValueResult[OriginalConvertedImageData]:
+    ) -> ValueResult[_OriginalAndConvertedImageFileInfo]:
         return Result.do(
-            OriginalConvertedImageData(original=original_image_data, converted=converted_image_data)
-            for original_image_data in self.__get_original_image_data(file, new_filename)
-            for converted_image_data in self.__convert_image(original_image_data.image_file, new_filename, options)
+            _OriginalAndConvertedImageFileInfo(original=original_file_info, converted=converted_file_info)
+            for original_file_info in self.__get_original_image_data(file, new_filename)
+            for converted_file_info in self.__convert_image(original_file_info.image_file, new_filename, options)
         )
 
     @staticmethod
@@ -284,6 +271,12 @@ class ImageConverter(ImageConverterABC):
             exif_data=created_asset_file.exif_data,
         )
 
+    def __get_original_image_data(self, image_file: UploadedFile, new_filename: str) -> ValueResult[ImageFileInfo]:
+        with open(cast(IO, image_file.file)) as original_image:
+            return self.__image_file_utility_service.update_filename(original_image, new_filename).bind(
+                self.__image_file_utility_service.get_file_info
+            )
+
     def __convert_image(
         self,
         original_image: ImageFile,
@@ -296,6 +289,36 @@ class ImageConverter(ImageConverterABC):
             .bind(lambda image: self.__image_file_utility_service.update_filename(image, new_filename))
             .bind(self.__image_file_utility_service.get_file_info)
         )
+
+    def __convert_color_mode(
+        self,
+        original_image: Image,
+        output_format: ImageConverterAllOutputFormats,
+    ) -> ValueResult[Image]:
+        if original_image.format is None:
+            return Failure(
+                FailureContext(
+                    message="Unable to convert image color. Invalid image format",
+                    error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
+                )
+            )
+
+        if original_image.format.upper() not in ImageConverterOutputFormatsWithAlphaChannel:
+            return Success(original_image.convert("RGB"))
+
+        rgba_image = original_image.convert("RGBA")
+
+        if output_format in ImageConverterOutputFormatsWithAlphaChannel:
+            return Success(rgba_image)
+
+        return Success(self.__to_rgb(rgba_image))
+
+    @staticmethod
+    def __to_rgb(rgba_image: Image) -> Image:
+        white_color = (255, 255, 255, 255)
+        white_background: Image = new(mode="RGBA", size=rgba_image.size, color=white_color)
+        # Merge RGBA into RGB with a white background
+        return alpha_composite(white_background, rgba_image).convert("RGB")
 
     @staticmethod
     def __convert_format(image: Image, exif_data: Exif, options: ConversionRequest.Options) -> ImageFile:
@@ -340,39 +363,3 @@ class ImageConverter(ImageConverterABC):
                     )
 
             return open(buffer)
-
-    def __get_original_image_data(self, image_file: UploadedFile, new_filename: str) -> ValueResult[ImageFileInfo]:
-        with open(cast(IO, image_file.file)) as original_image:
-            return self.__image_file_utility_service.update_filename(original_image, new_filename).bind(
-                self.__image_file_utility_service.get_file_info
-            )
-
-    def __convert_color_mode(
-        self,
-        original_image: Image,
-        output_format: ImageConverterAllOutputFormats,
-    ) -> ValueResult[Image]:
-        if original_image.format is None:
-            return Failure(
-                FailureContext(
-                    message="Unable to convert image color. Invalid image format",
-                    error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                )
-            )
-
-        if original_image.format.upper() not in ImageConverterOutputFormatsWithAlphaChannel:
-            return Success(original_image.convert("RGB"))
-
-        rgba_image = original_image.convert("RGBA")
-
-        if output_format in ImageConverterOutputFormatsWithAlphaChannel:
-            return Success(rgba_image)
-
-        return Success(self.__to_rgb(rgba_image))
-
-    @staticmethod
-    def __to_rgb(rgba_image: Image) -> Image:
-        white_color = (255, 255, 255, 255)
-        white_background: Image = new(mode="RGBA", size=rgba_image.size, color=white_color)
-        # Merge RGBA into RGB with a white background
-        return alpha_composite(white_background, rgba_image).convert("RGB")

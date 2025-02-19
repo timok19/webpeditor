@@ -4,7 +4,7 @@ from returns.pipeline import is_successful
 
 from webpeditor_app.common import ValueResult
 from webpeditor_app.models import ConverterImageAsset
-from webpeditor_app.core.auth.session_service import SessionService
+from webpeditor_app.application.auth import SessionService
 
 
 class ConvertedImagesDestroyAPIView:

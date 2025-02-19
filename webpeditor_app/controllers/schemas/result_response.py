@@ -6,7 +6,7 @@ from pydantic import ConfigDict
 from returns.pipeline import is_successful
 from types_linq import Enumerable
 
-from webpeditor_app.common.result_extensions import FailureContext, ValueResult
+from webpeditor_app.core.result_extensions import FailureContext, ValueResult
 
 _TResponse = TypeVar("_TResponse")
 

@@ -18,7 +18,7 @@ from returns.result import Failure, Result, Success
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.common.result_extensions import FailureContext, ValueResult
+from webpeditor_app.core.result_extensions import FailureContext, ValueResult
 
 
 @final

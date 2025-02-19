@@ -10,7 +10,7 @@ from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServi
 
 class CloudinaryService(CloudinaryServiceABC):
     def __init__(self) -> None:
-        from webpeditor_app.common.di_container import DiContainer
+        from webpeditor_app.core.di_container import DiContainer
 
         self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
 

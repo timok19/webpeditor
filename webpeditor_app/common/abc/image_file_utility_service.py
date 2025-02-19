@@ -4,7 +4,7 @@ from typing import Optional
 from PIL.ImageFile import ImageFile
 
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.common.result_extensions import ValueResult
+from webpeditor_app.core.result_extensions import ValueResult
 
 
 class ImageFileUtilityServiceABC(ABC):

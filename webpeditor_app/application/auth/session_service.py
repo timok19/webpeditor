@@ -7,9 +7,9 @@ from returns.maybe import Maybe, Nothing, Some
 from returns.pipeline import is_successful
 from returns.result import Result
 
-from webpeditor_app.common.result_extensions import FailureContext, ValueResult
+from webpeditor_app.core.result_extensions import FailureContext, ValueResult
 from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
-from webpeditor_app.core.abc.user_service import UserServiceABC
+from webpeditor_app.application.auth.abc.user_service import UserServiceABC
 from webpeditor_app.domain.abc.converter.queries import ConverterQueriesABC
 from webpeditor_app.domain.abc.editor.queries import EditorQueriesABC
 from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC

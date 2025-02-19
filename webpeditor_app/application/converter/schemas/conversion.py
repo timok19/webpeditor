@@ -3,7 +3,7 @@ from decimal import Decimal
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 
-from webpeditor_app.core.converter.settings import ImageConverterAllOutputFormats
+from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
 
 
 class ConversionRequest(Schema):

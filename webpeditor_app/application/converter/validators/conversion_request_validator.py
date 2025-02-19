@@ -5,15 +5,18 @@ from returns.pipeline import is_successful
 from returns.result import Failure, Result, Success
 
 from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
-from webpeditor_app.common.validator_abc import ValidatorABC, ValidationResult
-from webpeditor_app.core.converter.schemas.conversion import ConversionRequest
-from webpeditor_app.core.converter.settings import IMAGE_CONVERTER_SETTINGS, ImageConverterAllOutputFormats
+from webpeditor_app.common.abc.validator import ValidatorABC, ValidationResult
+from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.schemas.settings import (
+    IMAGE_CONVERTER_SETTINGS,
+    ImageConverterAllOutputFormats,
+)
 
 
 @final
 class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __init__(self) -> None:
-        from webpeditor_app.common.di_container import DiContainer
+        from webpeditor_app.core.di_container import DiContainer
 
         self.__image_file_utility_service: Final[ImageFileUtilityServiceABC] = DiContainer.get_dependency(
             ImageFileUtilityServiceABC

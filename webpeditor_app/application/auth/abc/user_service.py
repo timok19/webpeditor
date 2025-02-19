@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-from webpeditor_app.common.result_extensions import ValueResult
+from webpeditor_app.core.result_extensions import ValueResult
 
 
 class UserServiceABC(ABC):

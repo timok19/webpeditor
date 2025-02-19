@@ -1,7 +1,8 @@
 from enum import StrEnum
 from typing import Final
 
-from pydantic import ConfigDict, BaseModel
+from ninja import Schema
+from pydantic import ConfigDict
 
 
 class ImageConverterAllOutputFormats(StrEnum):
@@ -27,7 +28,7 @@ class ImageConverterOutputFormatsWithAlphaChannel(StrEnum):
     ICO = "ICO"
 
 
-class _ImageConverterSettings(BaseModel):
+class _ImageConverterSettings(Schema):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
     min_quality: Final[int] = 5
