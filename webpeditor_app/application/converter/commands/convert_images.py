@@ -285,7 +285,7 @@ class ConvertImages:
     ) -> ValueResult[ImageFileInfo]:
         return (
             self.__convert_color_mode(original_image, output_format=options.output_format)
-            .map(lambda image: self.__convert_format(image, original_image.getexif(), options=options))
+            .map(lambda image: self.__convert_format(image, original_image.getexif(), options))
             .bind(lambda image: self.__image_file_utility_service.update_filename(image, new_filename))
             .bind(self.__image_file_utility_service.get_file_info)
         )
