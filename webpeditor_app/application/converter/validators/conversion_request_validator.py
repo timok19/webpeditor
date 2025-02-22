@@ -4,8 +4,8 @@ from ninja import UploadedFile
 from returns.pipeline import is_successful
 from returns.result import Failure, Result, Success
 
-from webpeditor_app.common.abc.image_file_utility_service import ImageFileUtilityServiceABC
-from webpeditor_app.common.abc.validator import ValidatorABC, ValidationResult
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.validator_abc import ValidatorABC, ValidationResult
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.schemas.settings import (
     IMAGE_CONVERTER_SETTINGS,
@@ -18,9 +18,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __init__(self) -> None:
         from webpeditor_app.core.di_container import DiContainer
 
-        self.__image_file_utility_service: Final[ImageFileUtilityServiceABC] = DiContainer.get_dependency(
-            ImageFileUtilityServiceABC
-        )
+        self.__image_file_utility: Final[ImageFileUtilityABC] = DiContainer.get_dependency(ImageFileUtilityABC)
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
         validation_result = ValidationResult()
@@ -50,7 +48,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __validate_filename(self, filename: Optional[str]) -> Result[None, str]:
         return (
             Failure(result.failure().message or "Invalid filename")
-            if not is_successful(result := self.__image_file_utility_service.validate_filename(filename))
+            if not is_successful(result := self.__image_file_utility.validate_filename(filename))
             else Success(None)
         )
 

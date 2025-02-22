@@ -5,14 +5,13 @@ from django.http.request import HttpRequest
 from django.utils import timezone
 from returns.maybe import Maybe, Nothing, Some
 from returns.pipeline import is_successful
-from returns.result import Result
 
-from webpeditor_app.core.result_extensions import FailureContext, ValueResult
-from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
-from webpeditor_app.application.auth.abc.user_service import UserServiceABC
-from webpeditor_app.domain.abc.converter.queries import ConverterQueriesABC
-from webpeditor_app.domain.abc.editor.queries import EditorQueriesABC
-from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC
+from webpeditor_app.core.based_result import FailureContext, BasedResultOutput, BasedResult
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
+from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.domain.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.models.app_user import AppUser
 
 
@@ -51,7 +50,7 @@ class SessionService:
         )
         datetime_now: datetime = timezone.now()
 
-        user_id_result: ValueResult[str] = await self.get_user_id_async()
+        user_id_result: BasedResultOutput[str] = await self.get_user_id_async()
 
         if not is_successful(user_id_result):
             failure: FailureContext = user_id_result.failure()
@@ -63,7 +62,7 @@ class SessionService:
         user_id: str = user_id_result.unwrap()
 
         if datetime_now > session_store_expiry_datetime:
-            await self.__cleanup_storages(user_id)
+            await self.__cleanup_storages_async(user_id)
 
         await self.set_expiry_async(timedelta(minutes=15))
 
@@ -78,24 +77,13 @@ class SessionService:
 
         return None
 
-    async def get_user_id_async(self) -> ValueResult[str]:
-        return (
-            (await self.__get_signed_user_id_async())
-            .map(lambda signed_user_id: self.__user_service.unsign_id(signed_user_id))
-            .value_or(
-                Result.from_failure(
-                    FailureContext(
-                        message="Unable to get user ID from session storage",
-                        error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                    )
-                )
-            )
-        )
+    async def get_user_id_async(self) -> BasedResultOutput[str]:
+        return (await self.__get_signed_user_id_async()).bind(self.__user_service.unsign_id)
 
     async def set_expiry_async(self, duration: timedelta) -> None:
         return await self.__request.session.aset_expiry(timezone.now() + duration)
 
-    async def clear_expired_async(self) -> ValueResult[None]:
+    async def clear_expired_async(self) -> BasedResultOutput[None]:
         return (
             (await self.get_user_id_async())
             .map(lambda user_id: (user_id, self.__request.session.clear_expired()))
@@ -121,7 +109,7 @@ class SessionService:
 
         return None
 
-    async def __cleanup_storages(self, user_id: str) -> None:
+    async def __cleanup_storages_async(self, user_id: str) -> None:
         (await self.__editor_queries.get_original_asset_async(user_id)).map(lambda asset: asset.delete())
         (await self.__editor_queries.get_edited_asset_async(user_id)).map(lambda asset: asset.delete())
         (await self.__converter_queries.get_converted_asset_async(user_id)).map(lambda asset: asset.delete())
@@ -144,6 +132,12 @@ class SessionService:
         session_key: Optional[str] = self.__request.session.session_key
         return Some(session_key) if session_key is not None else Nothing
 
-    async def __get_signed_user_id_async(self) -> Maybe[str]:
+    async def __get_signed_user_id_async(self) -> BasedResultOutput[str]:
         user_id: Optional[str] = await self.__request.session.aget(self.__user_id_key)
-        return Some(user_id) if user_id is not None else Nothing
+        if user_id is None:
+            return BasedResult.failure(
+                FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
+                "Unable to get user ID from session storage",
+            )
+
+        return BasedResult.success(user_id)

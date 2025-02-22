@@ -1,12 +1,12 @@
 from typing import Final
 from django.http import HttpRequest
 
-from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
-from webpeditor_app.application.auth.abc.user_service import UserServiceABC
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.auth.session_service import SessionService
-from webpeditor_app.domain.abc.converter.queries import ConverterQueriesABC
-from webpeditor_app.domain.abc.editor.queries import EditorQueriesABC
-from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC
+from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.domain.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 
 
 class SessionServiceFactory:

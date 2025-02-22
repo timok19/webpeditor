@@ -4,6 +4,7 @@ from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 
 from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
+from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 
 
 class ConversionRequest(Schema):
@@ -37,3 +38,10 @@ class ConversionResponse(Schema):
         aspect_ratio: Decimal
         color_mode: str
         exif_data: dict[str, str]
+
+
+class OriginalAndConvertedImageFileInfo(Schema):
+    model_config = ConfigDict(frozen=True, strict=True, extra="forbid", arbitrary_types_allowed=True)
+
+    original: ImageFileInfo
+    converted: ImageFileInfo

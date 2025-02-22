@@ -4,7 +4,7 @@ from django.http.request import HttpRequest
 from loguru import logger
 
 from webpeditor.settings import DEBUG
-from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
 class WebPEditorLogger(WebPEditorLoggerABC):

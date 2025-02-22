@@ -4,8 +4,8 @@ import cloudinary.api
 import cloudinary.uploader
 from cloudinary.api_client.execute_request import Response
 
-from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
-from webpeditor_app.infrastructure.abc.cloudinary_service import CloudinaryServiceABC
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 
 
 class CloudinaryService(CloudinaryServiceABC):

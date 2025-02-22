@@ -8,7 +8,7 @@ from returns.pipeline import is_successful
 from returns.result import attempt, Result
 from types_linq import Enumerable
 
-from webpeditor_app.core.abc.webpeditorlogger import WebPEditorLoggerABC
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
 class ExceptionHandlingMiddleware:
@@ -22,19 +22,21 @@ class ExceptionHandlingMiddleware:
         return self.__process_response(request, self.get_response(request))
 
     def __process_response(self, request: HttpRequest, response: HttpResponseBase) -> HttpResponseBase:
-        error_codes = Enumerable(codes_4xx).union(codes_5xx)
-
-        if isinstance(response, HttpResponse) and error_codes.any(lambda code: response.status_code == code):
+        if isinstance(response, HttpResponse) and self.__is_error_response(response.status_code):
             return self.__process_http_error_response(request, response)
 
         return response
+
+    @staticmethod
+    def __is_error_response(status_code: int) -> bool:
+        return Enumerable(codes_4xx).union(codes_5xx).any(lambda code: status_code == code)
 
     def __process_http_error_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
         response_data_result: Result[object, bytes] = self.__get_response_data(response.content)
 
         if not is_successful(response_data_result):
             content = response_data_result.failure().decode()
-            self.__logger.log_request_error(request, f"Error parsing response content. Content: '{content}'")
+            self.__logger.log_request_error(request, f"Unhandled error occurred. Response: '{content}'")
             return response
 
         response_data = response_data_result.unwrap()
@@ -56,4 +58,4 @@ class ExceptionHandlingMiddleware:
         return json.loads(content)
 
     def __log_mapped_error(self, request: HttpRequest, data: dict[str, object]) -> None:
-        self.__logger.log_request_error(request, data["message"] if "message" in data else "Unexpected response")
+        self.__logger.log_request_error(request, str(data["message"]) if "message" in data else "Unexpected response")

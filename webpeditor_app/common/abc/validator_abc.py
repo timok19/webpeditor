@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from webpeditor_app.core.based_result import FailureContext, BasedResultOutput, BasedResult
+
 
 class ValidationResult:
     def __init__(self) -> None:
@@ -19,6 +21,13 @@ class ValidationResult:
 
     def is_successful(self) -> bool:
         return not any(self.__errors)
+
+    def as_based_result(self) -> BasedResultOutput[None]:
+        return (
+            BasedResult.failure(FailureContext.ErrorCode.BAD_REQUEST, self.message)
+            if not self.is_successful()
+            else BasedResult.success(None)
+        )
 
 
 class ValidatorABC[TModel: object](ABC):

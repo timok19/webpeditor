@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-from webpeditor_app.core.result_extensions import ValueResult
+from webpeditor_app.core.based_result import BasedResultOutput
 
 
 class UserServiceABC(ABC):
@@ -9,4 +9,4 @@ class UserServiceABC(ABC):
     def sign_id(self, user_id: str) -> str: ...
 
     @abstractmethod
-    def unsign_id(self, signed_user_id: str) -> ValueResult[str]: ...
+    def unsign_id(self, signed_user_id: str) -> BasedResultOutput[str]: ...
