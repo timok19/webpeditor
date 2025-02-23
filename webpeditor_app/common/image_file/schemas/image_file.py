@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from PIL.ImageFile import ImageFile
 from django.core.files.base import ContentFile
 from ninja import Schema
 from pydantic import ConfigDict
@@ -9,7 +8,6 @@ from pydantic import ConfigDict
 class ImageFileInfo(Schema):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid", arbitrary_types_allowed=True)
 
-    image_file: ImageFile
     content_file: ContentFile
     filename: str
     file_format: str

@@ -155,13 +155,9 @@ class ConvertImages:
         with open(cast(IO, file.file)) as original_image:
             image_files_info_results = Result.do(
                 OriginalAndConvertedImageFileInfo(original=original_file_info, converted=converted_file_info)
-                for original_file_info in (
-                    self.__image_file_utility.update_filename(original_image, new_filename).bind(
-                        self.__image_file_utility.get_file_info
-                    )
-                )
+                for original_file_info in self.__image_file_utility.get_file_info(original_image)
                 for converted_file_info in (
-                    self.__convert_color_mode(original_file_info.image_file, output_format=options.output_format)
+                    self.__convert_color_mode(original_image, output_format=options.output_format)
                     .map(lambda image: self.__convert_format(image, options))
                     .bind(lambda image: self.__image_file_utility.update_filename(image, new_filename))
                     .bind(self.__image_file_utility.get_file_info)
