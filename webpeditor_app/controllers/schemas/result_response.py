@@ -6,7 +6,7 @@ from pydantic import ConfigDict
 from returns.pipeline import is_successful
 from types_linq import Enumerable
 
-from webpeditor_app.core.based_result import FailureContext, BasedResultOutput
+from webpeditor_app.core.extensions.result_extensions import FailureContext, ResultOfType
 
 _TResponse = TypeVar("_TResponse")
 
@@ -28,7 +28,7 @@ class BasedResultResponse(Schema, Generic[_TResponse]):
     @classmethod
     def from_results(
         cls,
-        results: Collection[BasedResultOutput[_TResponse]],
+        results: Collection[ResultOfType[_TResponse]],
     ) -> tuple[HTTPStatus, "list[BasedResultResponse[_TResponse]]"]:
         if len(results) == 0:
             return HTTPStatus.NO_CONTENT, []
@@ -48,7 +48,7 @@ class BasedResultResponse(Schema, Generic[_TResponse]):
         return first_error_or_ok_status, result_responses
 
     @classmethod
-    def from_result(cls, result: BasedResultOutput[_TResponse]) -> tuple[HTTPStatus, "BasedResultResponse[_TResponse]"]:
+    def from_result(cls, result: ResultOfType[_TResponse]) -> tuple[HTTPStatus, "BasedResultResponse[_TResponse]"]:
         if not is_successful(result):
             return cls.from_failure(result.failure())
 

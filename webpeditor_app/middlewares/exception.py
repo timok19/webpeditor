@@ -13,10 +13,10 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 class ExceptionHandlingMiddleware:
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
-        self.get_response = get_response
         from webpeditor_app.core.di_container import DiContainer
 
         self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+        self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
         return self.__process_response(request, self.get_response(request))
@@ -36,7 +36,7 @@ class ExceptionHandlingMiddleware:
 
         if not is_successful(response_data_result):
             content = response_data_result.failure().decode()
-            self.__logger.log_request_error(request, f"Unhandled error occurred. Response: '{content}'")
+            self.__logger.log_request_error(request, f"Unhandled error. Response: '{content}'")
             return response
 
         response_data = response_data_result.unwrap()

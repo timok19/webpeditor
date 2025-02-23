@@ -1,32 +1,27 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from webpeditor_app.core.based_result import FailureContext, BasedResultOutput, BasedResult
+from ninja import Field, Schema
+
+from webpeditor_app.core.extensions.result_extensions import FailureContext, ResultOfType, ResultExtensions
 
 
-class ValidationResult:
-    def __init__(self) -> None:
-        self.__errors: list[str] = []
-
-    @property
-    def errors(self) -> list[str]:
-        return self.__errors
-
-    @property
-    def message(self) -> Optional[str]:
-        return f"Validation failed. Errors: [{', '.join(self.__errors)}]" if any(self.__errors) else None
+class ValidationResult(Schema):
+    errors: list[str] = Field(default_factory=list[str])
 
     def add_error(self, message: str) -> None:
-        self.__errors.append(message)
+        self.errors.append(message)
 
     def is_successful(self) -> bool:
-        return not any(self.__errors)
+        return not any(self.errors)
 
-    def as_based_result(self) -> BasedResultOutput[None]:
+    def as_based_result(self) -> ResultOfType[None]:
         return (
-            BasedResult.failure(FailureContext.ErrorCode.BAD_REQUEST, self.message)
+            ResultExtensions.failure(
+                FailureContext.ErrorCode.BAD_REQUEST,
+                f"Validation failed. Errors: [{', '.join(self.errors)}]" if any(self.errors) else None,
+            )
             if not self.is_successful()
-            else BasedResult.success(None)
+            else ResultExtensions.success(None)
         )
 
 

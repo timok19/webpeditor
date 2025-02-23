@@ -17,55 +17,55 @@ from PIL.TiffImagePlugin import IFDRational
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.based_result import BasedResult, FailureContext, BasedResultOutput
+from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ResultOfType
 
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
-    def convert_to_bytes(self, file_base64: str) -> BasedResultOutput[bytes]:
+    def convert_to_bytes(self, file_base64: str) -> ResultOfType[bytes]:
         if len(file_base64) == 0:
-            return BasedResult.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File base64 is empty")
+            return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File base64 is empty")
 
         image_base64_data: str = file_base64.split(",")[1]
 
-        return BasedResult.success(base64.b64decode(image_base64_data))
+        return ResultExtensions.success(base64.b64decode(image_base64_data))
 
-    async def get_file_content_async(self, file_url: str) -> BasedResultOutput[bytes]:
+    async def get_file_content_async(self, file_url: str) -> ResultOfType[bytes]:
         if len(file_url) == 0:
-            return BasedResult.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
+            return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
 
         async with AsyncClient() as client:
             file_response = await client.get(file_url)
 
             if file_response.status_code == HTTPStatus.NOT_FOUND.value:
-                return BasedResult.failure(
+                return ResultExtensions.failure(
                     FailureContext.ErrorCode.NOT_FOUND,
                     f"Unable to get content of image file from url '{file_url}'",
                 )
 
             if len(file_response.content) == 0 or file_response.content is None:
-                return BasedResult.failure(FailureContext.ErrorCode.NOT_FOUND, "File has no content")
+                return ResultExtensions.failure(FailureContext.ErrorCode.NOT_FOUND, "File has no content")
 
-            return BasedResult.success(file_response.content)
+            return ResultExtensions.success(file_response.content)
 
-    def get_file_info(self, image_file: ImageFile) -> BasedResultOutput[ImageFileInfo]:
+    def get_file_info(self, image_file: ImageFile) -> ResultOfType[ImageFileInfo]:
         with BytesIO() as buffer:
             image_file.save(buffer, format=image_file.format)
             image_file_bytes = buffer.getvalue()
 
         if len(image_file_bytes) == 0:
-            return BasedResult.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File has no content")
+            return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File has no content")
 
         content_file = ContentFile(image_file_bytes, str(image_file.filename))
 
         if image_file.format is None:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
                 "Failed to read image file format",
             )
 
         if isinstance(image_file.filename, bytes):
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
                 "Filename must be a string",
             )
@@ -89,21 +89,21 @@ class ImageFileUtility(ImageFileUtilityABC):
             exif_data=mapped_exif_data,
         )
 
-        return BasedResult.success(image_file_info)
+        return ResultExtensions.success(image_file_info)
 
-    def update_filename(self, image_file: ImageFile, new_filename: str) -> BasedResultOutput[ImageFile]:
+    def update_filename(self, image_file: ImageFile, new_filename: str) -> ResultOfType[ImageFile]:
         return (
             self.validate_filename(new_filename)
             .map(self.sanitize_filename)
             .map(lambda filename: self.__update_filename(image_file, filename))
         )
 
-    def validate_filename(self, filename: Optional[str]) -> BasedResultOutput[str]:
+    def validate_filename(self, filename: Optional[str]) -> ResultOfType[str]:
         if filename is None or len(filename) == 0:
-            return BasedResult.failure(FailureContext.ErrorCode.BAD_REQUEST, "Filename must not be empty")
+            return ResultExtensions.failure(FailureContext.ErrorCode.BAD_REQUEST, "Filename must not be empty")
 
         if len(filename) > settings.FILENAME_MAX_SIZE:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.BAD_REQUEST,
                 f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})",
             )
@@ -111,33 +111,33 @@ class ImageFileUtility(ImageFileUtilityABC):
         basename, extension = os.path.splitext(filename)
 
         if basename.upper() in settings.RESERVED_WINDOWS_FILENAMES:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.BAD_REQUEST,
                 f"Filename '{filename}' is a reserved name",
             )
 
         if len(extension) == 0:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.BAD_REQUEST,
                 f"Filename '{filename}' has no extension",
             )
 
-        return BasedResult.success(filename)
+        return ResultExtensions.success(filename)
 
     def sanitize_filename(self, filename: str) -> str:
         pattern = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
         new_filename = re.sub(pattern, "_", filename)
         return new_filename
 
-    def trim_filename(self, filename: str, *, max_length: int) -> BasedResultOutput[str]:
+    def trim_filename(self, filename: str, *, max_length: int) -> ResultOfType[str]:
         if max_length <= 0:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
                 f"Maximum length must be greater than 0, got {max_length}",
             )
 
         if len(filename) <= max_length:
-            return BasedResult.success(filename)
+            return ResultExtensions.success(filename)
 
         basename, extension = os.path.splitext(filename)
 
@@ -148,9 +148,9 @@ class ImageFileUtility(ImageFileUtilityABC):
         min_required_length: int = len(extension) + ellipsis_len
 
         if max_length < min_required_length:
-            return BasedResult.success(f"{basename[: max_length - ellipsis_len]}{ellipsis_str}")
+            return ResultExtensions.success(f"{basename[: max_length - ellipsis_len]}{ellipsis_str}")
 
-        return BasedResult.success(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
+        return ResultExtensions.success(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
 
     @staticmethod
     def __update_filename(image_file: ImageFile, filename: str) -> ImageFile:

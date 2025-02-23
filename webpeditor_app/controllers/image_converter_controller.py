@@ -10,7 +10,7 @@ from webpeditor_app.application.converter.commands.convert_images import Convert
 from webpeditor_app.application.converter.schemas.conversion import ConversionResponse, ConversionRequest
 from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
 from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
-from webpeditor_app.core.based_result import FailureContext
+from webpeditor_app.core.extensions.result_extensions import FailureContext
 from webpeditor_app.controllers.mixins.controller_mixin import ControllerMixin
 from webpeditor_app.controllers.schemas.result_response import BasedResultResponse
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory

@@ -6,7 +6,7 @@ from django.utils import timezone
 from returns.maybe import Maybe, Nothing, Some
 from returns.pipeline import is_successful
 
-from webpeditor_app.core.based_result import FailureContext, BasedResultOutput, BasedResult
+from webpeditor_app.core.extensions.result_extensions import FailureContext, ResultOfType, ResultExtensions
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
@@ -50,7 +50,7 @@ class SessionService:
         )
         datetime_now: datetime = timezone.now()
 
-        user_id_result: BasedResultOutput[str] = await self.get_user_id_async()
+        user_id_result: ResultOfType[str] = await self.get_user_id_async()
 
         if not is_successful(user_id_result):
             failure: FailureContext = user_id_result.failure()
@@ -77,13 +77,13 @@ class SessionService:
 
         return None
 
-    async def get_user_id_async(self) -> BasedResultOutput[str]:
+    async def get_user_id_async(self) -> ResultOfType[str]:
         return (await self.__get_signed_user_id_async()).bind(self.__user_service.unsign_id)
 
     async def set_expiry_async(self, duration: timedelta) -> None:
         return await self.__request.session.aset_expiry(timezone.now() + duration)
 
-    async def clear_expired_async(self) -> BasedResultOutput[None]:
+    async def clear_expired_async(self) -> ResultOfType[None]:
         return (
             (await self.get_user_id_async())
             .map(lambda user_id: (user_id, self.__request.session.clear_expired()))
@@ -132,12 +132,12 @@ class SessionService:
         session_key: Optional[str] = self.__request.session.session_key
         return Some(session_key) if session_key is not None else Nothing
 
-    async def __get_signed_user_id_async(self) -> BasedResultOutput[str]:
+    async def __get_signed_user_id_async(self) -> ResultOfType[str]:
         user_id: Optional[str] = await self.__request.session.aget(self.__user_id_key)
         if user_id is None:
-            return BasedResult.failure(
+            return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
                 "Unable to get user ID from session storage",
             )
 
-        return BasedResult.success(user_id)
+        return ResultExtensions.success(user_id)
