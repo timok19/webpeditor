@@ -1,7 +1,7 @@
 import os.path
 from decimal import Decimal
 from io import BytesIO
-from typing import IO, Collection, Final, Type, cast, final
+from typing import IO, Collection, Final, cast, final
 
 from PIL.Image import Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
@@ -222,7 +222,7 @@ class ConvertImages:
         new_filename: str,
         trimmed_filename: str,
         converter_image_asset: ConverterImageAsset,
-        asset_file_model: Type[T],
+        asset_file_model: type[T],
     ) -> ConversionResponse.ImageData:
         created_asset_file = await asset_file_model.objects.acreate(
             file=file_info.content_file,
@@ -249,7 +249,7 @@ class ConvertImages:
             format_description=created_asset_file.format_description,
             size=created_asset_file.size or 0,
             resolution=(created_asset_file.width or 0, created_asset_file.height or 0),
-            aspect_ratio=created_asset_file.aspect_ratio or Decimal.from_float(0),
+            aspect_ratio=created_asset_file.aspect_ratio or Decimal(),
             color_mode=created_asset_file.color_mode,
             exif_data=created_asset_file.exif_data,
         )
