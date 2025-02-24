@@ -21,28 +21,28 @@ class FailureContext(BaseModel):
     message: Optional[str] = None
 
 
-type ResultOfType[T] = Result[T, FailureContext]
+type ContextResult[T] = Result[T, FailureContext]
 
 
 class ResultExtensions:
     @staticmethod
-    def failure[T](error_code: FailureContext.ErrorCode, message: Optional[str] = None) -> ResultOfType[T]:
+    def failure[T](error_code: FailureContext.ErrorCode, message: Optional[str] = None) -> ContextResult[T]:
         return Failure(FailureContext(error_code=error_code, message=message))
 
     @staticmethod
-    def from_failure[T](failure: FailureContext) -> ResultOfType[T]:
+    def from_failure[T](failure: FailureContext) -> ContextResult[T]:
         return Failure(failure)
 
     @staticmethod
-    def success[T](value: T) -> ResultOfType[T]:
+    def success[T](value: T) -> ContextResult[T]:
         return Success(value)
 
     @staticmethod
     def match[T](
-        results: Collection[ResultOfType[T]],
-        success_func: Callable[[Enumerable[T]], Collection[ResultOfType[T]]],
-        failure_func: Callable[[Enumerable[FailureContext]], Collection[ResultOfType[T]]],
-    ) -> Collection[ResultOfType[T]]:
+        results: Collection[ContextResult[T]],
+        success_func: Callable[[Enumerable[T]], Collection[ContextResult[T]]],
+        failure_func: Callable[[Enumerable[FailureContext]], Collection[ContextResult[T]]],
+    ) -> Collection[ContextResult[T]]:
         enum_results = Enumerable(results)
         errors = enum_results.where(lambda result: not is_successful(result)).select(lambda result: result.failure())
         successes = enum_results.where(is_successful).select(lambda result: result.unwrap())

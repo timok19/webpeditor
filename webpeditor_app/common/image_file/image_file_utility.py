@@ -17,12 +17,12 @@ from PIL.TiffImagePlugin import IFDRational
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ResultOfType
+from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ContextResult
 
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
-    def convert_to_bytes(self, file_base64: str) -> ResultOfType[bytes]:
+    def convert_to_bytes(self, file_base64: str) -> ContextResult[bytes]:
         if len(file_base64) == 0:
             return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File base64 is empty")
 
@@ -30,7 +30,7 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ResultExtensions.success(base64.b64decode(image_base64_data))
 
-    async def get_file_content_async(self, file_url: str) -> ResultOfType[bytes]:
+    async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]:
         if len(file_url) == 0:
             return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
 
@@ -48,7 +48,7 @@ class ImageFileUtility(ImageFileUtilityABC):
 
             return ResultExtensions.success(file_response.content)
 
-    def get_file_info(self, image_file: ImageFile) -> ResultOfType[ImageFileInfo]:
+    def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
         with BytesIO() as buffer:
             image_file.save(buffer, format=image_file.format)
             image_file_bytes = buffer.getvalue()
@@ -91,14 +91,14 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ResultExtensions.success(image_file_info)
 
-    def update_filename(self, image_file: ImageFile, new_filename: str) -> ResultOfType[ImageFile]:
+    def update_filename(self, image_file: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
         return (
             self.validate_filename(new_filename)
             .map(self.sanitize_filename)
             .map(lambda filename: self.__update_filename(image_file, filename))
         )
 
-    def validate_filename(self, filename: Optional[str]) -> ResultOfType[str]:
+    def validate_filename(self, filename: Optional[str]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
             return ResultExtensions.failure(FailureContext.ErrorCode.BAD_REQUEST, "Filename must not be empty")
 
@@ -129,7 +129,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         new_filename = re.sub(pattern, "_", filename)
         return new_filename
 
-    def trim_filename(self, filename: str, *, max_length: int) -> ResultOfType[str]:
+    def trim_filename(self, filename: str, *, max_length: int) -> ContextResult[str]:
         if max_length <= 0:
             return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,

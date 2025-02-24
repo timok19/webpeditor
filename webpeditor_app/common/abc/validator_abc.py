@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from ninja import Field, Schema
 
-from webpeditor_app.core.extensions.result_extensions import FailureContext, ResultOfType, ResultExtensions
+from webpeditor_app.core.extensions.result_extensions import FailureContext, ContextResult, ResultExtensions
 
 
 class ValidationResult(Schema):
@@ -14,7 +14,7 @@ class ValidationResult(Schema):
     def is_successful(self) -> bool:
         return not any(self.errors)
 
-    def as_based_result(self) -> ResultOfType[None]:
+    def as_based_result(self) -> ContextResult[None]:
         return (
             ResultExtensions.failure(
                 FailureContext.ErrorCode.BAD_REQUEST,

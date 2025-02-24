@@ -12,7 +12,7 @@ from webpeditor_app.application.converter.schemas.download import DownloadAllZip
 from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
 from webpeditor_app.core.extensions.result_extensions import FailureContext
 from webpeditor_app.controllers.mixins.controller_mixin import ControllerMixin
-from webpeditor_app.controllers.schemas.result_response import BasedResultResponse
+from webpeditor_app.controllers.schemas.result_response import ResultResponse
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 
 # TODO: Add other endpoints from "__converter" folder
@@ -30,9 +30,9 @@ class ImageConverterController(ControllerMixin, ControllerBase):
     @http_post(
         "/convert-images",
         response={
-            HTTPStatus.OK: list[BasedResultResponse[ConversionResponse]],
-            HTTPStatus.BAD_REQUEST: list[BasedResultResponse[ConversionResponse]],
-            HTTPStatus.INTERNAL_SERVER_ERROR: list[BasedResultResponse[ConversionResponse]],
+            HTTPStatus.OK: list[ResultResponse[ConversionResponse]],
+            HTTPStatus.BAD_REQUEST: list[ResultResponse[ConversionResponse]],
+            HTTPStatus.INTERNAL_SERVER_ERROR: list[ResultResponse[ConversionResponse]],
         },
         exclude_none=True,
     )
@@ -63,9 +63,9 @@ class ImageConverterController(ControllerMixin, ControllerBase):
                 description="Upload files to be converted into different format",
             ),
         ],
-    ) -> tuple[HTTPStatus, list[BasedResultResponse[ConversionResponse]]]:
+    ) -> tuple[HTTPStatus, list[ResultResponse[ConversionResponse]]]:
         session_service = self.__session_service_factory.create(self.get_request(self.context))
-        return BasedResultResponse[ConversionResponse].from_results(
+        return ResultResponse[ConversionResponse].from_results(
             await self.__convert_images.handle_async(
                 request=ConversionRequest(
                     files=files,
@@ -81,13 +81,13 @@ class ImageConverterController(ControllerMixin, ControllerBase):
     @http_post(
         "/download-all-zip",
         response={
-            HTTPStatus.OK: BasedResultResponse[DownloadAllZipResponse],
-            HTTPStatus.INTERNAL_SERVER_ERROR: BasedResultResponse[DownloadAllZipResponse],
+            HTTPStatus.OK: ResultResponse[DownloadAllZipResponse],
+            HTTPStatus.INTERNAL_SERVER_ERROR: ResultResponse[DownloadAllZipResponse],
         },
         exclude_none=True,
     )
-    async def download_all_as_zip_async(self) -> tuple[HTTPStatus, BasedResultResponse[DownloadAllZipResponse]]:
+    async def download_all_as_zip_async(self) -> tuple[HTTPStatus, ResultResponse[DownloadAllZipResponse]]:
         session_service = self.__session_service_factory.create(self.get_request(self.context))
-        return BasedResultResponse[DownloadAllZipResponse].from_result(
+        return ResultResponse[DownloadAllZipResponse].from_result(
             Failure(FailureContext(error_code=FailureContext.ErrorCode.INTERNAL_SERVER_ERROR))
         )

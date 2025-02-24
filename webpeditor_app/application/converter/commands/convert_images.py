@@ -7,25 +7,23 @@ from PIL.Image import Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
 from ninja import UploadedFile
 from returns.pipeline import is_successful
-from returns.result import Result
 from types_linq import Enumerable
 
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ResultOfType
-from webpeditor_app.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.schemas.conversion import (
     ConversionRequest,
     ConversionResponse,
-    OriginalAndConvertedImageFileInfo,
 )
 from webpeditor_app.application.converter.schemas.settings import (
     ImageConverterAllOutputFormats,
     ImageConverterOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,
 )
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.validator_abc import ValidatorABC
+from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ContextResult
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
@@ -51,7 +49,7 @@ class ConvertImages:
         self,
         request: ConversionRequest,
         session_service: SessionService,
-    ) -> Collection[ResultOfType[ConversionResponse]]:
+    ) -> Collection[ContextResult[ConversionResponse]]:
         # Synchronize session
         await session_service.synchronize_async()
 
@@ -84,7 +82,7 @@ class ConvertImages:
         self,
         request: ConversionRequest,
         user_id: str,
-    ) -> Enumerable[ResultOfType[ConversionResponse]]:
+    ) -> Enumerable[ContextResult[ConversionResponse]]:
         return Enumerable(
             [
                 await result
@@ -102,7 +100,7 @@ class ConvertImages:
         self,
         responses: Enumerable[ConversionResponse],
         user_id: str,
-    ) -> Collection[ResultOfType[ConversionResponse]]:
+    ) -> Collection[ContextResult[ConversionResponse]]:
         self.__logger.log_info(f"Successfully converted {responses.count()} image(s) for user '{user_id}'")
         return responses.select(ResultExtensions.success)
 
@@ -110,21 +108,15 @@ class ConvertImages:
         self,
         failures: Enumerable[FailureContext],
         user_id: str,
-    ) -> Enumerable[ResultOfType[ConversionResponse]]:
-        failures_messages = failures.select(
-            lambda failure: f"Error code: {failure.error_code}, Message: {failure.message or ''}"
-        )
+    ) -> Enumerable[ContextResult[ConversionResponse]]:
+        reasons = ", ".join(failures.select(lambda f: f"Error code: {f.error_code}, Message: {f.message or ''}"))
 
-        error_code = failures.select(lambda failure: failure.error_code).first()
-
-        self.__logger.log_error(
-            f"Failed to convert images for user '{user_id}'. Reasons: [{', '.join(failures_messages)}] "
-        )
+        self.__logger.log_error(f"Failed to convert images for user '{user_id}'. Reasons: [{reasons}]")
 
         return failures.select(
-            lambda failure: ResultExtensions.failure(
-                error_code,
-                f"Failed to convert images. Reasons: [{', '.join(failures_messages)}]",
+            lambda _: ResultExtensions.failure(
+                failures.first().error_code,
+                f"Failed to convert images. Reasons: [{reasons}]",
             )
         )
 
@@ -133,7 +125,7 @@ class ConvertImages:
         user_id: str,
         file: UploadedFile,
         options: ConversionRequest.Options,
-    ) -> ResultOfType[ConversionResponse]:
+    ) -> ContextResult[ConversionResponse]:
         # Get sanitized filenames
         original_filename = self.__image_file_utility.sanitize_filename(cast(str, file.name))
         new_filename = self.__create_new_filename(original_filename, options=options)
@@ -153,19 +145,14 @@ class ConvertImages:
 
         # Get original and converted image data
         with open(cast(IO, file.file)) as original_image:
-            image_files_info_results = Result.do(
-                OriginalAndConvertedImageFileInfo(original=original_file_info, converted=converted_file_info)
-                for original_file_info in self.__image_file_utility.get_file_info(original_image)
-                for converted_file_info in (
-                    self.__convert_color_mode(original_image, output_format=options.output_format)
-                    .map(lambda image: self.__convert_format(image, options))
-                    .bind(lambda image: self.__image_file_utility.update_filename(image, new_filename))
-                    .bind(self.__image_file_utility.get_file_info)
-                )
-            )
+            original_file_info_result = self.__image_file_utility.get_file_info(original_image)
+            converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
 
-        if not is_successful(image_files_info_results):
-            return ResultExtensions.from_failure(image_files_info_results.failure())
+        if not is_successful(original_file_info_result):
+            return ResultExtensions.from_failure(original_file_info_result.failure())
+
+        if not is_successful(converted_file_info_result):
+            return ResultExtensions.from_failure(converted_file_info_result.failure())
 
         # Get or create converter image asset
         converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
@@ -174,7 +161,7 @@ class ConvertImages:
 
         # Create original image asset file
         original_image_data = await self.__create_asset_file_data_async(
-            image_files_info_results.unwrap().original,
+            original_file_info_result.unwrap(),
             original_filename,
             original_trimmed_filename,
             converter_image_asset_result.unwrap(),
@@ -183,7 +170,7 @@ class ConvertImages:
 
         # Create converted image asset file
         converted_image_data = await self.__create_asset_file_data_async(
-            image_files_info_results.unwrap().converted,
+            converted_file_info_result.unwrap(),
             f"converted_{new_filename}",
             new_trimmed_filename,
             converter_image_asset_result.unwrap(),
@@ -203,12 +190,24 @@ class ConvertImages:
         return f"webpeditor_{basename}.{options.output_format.lower()}"
 
     def __trim_filename_or_default(self, filename: str, *, max_length: int, output_format: str) -> str:
-        return self.__image_file_utility.trim_filename(filename, max_length=max_length).value_or(
-            f"webpeditor.{output_format.lower()}"
+        result = self.__image_file_utility.trim_filename(filename, max_length=max_length)
+        return result.value_or(f"webpeditor.{output_format.lower()}")
+
+    def __convert_image_and_get_file_info(
+        self,
+        original_image: ImageFile,
+        new_filename: str,
+        options: ConversionRequest.Options,
+    ) -> ContextResult[ImageFileInfo]:
+        return (
+            self.__convert_color_mode(original_image, options.output_format)
+            .map(lambda image: self.__convert_format(image, options))
+            .bind(lambda image: self.__image_file_utility.update_filename(image, new_filename))
+            .bind(self.__image_file_utility.get_file_info)
         )
 
     @staticmethod
-    async def __get_or_create_image_asset_async(user_id: str) -> ResultOfType[ConverterImageAsset]:
+    async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
         user = await AppUser.objects.filter(id=user_id).afirst()
         if user is None:
             return ResultExtensions.failure(
@@ -261,7 +260,7 @@ class ConvertImages:
         self,
         original_image: Image,
         output_format: ImageConverterAllOutputFormats,
-    ) -> ResultOfType[Image]:
+    ) -> ContextResult[Image]:
         if original_image.format is None:
             return ResultExtensions.failure(
                 FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
