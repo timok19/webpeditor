@@ -70,7 +70,7 @@ class ConvertImages:
             self.__cloudinary_service.delete_converted_images(user_id_result.unwrap())
 
         # Process images
-        return ResultExtensions.match(
+        return ResultExtensions.match_many(
             await self.__batch_convert_async(request, user_id_result.unwrap()),
             lambda responses: self.__process_successes(responses, user_id_result.unwrap()),
             lambda failures: self.__process_failures(failures, user_id_result.unwrap()),

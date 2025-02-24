@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-from typing import Optional, Callable, Collection
+from typing import Optional, Callable, Collection, overload
 
 from pydantic import BaseModel, ConfigDict
 from returns.pipeline import is_successful
@@ -24,21 +24,29 @@ class FailureContext(BaseModel):
 type ContextResult[T] = Result[T, FailureContext]
 
 
-class ResultExtensions:
+class ResultExtensions[T]:
     @staticmethod
-    def failure[T](error_code: FailureContext.ErrorCode, message: Optional[str] = None) -> ContextResult[T]:
+    def failure(error_code: FailureContext.ErrorCode, message: Optional[str] = None) -> ContextResult[T]:
         return Failure(FailureContext(error_code=error_code, message=message))
 
     @staticmethod
-    def from_failure[T](failure: FailureContext) -> ContextResult[T]:
+    def from_failure(failure: FailureContext) -> ContextResult[T]:
         return Failure(failure)
 
     @staticmethod
-    def success[T](value: T) -> ContextResult[T]:
+    def success(value: T) -> ContextResult[T]:
         return Success(value)
 
     @staticmethod
-    def match[T](
+    def match(
+        result: ContextResult[T],
+        success_func: Callable[[T], ContextResult[T]],
+        failure_func: Callable[[FailureContext], ContextResult[T]],
+    ) -> ContextResult[T]:
+        return failure_func(result.failure()) if not is_successful(result) else success_func(result.unwrap())
+
+    @staticmethod
+    def match_many(
         results: Collection[ContextResult[T]],
         success_func: Callable[[Enumerable[T]], Collection[ContextResult[T]]],
         failure_func: Callable[[Enumerable[FailureContext]], Collection[ContextResult[T]]],
