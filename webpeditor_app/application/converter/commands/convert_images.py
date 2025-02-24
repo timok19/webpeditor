@@ -7,6 +7,7 @@ from PIL.Image import Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
 from ninja import UploadedFile
 from returns.pipeline import is_successful
+from returns.result import Failure
 from types_linq import Enumerable
 
 from webpeditor_app.application.auth.session_service import SessionService
@@ -56,12 +57,12 @@ class ConvertImages:
         # Request validation
         validation_result = self.__conversion_request_validator.validate(request).as_context_result()
         if not is_successful(validation_result):
-            return [ResultExtensions.from_failure(validation_result.failure())]
+            return [Failure(validation_result.failure())]
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
         if not is_successful(user_id_result):
-            return [ResultExtensions.from_failure(user_id_result.failure())]
+            return [Failure(user_id_result.failure())]
 
         # Delete previous content if exist
         converted_image_asset = ConverterImageAsset.objects.filter(user_id=user_id_result.unwrap())
@@ -147,15 +148,15 @@ class ConvertImages:
             converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
 
         if not is_successful(original_file_info_result):
-            return ResultExtensions.from_failure(original_file_info_result.failure())
+            return Failure(original_file_info_result.failure())
 
         if not is_successful(converted_file_info_result):
-            return ResultExtensions.from_failure(converted_file_info_result.failure())
+            return Failure(converted_file_info_result.failure())
 
         # Get or create converter image asset
         converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
         if not is_successful(converter_image_asset_result):
-            return ResultExtensions.from_failure(converter_image_asset_result.failure())
+            return Failure(converter_image_asset_result.failure())
 
         # Create original image asset file
         original_image_data = await self.__create_asset_file_data_async(

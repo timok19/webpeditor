@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-from typing import Optional, Callable, Collection, overload
+from typing import Optional, Callable, Collection
 
 from pydantic import BaseModel, ConfigDict
 from returns.pipeline import is_successful
@@ -28,10 +28,6 @@ class ResultExtensions[T]:
     @staticmethod
     def failure(error_code: FailureContext.ErrorCode, message: Optional[str] = None) -> ContextResult[T]:
         return Failure(FailureContext(error_code=error_code, message=message))
-
-    @staticmethod
-    def from_failure(failure: FailureContext) -> ContextResult[T]:
-        return Failure(failure)
 
     @staticmethod
     def success(value: T) -> ContextResult[T]:
