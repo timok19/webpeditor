@@ -14,15 +14,11 @@ class ValidationResult(Schema):
     def is_successful(self) -> bool:
         return not any(self.errors)
 
-    def as_based_result(self) -> ContextResult[None]:
-        return (
-            ResultExtensions.failure(
-                FailureContext.ErrorCode.BAD_REQUEST,
-                f"Validation failed. Errors: [{', '.join(self.errors)}]" if any(self.errors) else None,
-            )
-            if not self.is_successful()
-            else ResultExtensions.success(None)
-        )
+    def as_context_result(self) -> ContextResult[None]:
+        if not self.is_successful():
+            error_message = f"Validation failed. Reasons: [{', '.join(self.errors)}]"
+            return ResultExtensions.failure(FailureContext.ErrorCode.BAD_REQUEST, error_message)
+        return ResultExtensions.success(None)
 
 
 class ValidatorABC[TModel: object](ABC):

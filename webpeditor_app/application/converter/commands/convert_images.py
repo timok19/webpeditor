@@ -54,7 +54,7 @@ class ConvertImages:
         await session_service.synchronize_async()
 
         # Request validation
-        validation_result = self.__conversion_request_validator.validate(request).as_based_result()
+        validation_result = self.__conversion_request_validator.validate(request).as_context_result()
         if not is_successful(validation_result):
             return [ResultExtensions.from_failure(validation_result.failure())]
 
@@ -63,19 +63,17 @@ class ConvertImages:
         if not is_successful(user_id_result):
             return [ResultExtensions.from_failure(user_id_result.failure())]
 
-        user_id = user_id_result.unwrap()
-
         # Delete previous content if exist
-        converted_image_asset = ConverterImageAsset.objects.filter(user_id=user_id)
+        converted_image_asset = ConverterImageAsset.objects.filter(user_id=user_id_result.unwrap())
         if await converted_image_asset.aexists():
             await converted_image_asset.adelete()
-            self.__cloudinary_service.delete_converted_images(user_id)
+            self.__cloudinary_service.delete_converted_images(user_id_result.unwrap())
 
         # Process images
         return ResultExtensions.match(
-            await self.__batch_convert_async(request, user_id),
-            lambda responses: self.__process_successes(responses, user_id),
-            lambda failures: self.__process_failures(failures, user_id),
+            await self.__batch_convert_async(request, user_id_result.unwrap()),
+            lambda responses: self.__process_successes(responses, user_id_result.unwrap()),
+            lambda failures: self.__process_failures(failures, user_id_result.unwrap()),
         )
 
     async def __batch_convert_async(
