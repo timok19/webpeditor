@@ -13,10 +13,10 @@ from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.auth.user_service import UserService
 from webpeditor_app.core.webpeditor_logger import WebPEditorLogger
-from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
-from webpeditor_app.domain.abc.editor_queries_abc import EditorQueriesABC
-from webpeditor_app.domain.converter_queries import ConverterQueries
-from webpeditor_app.domain.editor_queries import EditorQueries
+from webpeditor_app.infrastructure.database.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.infrastructure.database.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.database.converter_queries import ConverterQueries
+from webpeditor_app.infrastructure.database.editor_queries import EditorQueries
 from webpeditor_app.infrastructure.cloudinary.cloudinary_service import CloudinaryService
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 

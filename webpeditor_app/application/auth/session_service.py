@@ -9,8 +9,8 @@ from returns.pipeline import is_successful
 from webpeditor_app.core.extensions.result_extensions import FailureContext, ContextResult, ResultExtensions
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
-from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
-from webpeditor_app.domain.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.database.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.infrastructure.database.abc.editor_queries_abc import EditorQueriesABC
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.models.app_user import AppUser
 

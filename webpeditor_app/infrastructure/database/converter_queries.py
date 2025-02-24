@@ -1,6 +1,6 @@
 from returns.maybe import Maybe, Nothing, Some
 
-from webpeditor_app.domain.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.infrastructure.database.abc.converter_queries_abc import ConverterQueriesABC
 from webpeditor_app.models.converter import ConverterImageAsset
 
 

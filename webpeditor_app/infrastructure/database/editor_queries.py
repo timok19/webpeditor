@@ -1,6 +1,6 @@
 from returns.maybe import Some, Nothing, Maybe
 
-from webpeditor_app.domain.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.database.abc.editor_queries_abc import EditorQueriesABC
 from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
 
 
