@@ -17,7 +17,12 @@ from PIL.TiffImagePlugin import IFDRational
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.extensions.result_extensions import ResultExtensions, FailureContext, ContextResult
+from webpeditor_app.core.extensions.result_extensions import (
+    ResultExtensions,
+    FailureContext,
+    ContextResult,
+    FutureContextResult,
+)
 
 
 @final
@@ -30,23 +35,23 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ResultExtensions.success(base64.b64decode(image_base64_data))
 
-    async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]:
+    async def get_file_content_async(self, file_url: str) -> FutureContextResult[bytes]:
         if len(file_url) == 0:
-            return ResultExtensions.failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
+            return ResultExtensions.future_failure(FailureContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
 
         async with AsyncClient() as client:
             file_response = await client.get(file_url)
 
             if file_response.status_code == HTTPStatus.NOT_FOUND.value:
-                return ResultExtensions.failure(
+                return ResultExtensions.future_failure(
                     FailureContext.ErrorCode.NOT_FOUND,
                     f"Unable to get content of image file from url '{file_url}'",
                 )
 
             if len(file_response.content) == 0 or file_response.content is None:
-                return ResultExtensions.failure(FailureContext.ErrorCode.NOT_FOUND, "File has no content")
+                return ResultExtensions.future_failure(FailureContext.ErrorCode.NOT_FOUND, "File has no content")
 
-            return ResultExtensions.success(file_response.content)
+            return ResultExtensions.future_success(file_response.content)
 
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
         with BytesIO() as buffer:
@@ -77,7 +82,6 @@ class ImageFileUtility(ImageFileUtilityABC):
         mapped_exif_data = self.__map_exif_data(image_file.getexif())
 
         image_file_info = ImageFileInfo(
-            image_file=image_file,
             content_file=content_file,
             filename=image_file.filename,
             file_format=image_file.format,

@@ -19,7 +19,7 @@ from webpeditor_app.application.auth.session_service_factory import SessionServi
 
 
 @final
-@api_controller("/converter", tags=["Image Converter"])
+@api_controller("/converter", tags=["Image Converter"])  # pyright: ignore [reportArgumentType]
 class ImageConverterController(ControllerMixin, ControllerBase):
     def __init__(self) -> None:
         from webpeditor_app.core.di_container import DiContainer
@@ -65,7 +65,7 @@ class ImageConverterController(ControllerMixin, ControllerBase):
         ],
     ) -> tuple[HTTPStatus, list[ResultResponse[ConversionResponse]]]:
         session_service = self.__session_service_factory.create(self.get_request(self.context))
-        return ResultResponse[ConversionResponse].from_results(
+        return ResultResponse[ConversionResponse].from_io_results(
             await self.__convert_images.handle_async(
                 request=ConversionRequest(
                     files=files,

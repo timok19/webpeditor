@@ -4,7 +4,7 @@ from typing import Optional
 from PIL.ImageFile import ImageFile
 
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.extensions.result_extensions import ContextResult
+from webpeditor_app.core.extensions.result_extensions import ContextResult, FutureContextResult
 
 
 class ImageFileUtilityABC(ABC):
@@ -12,7 +12,7 @@ class ImageFileUtilityABC(ABC):
     def convert_to_bytes(self, file_base64: str) -> ContextResult[bytes]: ...
 
     @abstractmethod
-    async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]: ...
+    async def get_file_content_async(self, file_url: str) -> FutureContextResult[bytes]: ...
 
     @abstractmethod
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]: ...
