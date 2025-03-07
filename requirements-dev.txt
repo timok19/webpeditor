@@ -49,4 +49,4 @@ types-pyyaml==6.0.12.20241230
 typing-extensions==4.12.2
 tzdata==2025.1 ; sys_platform == 'win32'
 urllib3==2.3.0
-virtualenv==20.29.2
+virtualenv==20.29.3
