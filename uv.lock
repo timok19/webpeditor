@@ -537,7 +537,7 @@ wheels = [
 
 [[package]]
 name = "django-ninja-extra"
-version = "0.22.4"
+version = "0.22.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
@@ -546,9 +546,9 @@ dependencies = [
     { name = "django-ninja" },
     { name = "injector" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/d6/ecd8b14a8e182226fd74b90901fb693ca09e5aa9ddd7b46bf035e175c47e/django_ninja_extra-0.22.4.tar.gz", hash = "sha256:55a99edd8134558a67d5c5e5ee6ceaf098d79dc4aa3fb2adad0f0948687bc6c5", size = 53280 }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/ad/de4880eb4a930db4b9645ad19fc91174dc3ac41a26c2a1fe2b6a6860e7a1/django_ninja_extra-0.22.5.tar.gz", hash = "sha256:e402bb075c05d814009c3bab38bf5deffe36f3117a43b781473e8304425dbd84", size = 53339 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/00/4f/c15e24973d7569a214c0f70c1698ac5dcfa60b8f0ddc5967bef6fb4b6e67/django_ninja_extra-0.22.4-py3-none-any.whl", hash = "sha256:d57b5f75754bfa900da5f597e2365215fac48b62f88d28e7aebab07cd360f52d", size = 72788 },
+    { url = "https://files.pythonhosted.org/packages/e6/92/e6867aadf978fdde4b52ef89e4f3c8816be05cb0bb747f748b9ae48091db/django_ninja_extra-0.22.5-py3-none-any.whl", hash = "sha256:da885c660449055c19d9f5ba38fc80a45d5a931dca56cd691169b31cd4c0980a", size = 72879 },
 ]
 
 [[package]]
