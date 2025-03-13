@@ -4,7 +4,7 @@ aiofiles==24.1.0
 annotated-types==0.7.0
 anyio==4.8.0
 asgiref==3.8.1
-attrs==25.2.0
+attrs==25.3.0
 autobahn==24.4.2
 automat==24.8.1
 autopep8==2.3.2
