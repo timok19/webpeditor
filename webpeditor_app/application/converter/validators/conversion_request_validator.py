@@ -1,5 +1,6 @@
 from typing import IO, Final, Optional, cast, final
 
+from PIL import UnidentifiedImageError
 from expression import Option
 from ninja import UploadedFile
 from PIL.Image import open
@@ -11,6 +12,7 @@ from webpeditor_app.application.converter.schemas.settings import (
 )
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
+from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
 @final
@@ -19,6 +21,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         from webpeditor_app.core.di_container import DiContainer
 
         self.__image_file_utility: Final[ImageFileUtilityABC] = DiContainer.get_dependency(ImageFileUtilityABC)
+        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
 
     def validate(self, value: ConversionRequest) -> ValidationResult[ConversionRequest]:
         validation_result = ValidationResult(value=value)
@@ -74,5 +77,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         try:
             with open(cast(IO, file.file)):
                 return Option[str].Nothing()
-        except Exception:
-            return Option[str].Some(f"File {file.name} cannot be processed. Incompatible file")
+        except UnidentifiedImageError as uie:
+            message = f"File '{file.name}' cannot be processed. Incompatible file"
+            self.__logger.log_exception(uie, message)
+            return Option[str].Some(message)
+        except Exception as exc:
+            message = f"Failed to validate file '{file.name}'"
+            self.__logger.log_exception(exc, message)
+            return Option[str].Some(message)
