@@ -7,11 +7,11 @@ from http import HTTPStatus
 from io import BytesIO
 from typing import Optional, final
 
-from PIL.ImageFile import ImageFile
 from django.core.files.base import ContentFile
 from httpx import AsyncClient
 from PIL.ExifTags import TAGS
 from PIL.Image import Exif
+from PIL.ImageFile import ImageFile
 from PIL.TiffImagePlugin import IFDRational
 
 from webpeditor import settings

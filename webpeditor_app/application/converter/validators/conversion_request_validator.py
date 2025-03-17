@@ -1,15 +1,16 @@
-from typing import Final, Optional, final
+from typing import IO, Final, Optional, cast, final
 
 from expression import Option
 from ninja import UploadedFile
+from PIL.Image import open
 
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.abc.validator_abc import ValidatorABC, ValidationResult
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.schemas.settings import (
     IMAGE_CONVERTER_SETTINGS,
     ImageConverterAllOutputFormats,
 )
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
 
 
 @final
@@ -30,6 +31,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             validation_result.add_error("Too many files uploaded")
 
         for file in validation_result.value.files:
+            self.__validate_file_compatibility(file).map(validation_result.add_error)
             self.__validate_filename(file.name).map(validation_result.add_error)
             self.__validate_empty_file_size(file).map(validation_result.add_error)
             self.__validate_max_file_size(file).map(validation_result.add_error)
@@ -67,3 +69,10 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             if file.size is not None and file.size > IMAGE_CONVERTER_SETTINGS.max_file_size
             else Option[str].Nothing()
         )
+
+    def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
+        try:
+            with open(cast(IO, file.file)):
+                return Option[str].Nothing()
+        except Exception:
+            return Option[str].Some(f"File {file.name} cannot be processed. Incompatible file")
