@@ -17,7 +17,7 @@ from webpeditor_app.application.auth.session_service_factory import SessionServi
 
 
 @final
-@api_controller("/converter", tags=["Image Converter"])  # pyright: ignore [reportArgumentType]
+@api_controller("/converter", tags=["Image Converter"])
 class ImageConverterController(ControllerMixin, ControllerBase):
     def __init__(self) -> None:
         from webpeditor_app.core.di_container import DiContainer
