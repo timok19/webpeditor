@@ -1,17 +1,17 @@
 from django.http import HttpRequest, HttpResponse
-from ninja_extra.controllers import RouteContext
+from ninja_extra.context import RouteContext
 from typing import Optional
 
 
 class ControllerMixin:
     @classmethod
     def get_request(cls, context: Optional[RouteContext]) -> HttpRequest:
-        ctx: RouteContext = cls.__validate_context(context)
+        ctx = cls.__validate_context(context)
         return cls.__validate_request(ctx.request)
 
     @classmethod
     def get_response(cls, context: Optional[RouteContext]) -> HttpResponse:
-        ctx: RouteContext = cls.__validate_context(context)
+        ctx = cls.__validate_context(context)
         return cls.__validate_response(ctx.response)
 
     @classmethod

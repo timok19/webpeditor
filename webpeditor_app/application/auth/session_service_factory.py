@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, final
 from django.http import HttpRequest
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
@@ -9,6 +9,7 @@ from webpeditor_app.infrastructure.database.abc.editor_queries_abc import Editor
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 
 
+@final
 class SessionServiceFactory:
     def __init__(self) -> None:
         from webpeditor_app.core.di_container import DiContainer

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-
-from webpeditor_app.core.extensions.result_extensions import ContextResult
+from webpeditor_app.core.context_result import ContextResult
 
 
 class UserServiceABC(ABC):

@@ -1,26 +1,33 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
+from ninja import Schema
+from pydantic import ConfigDict, Field
 
-from ninja import Field, Schema
+from webpeditor_app.core.context_result import ContextResult, ErrorContext
 
-from webpeditor_app.core.extensions.result_extensions import FailureContext, ContextResult, ResultExtensions
+_TValue = TypeVar("_TValue")
 
 
-class ValidationResult(Schema):
+class ValidationResult(Schema, Generic[_TValue]):
+    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
+
+    value: _TValue
     errors: list[str] = Field(default_factory=list[str])
 
     def add_error(self, message: str) -> None:
         self.errors.append(message)
 
-    def is_successful(self) -> bool:
-        return not any(self.errors)
+    def has_errors(self) -> bool:
+        return any(self.errors)
 
-    def as_context_result(self) -> ContextResult[None]:
-        if not self.is_successful():
-            error_message = f"Validation failed. Reasons: [{', '.join(self.errors)}]"
-            return ResultExtensions.failure(FailureContext.ErrorCode.BAD_REQUEST, error_message)
-        return ResultExtensions.success(None)
+    def to_context_result(self) -> ContextResult[_TValue]:
+        return (
+            ContextResult[_TValue].Error2(ErrorContext.ErrorCode.BAD_REQUEST, "Validation failed", self.errors)
+            if self.has_errors()
+            else ContextResult[_TValue].Ok(self.value)
+        )
 
 
-class ValidatorABC[TModel: object](ABC):
+class ValidatorABC[TValue](ABC):
     @abstractmethod
-    def validate(self, value: TModel) -> ValidationResult: ...
+    def validate(self, value: TValue) -> ValidationResult[TValue]: ...

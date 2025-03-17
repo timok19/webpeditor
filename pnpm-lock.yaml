@@ -159,8 +159,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  acorn@8.14.0:
-    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
+  acorn@8.14.1:
+    resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -802,8 +802,8 @@ packages:
   nan@2.22.2:
     resolution: {integrity: sha512-DANghxFkS1plDdRsX0X9pm0Z6SJNN6gBdtXfanwoZ8hooC5gosGFSBGRYHUVPz1asKA/kMRqDRdHrluZ61SpBQ==}
 
-  nanoid@3.3.8:
-    resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
+  nanoid@3.3.10:
+    resolution: {integrity: sha512-vSJJTG+t/dIKAUhUDw/dLdZ9s//5OxcHqLaDWWrW4Cdq7o6tdLIczUkMXt2MBNmk6sJRZBZRXVixs7URY1CmIg==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -1412,7 +1412,7 @@ snapshots:
 
   acorn-globals@7.0.1:
     dependencies:
-      acorn: 8.14.0
+      acorn: 8.14.1
       acorn-walk: 8.3.4
     optional: true
 
@@ -1421,7 +1421,7 @@ snapshots:
 
   acorn-walk@8.3.4:
     dependencies:
-      acorn: 8.14.0
+      acorn: 8.14.1
     optional: true
 
   acorn@6.4.2:
@@ -1430,7 +1430,7 @@ snapshots:
   acorn@7.4.1:
     optional: true
 
-  acorn@8.14.0:
+  acorn@8.14.1:
     optional: true
 
   agent-base@6.0.2:
@@ -2079,7 +2079,7 @@ snapshots:
   jsdom@20.0.3(canvas@2.11.2):
     dependencies:
       abab: 2.0.6
-      acorn: 8.14.0
+      acorn: 8.14.1
       acorn-globals: 7.0.1
       cssom: 0.5.0
       cssstyle: 2.3.0
@@ -2221,7 +2221,7 @@ snapshots:
   nan@2.22.2:
     optional: true
 
-  nanoid@3.3.8: {}
+  nanoid@3.3.10: {}
 
   node-fetch@2.7.0:
     dependencies:
@@ -2339,7 +2339,7 @@ snapshots:
 
   postcss@8.5.3:
     dependencies:
-      nanoid: 3.3.8
+      nanoid: 3.3.10
       picocolors: 1.1.1
       source-map-js: 1.2.1
 

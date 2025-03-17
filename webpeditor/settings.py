@@ -19,29 +19,35 @@ from environ import Env
 from pathlib import Path
 from typing import Any
 
+from webpeditor_app.apps import WebpeditorAppConfig
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
 env: Env = Env(
-    APP_VERSION=(str, "your_app_version"),
+    APP_VERSION=(str, "app_version"),
     DEBUG=(str, "1"),
     SECRET_KEY=(str, get_random_secret_key()),
-    CLOUDINARY_CLOUD_NAME=(str, "your_cloud_name"),
-    CLOUDINARY_API_KEY=(str, "your_api_key"),
-    CLOUDINARY_API_SECRET=(str, "your_api_secret"),
-    CSRF_TRUSTED_ORIGINS=(str, "your_trusted_origins_separated_by_comma"),
+    CLOUDINARY_CLOUD_NAME=(str, "cloud_name"),
+    CLOUDINARY_API_KEY=(str, "api_key"),
+    CLOUDINARY_API_SECRET=(str, "api_secret"),
+    CSRF_TRUSTED_ORIGINS=(str, "trusted_origins_separated_by_comma"),
+    WEBPEDITOR_API_KEY=(str, "webpeditor_api_key"),
+    WEBPEDITOR_SALT_KEY=(str, get_random_secret_key()),
 )
 
 Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY: str = str(env("SECRET_KEY"))
 
 WEBPEDITOR_API_KEY: str = str(env("WEBPEDITOR_API_KEY"))
+
+WEBPEDITOR_SALT_KEY: str = str(env("WEBPEDITOR_SALT_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG: bool = bool(int(env("DEBUG")))
@@ -115,14 +121,11 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "webpeditor.asgi.application"
 
-ONE_MEGABYTE: int = 1_048_576
-
 FILE_UPLOAD_MAX_MEMORY_SIZE: int = 10_485_760 * 4
 
 DATA_UPLOAD_MAX_MEMORY_SIZE: int = 52_428_800 * 4
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     "default": {
@@ -132,12 +135,9 @@ DATABASES = {
 }
 
 # Path for future migrations
-MIGRATION_MODULES: dict[str, str] = {
-    "webpeditor_app": "webpeditor_app.infrastructure.database.migrations",
-}
+MIGRATION_MODULES: dict[str, str] = {"webpeditor_app": "webpeditor_app.infrastructure.database.migrations"}
 
 # Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS: list[dict[str, str]] = [
     {
@@ -155,7 +155,6 @@ AUTH_PASSWORD_VALIDATORS: list[dict[str, str]] = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE: str = "en-us"
 
@@ -253,7 +252,7 @@ RESERVED_WINDOWS_FILENAMES: set[str] = {
 }
 
 # Application definition
-APP_VERBOSE_NAME: str = f"WebP Editor V{APP_VERSION}"
+APP_VERBOSE_NAME: str = f"{str(WebpeditorAppConfig.verbose_name)} - V{APP_VERSION}"
 
 CRISPY_ALLOWED_TEMPLATE_PACKS: str = "tailwind"
 CRISPY_TEMPLATE_PACK: str = "tailwind"
