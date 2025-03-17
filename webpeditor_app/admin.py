@@ -4,16 +4,24 @@ from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from webpeditor_app.models.app_user import AppUser
-from webpeditor_app.models.converter import ConverterImageAsset, ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile
-from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorOriginalImageAssetFile, EditorEditedImageAsset, EditorEditedImageAssetFile
+from webpeditor_app.models.converter import (
+    ConverterImageAsset,
+    ConverterOriginalImageAssetFile,
+    ConverterConvertedImageAssetFile,
+)
+from webpeditor_app.models.editor import (
+    EditorOriginalImageAsset,
+    EditorOriginalImageAssetFile,
+    EditorEditedImageAsset,
+    EditorEditedImageAssetFile,
+)
 from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 
 # Admin site
 admin_site: JazzminOTPAdminSite = JazzminOTPAdminSite(name="OTPAdmin")
 
 # Auth Models
-admin_site.register(User)
-admin_site.register(Group)
+admin_site.register([User, Group])
 
 # OTP Models
 admin_site.register(TOTPDevice, TOTPDeviceAdmin)

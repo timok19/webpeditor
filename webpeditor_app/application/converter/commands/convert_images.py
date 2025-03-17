@@ -3,15 +3,11 @@ import os.path
 import typing
 from decimal import Decimal
 from io import BytesIO
-from typing import Collection, Final, cast, final
-
+from typing import Final, cast, final
 
 from ninja import UploadedFile
 from PIL.Image import Image, alpha_composite, new, open
 from PIL.ImageFile import ImageFile
-from returns.future import FutureResult
-from returns.io import IOResult, IO
-from returns.pipeline import is_successful
 from types_linq import Enumerable
 
 from webpeditor_app.application.auth.session_service import SessionService
@@ -25,13 +21,7 @@ from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.extensions.result_extensions import (
-    ContextResult,
-    FailureContext,
-    FutureContextResult,
-    IOContextResult,
-    ResultExtensions,
-)
+from webpeditor_app.core.context_result import ContextResult, ErrorContext, MultipleContextResults
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
@@ -57,118 +47,74 @@ class ConvertImages:
         self,
         request: ConversionRequest,
         session_service: SessionService,
-    ) -> Collection[IOContextResult[ConversionResponse]]:
+    ) -> MultipleContextResults[ConversionResponse]:
         # Synchronize session
         await session_service.synchronize_async()
 
         # Request validation
-        validation_result = self.__conversion_request_validator.validate(request).as_context_result()
-        if not is_successful(validation_result):
-            return [IOResult.from_failure(validation_result.failure())]
+        validation_result = self.__conversion_request_validator.validate(request).to_context_result()
+        if validation_result.is_error():
+            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(validation_result.error))
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
-        if not await ResultExtensions.is_future_successful(user_id_result):
-            return [IOResult.from_failed_io((await user_id_result.awaitable()).failure())]
+        if user_id_result.is_error():
+            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(user_id_result.error))
 
         # Delete previous content if exist
-        await (
-            (converter_asset := user_id_result.map(lambda user_id: ConverterImageAsset.objects.filter(user_id=user_id)))
-            .bind_awaitable(lambda asset: asset.aexists())
-            .bind(
-                lambda exists: user_id_result.map(self.__cloudinary_service.delete_converted_images)
-                .bind(lambda _: converter_asset.bind_awaitable(lambda asset: asset.adelete()))
-                .map(lambda _: None)
-                if exists
-                else user_id_result.map(lambda _: None)
-            )
-            .awaitable()
-        )
-
-        user_id_io = (await user_id_result.awaitable()).unwrap()
+        converter_asset = ConverterImageAsset.objects.filter(user_id=user_id_result.ok)
+        if await converter_asset.aexists():
+            self.__cloudinary_service.delete_converted_images(user_id_result.ok)
+            await converter_asset.adelete()
 
         # Process images
-        return await ResultExtensions.match_many_futures(
-            await self.__batch_convert_async(request, user_id_result),
-            lambda responses: self.__process_successes(responses, user_id_io),
-            lambda failures: self.__process_failures(failures, user_id_io),
+        return (await self.__batch_convert_async(user_id_result.ok, validation_result.ok)).match(
+            lambda values: self.__process_values(values, user_id_result.ok),
+            lambda errors: self.__process_errors(errors, user_id_result.ok),
         )
 
     async def __batch_convert_async(
         self,
+        user_id: str,
         request: ConversionRequest,
-        user_id_result: FutureContextResult[str],
-    ) -> Enumerable[FutureContextResult[ConversionResponse]]:
-        return Enumerable(
-            await asyncio.gather(
-                *(
-                    Enumerable(request.files)
-                    .chunk(4)
-                    .select_many(
-                        lambda files: [self.__convert_async(user_id_result, file, request.options) for file in files]
-                    )
-                    .to_tuple()
-                )
+    ) -> MultipleContextResults[ConversionResponse]:
+        return MultipleContextResults[ConversionResponse].from_results(
+            *await asyncio.gather(
+                *Enumerable(request.files)
+                .chunk(4)
+                .select_many(lambda files: [self.__convert_async(user_id, file, request.options) for file in files])
+                .to_list()
             )
         )
 
-    def __process_successes(
+    def __process_values(
         self,
-        responses: Enumerable[IO[ConversionResponse]],
-        user_id_io: IO[str],
-    ) -> Collection[IOContextResult[ConversionResponse]]:
-        user_id_io.map(
-            lambda user_id: self.__logger.log_info(
-                f"Successfully converted {responses.count()} image(s) for user '{user_id}'"
-            )
-        )
-        return responses.select(IOResult.from_io)
+        values: Enumerable[ConversionResponse],
+        user_id: str,
+    ) -> Enumerable[ConversionResponse]:
+        self.__logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
+        return values
 
-    def __process_failures(
+    def __process_errors(
         self,
-        failures: Enumerable[IO[FailureContext]],
-        user_id_io: IO[str],
-    ) -> Enumerable[IOContextResult[ConversionResponse]]:
-        # Aggregate reasons of failures into a single string for each user
-        reasons_as_str = failures.select(
-            lambda f: f.map(lambda fc: f"Error code: {fc.error_code}, Message: {fc.message or ''}")
-        ).aggregate(lambda io_v1, io_v2: io_v1.bind(lambda v1: io_v2.map(lambda v2: f"{v1}, {v2}")))
-
-        # Log message with errors
-        user_id_io.bind(
-            lambda user_id: reasons_as_str.map(
-                lambda reasons: self.__logger.log_error(
-                    f"Failed to convert images for user '{user_id}'. Reasons: [{reasons}]"
-                )
-            )
+        errors: Enumerable[ErrorContext],
+        user_id: str,
+    ) -> Enumerable[ErrorContext]:
+        # Aggregate reasons of errors into a single string for each user
+        reasons = errors.select(lambda e: f"Error code: {e.error_code}, Message: {e.message or ''}").aggregate(
+            lambda message1, message2: f"{message1}, {message2}"
         )
-
-        # Create failure response for each failed item
-        return failures.select(
-            lambda _: IOResult.from_failed_io(
-                (
-                    failures.first()
-                    .map(lambda fc: fc.error_code)
-                    .bind(
-                        lambda error_code: IO.from_value(
-                            FailureContext(
-                                error_code=error_code,
-                                message=f"Failed to convert images. Reasons: [{reasons_as_str}]",
-                            )
-                        )
-                    )
-                )
-            )
-        )
+        self.__logger.log_error(f"Failed to convert images for user '{user_id}'. Reasons: [{reasons}]")
+        return errors
 
     async def __convert_async(
         self,
-        user_id_result: FutureContextResult[str],
-        file: UploadedFile,
+        user_id: str,
+        uploaded_file: UploadedFile,
         options: ConversionRequest.Options,
-    ) -> FutureContextResult[ConversionResponse]:
-        # Get sanitized filenames
-        original_filename = self.__image_file_utility.sanitize_filename(cast(str, file.name))
+    ) -> ContextResult[ConversionResponse]:
+        # Get filenames
+        original_filename = self.__image_file_utility.sanitize_filename(cast(str, uploaded_file.name))
         new_filename = self.__create_new_filename(original_filename, options=options)
 
         # Trim original and new filenames
@@ -185,52 +131,45 @@ class ConvertImages:
         )
 
         # Get original and converted image data
-        with open(cast(typing.IO, file.file)) as original_image:
-            original_file_info_result = self.__image_file_utility.get_file_info(original_image)
+        with open(cast(typing.IO, uploaded_file.file)) as original_image:
+            original_file_info_result = self.__get_file_info(original_image, original_filename)
             converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
 
-        if not is_successful(original_file_info_result):
-            return FutureResult.from_failure(original_file_info_result.failure())
+        if original_file_info_result.is_error():
+            return ContextResult[ConversionResponse].Error(original_file_info_result.error)
 
-        if not is_successful(converted_file_info_result):
-            return FutureResult.from_failure(converted_file_info_result.failure())
+        if converted_file_info_result.is_error():
+            return ContextResult[ConversionResponse].Error(converted_file_info_result.error)
 
         # Get or create converter image asset
-        converter_image_asset_result = user_id_result.bind_async(self.__get_or_create_image_asset_async)
+        converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
+        if converter_image_asset_result.is_error():
+            return ContextResult[ConversionResponse].Error(converter_image_asset_result.error)
 
-        if not await ResultExtensions.is_future_successful(converter_image_asset_result):
-            return FutureResult.from_failed_io((await converter_image_asset_result.awaitable()).failure())
-
-        # Create original and converted image asset file
-        original_image_data_result, converted_image_data_result = await asyncio.gather(
-            converter_image_asset_result.bind_awaitable(
-                lambda asset: self.__create_asset_file_data_async(
-                    original_file_info_result.unwrap(),
-                    original_filename,
-                    original_trimmed_filename,
-                    asset,
-                    ConverterOriginalImageAssetFile,
-                )
-            ).awaitable(),
-            converter_image_asset_result.bind_awaitable(
-                lambda asset: self.__create_asset_file_data_async(
-                    converted_file_info_result.unwrap(),
-                    f"converted_{new_filename}",
-                    new_trimmed_filename,
-                    asset,
-                    ConverterConvertedImageAssetFile,
-                )
-            ).awaitable(),
+        # Create original image asset file
+        original_image_data_result = await converter_image_asset_result.map_async(
+            lambda asset: self.__create_asset_file_data_async(
+                original_file_info_result.ok,
+                original_filename,
+                original_trimmed_filename,
+                asset,
+                ConverterOriginalImageAssetFile,
+            )
+        )
+        # Create converted image asset file
+        converted_image_data_result = await converter_image_asset_result.map_async(
+            lambda asset: self.__create_asset_file_data_async(
+                converted_file_info_result.ok,
+                f"converted_{new_filename}",
+                new_trimmed_filename,
+                asset,
+                ConverterConvertedImageAssetFile,
+            )
         )
 
-        return FutureResult.from_ioresult(
-            original_image_data_result.bind(
-                lambda original_image_data: converted_image_data_result.map(
-                    lambda converted_image_data: ConversionResponse(
-                        original_image_data=original_image_data,
-                        converted_image_data=converted_image_data,
-                    )
-                )
+        return original_image_data_result.bind(
+            lambda original: converted_image_data_result.map(
+                lambda converted: ConversionResponse(original_image_data=original, converted_image_data=converted)
             )
         )
 
@@ -241,7 +180,12 @@ class ConvertImages:
 
     def __trim_filename_or_default(self, filename: str, *, max_length: int, output_format: str) -> str:
         default = f"webpeditor.{output_format.lower()}"
-        return self.__image_file_utility.trim_filename(filename, max_length=max_length).value_or(default)
+        return self.__image_file_utility.trim_filename(filename, max_length=max_length).default_value(default)
+
+    def __get_file_info(self, original_image: ImageFile, original_filename: str) -> ContextResult[ImageFileInfo]:
+        return self.__image_file_utility.update_filename(original_image, original_filename).bind(
+            self.__image_file_utility.get_file_info
+        )
 
     def __convert_image_and_get_file_info(
         self,
@@ -257,16 +201,16 @@ class ConvertImages:
         )
 
     @staticmethod
-    async def __get_or_create_image_asset_async(user_id: str) -> FutureContextResult[ConverterImageAsset]:
+    async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
         user = await AppUser.objects.filter(id=user_id).afirst()
         if user is None:
-            return ResultExtensions.future_failure(
-                FailureContext.ErrorCode.NOT_FOUND,
+            return ContextResult[ConverterImageAsset].Error2(
+                ErrorContext.ErrorCode.NOT_FOUND,
                 f"Unable to find current user '{user_id}'",
             )
 
         converter_image_asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
-        return ResultExtensions.future_success(converter_image_asset)
+        return ContextResult[ConverterImageAsset].Ok(converter_image_asset)
 
     @staticmethod
     async def __create_asset_file_data_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
@@ -312,27 +256,20 @@ class ConvertImages:
         output_format: ImageConverterAllOutputFormats,
     ) -> ContextResult[Image]:
         if original_image.format is None:
-            return ResultExtensions.failure(
-                FailureContext.ErrorCode.INTERNAL_SERVER_ERROR,
+            return ContextResult[Image].Error2(
+                ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR,
                 "Unable to convert image color. Invalid image format",
             )
 
         if original_image.format.upper() not in ImageConverterOutputFormatsWithAlphaChannel:
-            return ResultExtensions.success(original_image.convert("RGB"))
+            return ContextResult[Image].Ok(original_image.convert("RGB"))
 
         rgba_image = original_image.convert("RGBA")
 
         if output_format in ImageConverterOutputFormatsWithAlphaChannel:
-            return ResultExtensions.success(rgba_image)
+            return ContextResult[Image].Ok(rgba_image)
 
-        return ResultExtensions.success(self.__to_rgb(rgba_image))
-
-    @staticmethod
-    def __to_rgb(rgba_image: Image) -> Image:
-        white_color = (255, 255, 255, 255)
-        white_background: Image = new(mode="RGBA", size=rgba_image.size, color=white_color)
-        # Merge RGBA into RGB with a white background
-        return alpha_composite(white_background, rgba_image).convert("RGB")
+        return ContextResult[Image].Ok(self.__to_rgb(rgba_image))
 
     @staticmethod
     def __convert_format(image: Image, options: ConversionRequest.Options) -> ImageFile:
@@ -377,3 +314,10 @@ class ConvertImages:
                     )
 
             return open(buffer)
+
+    @staticmethod
+    def __to_rgb(rgba_image: Image) -> Image:
+        white_color = (255, 255, 255, 255)
+        white_background: Image = new(mode="RGBA", size=rgba_image.size, color=white_color)
+        # Merge RGBA into RGB with a white background
+        return alpha_composite(white_background, rgba_image).convert("RGB")

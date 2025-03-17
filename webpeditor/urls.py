@@ -1,12 +1,18 @@
 from typing import Union
 
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import (
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
 from django.urls import path, include, URLPattern, URLResolver
 
 from webpeditor_app.admin import admin_site
 
 # Admin
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
+    # TODO: Make dynamic URL Admin page access based on OTP code -> check out the perplexity chat
     path("admin/", admin_site.urls),
     path("admin/doc/", include("django.contrib.admindocs.urls")),
 ]

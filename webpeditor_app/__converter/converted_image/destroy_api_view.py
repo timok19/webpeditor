@@ -15,14 +15,14 @@ class ConvertedImagesDestroyAPIView:
         signed_user_id_result: ValueResult[str] = session_service.get_user_id_async()
 
         if not is_successful(signed_user_id_result):
-            return ResultResponse.from_failure(signed_user_id_result.failure())
+            return ResultResponse.from_error(signed_user_id_result.Error2())
 
         signed_user_id: str = signed_user_id_result.unwrap()
 
         unsigned_user_id_result: ValueResult[str] = self.__user_service.unsign_id(signed_user_id)
 
         if not is_successful(unsigned_user_id_result):
-            return ResultResponse.from_failure(unsigned_user_id_result.failure())
+            return ResultResponse.from_error(unsigned_user_id_result.Error2())
 
         unsigned_user_id: str = unsigned_user_id_result.unwrap()
 
