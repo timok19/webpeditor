@@ -86,7 +86,7 @@ INSTALLED_APPS: list[str] = [
 CORS_ORIGIN_WHITELIST: list[str] = str(env("CORS_ORIGIN_WHITELIST")).split(",")
 
 MIDDLEWARE: list[str | Any] = [
-    "webpeditor_app.middlewares.exception.ExceptionHandlingMiddleware",
+    "webpeditor_app.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
     "silk.middleware.SilkyMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",

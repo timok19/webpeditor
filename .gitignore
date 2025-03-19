@@ -23,3 +23,6 @@ yarn-error.log.DS_Store
 .env
 .vercel
 *.sqlite3
+
+venv/
+.venv/

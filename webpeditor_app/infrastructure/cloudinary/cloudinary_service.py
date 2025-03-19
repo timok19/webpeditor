@@ -15,6 +15,7 @@ class CloudinaryService(CloudinaryServiceABC):
         self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
 
     # TODO: rework implementation according new folder structure
+    # TODO: rewrite into async using "aiohttp" client
 
     def delete_assets(self, user_id: str, filter_func: Callable[[dict[str, Any]], bool] | None = None) -> None:
         response = cloudinary.api.resources(folder=user_id, max_results=500)

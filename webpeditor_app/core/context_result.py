@@ -21,6 +21,9 @@ class ErrorContext(Schema):
     message: str = Field(default_factory=str)
     reasons: list[str] = Field(default_factory=list[str])
 
+    def to_str(self):
+        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
+
 
 type ContextResultType[TOut] = Result[TOut, ErrorContext]
 

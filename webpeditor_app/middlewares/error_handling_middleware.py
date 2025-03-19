@@ -10,7 +10,7 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
 @final
-class ExceptionHandlingMiddleware:
+class ErrorHandlingMiddleware:
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
         from webpeditor_app.core.di_container import DiContainer
 

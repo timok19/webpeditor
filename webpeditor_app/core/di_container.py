@@ -26,21 +26,23 @@ class DiContainer:
 
     @classmethod
     def create(cls) -> Container:
-        # Common
-        cls.__di_container.register(ImageFileUtilityABC, factory=ImageFileUtility, scope=Scope.transient)
-
-        # Core
-        cls.__di_container.register(SessionServiceFactory, scope=Scope.transient)
-        cls.__di_container.register(WebPEditorLoggerABC, factory=WebPEditorLogger, scope=Scope.singleton)
-        cls.__di_container.register(UserServiceABC, factory=UserService, scope=Scope.transient)
-        cls.__di_container.register(ConvertImages, scope=Scope.transient)
-
-        # Domain
-        cls.__di_container.register(EditorQueriesABC, factory=EditorQueries, scope=Scope.transient)
-        cls.__di_container.register(ConverterQueriesABC, factory=ConverterQueries, scope=Scope.transient)
+        # Application
+        cls.__di_container.register(ConvertImages)
 
         # Validators
-        cls.__di_container.register(ValidatorABC[ConversionRequest], ConversionRequestValidator, scope=Scope.transient)
+        cls.__di_container.register(ValidatorABC[ConversionRequest], ConversionRequestValidator)
+
+        # Common
+        cls.__di_container.register(ImageFileUtilityABC, factory=ImageFileUtility)
+
+        # Core
+        cls.__di_container.register(SessionServiceFactory)
+        cls.__di_container.register(WebPEditorLoggerABC, factory=WebPEditorLogger, scope=Scope.singleton)
+        cls.__di_container.register(UserServiceABC, factory=UserService)
+
+        # Domain
+        cls.__di_container.register(EditorQueriesABC, factory=EditorQueries)
+        cls.__di_container.register(ConverterQueriesABC, factory=ConverterQueries)
 
         # Infrastructure
         cls.__di_container.register(CloudinaryServiceABC, factory=CloudinaryService, scope=Scope.singleton)

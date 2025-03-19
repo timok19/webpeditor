@@ -101,10 +101,8 @@ class ConvertImages:
         user_id: str,
     ) -> Enumerable[ErrorContext]:
         # Aggregate reasons of errors into a single string for each user
-        reasons = errors.select(lambda e: f"Error code: {e.error_code}, Message: {e.message or ''}").aggregate(
-            lambda message1, message2: f"{message1}, {message2}"
-        )
-        self.__logger.log_error(f"Failed to convert images for user '{user_id}'. Reasons: [{reasons}]")
+        reasons = errors.select(lambda error: error.to_str()).aggregate(lambda m1, m2: f"{m1}, {m2}")
+        self.__logger.log_error(f"Failed to convert images for user '{user_id}'. {reasons}")
         return errors
 
     async def __convert_async(
