@@ -7,12 +7,12 @@ from http import HTTPStatus
 from io import BytesIO
 from typing import Optional, final
 
-from django.core.files.base import ContentFile
-from httpx import AsyncClient
 from PIL.ExifTags import TAGS
 from PIL.Image import Exif
 from PIL.ImageFile import ImageFile
 from PIL.TiffImagePlugin import IFDRational
+from django.core.files.base import ContentFile
+from httpx import AsyncClient
 
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
@@ -48,6 +48,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].Ok(file_response.content)
 
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
+        # TODO: Fix this issue "ValueError: I/O operation on closed file."
         with BytesIO() as buffer:
             image_file.save(buffer, format=image_file.format)
             image_file_bytes = buffer.getvalue()

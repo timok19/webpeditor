@@ -3,7 +3,7 @@ from typing import IO, Final, Optional, cast, final
 from PIL import UnidentifiedImageError
 from expression import Option
 from ninja import UploadedFile
-from PIL.Image import open
+from PIL.Image import Image, open
 
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.schemas.settings import (
@@ -40,16 +40,13 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             self.__validate_max_file_size(file).map(validation_result.add_error)
 
         if validation_result.value.options.output_format.strip().upper() not in ImageConverterAllOutputFormats:
-            validation_result.add_error(f"Invalid output format - {validation_result.value.options.output_format}")
+            validation_result.add_error(f"Invalid output format '{validation_result.value.options.output_format}'")
 
-        if not (
-            IMAGE_CONVERTER_SETTINGS.min_quality
-            <= validation_result.value.options.quality
-            <= IMAGE_CONVERTER_SETTINGS.max_quality
-        ):
-            validation_result.add_error(
-                f"Quality must be between {IMAGE_CONVERTER_SETTINGS.min_quality} and {IMAGE_CONVERTER_SETTINGS.max_quality}"
-            )
+        min_quality = IMAGE_CONVERTER_SETTINGS.min_quality
+        max_quality = IMAGE_CONVERTER_SETTINGS.max_quality
+
+        if not (min_quality <= validation_result.value.options.quality <= max_quality):
+            validation_result.add_error(f"Quality must be between {min_quality} and {max_quality}")
 
         return validation_result
 
@@ -60,7 +57,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
         return (
-            Option[str].Some(f"Provided file {file.name} does not have size")
+            Option[str].Some(f"File {file.name} does not have size")
             if file.size is None or file.size == 0
             else Option[str].Nothing()
         )
@@ -75,13 +72,13 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
         try:
-            with open(cast(IO, file.file)):
-                return Option[str].Nothing()
+            open(cast(IO, file.file)).verify()
+            return Option[str].Nothing()
         except UnidentifiedImageError as uie:
             message = f"File '{file.name}' cannot be processed. Incompatible file"
             self.__logger.log_exception(uie, message)
             return Option[str].Some(message)
         except Exception as exc:
-            message = f"Failed to validate file '{file.name}'"
+            message = f"File '{file.name}' cannot be processed. Corrupted or damaged file"
             self.__logger.log_exception(exc, message)
             return Option[str].Some(message)

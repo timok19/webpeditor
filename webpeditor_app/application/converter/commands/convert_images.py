@@ -52,9 +52,11 @@ class ConvertImages:
         await session_service.synchronize_async()
 
         # Request validation
-        validation_result = self.__conversion_request_validator.validate(request).to_context_result()
-        if validation_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(validation_result.error))
+        validated_request_result = self.__conversion_request_validator.validate(request).to_context_result()
+        if validated_request_result.is_error():
+            return MultipleContextResults[ConversionResponse].from_results(
+                ContextResult.Error(validated_request_result.error)
+            )
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
@@ -68,7 +70,7 @@ class ConvertImages:
             await converter_asset.adelete()
 
         # Process images
-        return (await self.__batch_convert_async(user_id_result.ok, validation_result.ok)).match(
+        return (await self.__batch_convert_async(user_id_result.ok, validated_request_result.ok)).match(
             lambda values: self.__process_values(values, user_id_result.ok),
             lambda errors: self.__process_errors(errors, user_id_result.ok),
         )
@@ -129,9 +131,10 @@ class ConvertImages:
         )
 
         # Get original and converted image data
-        with open(cast(typing.IO, uploaded_file.file)) as original_image:
-            original_file_info_result = self.__get_file_info(original_image, original_filename)
-            converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
+        original_image = open(cast(typing.IO, uploaded_file.file))
+        original_file_info_result = self.__get_file_info(original_image, original_filename)
+        converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
+        original_image.close()
 
         if original_file_info_result.is_error():
             return ContextResult[ConversionResponse].Error(original_file_info_result.error)
@@ -310,6 +313,9 @@ class ConvertImages:
                         exif=image.getexif(),
                         optimize=True,
                     )
+
+            # Set pointer to start
+            buffer.seek(0)
 
             return open(buffer)
 
