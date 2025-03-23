@@ -94,7 +94,7 @@ types-psycopg2==2.9.21.20250318
 types-pyyaml==6.0.12.20241230
 types-setuptools==76.0.0.20250313
 typing-extensions==4.12.2
-tzdata==2025.1 ; sys_platform == 'win32'
+tzdata==2025.2 ; sys_platform == 'win32'
 urllib3==2.3.0
 varname==0.14.0
 whitenoise==6.9.0

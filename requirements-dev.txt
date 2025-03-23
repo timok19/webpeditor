@@ -42,6 +42,6 @@ sqlparse==0.5.3
 toml==0.10.2
 types-pyyaml==6.0.12.20241230
 typing-extensions==4.12.2
-tzdata==2025.1 ; sys_platform == 'win32'
+tzdata==2025.2 ; sys_platform == 'win32'
 urllib3==2.3.0
 virtualenv==20.29.3
