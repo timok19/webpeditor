@@ -107,21 +107,3 @@ target-version = "py313"
 select = ["E4", "E7", "E9", "F", "B", "F401"]
 ignore = ["E501", "B008"]
 unfixable = ["B"]
-
-[tool.basedpyright]
-include = [
-    "webpeditor",
-    "webpeditor_app"
-]
-exclude = [
-    "**/.venv",
-    "**/venv",
-    "**/node_modules",
-    "**/__pycache__",
-    "**/.*",
-    "htmlcov"
-]
-reportMissingImports = true
-reportMissingTypeStubs = false
-pythonVersion = "3.13"
-typeCheckingMode = "standard"

@@ -1,0 +1,21 @@
+{
+  "include": [
+    "webpeditor",
+    "webpeditor_app"
+  ],
+  "exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "htmlcov"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.13",
+  "typeCheckingMode": "standard",
+  "enableExperimentalFeatures": true,
+  "useLibraryCodeForTypes": true,
+  "reportWildcardImportFromLibrary": true
+}
