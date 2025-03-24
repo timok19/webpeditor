@@ -85,7 +85,7 @@ class SessionService:
 
     async def __set_signed_user_id_async(self) -> None:
         # Create a new session
-        if self.__request.session.is_empty() or self.__get_session_key().is_none():
+        if self.__get_session_key().is_none() or self.__request.session.is_empty():
             await self.__request.session.acreate()
 
         # Do nothing if the session contains a signed user id
@@ -116,7 +116,7 @@ class SessionService:
         self.__cloudinary_service.delete_original_and_edited_images(user_id)
         self.__cloudinary_service.delete_converted_images(user_id)
 
-        (await self.clear_expired_async()).map_error(lambda error: self.__logger.log_error(str(error.message)))
+        (await self.clear_expired_async()).map_error(lambda error: self.__logger.log_error(error.message))
 
         self.__logger.log_debug("Storages have been cleaned up")
 
