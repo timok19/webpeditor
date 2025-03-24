@@ -5,6 +5,7 @@ from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedI
 
 class EditorQueries(EditorQueriesABC):
     async def get_original_asset_async(self, user_id: str) -> ContextResult[EditorOriginalImageAsset]:
+        # TODO: optimize the same way as in converter_queries
         original_image_asset = await EditorOriginalImageAsset.objects.filter(user_id=user_id).afirst()
         return (
             ContextResult[EditorOriginalImageAsset].Error2(

@@ -5,6 +5,7 @@ from decimal import Decimal
 from io import BytesIO
 from typing import Final, cast, final
 
+from expression import Option
 from ninja import UploadedFile
 from PIL.Image import Image, alpha_composite, new, open as open_image
 from PIL.ImageFile import ImageFile
@@ -201,15 +202,19 @@ class ConvertImages:
 
     @staticmethod
     async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
-        user = await AppUser.objects.filter(id=user_id).afirst()
-        if user is None:
-            return ContextResult[ConverterImageAsset].Error2(
-                ErrorContext.ErrorCode.NOT_FOUND,
-                f"Unable to find current user '{user_id}'",
+        optional_user = await AppUser.objects.filter(id=user_id).afirst()
+        result = Option.of_optional(optional_user).to_result(
+            ErrorContext(
+                error_code=ErrorContext.ErrorCode.NOT_FOUND,
+                message=f"Unable to find current user '{user_id}'",
             )
+        )
 
-        converter_image_asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
-        return ContextResult[ConverterImageAsset].Ok(converter_image_asset)
+        return (
+            await ContextResult[AppUser]
+            .from_result(result)
+            .map_async(lambda user: ConverterImageAsset.objects.aget_or_create(user=user))
+        ).map(lambda image_asset: image_asset[0])
 
     @staticmethod
     async def __create_asset_file_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
