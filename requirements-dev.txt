@@ -32,7 +32,7 @@ platformdirs==4.3.7
 pre-commit==4.2.0
 py-serializable==1.1.2
 pygments==2.19.1
-pyparsing==3.2.1
+pyparsing==3.2.2
 pyyaml==6.0.2
 requests==2.32.3
 rich==13.9.4

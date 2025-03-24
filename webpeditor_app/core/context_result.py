@@ -21,11 +21,12 @@ class ErrorContext(Schema):
     message: str = Field(default_factory=str)
     reasons: list[str] = Field(default_factory=list[str])
 
+    @classmethod
+    def create(cls, error_code: ErrorCode, message: Optional[str] = None) -> "ErrorContext":
+        return cls(error_code=error_code, message=message or "")
+
     def to_str(self):
         return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
-
-
-type ContextResultType[TOut] = Result[TOut, ErrorContext]
 
 
 class ContextResult[TOut](Result[TOut, ErrorContext]):
@@ -97,10 +98,19 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
                 return ContextResult[TNewOut].unexpected_result()
 
     @override
-    def bind[TNewOut](self, mapper: Callable[[TOut], ContextResultType[TNewOut]]) -> "ContextResult[TNewOut]":
+    def bind[TNewOut](self, mapper: Callable[[TOut], Result[TNewOut, ErrorContext]]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
                 return ContextResult[TNewOut].from_result(mapper(value))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].Error(error)
+            case _:
+                return ContextResult[TNewOut].unexpected_result()
+
+    def bind2[TNewOut](self, mapper: Callable[[TOut], "ContextResult[TNewOut]"]) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return mapper(value)
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].Error(error)
             case _:
@@ -133,11 +143,12 @@ class MultipleContextResults[TOut](Enumerable[ContextResult[TOut]]):
         success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
         error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
     ) -> "MultipleContextResults[TOut]":
-        if self.any(lambda result: result.is_error()):
-            return MultipleContextResults(
+        return (
+            MultipleContextResults(
                 error_func(self.where(lambda r: r.is_error()).select(lambda r: r.error)).select(ContextResult.Error)
             )
-
-        return MultipleContextResults(
-            success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult.Ok)
+            if self.any(lambda result: result.is_error())
+            else MultipleContextResults(
+                success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult.Ok)
+            )
         )
