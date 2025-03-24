@@ -6,7 +6,7 @@ from io import BytesIO
 from typing import Final, cast, final
 
 from ninja import UploadedFile
-from PIL.Image import Image, alpha_composite, new, open
+from PIL.Image import Image, alpha_composite, new, open as open_image
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
@@ -52,11 +52,9 @@ class ConvertImages:
         await session_service.synchronize_async()
 
         # Request validation
-        validated_request_result = self.__conversion_request_validator.validate(request).to_context_result()
-        if validated_request_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(
-                ContextResult.Error(validated_request_result.error)
-            )
+        validation_result = self.__conversion_request_validator.validate(request).to_context_result()
+        if validation_result.is_error():
+            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(validation_result.error))
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
@@ -70,7 +68,7 @@ class ConvertImages:
             await converter_asset.adelete()
 
         # Process images
-        return (await self.__batch_convert_async(user_id_result.ok, validated_request_result.ok)).match(
+        return (await self.__batch_convert_async(user_id_result.ok, request)).match(
             lambda values: self.__process_values(values, user_id_result.ok),
             lambda errors: self.__process_errors(errors, user_id_result.ok),
         )
@@ -131,10 +129,13 @@ class ConvertImages:
         )
 
         # Get original and converted image data
-        original_image = open(cast(typing.IO, uploaded_file.file))
-        original_file_info_result = self.__get_file_info(original_image, original_filename)
-        converted_file_info_result = self.__convert_image_and_get_file_info(original_image, new_filename, options)
-        original_image.close()
+        with open_image(cast(typing.IO, uploaded_file.file)) as original_image:
+            original_file_info_result = self.__get_file_info(original_image, original_filename)
+            converted_file_info_result = (
+                self.__convert_color_mode(original_image, options.output_format)
+                .map(lambda image: self.__convert_format(image, options))
+                .bind(lambda image: self.__get_file_info(image, new_filename))
+            )
 
         if original_file_info_result.is_error():
             return ContextResult[ConversionResponse].Error(original_file_info_result.error)
@@ -148,29 +149,41 @@ class ConvertImages:
             return ContextResult[ConversionResponse].Error(converter_image_asset_result.error)
 
         # Create original image asset file
-        original_image_data_result = await converter_image_asset_result.map_async(
-            lambda asset: self.__create_asset_file_data_async(
-                original_file_info_result.ok,
-                original_filename,
-                original_trimmed_filename,
-                asset,
-                ConverterOriginalImageAssetFile,
+        original_image_data_result = (
+            await converter_image_asset_result.map_async(
+                lambda asset: self.__create_asset_file_async(
+                    original_file_info_result.ok,
+                    original_filename,
+                    original_trimmed_filename,
+                    asset,
+                    ConverterOriginalImageAssetFile,
+                )
             )
-        )
-        # Create converted image asset file
-        converted_image_data_result = await converter_image_asset_result.map_async(
-            lambda asset: self.__create_asset_file_data_async(
-                converted_file_info_result.ok,
-                f"converted_{new_filename}",
-                new_trimmed_filename,
-                asset,
-                ConverterConvertedImageAssetFile,
-            )
-        )
+        ).map(self.__to_image_data)
 
-        return original_image_data_result.bind(
-            lambda original: converted_image_data_result.map(
-                lambda converted: ConversionResponse(original_image_data=original, converted_image_data=converted)
+        if original_image_data_result.is_error():
+            return ContextResult[ConversionResponse].Error(original_image_data_result.error)
+
+        # Create converted image asset file
+        converted_image_data_result = (
+            await converter_image_asset_result.map_async(
+                lambda asset: self.__create_asset_file_async(
+                    converted_file_info_result.ok,
+                    f"converted_{new_filename}",
+                    new_trimmed_filename,
+                    asset,
+                    ConverterConvertedImageAssetFile,
+                )
+            )
+        ).map(self.__to_image_data)
+
+        if converted_image_data_result.is_error():
+            return ContextResult[ConversionResponse].Error(converted_image_data_result.error)
+
+        return ContextResult[ConversionResponse].Ok(
+            ConversionResponse(
+                original_image_data=original_image_data_result.ok,
+                converted_image_data=converted_image_data_result.ok,
             )
         )
 
@@ -183,23 +196,8 @@ class ConvertImages:
         default = f"webpeditor.{output_format.lower()}"
         return self.__image_file_utility.trim_filename(filename, max_length=max_length).default_value(default)
 
-    def __get_file_info(self, original_image: ImageFile, original_filename: str) -> ContextResult[ImageFileInfo]:
-        return self.__image_file_utility.update_filename(original_image, original_filename).bind(
-            self.__image_file_utility.get_file_info
-        )
-
-    def __convert_image_and_get_file_info(
-        self,
-        original_image: ImageFile,
-        new_filename: str,
-        options: ConversionRequest.Options,
-    ) -> ContextResult[ImageFileInfo]:
-        return (
-            self.__convert_color_mode(original_image, options.output_format)
-            .map(lambda image: self.__convert_format(image, options))
-            .bind(lambda image: self.__image_file_utility.update_filename(image, new_filename))
-            .bind(self.__image_file_utility.get_file_info)
-        )
+    def __get_file_info(self, image: ImageFile, filename: str) -> ContextResult[ImageFileInfo]:
+        return self.__image_file_utility.update_filename(image, filename).bind(self.__image_file_utility.get_file_info)
 
     @staticmethod
     async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
@@ -214,14 +212,14 @@ class ConvertImages:
         return ContextResult[ConverterImageAsset].Ok(converter_image_asset)
 
     @staticmethod
-    async def __create_asset_file_data_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
+    async def __create_asset_file_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         file_info: ImageFileInfo,
         new_filename: str,
         trimmed_filename: str,
         converter_image_asset: ConverterImageAsset,
         asset_file_model: type[T],
-    ) -> ConversionResponse.ImageData:
-        created_asset_file = await asset_file_model.objects.acreate(
+    ) -> T:
+        return await asset_file_model.objects.acreate(
             file=file_info.content_file,
             filename=new_filename,
             filename_shorter=trimmed_filename,
@@ -237,18 +235,22 @@ class ConvertImages:
             image_asset=converter_image_asset,
         )
 
+    @staticmethod
+    def __to_image_data[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
+        asset_file: T,
+    ) -> ConversionResponse.ImageData:
         return ConversionResponse.ImageData(
-            url=created_asset_file.file.url,
-            filename=created_asset_file.filename,
-            filename_shorter=created_asset_file.filename_shorter,
-            content_type=created_asset_file.content_type,
-            format=created_asset_file.format,
-            format_description=created_asset_file.format_description,
-            size=created_asset_file.size or 0,
-            resolution=(created_asset_file.width or 0, created_asset_file.height or 0),
-            aspect_ratio=created_asset_file.aspect_ratio or Decimal(),
-            color_mode=created_asset_file.color_mode,
-            exif_data=created_asset_file.exif_data,
+            url=asset_file.file.url,
+            filename=asset_file.filename,
+            filename_shorter=asset_file.filename_shorter,
+            content_type=asset_file.content_type,
+            format=asset_file.format,
+            format_description=asset_file.format_description,
+            size=asset_file.size or 0,
+            resolution=(asset_file.width or 0, asset_file.height or 0),
+            aspect_ratio=asset_file.aspect_ratio or Decimal(),
+            color_mode=asset_file.color_mode,
+            exif_data=asset_file.exif_data,
         )
 
     def __convert_color_mode(
@@ -273,55 +275,59 @@ class ConvertImages:
         return ContextResult[Image].Ok(self.__to_rgb(rgba_image))
 
     @staticmethod
-    def __convert_format(image: Image, options: ConversionRequest.Options) -> ImageFile:
-        with BytesIO() as buffer:
-            match options.output_format:
-                case ImageConverterAllOutputFormats.JPEG:
-                    image.save(
-                        buffer,
-                        format=ImageConverterAllOutputFormats.JPEG,
-                        quality=options.quality,
-                        subsampling=0 if options.quality == 100 else 2,
-                        exif=image.getexif(),
-                    )
-                case ImageConverterAllOutputFormats.TIFF:
-                    image.save(
-                        buffer,
-                        format=ImageConverterOutputFormats.TIFF,
-                        quality=options.quality,
-                        exif=image.getexif(),
-                        compression="jpeg",
-                    )
-                case ImageConverterAllOutputFormats.BMP:
-                    image.save(
-                        buffer,
-                        format=ImageConverterAllOutputFormats.BMP,
-                        bitmap_format="bmp",
-                    )
-                case ImageConverterAllOutputFormats.PNG:
-                    image.save(
-                        buffer,
-                        format=ImageConverterAllOutputFormats.PNG,
-                        bitmap_format="png",
-                        exif=image.getexif(),
-                    )
-                case _:
-                    image.save(
-                        buffer,
-                        format=options.output_format,
-                        quality=options.quality,
-                        exif=image.getexif(),
-                        optimize=True,
-                    )
-
-            # Set pointer to start
-            buffer.seek(0)
-
-            return open(buffer)
-
-    @staticmethod
     def __to_rgb(rgba_image: Image) -> Image:
         white_color = (255, 255, 255, 255)
         white_background: Image = new(mode="RGBA", size=rgba_image.size, color=white_color)
         # Merge RGBA into RGB with a white background
         return alpha_composite(white_background, rgba_image).convert("RGB")
+
+    @staticmethod
+    def __convert_format(image: Image, options: ConversionRequest.Options) -> ImageFile:
+        buffer = BytesIO()
+
+        match options.output_format:
+            case ImageConverterAllOutputFormats.JPEG:
+                image.save(
+                    buffer,
+                    format=ImageConverterAllOutputFormats.JPEG,
+                    quality=options.quality,
+                    subsampling=0 if options.quality == 100 else 2,
+                    exif=image.getexif(),
+                    optimize=True,
+                )
+            case ImageConverterAllOutputFormats.TIFF:
+                image.save(
+                    buffer,
+                    format=ImageConverterOutputFormats.TIFF,
+                    quality=options.quality,
+                    exif=image.getexif(),
+                    optimize=True,
+                    compression="jpeg" if image.format == ImageConverterAllOutputFormats.JPEG else None,
+                )
+            case ImageConverterAllOutputFormats.BMP:
+                image.save(
+                    buffer,
+                    format=ImageConverterAllOutputFormats.BMP,
+                    bitmap_format="bmp",
+                    optimize=True,
+                )
+            case ImageConverterAllOutputFormats.PNG:
+                image.save(
+                    buffer,
+                    format=ImageConverterAllOutputFormats.PNG,
+                    bitmap_format="png",
+                    exif=image.getexif(),
+                    optimize=True,
+                )
+            case _:
+                image.save(
+                    buffer,
+                    format=options.output_format,
+                    quality=options.quality,
+                    exif=image.getexif(),
+                    optimize=True,
+                )
+
+        # Set pointer to start
+        buffer.seek(0)
+        return open_image(buffer)

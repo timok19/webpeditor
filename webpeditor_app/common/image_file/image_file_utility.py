@@ -1,16 +1,13 @@
 import base64
 import os
 import re
+import exif
 from decimal import ROUND_UP, Decimal
-from fractions import Fraction
 from http import HTTPStatus
 from io import BytesIO
-from typing import Optional, final
+from typing import Optional, cast, final
 
-from PIL.ExifTags import TAGS
-from PIL.Image import Exif
 from PIL.ImageFile import ImageFile
-from PIL.TiffImagePlugin import IFDRational
 from django.core.files.base import ContentFile
 from httpx import AsyncClient
 
@@ -48,42 +45,25 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].Ok(file_response.content)
 
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
-        # TODO: Fix this issue "ValueError: I/O operation on closed file."
-        with BytesIO() as buffer:
-            image_file.save(buffer, format=image_file.format)
-            image_file_bytes = buffer.getvalue()
+        content_file = self.__to_content_file(image_file)
 
-        if len(image_file_bytes) == 0:
-            return ContextResult[ImageFileInfo].Error2(
-                ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR, "File has no content"
-            )
-
-        filename = image_file.filename.decode() if isinstance(image_file.filename, bytes) else image_file.filename
-        content_file = ContentFile(image_file_bytes, filename)
-
-        if image_file.format is None:
+        if content_file.size == 0:
             return ContextResult[ImageFileInfo].Error2(
                 ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                "Failed to read image file format",
+                "File has no content",
             )
-
-        file_format_description = image_file.format_description or ""
-        resolution = image_file.size
-        aspect_ratio = self.__get_aspect_ratio(resolution)
-        color_mode = image_file.mode
-        mapped_exif_data = self.__map_exif_data(image_file.getexif())
 
         return ContextResult[ImageFileInfo].Ok(
             ImageFileInfo(
                 content_file=content_file,
-                filename=filename,
-                file_format=image_file.format,
-                file_format_description=file_format_description,
+                filename=cast(str, content_file.name),
+                file_format=cast(str, image_file.format),
+                file_format_description=image_file.format_description or "",
                 size=content_file.size,
-                resolution=resolution,
-                aspect_ratio=aspect_ratio,
-                color_mode=color_mode,
-                exif_data=mapped_exif_data,
+                resolution=image_file.size,
+                aspect_ratio=self.__get_aspect_ratio(image_file.size),
+                color_mode=image_file.mode,
+                exif_data=self.__map_exif_data(image_file),
             )
         )
 
@@ -146,6 +126,16 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ContextResult[str].Ok(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
 
+    def __to_content_file(self, image_file: ImageFile) -> ContentFile:
+        with BytesIO() as buffer:
+            image_file.save(buffer, format=image_file.format)
+            file_bytes = buffer.getvalue()
+        return ContentFile(file_bytes, self.__get_filename(image_file))
+
+    @staticmethod
+    def __get_filename(image_file: ImageFile) -> str:
+        return image_file.filename.decode() if isinstance(image_file.filename, bytes) else image_file.filename
+
     @staticmethod
     def __update_filename(image_file: ImageFile, new_filename: str) -> ImageFile:
         image_file.filename = new_filename
@@ -157,25 +147,12 @@ class ImageFileUtility(ImageFileUtilityABC):
         rounded_aspect_ratio: Decimal = aspect_ratio.quantize(Decimal(".1"), rounding=ROUND_UP)
         return rounded_aspect_ratio
 
-    def __map_exif_data(self, exif: Exif) -> dict[str, str]:
-        # If no EXIF data is found, return an empty dictionary
-        if not exif or len(exif) == 0:
-            return {}
-
-        exif_map: dict[str, str] = {}
+    @staticmethod
+    def __map_exif_data(image_file: ImageFile) -> dict[str, str]:
+        image_file_copy = image_file.copy()
+        with BytesIO() as buffer:
+            image_file_copy.save(buffer, format=image_file.format, exif=image_file.getexif())
+            image = exif.Image(buffer.getvalue())
 
         # Map EXIF tags to human-readable names and decode values where necessary
-        for tag_id in exif:
-            if len(decoded_exif := self.__decode_exif_value(exif[tag_id])) > 0:
-                exif_map[TAGS[tag_id]] = decoded_exif
-
-        return exif_map
-
-    @staticmethod
-    def __decode_exif_value(value: object) -> str:
-        if isinstance(value, bytes):
-            return value.decode()
-        elif isinstance(value, IFDRational):
-            return str(float(Fraction(int(value.numerator), int(value.denominator))))
-        else:
-            return str(value)
+        return {tag: str(image.get(tag)) for tag in image.list_all()}
