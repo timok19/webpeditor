@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.utils import timezone
 
@@ -15,6 +16,7 @@ class BaseImageAsset(models.Model):
 
 
 class BaseImageAssetFile(models.Model):
+    # TODO: Add types
     id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=120, blank=True)
     filename_shorter = models.CharField(max_length=30, blank=True)
@@ -26,7 +28,7 @@ class BaseImageAssetFile(models.Model):
     height = models.IntegerField(null=True)
     aspect_ratio = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     color_mode = models.CharField(max_length=10)
-    exif_data = models.JSONField()
+    exif_data: models.JSONField[Any] = models.JSONField()
 
     class Meta:
         abstract = True

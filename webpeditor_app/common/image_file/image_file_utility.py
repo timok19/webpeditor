@@ -39,7 +39,7 @@ class ImageFileUtility(ImageFileUtilityABC):
                 ErrorContext.ErrorCode.NOT_FOUND, f"Unable to get content of image file from url '{file_url}'"
             )
 
-        if len(file_response.content) == 0 or file_response.content is None:
+        if len(file_response.content) == 0:
             return ContextResult[bytes].Error2(ErrorContext.ErrorCode.NOT_FOUND, "File has no content")
 
         return ContextResult[bytes].Ok(file_response.content)
@@ -56,7 +56,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[ImageFileInfo].Ok(
             ImageFileInfo(
                 content_file=content_file,
-                filename=cast(str, content_file.name),
+                filename=content_file.name,
                 file_format=cast(str, image_file.format),
                 file_format_description=image_file.format_description or "",
                 size=content_file.size,
@@ -155,4 +155,6 @@ class ImageFileUtility(ImageFileUtilityABC):
             image = exif.Image(buffer.getvalue())
 
         # Map EXIF tags to human-readable names and decode values where necessary
-        return {tag: str(image.get(tag)) for tag in image.list_all()}
+        exif_data = image.get_all()
+        exif_map = {key: str(value) for key, value in exif_data.items()}
+        return exif_map

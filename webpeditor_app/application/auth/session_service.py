@@ -98,7 +98,7 @@ class SessionService:
         # Set signed User ID to the session
         await self.__request.session.aset(self.__user_id_key, signed_user_id)
 
-        self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been added into session storage")
+        self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been added into the session storage")
 
     async def __get_expiry_age_minutes_async(self) -> int:
         return math.ceil(await self.__request.session.aget_expiry_age() / 60)

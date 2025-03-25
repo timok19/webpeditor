@@ -11,52 +11,45 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+import django_stubs_ext
 
 from datetime import timedelta
 
 from django.core.management.utils import get_random_secret_key
-from environ import Env
 from pathlib import Path
 from typing import Any
+from dotenv import load_dotenv
 
 from webpeditor_app.apps import WebpeditorAppConfig
 
+django_stubs_ext.monkeypatch()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
-env: Env = Env(
-    APP_VERSION=(str, "app_version"),
-    DEBUG=(str, "1"),
-    SECRET_KEY=(str, get_random_secret_key()),
-    CLOUDINARY_CLOUD_NAME=(str, "cloud_name"),
-    CLOUDINARY_API_KEY=(str, "api_key"),
-    CLOUDINARY_API_SECRET=(str, "api_secret"),
-    CSRF_TRUSTED_ORIGINS=(str, "trusted_origins_separated_by_comma"),
-    WEBPEDITOR_API_KEY=(str, "webpeditor_api_key"),
-    WEBPEDITOR_SALT_KEY=(str, get_random_secret_key()),
-)
+ENV_FILE_PATH: Path = BASE_DIR / ".env"
 
-Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
+if ENV_FILE_PATH.exists():
+    load_dotenv(dotenv_path=ENV_FILE_PATH, override=True, verbose=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = str(env("SECRET_KEY"))
+SECRET_KEY: str = os.getenv("SECRET_KEY") or get_random_secret_key()
 
-WEBPEDITOR_API_KEY: str = str(env("WEBPEDITOR_API_KEY"))
+WEBPEDITOR_API_KEY: str = str(os.getenv("WEBPEDITOR_API_KEY"))
 
-WEBPEDITOR_SALT_KEY: str = str(env("WEBPEDITOR_SALT_KEY"))
+WEBPEDITOR_SALT_KEY: str = str(os.getenv("WEBPEDITOR_SALT_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = bool(int(env("DEBUG")))
+DEBUG: bool = bool(int(str(os.getenv("DEBUG"))))
 
-APP_VERSION: str = str(env("APP_VERSION"))
+APP_VERSION: str = str(os.getenv("APP_VERSION"))
 
 ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "webpeditor.fly.dev"]
 
-CSRF_TRUSTED_ORIGINS: list[str] = str(env("CSRF_TRUSTED_ORIGINS")).split(",")
+CSRF_TRUSTED_ORIGINS: list[str] = str(os.getenv("CSRF_TRUSTED_ORIGINS")).split(",")
 
 INSTALLED_APPS: list[str] = [
     "daphne",
@@ -83,7 +76,7 @@ INSTALLED_APPS: list[str] = [
     "webpeditor_app",
 ]
 
-CORS_ORIGIN_WHITELIST: list[str] = str(env("CORS_ORIGIN_WHITELIST")).split(",")
+CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split(",")
 
 MIDDLEWARE: list[str | Any] = [
     "webpeditor_app.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
@@ -218,9 +211,9 @@ MEDIA_URL: str = "/"
 
 # Cloudinary storage config
 CLOUDINARY_STORAGE: dict[str, Any] = {
-    "CLOUD_NAME": str(env("CLOUDINARY_CLOUD_NAME")),
-    "API_KEY": str(env("CLOUDINARY_API_KEY")),
-    "API_SECRET": str(env("CLOUDINARY_API_SECRET")),
+    "CLOUD_NAME": str(os.getenv("CLOUDINARY_CLOUD_NAME")),
+    "API_KEY": str(os.getenv("CLOUDINARY_API_KEY")),
+    "API_SECRET": str(os.getenv("CLOUDINARY_API_SECRET")),
     "SECURE": True,
 }
 

@@ -1,9 +1,8 @@
 import asyncio
 import os.path
-import typing
 from decimal import Decimal
 from io import BytesIO
-from typing import Final, cast, final
+from typing import Final, final
 
 from PIL.Image import Image, alpha_composite, new, open as open_image
 from PIL.ImageFile import ImageFile
@@ -55,12 +54,16 @@ class ConvertImages:
         # Request validation
         validation_result = self.__conversion_request_validator.validate(request).to_context_result()
         if validation_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(validation_result.error))
+            return MultipleContextResults[ConversionResponse].from_results(
+                ContextResult[ConversionResponse].Error(validation_result.error)
+            )
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
         if user_id_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(ContextResult.Error(user_id_result.error))
+            return MultipleContextResults[ConversionResponse].from_results(
+                ContextResult[ConversionResponse].Error(user_id_result.error)
+            )
 
         # Delete previous content if exist
         converter_asset = ConverterImageAsset.objects.filter(user_id=user_id_result.ok)
@@ -113,7 +116,7 @@ class ConvertImages:
         options: ConversionRequest.Options,
     ) -> ContextResult[ConversionResponse]:
         # Get filenames
-        original_filename = self.__image_file_utility.sanitize_filename(cast(str, uploaded_file.name))
+        original_filename = self.__image_file_utility.sanitize_filename(uploaded_file.name)
         new_filename = self.__create_new_filename(original_filename, options=options)
 
         # Trim original and new filenames
@@ -130,7 +133,7 @@ class ConvertImages:
         )
 
         # Get original and converted image data
-        with open_image(cast(typing.IO, uploaded_file.file)) as original_image:
+        with open_image(uploaded_file.file) as original_image:
             original_file_info_result = self.__get_file_info(original_image, original_filename)
             converted_file_info_result = (
                 self.__convert_color_mode(original_image, options.output_format)
@@ -222,6 +225,7 @@ class ConvertImages:
         converter_image_asset: ConverterImageAsset,
         asset_file_model: type[T],
     ) -> T:
+        # TODO: Make sure that the file size of the converted image is not greater than 10485760
         return await asset_file_model.objects.acreate(
             file=file_info.content_file,
             filename=new_filename,

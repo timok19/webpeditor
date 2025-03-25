@@ -54,4 +54,4 @@ class DiContainer:
         """
         Get specified dependency from the DI container.
         """
-        return cls.__di_container.resolve(service_key, **kwargs)
+        return cls.__di_container.resolve(service_key, **kwargs)  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]

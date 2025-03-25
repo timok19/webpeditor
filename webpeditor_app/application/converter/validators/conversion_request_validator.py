@@ -1,9 +1,9 @@
-from typing import IO, Final, Optional, cast, final
+from typing import Final, Optional, final
 
 from PIL import UnidentifiedImageError
+from PIL.Image import open as open_image
 from expression import Option
 from ninja import UploadedFile
-from PIL.Image import open as open_image
 
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.schemas.settings import (
@@ -55,24 +55,20 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
-        return (
-            Option[str].Some(f"File {file.name} does not have size")
-            if file.size is None or file.size == 0
-            else Option[str].Nothing()
-        )
+        return Option[str].Some(f"File {file.name} does not have size") if file.size == 0 else Option[str].Nothing()
 
     @staticmethod
     def __validate_max_file_size(file: UploadedFile) -> Option[str]:
         max_file_size = IMAGE_CONVERTER_SETTINGS.max_file_size
         return (
             Option[str].Some(f"File {file.name} size {file.size} exceeds the maximum allowed size {max_file_size}")
-            if file.size is not None and file.size > max_file_size
+            if file.size > max_file_size
             else Option[str].Nothing()
         )
 
     def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
         try:
-            open_image(cast(IO, file.file)).verify()
+            open_image(file.file).verify()
             return Option[str].Nothing()
         except UnidentifiedImageError as uie:
             message = f"File '{file.name}' cannot be processed. Incompatible file"

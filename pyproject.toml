@@ -22,16 +22,13 @@ dependencies = [
     "django-compressor>=4.5.1",
     "django-cors-headers>=4.6.0",
     "django-crispy-forms>=2.3",
-    "django-environ>=0.11.2",
     "django-extensions>=3.2.3",
     "django-jazzmin>=3.0.1",
-    "django-jsonfield>=1.4.1",
     "django-ninja>=1.3.0",
     "django-ninja-extra>=0.21.8",
     "django-otp>=1.5.4",
     "django-silk>=5.3.2",
-    "django-stubs>=5.1.3",
-    "django-types>=0.19.1",
+    "django-stubs-ext>=5.1.3",
     "djhtml>=3.0.7",
     "dnspython>=2.7.0",
     "docutils>=0.21.2",
@@ -47,6 +44,7 @@ dependencies = [
     "platformdirs>=4.3.6",
     "punq>=0.7.0",
     "pycodestyle>=2.12.1",
+    "python-dotenv>=1.1.0",
     "pytz>=2024.2",
     "qrcode>=8.0",
     "shortuuid>=1.0.13",
@@ -54,7 +52,6 @@ dependencies = [
     "twisted[http2, tls]>=24.11.0",
     "types-linq>=1.2.1",
     "typing-extensions>=4.12.2",
-    "varname>=0.13.5",
     "whitenoise>=6.8.2",
     "wrapt>=1.17.2",
 ]
@@ -66,9 +63,9 @@ Homepage = "https://webpeditor.fly.dev"
 dev = [
     "pip-audit>=2.7.3",
     "pre-commit>=4.0.1",
-    "django-stubs>=5.1.3",
     "basedpyright>=1.27.1",
     "ruff>=0.11.0",
+    "django-types>=0.20.0",
 ]
 
 [tool.ruff]
