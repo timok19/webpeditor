@@ -3,7 +3,7 @@ from typing import Annotated, final, Final
 
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
-from ninja_extra import ControllerBase, api_controller, http_post
+from ninja_extra import ControllerBase, api_controller, http_post  # pyright: ignore [reportUnknownVariableType]
 
 from webpeditor_app.application.converter.commands.convert_images import ConvertImages
 from webpeditor_app.application.converter.schemas.conversion import ConversionResponse, ConversionRequest
@@ -84,5 +84,5 @@ class ImageConverterController(ControllerMixin, ControllerBase):
         exclude_none=True,
     )
     async def download_all_as_zip_async(self) -> tuple[HTTPStatus, ResultResponse[DownloadAllZipResponse]]:
-        session_service = self.__session_service_factory.create(self.get_request(self.context))
+        # session_service = self.__session_service_factory.create(self.get_request(self.context))
         return ResultResponse[DownloadAllZipResponse].failure_500("Not implemented")

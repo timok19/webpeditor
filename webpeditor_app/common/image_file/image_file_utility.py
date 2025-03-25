@@ -21,7 +21,7 @@ from webpeditor_app.core.context_result import ContextResult, ErrorContext
 class ImageFileUtility(ImageFileUtilityABC):
     def convert_to_bytes(self, file_base64: str) -> ContextResult[bytes]:
         if len(file_base64) == 0:
-            return ContextResult[bytes].Error2(ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR, "File base64 is empty")
+            return ContextResult[bytes].Error(ErrorContext.server_error("File base64 is empty"))
 
         image_base64_data: str = file_base64.split(",")[1]
 
@@ -29,18 +29,18 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]:
         if len(file_url) == 0:
-            return ContextResult[bytes].Error2(ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR, "File URL is empty")
+            return ContextResult[bytes].Error(ErrorContext.server_error("File URL is empty"))
 
         async with AsyncClient() as client:
             file_response = await client.get(file_url)
 
         if file_response.status_code == HTTPStatus.NOT_FOUND.value:
-            return ContextResult[bytes].Error2(
-                ErrorContext.ErrorCode.NOT_FOUND, f"Unable to get content of image file from url '{file_url}'"
+            return ContextResult[bytes].Error(
+                ErrorContext.not_found(f"Unable to get content of image file from url '{file_url}'")
             )
 
         if len(file_response.content) == 0:
-            return ContextResult[bytes].Error2(ErrorContext.ErrorCode.NOT_FOUND, "File has no content")
+            return ContextResult[bytes].Error(ErrorContext.not_found("File has no content"))
 
         return ContextResult[bytes].Ok(file_response.content)
 
@@ -48,10 +48,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         content_file = self.__to_content_file(image_file)
 
         if content_file.size == 0:
-            return ContextResult[ImageFileInfo].Error2(
-                ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                "File has no content",
-            )
+            return ContextResult[ImageFileInfo].Error(ErrorContext.server_error("File has no content"))
 
         return ContextResult[ImageFileInfo].Ok(
             ImageFileInfo(
@@ -76,27 +73,19 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     def validate_filename(self, filename: Optional[str]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
-            return ContextResult[str].Error2(ErrorContext.ErrorCode.BAD_REQUEST, "Filename must not be empty")
+            return ContextResult[str].Error(ErrorContext.bad_request("Filename must not be empty"))
 
         if len(filename) > settings.FILENAME_MAX_SIZE:
-            return ContextResult[str].Error2(
-                ErrorContext.ErrorCode.BAD_REQUEST,
-                f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})",
-            )
+            message = f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})"
+            return ContextResult[str].Error(ErrorContext.bad_request(message))
 
         basename, extension = os.path.splitext(filename)
 
         if basename.upper() in settings.RESERVED_WINDOWS_FILENAMES:
-            return ContextResult[str].Error2(
-                ErrorContext.ErrorCode.BAD_REQUEST,
-                f"Filename '{filename}' is a reserved name",
-            )
+            return ContextResult[str].Error(ErrorContext.bad_request(f"Filename '{filename}' is a reserved name"))
 
         if len(extension) == 0:
-            return ContextResult[str].Error2(
-                ErrorContext.ErrorCode.BAD_REQUEST,
-                f"Filename '{filename}' has no extension",
-            )
+            return ContextResult[str].Error(ErrorContext.bad_request(f"Filename '{filename}' has no extension"))
 
         return ContextResult[str].Ok(filename)
 
@@ -105,9 +94,8 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     def trim_filename(self, filename: str, *, max_length: int) -> ContextResult[str]:
         if max_length <= 0:
-            return ContextResult[str].Error2(
-                ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                f"Maximum length must be greater than 0, got {max_length}",
+            return ContextResult[str].Error(
+                ErrorContext.server_error(f"Maximum length must be greater than 0, got {max_length}")
             )
 
         if len(filename) <= max_length:

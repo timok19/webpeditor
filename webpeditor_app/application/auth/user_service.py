@@ -22,7 +22,7 @@ class UserService(UserServiceABC):
         return ContextResult[str].from_result(
             self.__get_unsigned_id(signed_user_id)
             .map_error(lambda exc: self.__logger.log_exception(exc, f"Invalid signed User ID: {signed_user_id}"))
-            .map_error(lambda _: ErrorContext.create(ErrorContext.ErrorCode.BAD_REQUEST))
+            .map_error(lambda _: ErrorContext.bad_request())
         )
 
     @staticmethod

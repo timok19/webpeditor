@@ -22,11 +22,36 @@ class ErrorContext(Schema):
     reasons: list[str] = Field(default_factory=list[str])
 
     @classmethod
-    def create(cls, error_code: ErrorCode, message: Optional[str] = None) -> "ErrorContext":
-        return cls(error_code=error_code, message=message or "")
+    def bad_request(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.__create(cls.ErrorCode.BAD_REQUEST, message, reasons)
+
+    @classmethod
+    def unauthorized(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.__create(cls.ErrorCode.UNAUTHORIZED, message, reasons)
+
+    @classmethod
+    def forbidden(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.__create(cls.ErrorCode.FORBIDDEN, message, reasons)
+
+    @classmethod
+    def not_found(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.__create(cls.ErrorCode.NOT_FOUND, message, reasons)
+
+    @classmethod
+    def server_error(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.__create(cls.ErrorCode.INTERNAL_SERVER_ERROR, message, reasons)
 
     def to_str(self):
         return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
+
+    @classmethod
+    def __create(
+        cls,
+        error_code: ErrorCode,
+        message: Optional[str] = None,
+        reasons: Optional[list[str]] = None,
+    ) -> "ErrorContext":
+        return cls(error_code=error_code, message=message or "", reasons=reasons or [])
 
 
 class ContextResult[TOut](Result[TOut, ErrorContext]):
@@ -130,7 +155,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @staticmethod
     def unexpected_result() -> "ContextResult[TOut]":
-        return ContextResult[TOut].Error2(ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected result")
+        return ContextResult[TOut].Error(ErrorContext.server_error("Unexpected result"))
 
 
 class MultipleContextResults[TOut](Enumerable[ContextResult[TOut]]):
@@ -145,10 +170,12 @@ class MultipleContextResults[TOut](Enumerable[ContextResult[TOut]]):
     ) -> "MultipleContextResults[TOut]":
         return (
             MultipleContextResults(
-                error_func(self.where(lambda r: r.is_error()).select(lambda r: r.error)).select(ContextResult.Error)
+                error_func(self.where(lambda r: r.is_error()).select(lambda r: r.error)).select(
+                    ContextResult[TOut].Error
+                )
             )
             if self.any(lambda result: result.is_error())
             else MultipleContextResults(
-                success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult.Ok)
+                success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult[TOut].Ok)
             )
         )

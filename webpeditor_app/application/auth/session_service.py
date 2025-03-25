@@ -10,9 +10,12 @@ from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.context_result import ContextResult, ErrorContext
 from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.infrastructure.database.abc.converter_queries_abc import ConverterQueriesABC
-from webpeditor_app.infrastructure.database.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.abc.converter_queries_abc import ConverterQueriesABC
+from webpeditor_app.infrastructure.abc.editor_queries_abc import EditorQueriesABC
 from webpeditor_app.models.app_user import AppUser
+
+
+# TODO: resolve typing issues
 
 
 @final
@@ -124,9 +127,8 @@ class SessionService:
         signed_user_id = await self.__request.session.aget(self.__user_id_key)
 
         if signed_user_id is None:
-            return ContextResult[str].Error2(
-                error_code=ErrorContext.ErrorCode.NOT_FOUND,
-                message=f"Unable to find signed User ID under key {self.__user_id_key}",
+            return ContextResult[str].Error(
+                ErrorContext.not_found(f"Unable to find signed User ID under key {self.__user_id_key}")
             )
 
         return ContextResult[str].Ok(signed_user_id)

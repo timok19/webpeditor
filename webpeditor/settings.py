@@ -29,6 +29,7 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
 ENV_FILE_PATH: Path = BASE_DIR / ".env"
 
+# Load .env file
 if ENV_FILE_PATH.exists():
     load_dotenv(dotenv_path=ENV_FILE_PATH, override=True, verbose=True)
 

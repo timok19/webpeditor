@@ -4,7 +4,7 @@ from django.http.response import HttpResponse, HttpResponseBase
 from expression import Success, Failure, Try
 from ninja.responses import codes_4xx, codes_5xx
 from types_linq import Enumerable
-from typing import Callable, Final, cast, final
+from typing import Callable, Final, Union, cast, final
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
@@ -46,13 +46,11 @@ class ErrorHandlingMiddleware:
         response_data = response_data_result.ok
 
         if isinstance(response_data, list):
-            for item in response_data:
+            for item in cast(list[Union[dict[str, object], object]], response_data):
                 if isinstance(item, dict):
-                    data = cast(dict[str, object], item)
-                    self.__log_mapped_error(request, data)
+                    self.__log_mapped_error(request, cast(dict[str, object], item))
         elif isinstance(response_data, dict):
-            data = cast(dict[str, object], response_data)
-            self.__log_mapped_error(request, data)
+            self.__log_mapped_error(request, cast(dict[str, object], response_data))
         else:
             self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
 

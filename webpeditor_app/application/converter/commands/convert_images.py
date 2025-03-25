@@ -206,10 +206,7 @@ class ConvertImages:
     @staticmethod
     async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
         optional_user = await AppUser.objects.filter(id=user_id).afirst()
-        error_context = ErrorContext.create(
-            ErrorContext.ErrorCode.NOT_FOUND,
-            f"Unable to find current user '{user_id}'",
-        )
+        error_context = ErrorContext.not_found(f"Unable to find current user '{user_id}'")
 
         return (
             await ContextResult[AppUser]
@@ -248,15 +245,15 @@ class ConvertImages:
     ) -> ConversionResponse.ImageData:
         return ConversionResponse.ImageData(
             url=asset_file.file.url,
-            filename=asset_file.filename,
-            filename_shorter=asset_file.filename_shorter,
-            content_type=asset_file.content_type,
-            format=asset_file.format,
-            format_description=asset_file.format_description,
+            filename=str(asset_file.filename),
+            filename_shorter=str(asset_file.filename_shorter),
+            content_type=str(asset_file.content_type),
+            format=str(asset_file.format),
+            format_description=str(asset_file.format_description),
             size=asset_file.size or 0,
             resolution=(asset_file.width or 0, asset_file.height or 0),
             aspect_ratio=asset_file.aspect_ratio or Decimal(),
-            color_mode=asset_file.color_mode,
+            color_mode=str(asset_file.color_mode),
             exif_data=asset_file.exif_data,
         )
 
@@ -266,9 +263,8 @@ class ConvertImages:
         output_format: ImageConverterAllOutputFormats,
     ) -> ContextResult[Image]:
         if original_image.format is None:
-            return ContextResult[Image].Error2(
-                ErrorContext.ErrorCode.INTERNAL_SERVER_ERROR,
-                "Unable to convert image color. Invalid image format",
+            return ContextResult[Image].Error(
+                ErrorContext.server_error("Unable to convert image color. Invalid image format")
             )
 
         if original_image.format.upper() not in ImageConverterOutputFormatsWithAlphaChannel:

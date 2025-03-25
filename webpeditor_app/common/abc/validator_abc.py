@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from types import NoneType
 from ninja import Schema
 from pydantic import ConfigDict, Field
 
@@ -16,11 +17,11 @@ class ValidationResult(Schema):
     def has_errors(self) -> bool:
         return any(self.errors)
 
-    def to_context_result(self) -> ContextResult[None]:
+    def to_context_result(self) -> ContextResult[NoneType]:
         return (
-            ContextResult.Error2(ErrorContext.ErrorCode.BAD_REQUEST, "Validation failed", self.errors)
+            ContextResult[NoneType].Error(ErrorContext.bad_request("Validation failed", self.errors))
             if self.has_errors()
-            else ContextResult.Ok(None)
+            else ContextResult[NoneType].Ok(None)
         )
 
 
