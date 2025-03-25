@@ -28,17 +28,17 @@ admin_site.register(TOTPDevice, TOTPDeviceAdmin)
 
 
 @admin.register(AppUser, site=admin_site)
-class AppUserAdmin(admin.ModelAdmin):
+class AppUserAdmin(admin.ModelAdmin[AppUser]):
     list_display = ("id", "session_key", "session_key_expiration_date")
     list_filter = ("session_key_expiration_date",)
 
 
 @admin.register(ConverterImageAsset, site=admin_site)
-class ConverterImageAssetAdmin(admin.ModelAdmin):
-    class OriginalImageAssetFileInline(admin.TabularInline):
+class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
+    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
         model = ConverterOriginalImageAssetFile
 
-    class ConvertedImageAssetFileInline(admin.TabularInline):
+    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile]):
         model = ConverterConvertedImageAssetFile
 
     list_display = ("id", "created_at", "user")
@@ -48,7 +48,7 @@ class ConverterImageAssetAdmin(admin.ModelAdmin):
 
 
 @admin.register(ConverterOriginalImageAssetFile, site=admin_site)
-class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin):
+class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalImageAssetFile]):
     list_display = (
         "id",
         "filename",
@@ -69,7 +69,7 @@ class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin):
 
 
 @admin.register(ConverterConvertedImageAssetFile, site=admin_site)
-class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin):
+class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedImageAssetFile]):
     list_display = (
         "id",
         "filename",
@@ -90,8 +90,8 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin):
 
 
 @admin.register(EditorOriginalImageAsset, site=admin_site)
-class EditorOriginalImageAssetAdmin(admin.ModelAdmin):
-    class EditorOriginalImageAssetFileInline(admin.TabularInline):
+class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
+    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile]):
         model = EditorOriginalImageAssetFile
         extra = 1
 
@@ -102,7 +102,7 @@ class EditorOriginalImageAssetAdmin(admin.ModelAdmin):
 
 
 @admin.register(EditorOriginalImageAssetFile, site=admin_site)
-class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin):
+class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAssetFile]):
     list_display = (
         "id",
         "filename",
@@ -123,8 +123,8 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin):
 
 
 @admin.register(EditorEditedImageAsset, site=admin_site)
-class EditorEditedImageAssetAdmin(admin.ModelAdmin):
-    class EditorEditedImageAssetFileInline(admin.TabularInline):
+class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
+    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile]):
         model = EditorEditedImageAssetFile
         extra = 1
 
@@ -135,7 +135,7 @@ class EditorEditedImageAssetAdmin(admin.ModelAdmin):
 
 
 @admin.register(EditorEditedImageAssetFile, site=admin_site)
-class EditorEditedImageAssetFileAdmin(admin.ModelAdmin):
+class EditorEditedImageAssetFileAdmin(admin.ModelAdmin[EditorEditedImageAssetFile]):
     list_display = (
         "id",
         "filename",
