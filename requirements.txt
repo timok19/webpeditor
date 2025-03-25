@@ -76,7 +76,7 @@ pycparser==2.22 ; platform_python_implementation != 'PyPy'
 pydantic==2.10.6
 pydantic-core==2.27.2
 pyopenssl==25.0.0
-pytz==2025.1
+pytz==2025.2
 qrcode==8.0
 rcssmin==1.1.2
 reactivex==4.0.4
