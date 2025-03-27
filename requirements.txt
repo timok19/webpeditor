@@ -89,7 +89,7 @@ twisted==24.11.0
 txaio==23.1.1
 types-linq==1.2.1
 types-setuptools==76.0.0.20250313
-typing-extensions==4.12.2
+typing-extensions==4.13.0
 tzdata==2025.2 ; sys_platform == 'win32'
 urllib3==2.3.0
 whitenoise==6.9.0
