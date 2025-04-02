@@ -6,9 +6,10 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
-from django.urls import path, include, URLPattern, URLResolver
+from django.urls import path, include, URLPattern, URLResolver, re_path
 
 from webpeditor_app.admin import admin_site
+from webpeditor_app.views.content_not_found_view import ContentNotFoundView
 
 # Admin
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
@@ -41,5 +42,11 @@ urlpatterns += [
     ),
 ]
 
+# QStash
+urlpatterns += [path("qstash/webhook/", include("django_qstash.urls"))]
+
 # WebP Editor
 urlpatterns += [path("", include("webpeditor_app.urls"))]
+
+# For all non-existing (not allowed) urls
+urlpatterns += [re_path(r"^.+$", ContentNotFoundView.as_view(), name="content-not-found-view")]

@@ -1,12 +1,12 @@
 import base64
 import os
 import re
-import exif
 from decimal import ROUND_UP, Decimal
 from http import HTTPStatus
 from io import BytesIO
 from typing import Optional, cast, final
 
+import exif
 from PIL.ImageFile import ImageFile
 from django.core.files.base import ContentFile
 from httpx import AsyncClient
@@ -45,15 +45,10 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].Ok(file_response.content)
 
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
-        content_file = self.__to_content_file(image_file)
-
-        if content_file.size == 0:
-            return ContextResult[ImageFileInfo].Error(ErrorContext.server_error("File has no content"))
-
-        return ContextResult[ImageFileInfo].Ok(
-            ImageFileInfo(
+        return self.__to_content_file(image_file).map(
+            lambda content_file: ImageFileInfo(
                 content_file=content_file,
-                filename=content_file.name,
+                filename=cast(str, content_file.name),
                 file_format=cast(str, image_file.format),
                 file_format_description=image_file.format_description or "",
                 size=content_file.size,
@@ -114,11 +109,16 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ContextResult[str].Ok(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
 
-    def __to_content_file(self, image_file: ImageFile) -> ContentFile:
+    def __to_content_file(self, image_file: ImageFile) -> ContextResult[ContentFile[bytes]]:
         with BytesIO() as buffer:
             image_file.save(buffer, format=image_file.format)
             file_bytes = buffer.getvalue()
-        return ContentFile(file_bytes, self.__get_filename(image_file))
+
+        content_file = ContentFile(file_bytes, self.__get_filename(image_file))
+        if content_file.size == 0:
+            return ContextResult[ContentFile[bytes]].Error(ErrorContext.server_error("File has no content"))
+
+        return ContextResult[ContentFile[bytes]].Ok(content_file)
 
     @staticmethod
     def __get_filename(image_file: ImageFile) -> str:
@@ -131,10 +131,11 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     @staticmethod
     def __get_aspect_ratio(resolution: tuple[int, int]) -> Decimal:
-        aspect_ratio: Decimal = Decimal(resolution[0] / resolution[1])
-        rounded_aspect_ratio: Decimal = aspect_ratio.quantize(Decimal(".1"), rounding=ROUND_UP)
-        return rounded_aspect_ratio
+        width, height = resolution
+        aspect_ratio: Decimal = Decimal(width / height).quantize(Decimal(".1"), rounding=ROUND_UP)
+        return aspect_ratio
 
+    # TODO: Call cloudinary API for getting exif data instead of using "exif" module
     @staticmethod
     def __map_exif_data(image_file: ImageFile) -> dict[str, str]:
         image_file_copy = image_file.copy()

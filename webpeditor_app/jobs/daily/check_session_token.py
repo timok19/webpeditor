@@ -1,33 +1,14 @@
-from loguru import logger
 from datetime import datetime
 
 from django.utils import timezone
-from django_extensions.management.jobs import DailyJob  # pyright: ignore [reportMissingTypeStubs]
-
-from webpeditor_app.services import (
-    delete_all_cloudinary_folders,
-    get_all_cloudinary_user_folders,
-    delete_cloudinary_original_and_edited_images,
-    delete_cloudinary_converted_images,
-    delete_cloudinary_folder,
-)
-
-from webpeditor_app.services import (
-    get_all_original_images,
-    get_all_edited_images,
-    delete_original_image_in_db,
-    get_all_converted_images,
-    delete_converted_image_in_db,
-)
-
-from webpeditor_app.services import clear_expired_session_store
+from django_extensions.management.jobs import DailyJob
 
 
+# TODO: rework the DailyWork using different tool, such as QSTASH
 class Job(DailyJob):
     help = "Checks the estimated time of the session key and delete expired session, images from db and images in Cloudinary storage"
 
     def execute(self) -> None:
-        # TODO: get original, edited and converted images data from db as serialized
 
         original_images = get_all_original_images()
         edited_images = get_all_edited_images()

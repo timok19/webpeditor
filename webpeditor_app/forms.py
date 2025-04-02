@@ -1,13 +1,14 @@
 from cloudinary.forms import CloudinaryFileField
 from django import forms
+from django.forms import ImageField, IntegerField
 
 
 class OriginalImageAssetForm(forms.Form):
-    image = forms.ImageField(required=True, allow_empty_file=False)
+    image: ImageField = forms.ImageField(required=True)
 
 
 class ConvertedImageAssetForm(forms.Form):
-    image = CloudinaryFileField(
+    image: CloudinaryFileField = CloudinaryFileField(
         required=True,
         widget=forms.ClearableFileInput(attrs={"allow_multiple_selected": True}),
     )
@@ -23,7 +24,7 @@ class ConvertedImageAssetForm(forms.Form):
         ],
         required=True,
     )
-    quality = forms.IntegerField(
+    quality: IntegerField = forms.IntegerField(
         required=True,
         min_value=5,
         max_value=100,

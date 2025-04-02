@@ -401,16 +401,16 @@ wheels = [
 
 [[package]]
 name = "django"
-version = "5.1.7"
+version = "5.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/57/11186e493ddc5a5e92cc7924a6363f7d4c2b645f7d7cb04a26a63f9bfb8b/Django-5.1.7.tar.gz", hash = "sha256:30de4ee43a98e5d3da36a9002f287ff400b43ca51791920bfb35f6917bfe041c", size = 10716510 }
+sdist = { url = "https://files.pythonhosted.org/packages/00/40/45adc1b93435d1b418654a734b68351bb6ce0a0e5e37b2f0e9aeb1a2e233/Django-5.1.8.tar.gz", hash = "sha256:42e92a1dd2810072bcc40a39a212b693f94406d0ba0749e68eb642f31dc770b4", size = 10723602 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/0f/7e042df3d462d39ae01b27a09ee76653692442bc3701fbfa6cb38e12889d/Django-5.1.7-py3-none-any.whl", hash = "sha256:1323617cb624add820cb9611cdcc788312d250824f92ca6048fda8625514af2b", size = 8276912 },
+    { url = "https://files.pythonhosted.org/packages/ec/0d/e6dd0ed898b920fec35c6eeeb9acbeb831fff19ad21c5e684744df1d4a36/Django-5.1.8-py3-none-any.whl", hash = "sha256:11b28fa4b00e59d0def004e9ee012fefbb1065a5beb39ee838983fd24493ad4f", size = 8277130 },
 ]
 
 [[package]]
@@ -541,6 +541,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fb/72/1fa100beb512165c0dfbb52ab007e11b56f471647441e86da0bfd706e3b7/django_otp-1.5.4.tar.gz", hash = "sha256:0d9497ea4fb13fc04d50b49aa53dd1c740fe4bc5dde0ca27fb394f84e5da7bac", size = 74334 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0a/73/92ae49259cb779a27280caeae11871f5f9dfb29c9d3fc520a635a47895c8/django_otp-1.5.4-py3-none-any.whl", hash = "sha256:783dea669ac0eaf5cd336f73839443584ee665af427a84175cca5a9d620366db", size = 82080 },
+]
+
+[[package]]
+name = "django-qstash"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "qstash" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/d8/234c3f6be4db49225d4626df31352e4902f0c7dfd767832865b9733c3c47/django_qstash-0.1.1.tar.gz", hash = "sha256:a55130d8ecfed600aa02cb17666ea73d6c6a195ff3cd93fe408bd9b0a4bf2167", size = 36118 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5f/c5/70bed50d0d030808eb2bae912712a10d26b998b00bd1989dee9f180ca201/django_qstash-0.1.1-py3-none-any.whl", hash = "sha256:6feeb5c1079ec26fe3991b2b1d4653035c97e59831a2c0b4ee90f7ef38ffa6b4", size = 37969 },
 ]
 
 [[package]]
@@ -1192,6 +1206,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyjwt"
+version = "2.10.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/46/bd74733ff231675599650d3e47f361794b22ef3e3770998dda30d3b63726/pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953", size = 87785 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb", size = 22997 },
+]
+
+[[package]]
 name = "pyopenssl"
 version = "25.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1257,6 +1280,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d7/db/6fc9631cac1327f609d2c8ae3680ecd987a2e97472437f2de7ead1235156/qrcode-8.0.tar.gz", hash = "sha256:025ce2b150f7fe4296d116ee9bad455a6643ab4f6e7dce541613a4758cbce347", size = 42743 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/74/ab/df8d889fd01139db68ae9e5cb5c8f0ea016823559a6ecb427582d52b07dc/qrcode-8.0-py3-none-any.whl", hash = "sha256:9fc05f03305ad27a709eb742cf3097fa19e6f6f93bb9e2f039c0979190f6f1b1", size = 45710 },
+]
+
+[[package]]
+name = "qstash"
+version = "2.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pyjwt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d1/0b/65efb303c06cc89d8a30b81155f79372361dca6fdc7e1f51358a5f575093/qstash-2.0.5.tar.gz", hash = "sha256:60b45dcff21d74f6bbe04aadb9e3d4a72e4a392178f4aeba2eee5358e48424e0", size = 32493 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/47/fd/4ba2f4b6d371418bcf46b988cec6cd9cd96e8d02684d5dbebc2738e3c882/qstash-2.0.5-py3-none-any.whl", hash = "sha256:fef8f04aa8f614751a9742d22e3c8a006bd0604c9dd6f21596fc4b6cbf35dcd7", size = 42634 },
 ]
 
 [[package]]
@@ -1482,11 +1518,11 @@ wheels = [
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12.20250326"
+version = "6.0.12.20250402"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9b/66/f58e386be67589d5c3c9c0a368600783ac1321b7e6ee213c8f51848dbf0c/types_pyyaml-6.0.12.20250326.tar.gz", hash = "sha256:5e2d86d8706697803f361ba0b8188eef2999e1c372cd4faee4ebb0844b8a4190", size = 17346 }
+sdist = { url = "https://files.pythonhosted.org/packages/2d/68/609eed7402f87c9874af39d35942744e39646d1ea9011765ec87b01b2a3c/types_pyyaml-6.0.12.20250402.tar.gz", hash = "sha256:d7c13c3e6d335b6af4b0122a01ff1d270aba84ab96d1a1a1063ecba3e13ec075", size = 17282 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/1e/5609fea65117db83cc060342d4f6810f3cf1d3453b9f81bfe5f03f679633/types_pyyaml-6.0.12.20250326-py3-none-any.whl", hash = "sha256:961871cfbdc1ad8ae3cb6ae3f13007262bcfc168adc513119755a6e4d5d7ed65", size = 20398 },
+    { url = "https://files.pythonhosted.org/packages/ed/56/1fe61db05685fbb512c07ea9323f06ea727125951f1eb4dff110b3311da3/types_pyyaml-6.0.12.20250402-py3-none-any.whl", hash = "sha256:652348fa9e7a203d4b0d21066dfb00760d3cbd5a15ebb7cf8d33c88a49546681", size = 20329 },
 ]
 
 [[package]]
@@ -1542,16 +1578,16 @@ wheels = [
 
 [[package]]
 name = "virtualenv"
-version = "20.29.3"
+version = "20.30.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "distlib" },
     { name = "filelock" },
     { name = "platformdirs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c7/9c/57d19fa093bcf5ac61a48087dd44d00655f85421d1aa9722f8befbf3f40a/virtualenv-20.29.3.tar.gz", hash = "sha256:95e39403fcf3940ac45bc717597dba16110b74506131845d9b687d5e73d947ac", size = 4320280 }
+sdist = { url = "https://files.pythonhosted.org/packages/38/e0/633e369b91bbc664df47dcb5454b6c7cf441e8f5b9d0c250ce9f0546401e/virtualenv-20.30.0.tar.gz", hash = "sha256:800863162bcaa5450a6e4d721049730e7f2dae07720e0902b0e4040bd6f9ada8", size = 4346945 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/eb/c6db6e3001d58c6a9e67c74bb7b4206767caa3ccc28c6b9eaf4c23fb4e34/virtualenv-20.29.3-py3-none-any.whl", hash = "sha256:3e3d00f5807e83b234dfb6122bf37cfadf4be216c53a49ac059d02414f819170", size = 4301458 },
+    { url = "https://files.pythonhosted.org/packages/4c/ed/3cfeb48175f0671ec430ede81f628f9fb2b1084c9064ca67ebe8c0ed6a05/virtualenv-20.30.0-py3-none-any.whl", hash = "sha256:e34302959180fca3af42d1800df014b35019490b119eba981af27f2fa486e5d6", size = 4329461 },
 ]
 
 [[package]]
@@ -1579,6 +1615,7 @@ dependencies = [
     { name = "django-ninja" },
     { name = "django-ninja-extra" },
     { name = "django-otp" },
+    { name = "django-qstash" },
     { name = "django-silk" },
     { name = "django-stubs-ext" },
     { name = "djhtml" },
@@ -1640,6 +1677,7 @@ requires-dist = [
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-ninja-extra", specifier = ">=0.21.8" },
     { name = "django-otp", specifier = ">=1.5.4" },
+    { name = "django-qstash", specifier = ">=0.1.1" },
     { name = "django-silk", specifier = ">=5.3.2" },
     { name = "django-stubs-ext", specifier = ">=5.1.3" },
     { name = "djhtml", specifier = ">=3.0.7" },
