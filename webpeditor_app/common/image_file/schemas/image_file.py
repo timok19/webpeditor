@@ -8,12 +8,13 @@ from pydantic import ConfigDict
 class ImageFileInfo(Schema):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid", arbitrary_types_allowed=True)
 
-    content_file: ContentFile
+    content_file: ContentFile[bytes]
     filename: str
     file_format: str
     file_format_description: str
     size: int
-    resolution: tuple[int, int]
+    width: int
+    height: int
     aspect_ratio: Decimal
     color_mode: str
     exif_data: dict[str, str]

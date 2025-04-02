@@ -34,7 +34,8 @@ class ConversionResponse(Schema):
         format: str
         format_description: str
         size: int
-        resolution: tuple[int, int]
+        width: int
+        height: int
         aspect_ratio: Decimal
         color_mode: str
         exif_data: dict[str, str]

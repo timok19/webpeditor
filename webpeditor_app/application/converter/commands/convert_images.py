@@ -2,7 +2,7 @@ import asyncio
 import os.path
 from decimal import Decimal
 from io import BytesIO
-from typing import Final, final
+from typing import Final, Union, final, cast
 
 from PIL.Image import Image, alpha_composite, new, open as open_image
 from PIL.ImageFile import ImageFile
@@ -206,22 +206,24 @@ class ConvertImages:
     @staticmethod
     async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
         optional_user = await AppUser.objects.filter(id=user_id).afirst()
-        error_context = ErrorContext.not_found(f"Unable to find current user '{user_id}'")
-
-        return (
+        user_result = Option.of_optional(optional_user).to_result(
+            ErrorContext.not_found(f"Unable to find current user '{user_id}'")
+        )
+        converter_image_asset_result = (
             await ContextResult[AppUser]
-            .from_result(Option.of_optional(optional_user).to_result(error_context))
+            .from_result(user_result)
             .map_async(lambda user: ConverterImageAsset.objects.aget_or_create(user=user))
-        ).map(lambda image_asset: image_asset[0])
+        )
+        return converter_image_asset_result.map(lambda image_asset: image_asset[0])
 
     @staticmethod
-    async def __create_asset_file_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
+    async def __create_asset_file_async(
         file_info: ImageFileInfo,
         new_filename: str,
         trimmed_filename: str,
         converter_image_asset: ConverterImageAsset,
-        asset_file_model: type[T],
-    ) -> T:
+        asset_file_model: type[Union[ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile]],
+    ) -> Union[ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile]:
         # TODO: Make sure that the file size of the converted image is not greater than 10485760
         return await asset_file_model.objects.acreate(
             file=file_info.content_file,
@@ -231,8 +233,8 @@ class ConvertImages:
             format=file_info.file_format,
             format_description=file_info.file_format_description or "",
             size=file_info.size,
-            width=file_info.resolution[0],
-            height=file_info.resolution[1],
+            width=file_info.width,
+            height=file_info.height,
             aspect_ratio=file_info.aspect_ratio,
             color_mode=file_info.color_mode,
             exif_data=file_info.exif_data,
@@ -240,8 +242,8 @@ class ConvertImages:
         )
 
     @staticmethod
-    def __to_image_data[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
-        asset_file: T,
+    def __to_image_data(
+        asset_file: Union[ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile],
     ) -> ConversionResponse.ImageData:
         return ConversionResponse.ImageData(
             url=asset_file.file.url,
@@ -251,7 +253,8 @@ class ConvertImages:
             format=str(asset_file.format),
             format_description=str(asset_file.format_description),
             size=asset_file.size or 0,
-            resolution=(asset_file.width or 0, asset_file.height or 0),
+            width=asset_file.width or 0,
+            height=asset_file.height or 0,
             aspect_ratio=asset_file.aspect_ratio or Decimal(),
             color_mode=str(asset_file.color_mode),
             exif_data=asset_file.exif_data,
