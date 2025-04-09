@@ -202,7 +202,7 @@ pycodestyle==2.13.0
     #   webpeditor
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.11.2
+pydantic==2.11.3
     # via
     #   django-ninja
     #   expression

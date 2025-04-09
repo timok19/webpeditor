@@ -4,7 +4,7 @@ asgiref==3.8.1
     # via
     #   django
     #   django-stubs
-basedpyright==1.28.4
+basedpyright==1.28.5
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.2
