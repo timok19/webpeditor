@@ -15,7 +15,11 @@ def upload_to_folder(instance: object, filename: str) -> str:
 
 
 class ConverterImageAsset(BaseImageAsset):
-    user = models.OneToOneField(AppUser, related_name="user_converted_image_asset", on_delete=models.DO_NOTHING)
+    user: models.OneToOneField[AppUser] = models.OneToOneField(
+        AppUser,
+        related_name="user_converted_image_asset",
+        on_delete=models.DO_NOTHING,
+    )
 
     class Meta(BaseImageAsset.Meta):
         verbose_name: str = _("Converted Image Asset")

@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 import sys
+from typing import final
 
 from django.http.request import HttpRequest
 from loguru import logger
@@ -7,6 +9,8 @@ from webpeditor.settings import DEBUG
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
+@final
+@dataclass
 class WebPEditorLogger(WebPEditorLoggerABC):
     def __init__(self) -> None:
         logger.remove()

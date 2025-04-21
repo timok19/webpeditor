@@ -31,15 +31,15 @@ repos:
       verbose: false
 
 #- repo: https://github.com/pypa/pip-audit
-#  rev: v2.7.3
+#  rev: v2.8.0
 #  hooks:
 #  - id: pip-audit
 #    name: "Audit dependencies"
-#    args: ["-r", "requirements.txt"]
+#    args: ["-r", "requirements.txt", "-l"]
 #    verbose: true
 #  - id: pip-audit
 #    name: "Audit dev dependencies"
-#    args: ["-r", "requirements-dev.txt"]
+#    args: ["-r", "requirements-dev.txt", "-l"]
 #    verbose: true
 #ci:
 #  skip: [pip-audit]

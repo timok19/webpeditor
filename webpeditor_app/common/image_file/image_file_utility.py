@@ -1,15 +1,16 @@
 import base64
+from dataclasses import dataclass
 import os
 import re
 from decimal import ROUND_UP, Decimal
 from http import HTTPStatus
 from io import BytesIO
-from typing import Optional, cast, final
+from typing import Optional, final
 
 import exif
-from PIL.ImageFile import ImageFile
 from django.core.files.base import ContentFile
 from httpx import AsyncClient
+from PIL.ImageFile import ImageFile
 
 from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
@@ -18,45 +19,46 @@ from webpeditor_app.core.context_result import ContextResult, ErrorContext
 
 
 @final
+@dataclass
 class ImageFileUtility(ImageFileUtilityABC):
     def convert_to_bytes(self, file_base64: str) -> ContextResult[bytes]:
         if len(file_base64) == 0:
-            return ContextResult[bytes].Error(ErrorContext.server_error("File base64 is empty"))
+            return ContextResult[bytes].failure(ErrorContext.server_error("File base64 is empty"))
 
         image_base64_data: str = file_base64.split(",")[1]
 
-        return ContextResult[bytes].Ok(base64.b64decode(image_base64_data))
+        return ContextResult[bytes].success(base64.b64decode(image_base64_data))
 
     async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]:
         if len(file_url) == 0:
-            return ContextResult[bytes].Error(ErrorContext.server_error("File URL is empty"))
+            return ContextResult[bytes].failure(ErrorContext.server_error("File URL is empty"))
 
         async with AsyncClient() as client:
             file_response = await client.get(file_url)
 
         if file_response.status_code == HTTPStatus.NOT_FOUND.value:
-            return ContextResult[bytes].Error(
+            return ContextResult[bytes].failure(
                 ErrorContext.not_found(f"Unable to get content of image file from url '{file_url}'")
             )
 
         if len(file_response.content) == 0:
-            return ContextResult[bytes].Error(ErrorContext.not_found("File has no content"))
+            return ContextResult[bytes].failure(ErrorContext.not_found("File has no content"))
 
-        return ContextResult[bytes].Ok(file_response.content)
+        return ContextResult[bytes].success(file_response.content)
 
     def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
         return self.__to_content_file(image_file).map(
             lambda content_file: ImageFileInfo(
                 content_file=content_file,
-                filename=cast(str, content_file.name),
-                file_format=cast(str, image_file.format),
+                filename=content_file.name,
+                file_format=str(image_file.format),
                 file_format_description=image_file.format_description or "",
                 size=content_file.size,
                 width=image_file.size[0],
                 height=image_file.size[1],
                 aspect_ratio=self.__get_aspect_ratio(image_file.size),
                 color_mode=image_file.mode,
-                exif_data=self.__map_exif_data(image_file),
+                exif_data={},
             )
         )
 
@@ -69,57 +71,57 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     def validate_filename(self, filename: Optional[str]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
-            return ContextResult[str].Error(ErrorContext.bad_request("Filename must not be empty"))
+            return ContextResult[str].failure(ErrorContext.bad_request("Filename must not be empty"))
 
         if len(filename) > settings.FILENAME_MAX_SIZE:
             message = f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})"
-            return ContextResult[str].Error(ErrorContext.bad_request(message))
+            return ContextResult[str].failure(ErrorContext.bad_request(message))
 
         basename, extension = os.path.splitext(filename)
 
         if basename.upper() in settings.RESERVED_WINDOWS_FILENAMES:
-            return ContextResult[str].Error(ErrorContext.bad_request(f"Filename '{filename}' is a reserved name"))
+            return ContextResult[str].failure(ErrorContext.bad_request(f"Filename '{filename}' is a reserved name"))
 
         if len(extension) == 0:
-            return ContextResult[str].Error(ErrorContext.bad_request(f"Filename '{filename}' has no extension"))
+            return ContextResult[str].failure(ErrorContext.bad_request(f"Filename '{filename}' has no extension"))
 
-        return ContextResult[str].Ok(filename)
+        return ContextResult[str].success(filename)
 
     def sanitize_filename(self, filename: str) -> str:
         return re.sub(re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+"), "_", filename)
 
     def trim_filename(self, filename: str, *, max_length: int) -> ContextResult[str]:
         if max_length <= 0:
-            return ContextResult[str].Error(
+            return ContextResult[str].failure(
                 ErrorContext.server_error(f"Maximum length must be greater than 0, got {max_length}")
             )
 
         if len(filename) <= max_length:
-            return ContextResult[str].Ok(filename)
+            return ContextResult[str].success(filename)
 
         basename, extension = os.path.splitext(filename)
 
         ellipsis_str: str = "..."
         ellipsis_len: int = len(ellipsis_str)
 
-        # Minimum space needed: 3 for ellipsis + length of extension
+        # Minimum space needed: 3 for ellipsis plus length of extension
         min_required_length: int = len(extension) + ellipsis_len
 
         if max_length < min_required_length:
-            return ContextResult[str].Ok(f"{basename[: max_length - ellipsis_len]}{ellipsis_str}")
+            return ContextResult[str].success(f"{basename[: max_length - ellipsis_len]}{ellipsis_str}")
 
-        return ContextResult[str].Ok(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
+        return ContextResult[str].success(f"{basename[: (max_length - min_required_length)]}{ellipsis_str}{extension}")
 
-    def __to_content_file(self, image_file: ImageFile) -> ContextResult[ContentFile[bytes]]:
+    def __to_content_file(self, image_file: ImageFile) -> ContextResult[ContentFile]:
         with BytesIO() as buffer:
             image_file.save(buffer, format=image_file.format)
             file_bytes = buffer.getvalue()
 
         content_file = ContentFile(file_bytes, self.__get_filename(image_file))
         if content_file.size == 0:
-            return ContextResult[ContentFile[bytes]].Error(ErrorContext.server_error("File has no content"))
+            return ContextResult[ContentFile].failure(ErrorContext.server_error("File has no content"))
 
-        return ContextResult[ContentFile[bytes]].Ok(content_file)
+        return ContextResult[ContentFile].success(content_file)
 
     @staticmethod
     def __get_filename(image_file: ImageFile) -> str:

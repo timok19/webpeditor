@@ -4,7 +4,7 @@ asgiref==3.8.1
     # via
     #   django
     #   django-stubs
-basedpyright==1.28.5
+basedpyright==1.29.0
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.2
@@ -33,7 +33,7 @@ filelock==3.18.0
     # via
     #   cachecontrol
     #   virtualenv
-identify==2.6.9
+identify==2.6.10
     # via pre-commit
 idna==3.10
     # via requests
@@ -51,7 +51,7 @@ nodejs-wheel-binaries==22.14.0
     # via basedpyright
 packageurl-python==0.16.0
     # via cyclonedx-python-lib
-packaging==24.2
+packaging==25.0
     # via
     #   pip-audit
     #   pip-requirements-parser
@@ -81,7 +81,7 @@ requests==2.32.3
     #   pip-audit
 rich==14.0.0
     # via pip-audit
-ruff==0.11.4
+ruff==0.11.6
 sortedcontainers==2.4.0
     # via cyclonedx-python-lib
 sqlparse==0.5.3
@@ -92,13 +92,13 @@ types-psycopg2==2.9.21.20250318
     # via django-types
 types-pyyaml==6.0.12.20250402
     # via django-stubs
-typing-extensions==4.13.1
+typing-extensions==4.13.2
     # via
     #   django-stubs
     #   django-stubs-ext
 tzdata==2025.2 ; sys_platform == 'win32'
     # via django
-urllib3==2.3.0
+urllib3==2.4.0
     # via requests
 virtualenv==20.30.0
     # via pre-commit

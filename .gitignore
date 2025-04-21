@@ -21,6 +21,7 @@ yarn-error.log.DS_Store
 .vscode
 
 .env
+.env.dev
 .vercel
 *.sqlite3
 

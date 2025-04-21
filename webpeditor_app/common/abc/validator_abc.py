@@ -19,9 +19,9 @@ class ValidationResult(Schema):
 
     def to_context_result(self) -> ContextResult[NoneType]:
         return (
-            ContextResult[NoneType].Error(ErrorContext.bad_request("Validation failed", self.errors))
+            ContextResult[NoneType].failure(ErrorContext.bad_request("Validation failed", self.errors))
             if self.has_errors()
-            else ContextResult[NoneType].Ok(None)
+            else ContextResult[NoneType].success(None)
         )
 
 

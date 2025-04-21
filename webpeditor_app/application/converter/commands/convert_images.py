@@ -1,8 +1,9 @@
 import asyncio
+from dataclasses import dataclass
 import os.path
 from decimal import Decimal
 from io import BytesIO
-from typing import Final, Union, final, cast
+from typing import Final, Union, final
 
 from PIL.Image import Image, alpha_composite, new, open as open_image
 from PIL.ImageFile import ImageFile
@@ -12,17 +13,17 @@ from types_linq import Enumerable
 
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
-from webpeditor_app.application.converter.schemas.settings import (
+from webpeditor_app.application.converter.schemas.output_formats import (
     ImageConverterAllOutputFormats,
-    ImageConverterOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,
 )
+
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.context_result import ContextResult, ErrorContext, MultipleContextResults
-from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.core.context_result import ContextResult, ErrorContext, EnumerableContextResult
+from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
     ConverterConvertedImageAssetFile,
@@ -32,43 +33,41 @@ from webpeditor_app.models.converter import (
 
 
 @final
+@dataclass
 class ConvertImages:
-    def __init__(self) -> None:
-        from webpeditor_app.core.di_container import DiContainer
-
-        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
-        self.__cloudinary_service: Final[CloudinaryServiceABC] = DiContainer.get_dependency(CloudinaryServiceABC)
-        self.__image_file_utility: Final[ImageFileUtilityABC] = DiContainer.get_dependency(ImageFileUtilityABC)
-        self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = DiContainer.get_dependency(
-            ValidatorABC[ConversionRequest]
-        )
+    conversion_request_validator: ValidatorABC[ConversionRequest]
+    cloudinary_service: CloudinaryServiceABC
+    image_file_utility: ImageFileUtilityABC
+    logger: WebPEditorLoggerABC
 
     async def handle_async(
         self,
         request: ConversionRequest,
         session_service: SessionService,
-    ) -> MultipleContextResults[ConversionResponse]:
+    ) -> EnumerableContextResult[ConversionResponse]:
         # Synchronize session
         await session_service.synchronize_async()
 
         # Request validation
-        validation_result = self.__conversion_request_validator.validate(request).to_context_result()
+        validation_result = self.conversion_request_validator.validate(request).to_context_result()
         if validation_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(
-                ContextResult[ConversionResponse].Error(validation_result.error)
+            return EnumerableContextResult[ConversionResponse].from_results(
+                ContextResult[ConversionResponse].failure(validation_result.error)
             )
 
         # Get User ID
         user_id_result = await session_service.get_user_id_async()
         if user_id_result.is_error():
-            return MultipleContextResults[ConversionResponse].from_results(
-                ContextResult[ConversionResponse].Error(user_id_result.error)
+            return EnumerableContextResult[ConversionResponse].from_results(
+                ContextResult[ConversionResponse].failure(user_id_result.error)
             )
+
+        await self.cloudinary_service.delete_assets(user_id_result.ok)
 
         # Delete previous content if exist
         converter_asset = ConverterImageAsset.objects.filter(user_id=user_id_result.ok)
         if await converter_asset.aexists():
-            self.__cloudinary_service.delete_converted_images(user_id_result.ok)
+            # await self.cloudinary_service.delete_assets(user_id_result.ok)
             await converter_asset.adelete()
 
         # Process images
@@ -81,8 +80,8 @@ class ConvertImages:
         self,
         user_id: str,
         request: ConversionRequest,
-    ) -> MultipleContextResults[ConversionResponse]:
-        return MultipleContextResults[ConversionResponse].from_results(
+    ) -> EnumerableContextResult[ConversionResponse]:
+        return EnumerableContextResult[ConversionResponse].from_results(
             *await asyncio.gather(
                 *Enumerable(request.files)
                 .chunk(4)
@@ -96,7 +95,7 @@ class ConvertImages:
         values: Enumerable[ConversionResponse],
         user_id: str,
     ) -> Enumerable[ConversionResponse]:
-        self.__logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
+        self.logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
         return values
 
     def __process_errors(
@@ -106,7 +105,7 @@ class ConvertImages:
     ) -> Enumerable[ErrorContext]:
         # Aggregate reasons of errors into a single string for each user
         reasons = errors.select(lambda error: error.to_str()).aggregate(lambda m1, m2: f"{m1}, {m2}")
-        self.__logger.log_error(f"Failed to convert images for user '{user_id}'. {reasons}")
+        self.logger.log_error(f"Failed to convert images for user '{user_id}'. {reasons}")
         return errors
 
     async def __convert_async(
@@ -116,7 +115,7 @@ class ConvertImages:
         options: ConversionRequest.Options,
     ) -> ContextResult[ConversionResponse]:
         # Get filenames
-        original_filename = self.__image_file_utility.sanitize_filename(uploaded_file.name)
+        original_filename = self.image_file_utility.sanitize_filename(uploaded_file.name)
         new_filename = self.__create_new_filename(original_filename, options=options)
 
         # Trim original and new filenames
@@ -142,15 +141,15 @@ class ConvertImages:
             )
 
         if original_file_info_result.is_error():
-            return ContextResult[ConversionResponse].Error(original_file_info_result.error)
+            return ContextResult[ConversionResponse].failure(original_file_info_result.error)
 
         if converted_file_info_result.is_error():
-            return ContextResult[ConversionResponse].Error(converted_file_info_result.error)
+            return ContextResult[ConversionResponse].failure(converted_file_info_result.error)
 
         # Get or create converter image asset
         converter_image_asset_result = await self.__get_or_create_image_asset_async(user_id)
         if converter_image_asset_result.is_error():
-            return ContextResult[ConversionResponse].Error(converter_image_asset_result.error)
+            return ContextResult[ConversionResponse].failure(converter_image_asset_result.error)
 
         # Create original image asset file
         original_image_data_result = (
@@ -166,7 +165,7 @@ class ConvertImages:
         ).map(self.__to_image_data)
 
         if original_image_data_result.is_error():
-            return ContextResult[ConversionResponse].Error(original_image_data_result.error)
+            return ContextResult[ConversionResponse].failure(original_image_data_result.error)
 
         # Create converted image asset file
         converted_image_data_result = (
@@ -182,9 +181,9 @@ class ConvertImages:
         ).map(self.__to_image_data)
 
         if converted_image_data_result.is_error():
-            return ContextResult[ConversionResponse].Error(converted_image_data_result.error)
+            return ContextResult[ConversionResponse].failure(converted_image_data_result.error)
 
-        return ContextResult[ConversionResponse].Ok(
+        return ContextResult[ConversionResponse].success(
             ConversionResponse(
                 original_image_data=original_image_data_result.ok,
                 converted_image_data=converted_image_data_result.ok,
@@ -198,10 +197,10 @@ class ConvertImages:
 
     def __trim_filename_or_default(self, filename: str, *, max_length: int, output_format: str) -> str:
         default = f"webpeditor.{output_format.lower()}"
-        return self.__image_file_utility.trim_filename(filename, max_length=max_length).default_value(default)
+        return self.image_file_utility.trim_filename(filename, max_length=max_length).default_value(default)
 
     def __get_file_info(self, image: ImageFile, filename: str) -> ContextResult[ImageFileInfo]:
-        return self.__image_file_utility.update_filename(image, filename).bind(self.__image_file_utility.get_file_info)
+        return self.image_file_utility.update_filename(image, filename).bind(self.image_file_utility.get_file_info)
 
     @staticmethod
     async def __get_or_create_image_asset_async(user_id: str) -> ContextResult[ConverterImageAsset]:
@@ -266,19 +265,19 @@ class ConvertImages:
         output_format: ImageConverterAllOutputFormats,
     ) -> ContextResult[Image]:
         if original_image.format is None:
-            return ContextResult[Image].Error(
+            return ContextResult[Image].failure(
                 ErrorContext.server_error("Unable to convert image color. Invalid image format")
             )
 
         if original_image.format.upper() not in ImageConverterOutputFormatsWithAlphaChannel:
-            return ContextResult[Image].Ok(original_image.convert("RGB"))
+            return ContextResult[Image].success(original_image.convert("RGB"))
 
         rgba_image = original_image.convert("RGBA")
 
         if output_format in ImageConverterOutputFormatsWithAlphaChannel:
-            return ContextResult[Image].Ok(rgba_image)
+            return ContextResult[Image].success(rgba_image)
 
-        return ContextResult[Image].Ok(self.__to_rgb(rgba_image))
+        return ContextResult[Image].success(self.__to_rgb(rgba_image))
 
     @staticmethod
     def __to_rgb(rgba_image: Image) -> Image:
@@ -304,7 +303,7 @@ class ConvertImages:
             case ImageConverterAllOutputFormats.TIFF:
                 image.save(
                     buffer,
-                    format=ImageConverterOutputFormats.TIFF,
+                    format=ImageConverterAllOutputFormats.TIFF,
                     quality=options.quality,
                     exif=image.getexif(),
                     optimize=True,

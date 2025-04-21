@@ -1,6 +1,6 @@
 from typing import Union
 
-from django.conf.urls.static import static  # pyright: ignore
+from django.conf.urls.static import static
 from django.urls import path, URLResolver, URLPattern, include
 
 from webpeditor import settings
@@ -11,17 +11,15 @@ from webpeditor_app.views.image_not_found_view import ImageNotFoundView
 
 # Templates
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
-    # path("image-info/", image_info_view, name="image-info-view"),
-    # path("image-editor/", image_edit_view, name="image-editor-view"),
-    # path("image-converter/", image_convert_view, name="image-converter-view"),
-    # path("", image_upload_view, name="image-uploader-view"),
+    path("api/", webpeditor_api.urls),
     path("image-not-found/", ImageNotFoundView.as_view(), name="image-not-found-view"),
     path("about/", AboutView.as_view(), name="about-view"),
     path("contact/", ContactView.as_view(), name="contact-view"),
+    # path("", image_upload_view, name="image-uploader-view"),
+    # path("image-info/", image_info_view, name="image-info-view"),
+    # path("image-editor/", image_edit_view, name="image-editor-view"),
+    # path("image-converter/", image_convert_view, name="image-converter-view"),
 ]
-
-# API
-urlpatterns += [path("api/", webpeditor_api.urls, name="webpeditor-api")]
 
 if settings.DEBUG:
     # Static files

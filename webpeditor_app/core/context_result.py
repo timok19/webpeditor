@@ -56,17 +56,15 @@ class ErrorContext(Schema):
 
 class ContextResult[TOut](Result[TOut, ErrorContext]):
     @staticmethod
-    @override
-    def Ok(value: TOut) -> "ContextResult[TOut]":
+    def success(value: TOut) -> "ContextResult[TOut]":
         return ContextResult(tag="ok", ok=value)
 
     @staticmethod
-    @override
-    def Error(error: ErrorContext) -> "ContextResult[TOut]":
-        return ContextResult[TOut].Error2(error.error_code, error.message, error.reasons)
+    def failure(error: ErrorContext) -> "ContextResult[TOut]":
+        return ContextResult[TOut].failure2(error.error_code, error.message, error.reasons)
 
     @staticmethod
-    def Error2(
+    def failure2(
         error_code: ErrorContext.ErrorCode,
         message: Optional[str] = None,
         reasons: Optional[list[str]] = None,
@@ -84,9 +82,9 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def from_result(cls, result: Result[TOut, ErrorContext]) -> "ContextResult[TOut]":
         match result:
             case Result(tag="ok", ok=value):
-                return cls.Ok(value)
+                return cls.success(value)
             case Result(tag="error", error=error):
-                return cls.Error(error)
+                return cls.failure(error)
             case _:
                 return cls.unexpected_result()
 
@@ -97,9 +95,9 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     ) -> "ContextResult[TOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                return self.Ok(success_func(value))
+                return self.success(success_func(value))
             case ContextResult(tag="error", error=error):
-                return self.Error(error_func(error))
+                return self.failure(error_func(error))
             case _:
                 return self.unexpected_result()
 
@@ -107,18 +105,18 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def map[TNewOut](self, mapper: Callable[[TOut], TNewOut]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                return ContextResult[TNewOut].Ok(mapper(value))
+                return ContextResult[TNewOut].success(mapper(value))
             case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].Error(error)
+                return ContextResult[TNewOut].failure(error)
             case _:
                 return ContextResult[TNewOut].unexpected_result()
 
     async def map_async[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                return ContextResult[TNewOut].Ok(await mapper(value))
+                return ContextResult[TNewOut].success(await mapper(value))
             case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].Error(error)
+                return ContextResult[TNewOut].failure(error)
             case _:
                 return ContextResult[TNewOut].unexpected_result()
 
@@ -128,7 +126,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="ok", ok=value):
                 return ContextResult[TNewOut].from_result(mapper(value))
             case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].Error(error)
+                return ContextResult[TNewOut].failure(error)
             case _:
                 return ContextResult[TNewOut].unexpected_result()
 
@@ -137,7 +135,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="ok", ok=value):
                 return mapper(value)
             case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].Error(error)
+                return ContextResult[TNewOut].failure(error)
             case _:
                 return ContextResult[TNewOut].unexpected_result()
 
@@ -149,33 +147,33 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="ok", ok=value):
                 return ContextResult[TNewOut].from_result(await mapper(value))
             case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].Error(error)
+                return ContextResult[TNewOut].failure(error)
             case _:
                 return ContextResult[TNewOut].unexpected_result()
 
     @staticmethod
     def unexpected_result() -> "ContextResult[TOut]":
-        return ContextResult[TOut].Error(ErrorContext.server_error("Unexpected result"))
+        return ContextResult[TOut].failure(ErrorContext.server_error("Unexpected result"))
 
 
-class MultipleContextResults[TOut](Enumerable[ContextResult[TOut]]):
+class EnumerableContextResult[TOut](Enumerable[ContextResult[TOut]]):
     @staticmethod
-    def from_results(*results: ContextResult[TOut]) -> "MultipleContextResults[TOut]":
-        return MultipleContextResults[TOut](results)
+    def from_results(*results: ContextResult[TOut]) -> "EnumerableContextResult[TOut]":
+        return EnumerableContextResult[TOut](results)
 
     def match(
         self,
         success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
         error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
-    ) -> "MultipleContextResults[TOut]":
+    ) -> "EnumerableContextResult[TOut]":
         return (
-            MultipleContextResults(
+            EnumerableContextResult(
                 error_func(self.where(lambda r: r.is_error()).select(lambda r: r.error)).select(
-                    ContextResult[TOut].Error
+                    ContextResult[TOut].failure
                 )
             )
             if self.any(lambda result: result.is_error())
-            else MultipleContextResults(
-                success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult[TOut].Ok)
+            else EnumerableContextResult(
+                success_func(self.where(lambda r: r.is_ok()).select(lambda r: r.ok)).select(ContextResult[TOut].success)
             )
         )

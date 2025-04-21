@@ -1,4 +1,5 @@
-from typing import final, Final
+from dataclasses import dataclass
+from typing import final
 from django.core import signing
 from expression import Failure, Success, Try
 
@@ -9,11 +10,9 @@ from webpeditor_app.core.context_result import ContextResult, ErrorContext
 
 
 @final
+@dataclass
 class UserService(UserServiceABC):
-    def __init__(self) -> None:
-        from webpeditor_app.core.di_container import DiContainer
-
-        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+    logger: WebPEditorLoggerABC
 
     def sign_id(self, user_id: str) -> str:
         return signing.dumps(user_id, salt=settings.WEBPEDITOR_SALT_KEY)
@@ -21,7 +20,7 @@ class UserService(UserServiceABC):
     def unsign_id(self, signed_user_id: str) -> ContextResult[str]:
         return ContextResult[str].from_result(
             self.__get_unsigned_id(signed_user_id)
-            .map_error(lambda exc: self.__logger.log_exception(exc, f"Invalid signed User ID: {signed_user_id}"))
+            .map_error(lambda exc: self.logger.log_exception(exc, f"Invalid signed User ID: {signed_user_id}"))
             .map_error(lambda _: ErrorContext.bad_request())
         )
 

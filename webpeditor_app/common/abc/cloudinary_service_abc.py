@@ -4,7 +4,11 @@ from typing import Any, Callable
 
 class CloudinaryServiceABC(ABC):
     @abstractmethod
-    def delete_assets(self, user_id: str, filter_func: Callable[[dict[str, Any]], bool] | None = None) -> None: ...
+    async def delete_assets(
+        self,
+        user_id: str,
+        filter_func: Callable[[dict[str, Any]], bool] | None = None,
+    ) -> None: ...
 
     @abstractmethod
     def delete_user_assets_in_subfolder(self, user_id: str, subfolder: str) -> None: ...

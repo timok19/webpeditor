@@ -1,37 +1,44 @@
-from typing import Any, Callable, Final
+from dataclasses import dataclass
+from typing import Any, Callable, final
 
 import cloudinary.api
-import cloudinary.uploader
 from cloudinary.api_client.execute_request import Response
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.infrastructure.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
 
+@final
+@dataclass
 class CloudinaryService(CloudinaryServiceABC):
-    def __init__(self) -> None:
-        from webpeditor_app.core.di_container import DiContainer
-
-        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+    cloudinary_client: CloudinaryClient
+    logger: WebPEditorLoggerABC
 
     # TODO: rework implementation according new folder structure
     # TODO: rewrite into async using "aiohttp" client
 
-    def delete_assets(self, user_id: str, filter_func: Callable[[dict[str, Any]], bool] | None = None) -> None:
-        response = cloudinary.api.resources(folder=user_id, max_results=500)
+    async def delete_assets(
+        self,
+        user_id: str,
+        filter_func: Callable[[dict[str, Any]], bool] | None = None,
+    ) -> None:
+        get_resources_response = await self.cloudinary_client.get_resources(user_id)
 
-        for resources in response["resources"]:
-            if filter_func is None or filter_func(resources):
-                cloudinary.api.delete_resources([resources["public_id"]])
+        for resource in get_resources_response.resources:
+            print(resource)
 
-        self.__logger.log_info(f"Assets have been deleted for user '{user_id}'")
+            # if filter_func is None or filter_func(resources):
+            #     cloudinary.api.delete_resources([resources["public_id"]])
+
+        self.logger.log_info(f"Assets have been deleted for user '{user_id}'")
 
     def delete_user_assets_in_subfolder(self, user_id: str, subfolder: str) -> None:
         self.delete_assets(user_id, lambda asset: subfolder in asset["public_id"])
 
     def delete_user_folder(self, user_id: str) -> None:
         cloudinary.api.delete_folder(user_id)
-        self.__logger.log_info(f"Folder '{user_id}' and its content have been deleted")
+        self.logger.log_info(f"Folder '{user_id}' and its content have been deleted")
 
         # response = cloudinary.api.subfolders(folder_path)
         # for folder in response['folders']:
@@ -49,7 +56,7 @@ class CloudinaryService(CloudinaryServiceABC):
 
             total_deleted_folders += i + 1
 
-        self.__logger.log_info(f"Deleted {total_deleted_folders} user folders in Cloudinary storage")
+        self.logger.log_info(f"Deleted {total_deleted_folders} user folders in Cloudinary storage")
 
     def get_all_users_folders(self) -> list[str]:
         response: Response = cloudinary.api.root_folders()

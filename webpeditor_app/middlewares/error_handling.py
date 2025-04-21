@@ -1,10 +1,12 @@
 import json
+
+from anydi.ext.django import container
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase
 from expression import Success, Failure, Try
 from ninja.responses import codes_4xx, codes_5xx
 from types_linq import Enumerable
-from typing import Callable, Final, Union, cast, final
+from typing import Callable, Union, cast, final, Final
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
@@ -12,9 +14,7 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 @final
 class ErrorHandlingMiddleware:
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
-        from webpeditor_app.core.di_container import DiContainer
-
-        self.__logger: Final[WebPEditorLoggerABC] = DiContainer.get_dependency(WebPEditorLoggerABC)
+        self.logger: Final[WebPEditorLoggerABC] = container.resolve(WebPEditorLoggerABC)
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
@@ -36,11 +36,8 @@ class ErrorHandlingMiddleware:
         response_data_result = self.__get_response_data(response.content)
 
         if response_data_result.is_error():
-            self.__logger.log_request_exception(
-                request,
-                response_data_result.error,
-                f"Unhandled error. Reason: '{response.content.decode()}'",
-            )
+            message = f"Unhandled error. Reason: '{response.content.decode()}'"
+            self.logger.log_request_exception(request, response_data_result.error, message)
             return response
 
         response_data = response_data_result.ok
@@ -52,7 +49,7 @@ class ErrorHandlingMiddleware:
         elif isinstance(response_data, dict):
             self.__log_mapped_error(request, cast(dict[str, object], response_data))
         else:
-            self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
+            self.logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
 
         return response
 
@@ -66,8 +63,7 @@ class ErrorHandlingMiddleware:
     def __log_mapped_error(self, request: HttpRequest, data: dict[str, object]) -> None:
         if "message" in data and "reasons" in data:
             reasons = cast(list[str], data["reasons"])
-            self.__logger.log_request_error(
-                request, f"{data['message']}. Reasons: [{', '.join(reasons) if len(reasons) > 0 else ''}]"
-            )
+            message = f"{data['message']}. Reasons: [{', '.join(reasons) if len(reasons) > 0 else ''}]"
+            self.logger.log_request_error(request, message)
         else:
-            self.__logger.log_request_error(request, "Unexpected response")
+            self.logger.log_request_error(request, "Unexpected response")

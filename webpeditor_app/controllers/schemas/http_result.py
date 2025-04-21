@@ -1,62 +1,56 @@
 from http import HTTPStatus
-from typing import Generic, Optional, TypeVar, final
+from typing import Optional, final
 
 from ninja import Schema, Field
 from pydantic import ConfigDict
 
-from webpeditor_app.core.context_result import ErrorContext, ContextResult, MultipleContextResults
+from webpeditor_app.core.context_result import ErrorContext, ContextResult, EnumerableContextResult
 
-_TResponse = TypeVar("_TResponse")
+type HTTPResultWithStatus[T: Schema] = tuple[HTTPStatus, HTTPResult[T]]
+type HTTPResultListWithStatus[T: Schema] = tuple[HTTPStatus, list[HTTPResult[T]]]
 
 
 @final
-class ResultResponse(Schema, Generic[_TResponse]):
+class HTTPResult[T: Schema](Schema):
     model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
-    value: Optional[_TResponse] = None
+    value: Optional[T] = None
     message: str = Field(default_factory=str)
     reasons: list[str] = Field(default_factory=list[str])
 
     @classmethod
-    def failure_500(cls, message: str) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def failure_500(cls, message: str) -> HTTPResultWithStatus[T]:
         return cls.failure(message, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @classmethod
-    def failure(cls, message: str, *, status_code: HTTPStatus) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def failure(cls, message: str, *, status_code: HTTPStatus) -> HTTPResultWithStatus[T]:
         return status_code, cls(message=message)
 
     @classmethod
-    def from_multiple_results(
-        cls,
-        results: MultipleContextResults[_TResponse],
-    ) -> tuple[HTTPStatus, "list[ResultResponse[_TResponse]]"]:
+    def from_results(cls, results: EnumerableContextResult[T]) -> HTTPResultListWithStatus[T]:
         if results.count() == 0:
             return HTTPStatus.NO_CONTENT, []
 
-        responses = results.select(lambda result: cls.from_result(result))
+        res = results.select(cls.from_result)
+        http_status = res.select(lambda r: r[0]).first2(lambda s: s.is_server_error or s.is_client_error, HTTPStatus.OK)
+        http_results = res.select(lambda r: r[1]).to_list()
 
-        result_responses = responses.select(lambda response: response[1]).to_list()
-        http_status = responses.select(lambda response: response[0]).first2(
-            lambda status_code: status_code.is_server_error or status_code.is_client_error,
-            HTTPStatus.OK,
-        )
-
-        return http_status, result_responses
+        return http_status, http_results
 
     @classmethod
-    def from_result(cls, result: ContextResult[_TResponse]) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def from_result(cls, result: ContextResult[T]) -> HTTPResultWithStatus[T]:
         return cls.from_error(result.error) if result.is_error() else cls.from_value(result.ok)
 
     @classmethod
-    def from_value(cls, value: _TResponse) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def from_value(cls, value: T) -> HTTPResultWithStatus[T]:
         return HTTPStatus.OK, cls(value=value)
 
     @classmethod
-    def from_error(cls, error: ErrorContext) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def from_error(cls, error: ErrorContext) -> HTTPResultWithStatus[T]:
         return cls.__map_status_code(error.error_code), cls(message=error.message, reasons=error.reasons)
 
     @classmethod
-    def no_content(cls) -> tuple[HTTPStatus, "ResultResponse[_TResponse]"]:
+    def no_content(cls) -> HTTPResultWithStatus[T]:
         return HTTPStatus.NO_CONTENT, cls()
 
     @classmethod

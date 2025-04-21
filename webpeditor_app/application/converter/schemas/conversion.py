@@ -3,7 +3,7 @@ from decimal import Decimal
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 
-from webpeditor_app.application.converter.schemas.settings import ImageConverterAllOutputFormats
+from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
 
 
@@ -16,6 +16,20 @@ class ConversionRequest(Schema):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
     files: list[UploadedFile]
     options: Options
+
+    @staticmethod
+    def create(
+        files: list[UploadedFile],
+        output_format: ImageConverterAllOutputFormats,
+        quality: int,
+    ) -> "ConversionRequest":
+        return ConversionRequest(
+            files=files,
+            options=ConversionRequest.Options(
+                output_format=output_format,
+                quality=quality,
+            ),
+        )
 
 
 class ConversionResponse(Schema):

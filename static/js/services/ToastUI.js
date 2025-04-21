@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return response.blob();
         })
         .then((convertedBlob) => {
-          saveAs(convertedBlob, imageName);
+          FileSaver.saveAs(convertedBlob, imageName);
           toastifyMessage("Image has been downloaded", true);
         })
         .catch((error) => {

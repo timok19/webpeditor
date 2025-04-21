@@ -12,7 +12,7 @@ from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from webpeditor_app.apps import WebpeditorAppConfig
 
@@ -22,24 +22,29 @@ django_stubs_ext.monkeypatch()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
-ENV_FILE_PATH: Path = BASE_DIR / ".env"
+DJANGO_ENVIRONMENT: Optional[str] = os.getenv("DJANGO_ENVIRONMENT")
 
-# Load .env file
-if ENV_FILE_PATH.exists():
-    load_dotenv(dotenv_path=ENV_FILE_PATH, override=True, verbose=True)
+IS_DEVELOPMENT_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Development"
+IS_STAGE_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Stage"
+IS_PRODUCTION_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Production"
+
+if IS_DEVELOPMENT_ENVIRONMENT:
+    load_dotenv(dotenv_path=BASE_DIR / ".env.dev", override=True, verbose=True)
+elif IS_STAGE_ENVIRONMENT:
+    load_dotenv(dotenv_path=BASE_DIR / ".env", override=True, verbose=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = os.getenv("SECRET_KEY") or get_random_secret_key()
+SECRET_KEY: str = os.getenv("SECRET_KEY", default=get_random_secret_key())
 
 WEBPEDITOR_API_KEY: str = str(os.getenv("WEBPEDITOR_API_KEY"))
 
 WEBPEDITOR_SALT_KEY: str = str(os.getenv("WEBPEDITOR_SALT_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = bool(int(str(os.getenv("DEBUG"))))
+DEBUG: bool = True if IS_DEVELOPMENT_ENVIRONMENT else False
 
 ALLOWED_HOSTS: list[str] = str(os.getenv("ALLOWED_HOSTS")).split(",")
 
@@ -71,12 +76,29 @@ INSTALLED_APPS: list[str] = [
     "cloudinary_storage",
     "ninja_extra",
     "webpeditor_app",
+    "anydi.ext.django",
 ]
+
+ANYDI: dict[str, Any] = {
+    "INJECT_URLCONF": "webpeditor.urls",
+    "PATCH_NINJA": True,
+    "REGISTER_COMPONENTS": True,
+    "REGISTER_SETTINGS": True,
+    "STRICT_MODE": True,
+    "MODULES": [
+        # Should follow the order - dependency resolution is synchronous
+        "webpeditor_app.core.CoreModule",
+        "webpeditor_app.infrastructure.InfrastructureModule",
+        "webpeditor_app.common.CommonModule",
+        "webpeditor_app.application.ApplicationModule",
+    ],
+}
 
 CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split(",")
 
 MIDDLEWARE: list[str] = [
-    "webpeditor_app.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
+    "anydi.ext.django.middleware.request_scoped_middleware",
+    "webpeditor_app.middlewares.error_handling.ErrorHandlingMiddleware",
     "silk.middleware.SilkyMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
@@ -207,10 +229,14 @@ COMPRESS_ENABLED: bool = True if DEBUG else False
 MEDIA_URL: str = "/"
 
 # Cloudinary storage config
+CLOUDINARY_BASE_URL: str = str(os.getenv("CLOUDINARY_BASE_URL"))
+CLOUDINARY_CLOUD_NAME: str = str(os.getenv("CLOUDINARY_CLOUD_NAME"))
+CLOUDINARY_API_KEY: str = str(os.getenv("CLOUDINARY_API_KEY"))
+CLOUDINARY_API_SECRET: str = str(os.getenv("CLOUDINARY_API_SECRET"))
 CLOUDINARY_STORAGE: dict[str, Any] = {
-    "CLOUD_NAME": str(os.getenv("CLOUDINARY_CLOUD_NAME")),
-    "API_KEY": str(os.getenv("CLOUDINARY_API_KEY")),
-    "API_SECRET": str(os.getenv("CLOUDINARY_API_SECRET")),
+    "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+    "API_KEY": CLOUDINARY_API_KEY,
+    "API_SECRET": CLOUDINARY_API_SECRET,
     "SECURE": True,
 }
 
