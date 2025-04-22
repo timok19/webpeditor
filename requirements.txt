@@ -262,7 +262,7 @@ txaio==23.1.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-setuptools==78.1.0.20250329
+types-setuptools==79.0.0.20250422
     # via requirements-parser
 typing-extensions==4.13.2
     # via
