@@ -15,5 +15,5 @@
   "scripts": {
     "update-css": "pnpx tailwindcss -i static/src/input.css -o static/src/output.css --watch"
   },
-  "packageManager": "pnpm@10.4.1"
+  "packageManager": "pnpm@10.9.0"
 }
