@@ -2,7 +2,6 @@ import math
 from datetime import timedelta
 from typing import Final, final
 
-from asgiref.sync import sync_to_async
 from django.http.request import HttpRequest
 from django.utils import timezone
 from expression import Option
@@ -73,21 +72,21 @@ class SessionService:
         return (await self.__get_signed_user_id_async()).bind(self.__user_service.unsign_id)
 
     async def set_expiry_async(self, duration: timedelta) -> None:
-        await sync_to_async(self.__request.session.set_expiry)(timezone.now() + duration)
+        await self.__request.session.aset_expiry(timezone.now() + duration)
 
     async def clear_expired_async(self) -> ContextResult[None]:
         user_id_result = await self.get_user_id_async()
         if user_id_result.is_error():
             return ContextResult[None].failure(user_id_result.error)
 
-        await sync_to_async(self.__request.session.clear_expired)()
+        await self.__request.session.aclear_expired()
         self.__logger.log_info(f"Expired session of User '{user_id_result.ok}' has been cleared")
         return ContextResult[None].success(None)
 
     async def __set_signed_user_id_async(self) -> None:
         # Create a new session
         if self.__get_session_key().is_none() or self.__request.session.is_empty():
-            await sync_to_async(self.__request.session.create)()
+            await self.__request.session.acreate()
 
         # Do nothing if the session contains a signed user id
         if (await self.__get_signed_user_id_async()).is_ok():
@@ -97,11 +96,11 @@ class SessionService:
         signed_user_id = await self.__create_user_and_sign_id_async()
 
         # Set signed User ID to the session
-        self.__request.session[self.__user_id_key] = signed_user_id
+        await self.__request.session.aset(self.__user_id_key, signed_user_id)
         self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been added into the session storage")
 
     async def __get_expiry_age_minutes_async(self) -> int:
-        return math.ceil(await sync_to_async(self.__request.session.get_expiry_age)() / 60)
+        return math.ceil(await self.__request.session.aget_expiry_age() / 60)
 
     async def __cleanup_storages_async(self, user_id: str) -> None:
         original_asset_result = await self.__editor_queries.get_original_asset_async(user_id)
@@ -121,7 +120,7 @@ class SessionService:
         self.__logger.log_debug("Storages have been cleaned up")
 
     async def __get_signed_user_id_async(self) -> ContextResult[str]:
-        signed_user_id = await sync_to_async(self.__request.session.get)(self.__user_id_key)
+        signed_user_id = await self.__request.session.aget(self.__user_id_key)
 
         if signed_user_id is None:
             return ContextResult[str].failure(
@@ -132,9 +131,9 @@ class SessionService:
 
     async def __create_user_and_sign_id_async(self) -> str:
         key = self.__get_session_key().some
-        expiration_date = await sync_to_async(self.__request.session.get_expiry_date)()
+        expiration_date = await self.__request.session.aget_expiry_date()
         user: AppUser = await AppUser.objects.acreate(session_key=key, session_key_expiration_date=expiration_date)
-        return self.__user_service.sign_id(str(user.id))
+        return self.__user_service.sign_id(user.id)
 
     def __get_session_key(self) -> Option[str]:
         return Option[str].of_optional(self.__request.session.session_key)

@@ -1,13 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Optional
 from django.db import models
 from django.utils import timezone
 
 
 class BaseImageAsset(models.Model):
-    id: models.AutoField = models.AutoField(primary_key=True)
-    created_at: models.DateTimeField[datetime] = models.DateTimeField(default=timezone.now)
+    id: models.AutoField[int, int] = models.AutoField(primary_key=True)
+    created_at: models.DateTimeField[datetime, datetime] = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract: bool = True
@@ -18,22 +18,22 @@ class BaseImageAsset(models.Model):
 
 
 class BaseImageAssetFile(models.Model):
-    id: models.AutoField = models.AutoField(primary_key=True)
-    filename: models.CharField[str] = models.CharField(max_length=120, blank=True)
-    filename_shorter: models.CharField[str] = models.CharField(max_length=30, blank=True)
-    content_type: models.CharField[str] = models.CharField(max_length=20)
-    format: models.CharField[str] = models.CharField(max_length=10, blank=True)
-    format_description: models.CharField[str] = models.CharField(max_length=50, blank=True)
-    size: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
-    width: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
-    height: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
-    aspect_ratio: models.DecimalField[Optional[Decimal]] = models.DecimalField(
+    id: models.AutoField[int, int] = models.AutoField(primary_key=True)
+    filename: models.CharField[str, str] = models.CharField(max_length=120, blank=True)
+    filename_shorter: models.CharField[str, str] = models.CharField(max_length=30, blank=True)
+    content_type: models.CharField[str, str] = models.CharField(max_length=20)
+    format: models.CharField[str, str] = models.CharField(max_length=10, blank=True)
+    format_description: models.CharField[str, str] = models.CharField(max_length=50, blank=True)
+    size: models.IntegerField[Optional[int], int] = models.IntegerField(null=True)
+    width: models.IntegerField[Optional[int], int] = models.IntegerField(null=True)
+    height: models.IntegerField[Optional[int], int] = models.IntegerField(null=True)
+    aspect_ratio: models.DecimalField[Optional[Decimal], Decimal] = models.DecimalField(
         max_digits=4,
         decimal_places=2,
         null=True,
     )
-    color_mode: models.CharField[str] = models.CharField(max_length=10)
-    exif_data: models.JSONField[Any] = models.JSONField()
+    color_mode: models.CharField[str, str] = models.CharField(max_length=10)
+    exif_data: models.JSONField = models.JSONField()
 
     class Meta:
         abstract: bool = True

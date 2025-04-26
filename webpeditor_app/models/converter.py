@@ -15,36 +15,38 @@ def upload_to_folder(instance: object, filename: str) -> str:
 
 
 class ConverterImageAsset(BaseImageAsset):
-    user: models.OneToOneField[AppUser] = models.OneToOneField(
+    user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
         AppUser,
         related_name="user_converted_image_asset",
         on_delete=models.DO_NOTHING,
     )
 
     class Meta(BaseImageAsset.Meta):
-        verbose_name: str = _("Converted Image Asset")
-        verbose_name_plural: str = _("Converted Image Assets")
+        verbose_name: str = str(_("Converted Image Asset"))
+        verbose_name_plural: str = str(_("Converted Image Assets"))
 
 
 class ConverterOriginalImageAssetFile(BaseImageAssetFile):
     file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
-    image_asset: models.ForeignKey[ConverterImageAsset] = models.ForeignKey(
+    image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
         ConverterImageAsset,
         related_name="original_image_asset_files",
         on_delete=models.CASCADE,
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = _("Original Image Asset File")
-        verbose_name_plural: str = _("Original Image Asset Files")
+        verbose_name: str = str(_("Original Image Asset File"))
+        verbose_name_plural: str = str(_("Original Image Asset Files"))
 
 
 class ConverterConvertedImageAssetFile(BaseImageAssetFile):
     file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
-    image_asset: models.ForeignKey[ConverterImageAsset] = models.ForeignKey(
-        ConverterImageAsset, related_name="converted_image_asset_files", on_delete=models.CASCADE
+    image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
+        ConverterImageAsset,
+        related_name="converted_image_asset_files",
+        on_delete=models.CASCADE,
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = _("Converted Image Asset File")
-        verbose_name_plural: str = _("Converted Image Asset Files")
+        verbose_name: str = str(_("Converted Image Asset File"))
+        verbose_name_plural: str = str(_("Converted Image Asset Files"))
