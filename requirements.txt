@@ -274,7 +274,7 @@ types-psycopg2==2.9.21.20250318
     # via django-types
 types-pyyaml==6.0.12.20250402
     # via django-stubs
-types-setuptools==79.0.0.20250422
+types-setuptools==80.0.0.20250429
     # via requirements-parser
 typing-extensions==4.13.2
     # via
