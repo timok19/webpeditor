@@ -212,12 +212,12 @@ pycodestyle==2.13.0
     #   webpeditor
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.11.3
+pydantic==2.11.4
     # via
     #   django-ninja
     #   expression
     #   ninja-schema
-pydantic-core==2.33.1
+pydantic-core==2.33.2
     # via pydantic
 pyjwt==2.10.1
     # via qstash
@@ -245,7 +245,7 @@ rjsmin==1.2.2
     # via django-compressor
 service-identity==24.2.0
     # via twisted
-setuptools==80.0.0
+setuptools==80.0.1
     # via
     #   autobahn
     #   incremental
