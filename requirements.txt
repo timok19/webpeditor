@@ -42,7 +42,7 @@ cffi==1.17.1 ; platform_python_implementation != 'PyPy'
     # via cryptography
 channels==4.2.2
     # via webpeditor
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 click==8.1.8
     # via deptry
@@ -227,7 +227,7 @@ python-dotenv==1.1.0
     # via webpeditor
 pytz==2025.2
     # via webpeditor
-qrcode==8.1
+qrcode==8.2
     # via webpeditor
 qstash==2.0.5
     # via django-qstash
