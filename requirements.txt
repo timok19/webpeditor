@@ -60,7 +60,7 @@ contextlib2==21.6.0
     # via django-ninja-extra
 crispy-tailwind==1.0.3
     # via webpeditor
-cryptography==44.0.2
+cryptography==44.0.3
     # via
     #   autobahn
     #   pyopenssl
@@ -229,7 +229,7 @@ pytz==2025.2
     # via webpeditor
 qrcode==8.2
     # via webpeditor
-qstash==2.0.5
+qstash==3.0.0
     # via django-qstash
 rcssmin==1.1.2
     # via django-compressor
@@ -245,7 +245,7 @@ rjsmin==1.2.2
     # via django-compressor
 service-identity==24.2.0
     # via twisted
-setuptools==80.1.0
+setuptools==80.3.1
     # via
     #   autobahn
     #   incremental
@@ -274,7 +274,7 @@ types-psycopg2==2.9.21.20250318
     # via django-types
 types-pyyaml==6.0.12.20250402
     # via django-stubs
-types-setuptools==80.0.0.20250429
+types-setuptools==80.3.0.20250505
     # via requirements-parser
 typing-extensions==4.13.2
     # via
