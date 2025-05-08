@@ -50,7 +50,7 @@ pip-api==0.0.34
 pip-audit==2.9.0
 pip-requirements-parser==32.0.1
     # via pip-audit
-platformdirs==4.3.7
+platformdirs==4.3.8
     # via
     #   pip-audit
     #   virtualenv
