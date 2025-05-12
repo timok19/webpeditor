@@ -6,7 +6,8 @@ from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import ControllerBase, api_controller, http_post  # pyright: ignore [reportUnknownVariableType]
 
-from webpeditor_app.application import ConvertImages, SessionServiceFactory
+from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
+from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
 from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
@@ -57,11 +58,14 @@ class ImageConverterController(ControllerMixin, ControllerBase):
         ],
     ) -> HTTPResultListWithStatus[ConversionResponse]:
         async with container.arequest_context():
+            # Get dependencies
             session_service_factory = await container.aresolve(SessionServiceFactory)
+            convert_images_handler = await container.aresolve(ConvertImagesHandler)
+            # Handle request
             session_service = session_service_factory.create(self.get_request(self.context))
-            convert_images = await container.aresolve(ConvertImages)
-            request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images.handle_async(request, session_service)
+            await session_service.synchronize_async()
+            conversion_request = ConversionRequest.create(files, output_format, quality)
+            results = await convert_images_handler.handle_async(conversion_request, session_service)
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_post(

@@ -1,14 +1,12 @@
-from dataclasses import dataclass
 from typing import final
 from expression import Option
 from webpeditor_app.core.context_result import ContextResult, ErrorContext
-from webpeditor_app.infrastructure.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
 
 
 @final
-@dataclass
-class EditorQueries(EditorQueriesABC):
+class EditorRepository(EditorRepositoryABC):
     async def get_original_asset_async(self, user_id: str) -> ContextResult[EditorOriginalImageAsset]:
         original_image_asset = await EditorOriginalImageAsset.objects.filter(user_id=user_id).afirst()
         error_context = ErrorContext.not_found(f"Unable to find Editor Original Image Asset for User '{user_id}'")

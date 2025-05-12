@@ -15,7 +15,7 @@ class HTTPResult[T: Schema](Schema):
     model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
     value: Optional[T] = None
-    message: str = Field(default_factory=str)
+    message: str = ""
     reasons: list[str] = Field(default_factory=list[str])
 
     @classmethod
@@ -31,9 +31,12 @@ class HTTPResult[T: Schema](Schema):
         if results.count() == 0:
             return HTTPStatus.NO_CONTENT, []
 
-        res = results.select(cls.from_result)
-        http_status = res.select(lambda r: r[0]).first2(lambda s: s.is_server_error or s.is_client_error, HTTPStatus.OK)
-        http_results = res.select(lambda r: r[1]).to_list()
+        http_results = results.select(cls.from_result)
+        http_status = http_results.select(lambda result: result[0]).first2(
+            lambda status: status.is_server_error or status.is_client_error,
+            HTTPStatus.OK,
+        )
+        http_results = http_results.select(lambda result: result[1]).to_list()
 
         return http_status, http_results
 

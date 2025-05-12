@@ -10,6 +10,7 @@ class ImageFileInfo(Schema):
 
     content_file: ContentFile[bytes]
     filename: str
+    filename_shorter: str
     file_format: str
     file_format_description: str
     size: int

@@ -21,10 +21,10 @@ from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 admin_site: JazzminOTPAdminSite = JazzminOTPAdminSite(name="OTPAdmin")
 
 # Auth Models
-admin_site.register([User, Group])
+admin_site.register([User, Group])  # pyright: ignore [reportUnknownMemberType]
 
 # OTP Models
-admin_site.register(TOTPDevice, TOTPDeviceAdmin)
+admin_site.register(TOTPDevice, TOTPDeviceAdmin)  # pyright: ignore [reportUnknownMemberType]
 
 
 @admin.register(AppUser, site=admin_site)
@@ -35,16 +35,20 @@ class AppUserAdmin(admin.ModelAdmin[AppUser]):
 
 @admin.register(ConverterImageAsset, site=admin_site)
 class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
-    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
+    class OriginalImageAssetFileInline(
+        admin.TabularInline[ConverterOriginalImageAssetFile, ConverterOriginalImageAssetFile]
+    ):
         model = ConverterOriginalImageAssetFile
 
-    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile]):
+    class ConvertedImageAssetFileInline(
+        admin.TabularInline[ConverterConvertedImageAssetFile, ConverterConvertedImageAssetFile]
+    ):
         model = ConverterConvertedImageAssetFile
 
     list_display = ("id", "created_at", "user")
     list_filter = ("created_at", "user")
     date_hierarchy = "created_at"
-    inlines = [OriginalImageAssetFileInline, ConvertedImageAssetFileInline]
+    inlines = [OriginalImageAssetFileInline, ConvertedImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
 @admin.register(ConverterOriginalImageAssetFile, site=admin_site)
@@ -91,14 +95,16 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedI
 
 @admin.register(EditorOriginalImageAsset, site=admin_site)
 class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
-    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile]):
+    class EditorOriginalImageAssetFileInline(
+        admin.TabularInline[EditorOriginalImageAssetFile, EditorOriginalImageAssetFile]
+    ):
         model = EditorOriginalImageAssetFile
         extra = 1
 
     list_display = ("id", "created_at", "user")
     list_filter = ("created_at", "user")
     date_hierarchy = "created_at"
-    inlines = [EditorOriginalImageAssetFileInline]
+    inlines = [EditorOriginalImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
 @admin.register(EditorOriginalImageAssetFile, site=admin_site)
@@ -116,7 +122,7 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
         "aspect_ratio",
         "color_mode",
         "exif_data",
-        "image_file",
+        "file",
         "original_image_asset",
     )
     list_filter = ("original_image_asset",)
@@ -124,14 +130,14 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
 
 @admin.register(EditorEditedImageAsset, site=admin_site)
 class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
-    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile]):
+    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile, EditorEditedImageAssetFile]):
         model = EditorEditedImageAssetFile
         extra = 1
 
     list_display = ("id", "created_at", "user", "original_image_asset")
     list_filter = ("created_at", "user", "original_image_asset")
     date_hierarchy = "created_at"
-    inlines = [EditorEditedImageAssetFileInline]
+    inlines = [EditorEditedImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
 @admin.register(EditorEditedImageAssetFile, site=admin_site)

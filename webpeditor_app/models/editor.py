@@ -27,7 +27,7 @@ class EditorOriginalImageAsset(BaseImageAsset):
 
 
 class EditorOriginalImageAssetFile(BaseImageAssetFile):
-    image_file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
+    file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
     original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = (
         models.OneToOneField(
             EditorOriginalImageAsset,

@@ -1,17 +1,17 @@
 from datetime import datetime
 
-from ninja import Field, Schema
-from pydantic import ConfigDict
+from ninja import Field
+from pydantic import BaseModel, ConfigDict
 
 
-class GetResourcesResponse(Schema):
+class GetResourcesResponse(BaseModel):
     model_config = ConfigDict(frozen=True, strict=True)
 
     resources: list["ResourceData"]
 
 
-class ResourceData(Schema):
-    model_config = ConfigDict(frozen=True, strict=True, serialize_by_alias=True)
+class ResourceData(BaseModel):
+    model_config = ConfigDict(frozen=True, serialize_by_alias=True)
 
     asset_id: str = Field(serialization_alias="asset_id")
     public_id: str = Field(serialization_alias="public_id")

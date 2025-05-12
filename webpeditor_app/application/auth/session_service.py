@@ -10,8 +10,8 @@ from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.context_result import ContextResult, ErrorContext
 from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.infrastructure.abc.converter_queries_abc import ConverterQueriesABC
-from webpeditor_app.infrastructure.abc.editor_queries_abc import EditorQueriesABC
+from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
+from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.models.app_user import AppUser
 
 
@@ -22,15 +22,15 @@ class SessionService:
         request: HttpRequest,
         user_service: UserServiceABC,
         cloudinary_service: CloudinaryServiceABC,
-        editor_queries: EditorQueriesABC,
-        converter_queries: ConverterQueriesABC,
+        editor_repository: EditorRepositoryABC,
+        converter_repository: ConverterRepositoryABC,
         logger: WebPEditorLoggerABC,
     ) -> None:
         self.__request: Final[HttpRequest] = request
         self.__user_service: Final[UserServiceABC] = user_service
         self.__cloudinary_service: Final[CloudinaryServiceABC] = cloudinary_service
-        self.__editor_queries: Final[EditorQueriesABC] = editor_queries
-        self.__converter_queries: Final[ConverterQueriesABC] = converter_queries
+        self.__editor_repository: Final[EditorRepositoryABC] = editor_repository
+        self.__converter_repository: Final[ConverterRepositoryABC] = converter_repository
         self.__logger: Final[WebPEditorLoggerABC] = logger
         self.__user_id_key: Final[str] = "USER_ID"
 
@@ -103,13 +103,13 @@ class SessionService:
         return math.ceil(await self.__request.session.aget_expiry_age() / 60)
 
     async def __cleanup_storages_async(self, user_id: str) -> None:
-        original_asset_result = await self.__editor_queries.get_original_asset_async(user_id)
+        original_asset_result = await self.__editor_repository.get_original_asset_async(user_id)
         await original_asset_result.map_async(lambda original_asset: original_asset.adelete())
 
-        edited_asset_result = await self.__editor_queries.get_edited_asset_async(user_id)
+        edited_asset_result = await self.__editor_repository.get_edited_asset_async(user_id)
         await edited_asset_result.map_async(lambda edited_asset: edited_asset.adelete())
 
-        converted_asset_result = await self.__converter_queries.get_converted_asset_async(user_id)
+        converted_asset_result = await self.__converter_repository.get_asset_async(user_id)
         await converted_asset_result.map_async(lambda converted_asset: converted_asset.adelete())
 
         self.__cloudinary_service.delete_original_and_edited_images(user_id)

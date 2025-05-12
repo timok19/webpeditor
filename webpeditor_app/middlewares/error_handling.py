@@ -14,8 +14,8 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 @final
 class ErrorHandlingMiddleware:
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
-        self.logger: Final[WebPEditorLoggerABC] = container.resolve(WebPEditorLoggerABC)
-        self.get_response = get_response
+        self.__logger: Final[WebPEditorLoggerABC] = container.resolve(WebPEditorLoggerABC)
+        self.get_response: Callable[[HttpRequest], HttpResponseBase] = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
         return self.__process(request, self.get_response(request))
@@ -37,7 +37,7 @@ class ErrorHandlingMiddleware:
 
         if response_data_result.is_error():
             message = f"Unhandled error. Reason: '{response.content.decode()}'"
-            self.logger.log_request_exception(request, response_data_result.error, message)
+            self.__logger.log_request_exception(request, response_data_result.error, message)
             return response
 
         response_data = response_data_result.ok
@@ -49,7 +49,7 @@ class ErrorHandlingMiddleware:
         elif isinstance(response_data, dict):
             self.__log_mapped_error(request, cast(dict[str, object], response_data))
         else:
-            self.logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
+            self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
 
         return response
 
@@ -64,6 +64,6 @@ class ErrorHandlingMiddleware:
         if "message" in data and "reasons" in data:
             reasons = cast(list[str], data["reasons"])
             message = f"{data['message']}. Reasons: [{', '.join(reasons) if len(reasons) > 0 else ''}]"
-            self.logger.log_request_error(request, message)
+            self.__logger.log_request_error(request, message)
         else:
-            self.logger.log_request_error(request, "Unexpected response")
+            self.__logger.log_request_error(request, "Unexpected response")

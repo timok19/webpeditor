@@ -1,8 +1,6 @@
-from dataclasses import dataclass
-from typing import Optional, final
+from typing import IO, Any, Final, Optional, cast, final, Generator
 
-from PIL import UnidentifiedImageError
-from PIL.Image import open as open_image
+from PIL import UnidentifiedImageError, Image
 from expression import Option
 from ninja import UploadedFile
 
@@ -15,59 +13,82 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
 @final
-@dataclass
 class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
-    image_file_utility: ImageFileUtilityABC
-    logger: WebPEditorLoggerABC
+    def __init__(
+        self,
+        image_file_utility: ImageFileUtilityABC,
+        converter_settings: ConverterSettings,
+        logger: WebPEditorLoggerABC,
+    ) -> None:
+        self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
+        self.__converter_settings: Final[ConverterSettings] = converter_settings
+        self.__logger: Final[WebPEditorLoggerABC] = logger
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
         validation_result = ValidationResult()
-        files_count = len(value.files)
 
-        if files_count == 0:
-            validation_result.add_error("No files uploaded")
-
-        if files_count > ConverterSettings.MAX_FILES_LIMIT:
-            validation_result.add_error("Too many files uploaded")
-
-        for file in value.files:
-            self.__validate_empty_file_size(file).map(validation_result.add_error)
-            self.__validate_max_file_size(file).map(validation_result.add_error)
-            self.__validate_filename(file.name).map(validation_result.add_error)
-            self.__validate_file_compatibility(file).map(validation_result.add_error)
-
-        if value.options.output_format.strip().upper() not in ImageConverterAllOutputFormats:
-            validation_result.add_error(f"Invalid output format '{value.options.output_format}'")
-
-        if not (ConverterSettings.MIN_QUALITY <= value.options.quality <= ConverterSettings.MAX_QUALITY):
-            message = f"Quality must be between {ConverterSettings.MIN_QUALITY} and {ConverterSettings.MAX_QUALITY}"
-            validation_result.add_error(message)
+        for error in self.__validate(value):
+            error.map(validation_result.add_error)
 
         return validation_result
 
+    def __validate(self, value: ConversionRequest) -> Generator[Option[str], Any, None]:
+        yield self.__validate_file_count(value.files)
+        yield self.__validate_output_format(value.options.output_format)
+        yield self.__validate_quality(value.options.quality)
+        for file in value.files:
+            yield self.__validate_empty_file_size(file)
+            yield self.__validate_max_file_size(file)
+            yield self.__validate_filename(file.name)
+            yield self.__validate_file_compatibility(file)
+
+    def __validate_file_count(self, files: list[UploadedFile]) -> Option[str]:
+        files_count = len(files)
+        if files_count == 0:
+            return Option[str].Some("No files uploaded")
+        if files_count > self.__converter_settings.MAX_FILES_LIMIT:
+            return Option[str].Some("Too many files uploaded")
+        return Option[str].Nothing()
+
     def __validate_filename(self, filename: Optional[str]) -> Option[str]:
-        return self.image_file_utility.validate_filename(filename).swap().map(lambda error: error.message).to_option()
+        return self.__image_file_utility.normalize_filename(filename).swap().map(lambda err: err.message).to_option()
 
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
-        return Option[str].Some(f"File {file.name} does not have size") if file.size == 0 else Option[str].Nothing()
-
-    @staticmethod
-    def __validate_max_file_size(file: UploadedFile) -> Option[str]:
-        message = (
-            f"File {file.name} size {file.size} exceeds the maximum allowed size {ConverterSettings.MAX_FILE_SIZE}"
+        return (
+            Option[str].Some(f"File {file.name} does not have size")
+            if file.size == 0 or file.size is None
+            else Option[str].Nothing()
         )
-        return Option[str].Some(message) if file.size > ConverterSettings.MAX_FILE_SIZE else Option[str].Nothing()
+
+    def __validate_max_file_size(self, file: UploadedFile) -> Option[str]:
+        max_file_size = self.__converter_settings.MAX_FILE_SIZE
+        if cast(int, file.size) > max_file_size:
+            message = f"File {file.name} size {file.size} exceeds the maximum allowed size {max_file_size}"
+            return Option[str].Some(message)
+        return Option[str].Nothing()
 
     def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
         try:
-            open_image(file.file).verify()
+            Image.open(cast(IO[bytes], file.file)).verify()
             return Option[str].Nothing()
-        except UnidentifiedImageError as uie:
+        except UnidentifiedImageError as image_error:
             message = f"File '{file.name}' cannot be processed. Incompatible file"
-            self.logger.log_exception(uie, message)
+            self.__logger.log_exception(image_error, message)
             return Option[str].Some(message)
-        except Exception as exc:
+        except Exception as exception:
             message = f"File '{file.name}' cannot be processed. Corrupted or damaged file"
-            self.logger.log_exception(exc, message)
+            self.__logger.log_exception(exception, message)
             return Option[str].Some(message)
+
+    @staticmethod
+    def __validate_output_format(output_format: str) -> Option[str]:
+        if output_format.strip().upper() not in ImageConverterAllOutputFormats:
+            return Option[str].Some(f"Invalid output format '{output_format}'")
+        return Option[str].Nothing()
+
+    def __validate_quality(self, quality: int) -> Option[str]:
+        if not (self.__converter_settings.MIN_QUALITY <= quality <= self.__converter_settings.MAX_QUALITY):
+            message = f"Quality must be between {self.__converter_settings.MIN_QUALITY} and {self.__converter_settings.MAX_QUALITY}"
+            return Option[str].Some(message)
+        return Option[str].Nothing()

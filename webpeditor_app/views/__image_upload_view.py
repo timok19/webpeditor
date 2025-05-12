@@ -27,7 +27,7 @@ def upload_original_image_to_cloudinary(image: InMemoryUploadedFile, user_id: st
     folder_path: str = f"{user_id}/"
 
     image_name: str = get_image_file_name(str(image.name))
-    image_name_after_re: str = FileUtils.sanitize_filename(image_name)
+    image_name_after_re: str = FileUtils.normalize_filename(image_name)
     new_original_image_name: str = f"webpeditor_{image_name_after_re}"
 
     cloudinary_parameters: dict = {
