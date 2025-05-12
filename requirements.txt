@@ -44,7 +44,7 @@ channels==4.2.2
     # via webpeditor
 charset-normalizer==3.4.2
     # via requests
-click==8.1.8
+click==8.2.0
     # via deptry
 cloudinary==1.44.0
     # via django-cloudinary-storage
@@ -245,7 +245,7 @@ rjsmin==1.2.2
     # via django-compressor
 service-identity==24.2.0
     # via twisted
-setuptools==80.3.1
+setuptools==80.4.0
     # via
     #   autobahn
     #   incremental
@@ -274,7 +274,7 @@ types-psycopg2==2.9.21.20250318
     # via django-types
 types-pyyaml==6.0.12.20250402
     # via django-stubs
-types-setuptools==80.3.0.20250505
+types-setuptools==80.4.0.20250511
     # via requirements-parser
 typing-extensions==4.13.2
     # via
