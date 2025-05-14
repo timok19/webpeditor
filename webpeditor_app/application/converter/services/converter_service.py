@@ -142,6 +142,5 @@ class ConverterService(ConverterServiceABC):
         # Set pointer to start
         buffer.seek(0)
         result = Image.open(buffer)
-        buffer.close()
         result.filename = filename
         return result
