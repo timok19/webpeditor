@@ -17,12 +17,12 @@ class CloudinaryService(CloudinaryServiceABC):
     # TODO: rework implementation according new folder structure
     # TODO: rewrite into async using "httpx" client
 
-    async def delete_assets(
+    async def adelete_assets(
         self,
         user_id: str,
         filter_func: Callable[[dict[str, Any]], bool] | None = None,
     ) -> None:
-        get_resources_response = await self.__cloudinary_client.get_resources(user_id)
+        get_resources_response = await self.__cloudinary_client.aget_resources(user_id)
 
         for resource in get_resources_response.resources:
             print(resource)
@@ -33,7 +33,7 @@ class CloudinaryService(CloudinaryServiceABC):
         self.__logger.log_info(f"Assets have been deleted for user '{user_id}'")
 
     def delete_user_assets_in_subfolder(self, user_id: str, subfolder: str) -> None:
-        self.delete_assets(user_id, lambda asset: subfolder in asset["public_id"])
+        self.adelete_assets(user_id, lambda asset: subfolder in asset["public_id"])
 
     def delete_user_folder(self, user_id: str) -> None:
         cloudinary.api.delete_folder(user_id)
@@ -63,7 +63,7 @@ class CloudinaryService(CloudinaryServiceABC):
 
     def delete_original_and_edited_images(self, user_id: str) -> None:
         self.delete_user_assets_in_subfolder(user_id, "edited/")
-        self.delete_assets(user_id)
+        self.adelete_assets(user_id)
 
     def delete_converted_images(self, user_id: str) -> None:
         self.delete_user_assets_in_subfolder(user_id, "converted/")

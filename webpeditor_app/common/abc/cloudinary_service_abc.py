@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 class CloudinaryServiceABC(ABC):
     @abstractmethod
-    async def delete_assets(
+    async def adelete_assets(
         self,
         user_id: str,
         filter_func: Callable[[dict[str, Any]], bool] | None = None,

@@ -35,7 +35,7 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ContextResult[bytes].success(base64.b64decode(base64_data))
 
-    async def get_file_content_async(self, file_url: str) -> ContextResult[bytes]:
+    async def aget_file_content(self, file_url: str) -> ContextResult[bytes]:
         if len(file_url) == 0:
             return ContextResult[bytes].failure(ErrorContext.server_error("File URL is empty"))
 

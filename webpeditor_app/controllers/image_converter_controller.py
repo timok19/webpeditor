@@ -29,7 +29,7 @@ class ImageConverterController(ControllerMixin, ControllerBase):
             HTTPStatus.INTERNAL_SERVER_ERROR: list[HTTPResult[ConversionResponse]],
         },
     )
-    async def convert_images_async(
+    async def aconvert_images(
         self,
         output_format: Annotated[
             ImageConverterAllOutputFormats,
@@ -63,9 +63,9 @@ class ImageConverterController(ControllerMixin, ControllerBase):
             convert_images_handler = await container.aresolve(ConvertImagesHandler)
             # Handle request
             session_service = session_service_factory.create(self.get_request(self.context))
-            await session_service.synchronize_async()
+            await session_service.aasynchronize()
             conversion_request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images_handler.handle_async(conversion_request, session_service)
+            results = await convert_images_handler.ahandle(conversion_request, session_service)
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_post(
@@ -75,6 +75,6 @@ class ImageConverterController(ControllerMixin, ControllerBase):
             HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[DownloadAllZipResponse],
         },
     )
-    async def download_all_as_zip_async(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
+    async def adownload_all_as_zip(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
         # session_service = self.__session_service_factory.create(self.get_request(self.context))
         return HTTPResult[DownloadAllZipResponse].failure_500("Not implemented")

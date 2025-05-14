@@ -13,12 +13,12 @@ class CloudinaryClient:
     def __init__(self) -> None:
         self.__max_results: Final[int] = 500
 
-    async def get_resources(self, user_id: str) -> GetResourcesResponse:
+    async def aget_resources(self, user_id: str) -> GetResourcesResponse:
         builder = RequestBuilder[None](HTTPMethod.GET, "/resources/image/upload")
         params = QueryParams({"prefix": user_id, "max_results": self.__max_results})
-        return await self.__send_request(builder.with_params(params), GetResourcesResponse)
+        return await self.__asend_request(builder.with_params(params), GetResourcesResponse)
 
-    async def __send_request[TRequest: (BaseModel, None), TResponse: BaseModel](
+    async def __asend_request[TRequest: (BaseModel, None), TResponse: BaseModel](
         self,
         request_builder: RequestBuilder[TRequest],
         response_type: type[TResponse],

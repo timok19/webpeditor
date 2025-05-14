@@ -12,7 +12,7 @@ class ConvertedImagesDestroyAPIView:
     @method_decorator(csrf_protect)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         session_service: SessionService = self.__session_service_factory.create(request)
-        signed_user_id_result: ValueResult[str] = session_service.get_user_id_async()
+        signed_user_id_result: ValueResult[str] = session_service.aget_user_id()
 
         if not is_successful(signed_user_id_result):
             return ResultResponse.from_error(signed_user_id_result.failure2())
@@ -40,6 +40,6 @@ class ConvertedImagesDestroyAPIView:
 
         # TODO: finish the implementation (take logic from remaining apis)
 
-        session_service.synchronize_async()
+        session_service.aasynchronize()
 
         return super().destroy(request, *args, **kwargs)

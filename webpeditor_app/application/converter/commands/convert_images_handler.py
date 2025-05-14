@@ -3,7 +3,7 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 from ninja import UploadedFile
 from types_linq import Enumerable
-from typing import IO, Final, cast, final, Callable
+from typing import IO, Final, cast, final
 
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
@@ -16,6 +16,7 @@ from webpeditor_app.core.context_result import (
     ContextResult,
     ErrorContext,
     EnumerableContextResult,
+    AwaitableEnumerableContextResult,
 )
 from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
@@ -48,7 +49,7 @@ class ConvertImagesHandler:
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__logger: Final[WebPEditorLoggerABC] = logger
 
-    async def handle_async(
+    async def ahandle(
         self,
         request: ConversionRequest,
         session_service: SessionService,
@@ -56,30 +57,38 @@ class ConvertImagesHandler:
         return (
             await self.__conversion_request_validator.validate(request)
             .to_context_result()
-            .bind_async(lambda _: session_service.get_user_id_async())
-            .bind_many_async(lambda user_id: self.__batch_convert_async(user_id, request))
+            .abind(lambda _: session_service.aget_user_id())
+            .abind_many(lambda user_id: self.__abatch_convert(user_id, request))
         )
 
-    async def __batch_convert_async(
+    async def __abatch_convert(
         self,
         user_id: str,
         request: ConversionRequest,
     ) -> EnumerableContextResult[ConversionResponse]:
+        def log_success(values: Enumerable[ConversionResponse]) -> Enumerable[ConversionResponse]:
+            self.__logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
+            return values
+
+        def log_errors(errors: Enumerable[ErrorContext]) -> Enumerable[ErrorContext]:
+            reasons = "; ".join(errors.select(lambda error: error.to_str()))
+            self.__logger.log_error(f"Failed to convert images for user '{user_id}'. [{reasons}]")
+            return errors
+
         return (
-            EnumerableContextResult[ConversionResponse]
-            .from_results(
-                await asyncio.gather(
+            await AwaitableEnumerableContextResult[ConversionResponse]
+            .afrom_results(
+                asyncio.gather(
                     *Enumerable(request.files)
                     .chunk(4)
-                    .select_many(lambda files: [self.__convert_async(user_id, file, request.options) for file in files])
+                    .select_many(lambda files: [self.__aconvert(user_id, file, request.options) for file in files])
                     .to_list()
                 )
             )
-            .match(self.__process_values(user_id), self.__process_errors(user_id))
+            .match(log_success, log_errors)
         )
 
-    # TODO: fix problem with empty filename
-    async def __convert_async(
+    async def __aconvert(
         self,
         user_id: str,
         uploaded_file: UploadedFile,
@@ -87,31 +96,31 @@ class ConvertImagesHandler:
     ) -> ContextResult[ConversionResponse]:
         with Image.open(cast(IO[bytes], uploaded_file.file)) as image:
             return await (
-                self.__cleanup_previous_images(user_id)
-                .bind_async(self.__user_repository.get_user_async)
-                .bind_async(self.__converter_repository.create_asset_async)
+                self.__acleanup_previous_images(user_id)
+                .abind(self.__user_repository.aget_user)
+                .abind(self.__converter_repository.acreate_asset)
                 .bind(
                     lambda asset: self.__image_file_utility.normalize_filename(uploaded_file.name)
                     .bind(lambda cleaned_filename: self.__image_file_utility.update_filename(image, cleaned_filename))
                     .map(lambda updated_image: (updated_image, asset))
                 )
-                .bind_async(lambda image_asset_pair: self.__convert_and_store(image_asset_pair, options))
+                .abind(lambda image_asset_pair: self.__aconvert_and_store(image_asset_pair, options))
                 .map(self.__to_response)
             )
 
-    def __cleanup_previous_images(self, user_id: str) -> AwaitableContextResult[str]:
-        async def cleanup_async(asset_exists: bool) -> ContextResult[str]:
+    def __acleanup_previous_images(self, user_id: str) -> AwaitableContextResult[str]:
+        async def acleanup_previous_images(asset_exists: bool) -> ContextResult[str]:
             return (
-                await AwaitableContextResult(self.__converter_repository.delete_asset_async(user_id))
-                .map_async(lambda _: self.__cloudinary_service.delete_assets(user_id))
+                await self.__converter_repository.adelete_asset(user_id)
+                .amap(lambda _: self.__cloudinary_service.adelete_assets(user_id))
                 .map(lambda _: user_id)
                 if asset_exists
                 else ContextResult[str].success(user_id)
             )
 
-        return AwaitableContextResult(self.__converter_repository.asset_exists_async(user_id)).bind_async(cleanup_async)
+        return self.__converter_repository.aasset_exists(user_id).abind(acleanup_previous_images)
 
-    def __convert_and_store(
+    def __aconvert_and_store(
         self,
         image_asset_pair: tuple[ImageFile, ConverterImageAsset],
         options: ConversionRequest.Options,
@@ -121,10 +130,10 @@ class ConvertImagesHandler:
         original_type = ConverterOriginalImageAssetFile
         return (
             self.__converter_service.get_info(image)
-            .bind_async(lambda i: self.__converter_repository.create_asset_file_async(original_type, i, asset))
-            .bind_async(
+            .abind(lambda info: self.__converter_repository.acreate_asset_file(original_type, info, asset))
+            .abind(
                 lambda original: self.__converter_service.convert_image(image, options)
-                .bind_async(lambda i: self.__converter_repository.create_asset_file_async(converted_type, i, asset))
+                .abind(lambda info: self.__converter_repository.acreate_asset_file(converted_type, info, asset))
                 .map(lambda converted: (original, converted))
             )
         )
@@ -138,24 +147,3 @@ class ConvertImagesHandler:
             original_data=ConversionResponse.ImageData.from_asset_file(original_asset_file),
             converted_data=ConversionResponse.ImageData.from_asset_file(converted_asset_file),
         )
-
-    def __process_values(
-        self,
-        user_id: str,
-    ) -> Callable[[Enumerable[ConversionResponse]], Enumerable[ConversionResponse]]:
-        def process(values: Enumerable[ConversionResponse]) -> Enumerable[ConversionResponse]:
-            self.__logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
-            return values
-
-        return process
-
-    def __process_errors(
-        self,
-        user_id: str,
-    ) -> Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]]:
-        def process(errors: Enumerable[ErrorContext]) -> Enumerable[ErrorContext]:
-            reasons = "; ".join(errors.select(lambda error: error.to_str()))
-            self.__logger.log_error(f"Failed to convert images for user '{user_id}'. [{reasons}]")
-            return errors
-
-        return process

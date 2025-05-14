@@ -16,12 +16,12 @@ class InfrastructureModule(Module):
         return CloudinaryClient()
 
     @provider(scope="request")
-    def provide_user_queries(self) -> UserRepositoryABC:
-        return UserRepository()
+    def provide_user_queries(self, logger: WebPEditorLoggerABC) -> UserRepositoryABC:
+        return UserRepository(logger=logger)
 
     @provider(scope="request")
     def provide_converter_queries(self, logger: WebPEditorLoggerABC) -> ConverterRepositoryABC:
-        return ConverterRepository(logger)
+        return ConverterRepository(logger=logger)
 
     @provider(scope="request")
     def provide_editor_queries(self) -> EditorRepositoryABC:

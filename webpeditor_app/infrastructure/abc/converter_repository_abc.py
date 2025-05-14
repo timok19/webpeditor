@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
-from webpeditor_app.core.context_result import ContextResult
+from webpeditor_app.core.context_result import AwaitableContextResult
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
     ConverterImageAsset,
@@ -12,21 +12,21 @@ from webpeditor_app.models.converter import (
 
 class ConverterRepositoryABC(ABC):
     @abstractmethod
-    async def get_asset_async(self, user_id: str) -> ContextResult[ConverterImageAsset]: ...
+    def aget_asset(self, user_id: str) -> AwaitableContextResult[ConverterImageAsset]: ...
 
     @abstractmethod
-    async def create_asset_async(self, user: AppUser) -> ContextResult[ConverterImageAsset]: ...
+    def acreate_asset(self, user: AppUser) -> AwaitableContextResult[ConverterImageAsset]: ...
 
     @abstractmethod
-    async def asset_exists_async(self, user_id: str) -> ContextResult[bool]: ...
+    def aasset_exists(self, user_id: str) -> AwaitableContextResult[bool]: ...
 
     @abstractmethod
-    async def delete_asset_async(self, user_id: str) -> ContextResult[None]: ...
+    def adelete_asset(self, user_id: str) -> AwaitableContextResult[None]: ...
 
     @abstractmethod
-    async def create_asset_file_async[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
+    def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         self,
         asset_file_type: type[T],
         file_info: ImageFileInfo,
         asset: ConverterImageAsset,
-    ) -> ContextResult[T]: ...
+    ) -> AwaitableContextResult[T]: ...

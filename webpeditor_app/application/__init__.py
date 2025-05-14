@@ -46,15 +46,17 @@ class ApplicationModule(Module):
         user_service: UserServiceABC,
         cloudinary_service: CloudinaryServiceABC,
         logger: WebPEditorLoggerABC,
-        editor_queries: EditorRepositoryABC,
-        converter_queries: ConverterRepositoryABC,
+        editor_repository: EditorRepositoryABC,
+        converter_repository: ConverterRepositoryABC,
+        user_repository: UserRepositoryABC,
     ) -> SessionServiceFactory:
         return SessionServiceFactory(
             user_service=user_service,
             cloudinary_service=cloudinary_service,
             logger=logger,
-            editor_repository=editor_queries,
-            converter_repository=converter_queries,
+            editor_repository=editor_repository,
+            converter_repository=converter_repository,
+            user_repository=user_repository,
         )
 
     @provider(scope="request")
