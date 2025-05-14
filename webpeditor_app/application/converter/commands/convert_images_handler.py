@@ -3,7 +3,7 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 from ninja import UploadedFile
 from types_linq import Enumerable
-from typing import IO, Final, cast, final
+from typing import Collection, Final, final
 
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
@@ -81,32 +81,35 @@ class ConvertImagesHandler:
                 asyncio.gather(
                     *Enumerable(request.files)
                     .chunk(4)
-                    .select_many(lambda files: [self.__aconvert(user_id, file, request.options) for file in files])
+                    .select_many(lambda files: self.__aconvert(user_id, files, request.options))
                     .to_list()
                 )
             )
             .match(log_success, log_errors)
         )
 
-    async def __aconvert(
+    def __aconvert(
         self,
         user_id: str,
-        uploaded_file: UploadedFile,
+        files: Collection[UploadedFile],
         options: ConversionRequest.Options,
-    ) -> ContextResult[ConversionResponse]:
-        with Image.open(cast(IO[bytes], uploaded_file.file)) as image:
-            return await (
-                self.__acleanup_previous_images(user_id)
+    ) -> Enumerable[AwaitableContextResult[ConversionResponse]]:
+        return (
+            Enumerable(files)
+            .select(lambda file: (Image.open(file), file.name))
+            .select(
+                lambda image_name_pair: self.__acleanup_previous_images(user_id)
                 .abind(self.__user_repository.aget_user)
-                .abind(self.__converter_repository.acreate_asset)
+                .abind(self.__converter_repository.aget_or_create_asset)
                 .bind(
-                    lambda asset: self.__image_file_utility.normalize_filename(uploaded_file.name)
-                    .bind(lambda cleaned_filename: self.__image_file_utility.update_filename(image, cleaned_filename))
+                    lambda asset: self.__image_file_utility.normalize_filename(image_name_pair[1])
+                    .bind(lambda normalized: self.__image_file_utility.update_filename(image_name_pair[0], normalized))
                     .map(lambda updated_image: (updated_image, asset))
                 )
                 .abind(lambda image_asset_pair: self.__aconvert_and_store(image_asset_pair, options))
                 .map(self.__to_response)
             )
+        )
 
     def __acleanup_previous_images(self, user_id: str) -> AwaitableContextResult[str]:
         async def acleanup_previous_images(asset_exists: bool) -> ContextResult[str]:

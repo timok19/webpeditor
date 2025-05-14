@@ -182,6 +182,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         return EnumerableContextResult[TOut]([ContextResult[TOut].unexpected()])
 
 
+# TODO: convert to Future instead
 class AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
     def __init__(self, awaitable: Awaitable[ContextResult[TOut]]) -> None:
         self.__awaitable_result: Awaitable[ContextResult[TOut]] = awaitable

@@ -52,27 +52,27 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         return ContextResult[bytes].success(file_response.content)
 
-    def get_file_info(self, image_file: ImageFile) -> ContextResult[ImageFileInfo]:
-        return self.trim_filename(image_file.filename, self.__max_filename_length).bind(
-            lambda trimmed_filename: self.__to_content_file(image_file).map(
+    def get_file_info(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
+        return self.trim_filename(image.filename, self.__max_filename_length).bind(
+            lambda trimmed_filename: self.__to_content_file(image).map(
                 lambda content_file: ImageFileInfo(
                     content_file=content_file,
                     filename=str(content_file.name),
                     filename_shorter=trimmed_filename,
-                    file_format=str(image_file.format),
-                    file_format_description=image_file.format_description or "",
+                    file_format=str(image.format),
+                    file_format_description=image.format_description or "",
                     size=content_file.size,
-                    width=image_file.size[0],
-                    height=image_file.size[1],
-                    aspect_ratio=self.__get_aspect_ratio(image_file.size),
-                    color_mode=image_file.mode,
+                    width=image.size[0],
+                    height=image.size[1],
+                    aspect_ratio=self.__get_aspect_ratio(image.size),
+                    color_mode=image.mode,
                     exif_data={},  # TODO use cloudinary to retrieve an exif data
                 )
             )
         )
 
-    def update_filename(self, image_file: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
-        return self.normalize_filename(new_filename).map(self.__update_filename(image_file))
+    def update_filename(self, image: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
+        return self.normalize_filename(new_filename).map(self.__update_filename(image))
 
     def normalize_filename(self, filename: Optional[Union[str, bytes]]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
@@ -101,6 +101,13 @@ class ImageFileUtility(ImageFileUtilityABC):
         if max_length <= 0:
             raise ValueError(f"Maximum length must be greater than 0, got {max_length}")
         return self.normalize_filename(filename).bind(self.__trim_filename(max_length))
+
+    def close_file(self, image: ImageFile) -> ContextResult[None]:
+        try:
+            return ContextResult[None].success(image.close())
+        except Exception as exception:
+            self.__logger.log_exception(exception, f"Failed to close image file '{image}'")
+            return ContextResult[None].failure(ErrorContext.server_error())
 
     def __to_content_file(self, image_file: ImageFile) -> ContextResult[ContentFile[bytes]]:
         buffer = BytesIO()
