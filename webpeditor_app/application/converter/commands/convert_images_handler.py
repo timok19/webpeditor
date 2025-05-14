@@ -57,7 +57,7 @@ class ConvertImagesHandler:
         return (
             await self.__conversion_request_validator.validate(request)
             .to_context_result()
-            .abind(lambda _: session_service.aget_user_id())
+            .abind(lambda _: session_service.aget_unsigned_user_id())
             .abind_many(lambda user_id: self.__abatch_convert(user_id, request))
         )
 

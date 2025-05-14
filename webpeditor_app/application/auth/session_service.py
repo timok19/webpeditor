@@ -48,7 +48,7 @@ class SessionService:
 
         current_expiry_age_minutes: int = await self.__aget_expiry_age_minutes()
 
-        user_id_result = await self.aget_user_id()
+        user_id_result = await self.aget_unsigned_user_id()
         if user_id_result.is_error():
             self.__logger.log_error(
                 f"Failed to get User ID. Reason: {user_id_result.error.message}. Error code: {user_id_result.error.error_code}"
@@ -71,7 +71,7 @@ class SessionService:
             f"Updated session expiration time of user '{user_id_result.ok}': {new_expiry_age_minutes} minute(s)"
         )
 
-    def aget_user_id(self) -> AwaitableContextResult[str]:
+    def aget_unsigned_user_id(self) -> AwaitableContextResult[str]:
         return self.__aget_signed_user_id().bind(self.__user_service.unsign_id)
 
     async def aset_expiry(self, duration: timedelta) -> None:
@@ -79,7 +79,7 @@ class SessionService:
 
     def aclear_expired(self) -> AwaitableContextResult[None]:
         async def aclear_expired() -> ContextResult[None]:
-            user_id_result = await self.aget_user_id()
+            user_id_result = await self.aget_unsigned_user_id()
             return await (
                 user_id_result.amap(lambda _: self.__request.session.aclear_expired())
                 .bind(lambda _: user_id_result)
@@ -134,7 +134,7 @@ class SessionService:
     async def __aget_expiry_age_minutes(self) -> int:
         return math.ceil(await self.__request.session.aget_expiry_age() / 60)
 
-    async def __acleanup_storages(self, user_id: str):
+    async def __acleanup_storages(self, user_id: str) -> ContextResult[None]:
         def log_success(_: None) -> None:
             self.__logger.log_info("Storages have been cleaned up")
 
@@ -142,7 +142,7 @@ class SessionService:
             self.__logger.log_error(error.message)
             return error
 
-        return ContextResult[None].from_result(
+        return (
             await self.__editor_repository.aget_original_asset(user_id)
             .amap(lambda original: original.adelete())
             .abind(lambda _: self.__editor_repository.aget_edited_asset(user_id))
