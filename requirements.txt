@@ -241,7 +241,7 @@ rjsmin==1.2.2
     # via django-compressor
 service-identity==24.2.0
     # via twisted
-setuptools==80.4.0
+setuptools==80.7.1
     # via
     #   autobahn
     #   incremental
