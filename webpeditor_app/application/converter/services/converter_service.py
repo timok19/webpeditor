@@ -68,9 +68,7 @@ class ConverterService(ConverterServiceABC):
         filename = image.filename
 
         # Determine if source and target formats support alpha
-        source_has_alpha = (
-            image.mode == self.__mode_rgba or image.format.upper() in ImageConverterOutputFormatsWithAlphaChannel
-        )
+        source_has_alpha = self.__has_alpha(image)
         target_has_alpha = options.output_format in ImageConverterOutputFormatsWithAlphaChannel
 
         # Determine the appropriate conversion based on image mode and alpha support
@@ -92,6 +90,11 @@ class ConverterService(ConverterServiceABC):
         converted_image.save(buffer, format=image.format)
 
         return ContextResult[ImageFile].success(self.__to_image_file(buffer, filename))
+
+    def __has_alpha(self, image: ImageFile) -> bool:
+        has_rgba_mode = image.mode == self.__mode_rgba
+        format_supports_alpha = str(image.format).upper() in ImageConverterOutputFormatsWithAlphaChannel
+        return has_rgba_mode or format_supports_alpha
 
     def __to_rgb(self, rgba_image: Image.Image) -> Image.Image:
         white_color = (255, 255, 255, 255)
@@ -159,6 +162,5 @@ class ConverterService(ConverterServiceABC):
         return result
 
     def __get_info_and_close(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
-        return self.__image_file_utility.get_file_info(image).bind(
-            lambda info: self.__image_file_utility.close_file(image).map(lambda _: info)
-        )
+        image_file_info_result = self.__image_file_utility.get_file_info(image)
+        return image_file_info_result.bind(lambda info: self.__image_file_utility.close_file(image).map(lambda _: info))
