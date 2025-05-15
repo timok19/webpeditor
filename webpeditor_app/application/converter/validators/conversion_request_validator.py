@@ -57,7 +57,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
         return (
             Option[str].Some(f"File {file.name} does not have size")
-            if file.size == 0 or file.size is None
+            if file.size is None or file.size == 0
             else Option[str].Nothing()
         )
 
