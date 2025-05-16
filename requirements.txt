@@ -245,7 +245,6 @@ setuptools==80.7.1
     # via
     #   autobahn
     #   incremental
-    #   types-setuptools
     #   zope-interface
 shortuuid==1.0.13
     # via webpeditor
@@ -266,11 +265,11 @@ txaio==23.1.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20250318
+types-psycopg2==2.9.21.20250516
     # via django-types
-types-pyyaml==6.0.12.20250402
+types-pyyaml==6.0.12.20250516
     # via django-stubs
-types-setuptools==80.4.0.20250511
+types-setuptools==80.7.0.20250516
     # via requirements-parser
 typing-extensions==4.13.2
     # via
