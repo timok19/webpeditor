@@ -60,13 +60,13 @@ contextlib2==21.6.0
     # via django-ninja-extra
 crispy-tailwind==1.0.3
     # via webpeditor
-cryptography==44.0.3
+cryptography==45.0.2
     # via
     #   autobahn
     #   pyopenssl
     #   service-identity
     #   webpeditor
-daphne==4.1.2
+daphne==4.2.0
     # via channels
 deptry==0.23.0
     # via webpeditor
@@ -217,7 +217,7 @@ pydantic-core==2.33.2
     # via pydantic
 pyjwt==2.10.1
     # via qstash
-pyopenssl==25.0.0
+pyopenssl==25.1.0
     # via twisted
 python-dotenv==1.1.0
     # via webpeditor
