@@ -72,7 +72,7 @@ deptry==0.23.0
     # via webpeditor
 dill==0.4.0
     # via webpeditor
-django==5.2.1
+django==5.2.2
     # via
     #   channels
     #   crispy-tailwind
