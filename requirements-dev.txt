@@ -63,7 +63,7 @@ pyparsing==3.2.3
     # via pip-requirements-parser
 pyyaml==6.0.2
     # via pre-commit
-requests==2.32.3
+requests==2.32.4
     # via
     #   cachecontrol
     #   pip-audit

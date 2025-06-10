@@ -231,7 +231,7 @@ rcssmin==1.1.2
     # via django-compressor
 reactivex==4.0.4
     # via aioreactive
-requests==2.32.3
+requests==2.32.4
     # via
     #   django-cloudinary-storage
     #   django-qstash
