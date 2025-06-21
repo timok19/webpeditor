@@ -42,9 +42,6 @@ urlpatterns += [
     ),
 ]
 
-# QStash
-urlpatterns += [path("qstash/webhook/", include("django_qstash.urls"))]
-
 # WebP Editor
 urlpatterns += [path("", include("webpeditor_app.urls"))]
 

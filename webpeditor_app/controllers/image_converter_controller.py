@@ -4,14 +4,14 @@ from typing import Annotated, final
 from anydi.ext.django import container
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
-from ninja_extra import ControllerBase, api_controller, http_post  # pyright: ignore [reportUnknownVariableType]
+from ninja_extra import api_controller, http_post  # pyright: ignore
 
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
 from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
-from webpeditor_app.controllers.mixins.controller_mixin import ControllerMixin
+from webpeditor_app.controllers.controller_base import WebPEditorControllerBase
 from webpeditor_app.controllers.schemas.http_result import HTTPResult, HTTPResultListWithStatus, HTTPResultWithStatus
 
 
@@ -20,14 +20,16 @@ from webpeditor_app.controllers.schemas.http_result import HTTPResult, HTTPResul
 
 @final
 @api_controller("/converter", tags="Image Converter")
-class ImageConverterController(ControllerMixin, ControllerBase):
+class ImageConverterController(WebPEditorControllerBase):
     @http_post(
         "/convert-images",
         response={
             HTTPStatus.OK: list[HTTPResult[ConversionResponse]],
             HTTPStatus.BAD_REQUEST: list[HTTPResult[ConversionResponse]],
+            HTTPStatus.NOT_FOUND: list[HTTPResult[ConversionResponse]],
             HTTPStatus.INTERNAL_SERVER_ERROR: list[HTTPResult[ConversionResponse]],
         },
+        summary="Convert images",
     )
     async def aconvert_images(
         self,
@@ -58,14 +60,11 @@ class ImageConverterController(ControllerMixin, ControllerBase):
         ],
     ) -> HTTPResultListWithStatus[ConversionResponse]:
         async with container.arequest_context():
-            # Get dependencies
             session_service_factory = await container.aresolve(SessionServiceFactory)
             convert_images_handler = await container.aresolve(ConvertImagesHandler)
-            # Handle request
-            session_service = session_service_factory.create(self.get_request(self.context))
-            await session_service.aasynchronize()
-            conversion_request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images_handler.ahandle(conversion_request, session_service)
+            session_service = session_service_factory.create(self.request)
+            request = ConversionRequest.create(files, output_format, quality)
+            results = await convert_images_handler.ahandle(request, session_service)
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_post(
@@ -74,6 +73,7 @@ class ImageConverterController(ControllerMixin, ControllerBase):
             HTTPStatus.OK: HTTPResult[DownloadAllZipResponse],
             HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[DownloadAllZipResponse],
         },
+        summary="Download all zip files",
     )
     async def adownload_all_as_zip(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
         # session_service = self.__session_service_factory.create(self.get_request(self.context))

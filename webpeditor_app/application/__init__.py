@@ -9,9 +9,9 @@ from webpeditor_app.application.converter.services.converter_service import Conv
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.settings import ConverterSettings
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
-from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.abc.validator_abc import ValidatorABC
+from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC

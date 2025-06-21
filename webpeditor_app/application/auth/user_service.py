@@ -1,6 +1,5 @@
 from typing import Final, final
 from django.core import signing
-from expression import Failure, Success, Try
 
 from webpeditor import settings
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
@@ -17,15 +16,14 @@ class UserService(UserServiceABC):
         return signing.dumps(user_id, salt=settings.WEBPEDITOR_SALT_KEY)
 
     def unsign_id(self, signed_user_id: str) -> ContextResult[str]:
-        return ContextResult[str].from_result(
-            self.__get_unsigned_id(signed_user_id)
-            .map_error(lambda exc: self.__logger.log_exception(exc, f"Invalid signed User ID: {signed_user_id}"))
-            .map_error(lambda _: ErrorContext.bad_request())
-        )
-
-    @staticmethod
-    def __get_unsigned_id(value: str) -> Try[str]:
         try:
-            return Success(signing.loads(value, salt=settings.WEBPEDITOR_SALT_KEY))
-        except Exception as exc:
-            return Failure(exc)
+            return ContextResult[str].success(
+                signing.loads(
+                    signed_user_id,
+                    salt=settings.WEBPEDITOR_SALT_KEY,
+                    max_age=settings.SESSION_COOKIE_AGE,
+                )
+            )
+        except Exception as exception:
+            self.__logger.log_exception(exception, f"Invalid signed User ID: {signed_user_id}")
+            return ContextResult[str].failure(ErrorContext.bad_request())

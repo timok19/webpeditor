@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 from webpeditor_app.apps import WebpeditorAppConfig
 
-# Patching Django types - DO NOT REMOVE
+# Patching Django types. Allows running app with annotated types.
 django_stubs_ext.monkeypatch()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,13 +24,13 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
 DJANGO_ENVIRONMENT: Optional[str] = os.getenv("DJANGO_ENVIRONMENT")
 
-IS_DEVELOPMENT_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Development"
-IS_STAGE_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Stage"
-IS_PRODUCTION_ENVIRONMENT: bool = DJANGO_ENVIRONMENT == "Production"
+IS_DEVELOPMENT: bool = DJANGO_ENVIRONMENT == "Development"
+IS_STAGE: bool = DJANGO_ENVIRONMENT == "Stage"
+IS_PRODUCTION: bool = DJANGO_ENVIRONMENT == "Production"
 
-if IS_DEVELOPMENT_ENVIRONMENT:
+if IS_DEVELOPMENT:
     load_dotenv(dotenv_path=BASE_DIR / ".env.dev", override=True, verbose=True)
-elif IS_STAGE_ENVIRONMENT:
+elif IS_STAGE:
     load_dotenv(dotenv_path=BASE_DIR / ".env", override=True, verbose=True)
 
 # Quick-start development settings - unsuitable for production
@@ -44,7 +44,7 @@ WEBPEDITOR_API_KEY: str = str(os.getenv("WEBPEDITOR_API_KEY"))
 WEBPEDITOR_SALT_KEY: str = str(os.getenv("WEBPEDITOR_SALT_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = True if IS_DEVELOPMENT_ENVIRONMENT else False
+DEBUG: bool = True if IS_DEVELOPMENT else False
 
 ALLOWED_HOSTS: list[str] = str(os.getenv("ALLOWED_HOSTS")).split(",")
 
@@ -64,16 +64,11 @@ INSTALLED_APPS: list[str] = [
     "django_otp",
     "django_otp.plugins.otp_totp",
     "django_extensions",
-    "django_qstash",
-    "django_qstash.results",
-    "django_qstash.schedules",
     "silk",
     "corsheaders",
     "compressor",
     "crispy_forms",
     "crispy_tailwind",
-    "cloudinary",
-    "cloudinary_storage",
     "ninja_extra",
     "webpeditor_app",
     "anydi.ext.django",
@@ -86,7 +81,7 @@ ANYDI: dict[str, Any] = {
     "REGISTER_SETTINGS": True,
     "STRICT_MODE": True,
     "MODULES": [
-        # Should follow the order - dependency resolution is synchronous
+        # Should follow the order. Synchronous dependency resolution
         "webpeditor_app.core.CoreModule",
         "webpeditor_app.infrastructure.InfrastructureModule",
         "webpeditor_app.common.CommonModule",
@@ -133,10 +128,6 @@ TEMPLATES: list[dict[str, Any]] = [
 
 ASGI_APPLICATION: str = "webpeditor.asgi.application"
 
-FILE_UPLOAD_MAX_MEMORY_SIZE: int = 10_485_760 * 4
-
-DATA_UPLOAD_MAX_MEMORY_SIZE: int = 52_428_800 * 4
-
 # Database
 
 DATABASES = {
@@ -180,12 +171,13 @@ USE_TZ: bool = True
 EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
 
 # Session handling
-SESSION_SAVE_EVERY_REQUEST: bool = True
+SESSION_ENGINE: str = "django.contrib.sessions.backends.db"
+SESSION_SERIALIZER: str = "django.contrib.sessions.serializers.JSONSerializer"
 SESSION_EXPIRE_AT_BROWSER_CLOSE: bool = True
 SESSION_COOKIE_SAMESITE: str = "Strict"
 SESSION_COOKIE_HTTPONLY: bool = True
 SESSION_COOKIE_SECURE: bool = True
-SESSION_COOKIE_AGE: int = int(timedelta(minutes=15).total_seconds())  # 15 minutes
+SESSION_COOKIE_AGE: int = math.ceil(timedelta(minutes=15).total_seconds())  # 15 minutes
 
 # CSRF
 CSRF_COOKIE_SAMESITE: str = "Strict"
@@ -193,10 +185,9 @@ CSRF_COOKIE_SECURE: bool = True
 CSRF_COOKIE_AGE: int = math.ceil(timedelta(minutes=15).total_seconds())  # 15 minutes
 
 # HSTS
-SECURE_HSTS_SECONDS: int = math.ceil(timedelta(days=365 * 5).total_seconds())  # 5 year
+SECURE_HSTS_SECONDS: int = math.ceil(timedelta(days=365 * 5).total_seconds())  # 5 years
 SECURE_HSTS_INCLUDE_SUBDOMAINS: bool = True
 SECURE_HSTS_PRELOAD: bool = True
-# SECURE_SSL_REDIRECT: bool = True
 
 # Additional security settings
 SECURE_CONTENT_TYPE_NOSNIFF: bool = True
@@ -206,9 +197,6 @@ X_FRAME_OPTIONS: str = "SAMEORIGIN"
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STORAGES: dict[str, dict[str, str]] = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
@@ -233,25 +221,10 @@ CLOUDINARY_BASE_URL: str = str(os.getenv("CLOUDINARY_BASE_URL"))
 CLOUDINARY_CLOUD_NAME: str = str(os.getenv("CLOUDINARY_CLOUD_NAME"))
 CLOUDINARY_API_KEY: str = str(os.getenv("CLOUDINARY_API_KEY"))
 CLOUDINARY_API_SECRET: str = str(os.getenv("CLOUDINARY_API_SECRET"))
-CLOUDINARY_STORAGE: dict[str, Any] = {
-    "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-    "API_KEY": CLOUDINARY_API_KEY,
-    "API_SECRET": CLOUDINARY_API_SECRET,
-    "SECURE": True,
-}
 
 FILENAME_MAX_SIZE: int = 255
 
 RESERVED_WINDOWS_FILENAMES: list[str] = str(os.getenv("RESERVED_WINDOWS_FILENAMES")).split(",")
-
-# QStash
-QSTASH_URL: str = "http://127.0.0.1:8585" if DEBUG else str(os.getenv("QSTASH_URL"))
-QSTASH_TOKEN: str = str(os.getenv("QSTASH_TOKEN"))
-QSTASH_CURRENT_SIGNING_KEY: str = str(os.getenv("QSTASH_CURRENT_SIGNING_KEY"))
-QSTASH_NEXT_SIGNING_KEY: str = str(os.getenv("QSTASH_NEXT_SIGNING_KEY"))
-DJANGO_QSTASH_DOMAIN: str = "http://127.0.0.1" if DEBUG else str(os.getenv("DJANGO_QSTASH_DOMAIN"))
-DJANGO_QSTASH_WEBHOOK_PATH: str = "/qstash/webhook/"
-DJANGO_QSTASH_FORCE_HTTPS: bool = False if DEBUG else True
 
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS: str = "tailwind"

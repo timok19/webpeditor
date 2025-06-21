@@ -1,15 +1,19 @@
-import math
 from datetime import timedelta
 from typing import Final, final
 
+from asgiref.sync import sync_to_async
 from django.http.request import HttpRequest
 from django.utils import timezone
 from expression import Option
 
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.context_result import AwaitableContextResult, ContextResult, ErrorContext
-from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.core.context_result import (
+    ContextResult,
+    ErrorContext,
+    acontext_result,
+)
+from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.infrastructure import UserRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
@@ -37,106 +41,94 @@ class SessionService:
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__user_id_key: Final[str] = "USER_ID"
 
-    # TODO: make this method more functional
-    async def aasynchronize(self) -> None:
-        """
-        Updates the session store of current User.
-
-        If the session has expired, it deletes data of the user in the session store.
-        """
-        await self.__aset_signed_user_id()
-
-        current_expiry_age_minutes: int = await self.__aget_expiry_age_minutes()
-
-        user_id_result = await self.aget_unsigned_user_id()
-        if user_id_result.is_error():
-            self.__logger.log_error(
-                f"Failed to get User ID. Reason: {user_id_result.error.message}. Error code: {user_id_result.error.error_code}"
-            )
-            return
-
-        session_expiry_date = self.__request.session.get_expiry_date().astimezone(timezone.get_default_timezone())
-        if timezone.now() > session_expiry_date:
-            await user_id_result.amap(self.__acleanup_storages)
-
-        await self.aset_expiry(timedelta(minutes=15))
-
-        new_expiry_age_minutes: int = await self.__aget_expiry_age_minutes()
-
-        # Log messages
-        self.__logger.log_debug(
-            f"Current session expiration time of user '{user_id_result.ok}': {current_expiry_age_minutes} minute(s)"
-        )
-        self.__logger.log_debug(
-            f"Updated session expiration time of user '{user_id_result.ok}': {new_expiry_age_minutes} minute(s)"
-        )
-
-    def aget_unsigned_user_id(self) -> AwaitableContextResult[str]:
-        return self.__aget_signed_user_id().bind(self.__user_service.unsign_id)
-
-    async def aset_expiry(self, duration: timedelta) -> None:
-        await self.__request.session.aset_expiry(timezone.now() + duration)
-
-    def aclear_expired(self) -> AwaitableContextResult[None]:
-        async def aclear_expired() -> ContextResult[None]:
-            user_id_result = await self.aget_unsigned_user_id()
-            return await (
-                user_id_result.amap(lambda _: self.__request.session.aclear_expired())
-                .bind(lambda _: user_id_result)
-                .map(lambda user_id: self.__logger.log_info(f"Expired session of User '{user_id}' has been cleared"))
-            )
-
-        return AwaitableContextResult(aclear_expired())
-
-    def __aset_signed_user_id(self) -> AwaitableContextResult[str]:
+    @acontext_result
+    async def asynchronize(self) -> ContextResult[str]:
         return (
-            self.__aensure_session_exists()
-            .abind(lambda _: self.__aget_signed_user_id())
+            await self.__get_signed_user_id()
+            .bind(self.__user_service.unsign_id)
+            .abind(self.__adelete_expired_data)
             .aor_else(
-                ContextResult[str]
-                .from_result(self.__get_session_key().to_result(ErrorContext.not_found()))
-                .abind(self.__acreate_app_user)
-                .map(lambda user: self.__user_service.sign_id(user.id))
-                .amap(self.__aset_signed_user_id_in_session)
+                self.__aget_or_create_session()
+                .abind(self.__aget_or_create_user)
+                .amap(self.__aset_signed_user_id_and_expiry)
+                .bind(self.__user_service.unsign_id)
+                .abind(self.__adelete_expired_data)
             )
         )
 
-    def __aensure_session_exists(self) -> AwaitableContextResult[None]:
-        async def aensure_session_exists() -> ContextResult[None]:
-            if self.__get_session_key().is_none() or self.__request.session.is_empty():
-                await self.__request.session.acreate()
-            return ContextResult[None].success(None)
-
-        return AwaitableContextResult(aensure_session_exists())
-
-    def __aget_signed_user_id(self) -> AwaitableContextResult[str]:
-        async def aset_signed_user_id() -> ContextResult[str]:
+    @acontext_result
+    async def __get_signed_user_id(self) -> ContextResult[str]:
+        try:
             return ContextResult[str].from_result(
                 Option[str]
-                .of_optional(str(await self.__request.session.aget(self.__user_id_key)))
-                .to_result(ErrorContext.not_found(f"Unable to find signed User ID under key {self.__user_id_key}"))
+                .of_optional(await self.__request.session.aget(self.__user_id_key, None))
+                .to_result(ErrorContext.not_found(f"{self.__user_id_key} not found in session"))
             )
+        except Exception as exception:
+            self.__logger.log_exception(exception, f"Failed to get {self.__user_id_key} from session")
+            await self.__clear_session()
+            return ContextResult[str].failure(ErrorContext.server_error())
 
-        return AwaitableContextResult(aset_signed_user_id())
+    @acontext_result
+    async def __aget_or_create_session(self) -> ContextResult[str]:
+        return await self.__get_session_key().aor_else(
+            self.__acreate_session().bind(lambda _: self.__get_session_key())
+        )
 
-    def __get_session_key(self) -> Option[str]:
-        return Option[str].of_optional(self.__request.session.session_key)
+    def __get_session_key(self) -> ContextResult[str]:
+        try:
+            return ContextResult[str].from_result(
+                Option[str]
+                .of_optional(self.__request.session.session_key)
+                .to_result(ErrorContext.not_found("Session key not found"))
+            )
+        except Exception as exception:
+            self.__logger.log_exception(exception, "Failed to get session key")
+            return ContextResult[str].failure(ErrorContext.server_error())
 
-    async def __acreate_app_user(self, session_key: str) -> ContextResult[AppUser]:
-        session_key_expiration_date = await self.__request.session.aget_expiry_date()
-        return await self.__user_repository.acreate_user(session_key, session_key_expiration_date)
+    @acontext_result
+    async def __acreate_session(self) -> ContextResult[None]:
+        try:
+            await self.__clear_session()
+            await self.__request.session.acreate()
+            return ContextResult[None].success(None)
+        except Exception as exception:
+            self.__logger.log_exception(exception, "Failed to create session")
+            return ContextResult[None].failure(ErrorContext.server_error())
 
-    async def __aset_signed_user_id_in_session(self, signed_user_id: str) -> str:
-        await self.__request.session.aset(self.__user_id_key, signed_user_id)
-        self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been added into the session storage")
-        return signed_user_id
+    @acontext_result
+    async def __aget_or_create_user(self, session_key: str) -> ContextResult[AppUser]:
+        try:
+            session_key_expiration_date = await self.__request.session.aget_expiry_date()
+            return await self.__user_repository.aget_or_create_user(session_key, session_key_expiration_date)
+        except Exception as exception:
+            self.__logger.log_exception(exception, "Failed to get or create user")
+            await self.__clear_session()
+            return ContextResult[AppUser].failure(ErrorContext.server_error())
 
-    async def __aget_expiry_age_minutes(self) -> int:
-        return math.ceil(await self.__request.session.aget_expiry_age() / 60)
+    async def __aset_signed_user_id_and_expiry(self, user: AppUser) -> str:
+        try:
+            signed_user_id = await self.__request.session.asetdefault(
+                self.__user_id_key,
+                self.__user_service.sign_id(user.id),
+            )
+            self.__logger.log_debug(f"Signed {self.__user_id_key} '{signed_user_id}' has been set")
 
-    async def __acleanup_storages(self, user_id: str) -> ContextResult[None]:
-        def log_success(_: None) -> None:
-            self.__logger.log_info("Storages have been cleaned up")
+            await self.__request.session.aset_expiry(timedelta(minutes=15))
+            session_expiry_date = await self.__request.session.aget_expiry_date()
+            self.__logger.log_debug(f"Session expiry date has been set to {session_expiry_date}")
+
+            return str(signed_user_id)
+        except Exception as exception:
+            self.__logger.log_exception(exception, f"Failed to set {self.__user_id_key} in session")
+            await self.__clear_session()
+            return ""
+
+    @acontext_result
+    async def __adelete_expired_data(self, user_id: str) -> ContextResult[str]:
+        def log_success(value: str) -> str:
+            self.__logger.log_info(f"Data for User '{value}' have been removed")
+            return value
 
         def log_error(error: ErrorContext) -> ErrorContext:
             self.__logger.log_error(error.message)
@@ -145,12 +137,30 @@ class SessionService:
         return (
             await self.__editor_repository.aget_original_asset(user_id)
             .amap(lambda original: original.adelete())
+            .map(lambda _: self.__logger.log_debug(f"Editor: Original asset of User '{user_id}' has been deleted "))
             .abind(lambda _: self.__editor_repository.aget_edited_asset(user_id))
             .amap(lambda edited: edited.adelete())
+            .map(lambda _: self.__logger.log_debug(f"Editor: Edited asset of User '{user_id}' has been deleted "))
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
             .amap(lambda converted: converted.adelete())
-            .map(lambda _: self.__cloudinary_service.delete_original_and_edited_images(user_id))
-            .map(lambda _: self.__cloudinary_service.delete_converted_images(user_id))
-            .abind(lambda _: self.aclear_expired())
+            .map(lambda _: self.__logger.log_debug(f"Converter: Asset of User '{user_id}' has been deleted "))
+            # .amap(lambda _: self.__cloudinary_service.adelete_editor_images(user_id))
+            # .amap(lambda _: self.__cloudinary_service.adelete_converted_images(user_id))
+            .amap(lambda _: self.__request.session.aclear_expired())
+            .map(lambda _: user_id)
             .match(log_success, log_error)
+            if await self.__asession_expired()
+            else ContextResult[str].success(user_id)
         )
+
+    async def __asession_expired(self) -> bool:
+        try:
+            session_expiry_date = await self.__request.session.aget_expiry_date()
+            return timezone.now() > session_expiry_date
+        except Exception as exception:
+            self.__logger.log_exception(exception, "Failed to check if session expired")
+            await self.__clear_session()
+            return True
+
+    async def __clear_session(self) -> None:
+        return await sync_to_async(self.__request.session.clear)()

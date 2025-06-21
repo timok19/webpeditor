@@ -4,7 +4,7 @@ from typing import final
 from django.http.request import HttpRequest
 from loguru import logger
 
-from webpeditor.settings import DEBUG
+from webpeditor import settings
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
@@ -13,7 +13,7 @@ class WebPEditorLogger(WebPEditorLoggerABC):
     def __init__(self) -> None:
         logger.remove()
         logger.add(
-            level="DEBUG" if DEBUG else "INFO",
+            level="DEBUG" if settings.IS_DEVELOPMENT else "INFO",
             sink=sys.stderr,
             colorize=True,
             format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <6}</level> | {module}:{function}:{line} - <level>{message}</level>",

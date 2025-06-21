@@ -1,6 +1,8 @@
-fly.toml
 .git/
+.run/
+.venv/
+node_modules/
 *.sqlite3
 .env
 .env.dev
-node_modules/
+fly.toml

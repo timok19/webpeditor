@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from returns.pipeline import is_successful
 
-from webpeditor_app.common import ValueResult
+from webpeditor_app.application.common import ValueResult
 from webpeditor_app.models import ConverterImageAsset
 from webpeditor_app.application.auth import SessionService
 
@@ -12,7 +12,7 @@ class ConvertedImagesDestroyAPIView:
     @method_decorator(csrf_protect)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         session_service: SessionService = self.__session_service_factory.create(request)
-        signed_user_id_result: ValueResult[str] = session_service.aget_unsigned_user_id()
+        # signed_user_id_result: ValueResult[str] = session_service.aget_or_create_user_id()
 
         if not is_successful(signed_user_id_result):
             return ResultResponse.from_error(signed_user_id_result.failure2())
@@ -40,6 +40,6 @@ class ConvertedImagesDestroyAPIView:
 
         # TODO: finish the implementation (take logic from remaining apis)
 
-        session_service.aasynchronize()
+        # session_service.aasynchronize()
 
         return super().destroy(request, *args, **kwargs)

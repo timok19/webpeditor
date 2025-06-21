@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 
-from webpeditor_app.core.context_result import AwaitableContextResult
+from webpeditor_app.core.context_result import ContextResult, acontext_result
 from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
 
 
 class EditorRepositoryABC(ABC):
     @abstractmethod
-    def aget_original_asset(self, user_id: str) -> AwaitableContextResult[EditorOriginalImageAsset]: ...
+    @acontext_result
+    async def aget_original_asset(self, user_id: str) -> ContextResult[EditorOriginalImageAsset]: ...
 
     @abstractmethod
-    def aget_edited_asset(self, user_id: str) -> AwaitableContextResult[EditorEditedImageAsset]: ...
+    @acontext_result
+    async def aget_edited_asset(self, user_id: str) -> ContextResult[EditorEditedImageAsset]: ...

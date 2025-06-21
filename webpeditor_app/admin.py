@@ -66,7 +66,7 @@ class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalIma
         "aspect_ratio",
         "color_mode",
         "exif_data",
-        "file",
+        "file_url",
         "image_asset",
     )
     list_filter = ("image_asset",)
@@ -87,7 +87,7 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedI
         "aspect_ratio",
         "color_mode",
         "exif_data",
-        "file",
+        "file_url",
         "image_asset",
     )
     list_filter = ("image_asset",)
@@ -122,7 +122,7 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
         "aspect_ratio",
         "color_mode",
         "exif_data",
-        "file",
+        "file_url",
         "original_image_asset",
     )
     list_filter = ("original_image_asset",)
@@ -155,7 +155,7 @@ class EditorEditedImageAssetFileAdmin(admin.ModelAdmin[EditorEditedImageAssetFil
         "aspect_ratio",
         "color_mode",
         "exif_data",
-        "file",
+        "file_url",
         "edited_image_asset",
     )
     list_filter = ("edited_image_asset",)

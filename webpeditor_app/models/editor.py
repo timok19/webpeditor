@@ -5,15 +5,6 @@ from webpeditor_app.models.base import BaseImageAsset, BaseImageAssetFile
 from webpeditor_app.models.app_user import AppUser
 
 
-def upload_to_folder(instance: object, filename: str) -> str:
-    if isinstance(instance, EditorOriginalImageAssetFile):
-        return f"{instance.original_image_asset.user.id}/editor/original/{filename}"
-    elif isinstance(instance, EditorEditedImageAssetFile):
-        return f"{instance.edited_image_asset.user.id}/editor/edited/{filename}"
-    else:
-        raise ValueError(f"{instance!r} is not a recognized image asset file type")
-
-
 class EditorOriginalImageAsset(BaseImageAsset):
     user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
         AppUser,
@@ -27,7 +18,6 @@ class EditorOriginalImageAsset(BaseImageAsset):
 
 
 class EditorOriginalImageAssetFile(BaseImageAssetFile):
-    file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
     original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = (
         models.OneToOneField(
             EditorOriginalImageAsset,
@@ -61,7 +51,6 @@ class EditorEditedImageAsset(BaseImageAsset):
 
 
 class EditorEditedImageAssetFile(BaseImageAssetFile):
-    file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
     edited_image_asset: models.OneToOneField[EditorEditedImageAsset, EditorEditedImageAsset] = models.OneToOneField(
         EditorEditedImageAsset,
         related_name="edited_image_asset_file",

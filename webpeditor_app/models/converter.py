@@ -5,15 +5,6 @@ from webpeditor_app.models.base import BaseImageAsset, BaseImageAssetFile
 from webpeditor_app.models.app_user import AppUser
 
 
-def upload_to_folder(instance: object, filename: str) -> str:
-    if isinstance(instance, ConverterOriginalImageAssetFile):
-        return f"{instance.image_asset.user.id}/converter/original/{filename}"
-    elif isinstance(instance, ConverterConvertedImageAssetFile):
-        return f"{instance.image_asset.user.id}/converter/converted/{filename}"
-    else:
-        raise ValueError("%r is not a recognized image asset file type", instance)
-
-
 class ConverterImageAsset(BaseImageAsset):
     user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
         AppUser,
@@ -27,7 +18,6 @@ class ConverterImageAsset(BaseImageAsset):
 
 
 class ConverterOriginalImageAssetFile(BaseImageAssetFile):
-    file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
     image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
         ConverterImageAsset,
         related_name="original_image_asset_files",
@@ -40,7 +30,6 @@ class ConverterOriginalImageAssetFile(BaseImageAssetFile):
 
 
 class ConverterConvertedImageAssetFile(BaseImageAssetFile):
-    file: models.ImageField = models.ImageField(upload_to=upload_to_folder, blank=True, max_length=1024)
     image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
         ConverterImageAsset,
         related_name="converted_image_asset_files",

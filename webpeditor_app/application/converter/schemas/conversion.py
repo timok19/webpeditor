@@ -57,7 +57,7 @@ class ConversionResponse(Schema):
         @classmethod
         def from_asset_file(cls, asset_file: BaseImageAssetFile) -> "ConversionResponse.ImageData":
             return cls(
-                url=asset_file.file.url,
+                url=asset_file.file_url,
                 filename=str(asset_file.filename),
                 filename_shorter=str(asset_file.filename_shorter),
                 content_type=str(asset_file.content_type),

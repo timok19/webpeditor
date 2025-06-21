@@ -6,7 +6,7 @@ from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
-from webpeditor_app.common.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 
 

@@ -19,7 +19,7 @@ class BaseImageAsset(models.Model):
 
 class BaseImageAssetFile(models.Model):
     id: models.AutoField[int, int] = models.AutoField(primary_key=True)
-    file: models.ImageField = models.ImageField(blank=True, null=True)
+    file_url: models.URLField[str, str] = models.URLField(blank=True)
     filename: models.CharField[str, str] = models.CharField(max_length=120, blank=True)
     filename_shorter: models.CharField[str, str] = models.CharField(max_length=30, blank=True)
     content_type: models.CharField[str, str] = models.CharField(max_length=20)

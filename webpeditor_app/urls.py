@@ -1,6 +1,6 @@
 from typing import Union
 
-from django.conf.urls.static import static
+from django.conf.urls.static import static  # pyright: ignore [reportUnknownVariableType]
 from django.urls import path, URLResolver, URLPattern, include
 
 from webpeditor import settings
@@ -21,7 +21,7 @@ urlpatterns: list[Union[URLResolver, URLPattern]] = [
     # path("image-converter/", image_convert_view, name="image-converter-view"),
 ]
 
-if settings.DEBUG:
+if settings.IS_DEVELOPMENT:
     # Static files
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     # Django Silk

@@ -15,4 +15,4 @@ class APIKey(APIKeyHeader):
 
 
 webpeditor_api = NinjaExtraAPI(title=APP_VERBOSE_NAME, version=APP_VERSION, auth=APIKey())
-webpeditor_api.register_controllers(ImageConverterController)  # pyright: ignore [reportUnknownMemberType]
+webpeditor_api.register_controllers(ImageConverterController)  # pyright: ignore

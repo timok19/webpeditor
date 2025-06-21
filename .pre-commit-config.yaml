@@ -1,11 +1,7 @@
 default_install_hook_types:
   - pre-commit
-  - post-checkout
-  - post-merge
-  - post-rewrite
 
 repos:
-
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
   hooks:
@@ -14,7 +10,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.6.13
+  rev: 0.7.13
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
@@ -31,7 +27,7 @@ repos:
       verbose: false
 
 #- repo: https://github.com/pypa/pip-audit
-#  rev: v2.8.0
+#  rev: v2.9.0
 #  hooks:
 #  - id: pip-audit
 #    name: "Audit dependencies"

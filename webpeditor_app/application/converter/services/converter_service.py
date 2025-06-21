@@ -10,8 +10,7 @@ from types_linq import Enumerable
 
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.image_file.schemas.image_file import ImageFileInfo
+from webpeditor_app.application.common import ImageFileUtilityABC
 from webpeditor_app.core.context_result import ContextResult, ErrorContext
 from webpeditor_app.application.converter.schemas.output_formats import (
     ImageConverterAllOutputFormats,
@@ -26,19 +25,15 @@ class ConverterService(ConverterServiceABC):
         self.__mode_rgba: Final[str] = "RGBA"
         self.__mode_palette: Final[str] = "P"
 
-    def get_info(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
-        return self.__image_file_utility.get_file_info(image)
-
     def convert_image(
         self,
         image: ImageFile,
         options: ConversionRequest.Options,
-    ) -> ContextResult[ImageFileInfo]:
+    ) -> ContextResult[ImageFile]:
         return (
             self.__update_filename(image, options)
             .bind(lambda img_new_filename: self.__convert_color_mode(img_new_filename, options))
             .map(lambda img_converted_color_mode: self.__convert_format(img_converted_color_mode, options))
-            .bind(self.__get_info_and_close)
         )
 
     def __update_filename(
@@ -51,7 +46,7 @@ class ConverterService(ConverterServiceABC):
             .of_optional(image_file.filename)
             .to_result(ErrorContext.server_error("Image file has no filename"))
             .bind(self.__image_file_utility.normalize_filename)
-            .map(lambda normalized_filename: Enumerable(os.path.splitext(normalized_filename)).first2(""))
+            .map(lambda normalized: Enumerable(os.path.splitext(normalized)).first())
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
             .bind(lambda new_filename: self.__image_file_utility.update_filename(image_file, new_filename))
         )
@@ -160,7 +155,3 @@ class ConverterService(ConverterServiceABC):
         result = Image.open(buffer)
         result.filename = filename
         return result
-
-    def __get_info_and_close(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
-        image_file_info_result = self.__image_file_utility.get_file_info(image)
-        return image_file_info_result.bind(lambda info: self.__image_file_utility.close_file(image).map(lambda _: info))

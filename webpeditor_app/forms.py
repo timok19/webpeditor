@@ -1,4 +1,3 @@
-from cloudinary.forms import CloudinaryFileField
 from django import forms
 from django.forms import ImageField, IntegerField
 
@@ -8,7 +7,7 @@ class OriginalImageAssetForm(forms.Form):
 
 
 class ConvertedImageAssetForm(forms.Form):
-    image: CloudinaryFileField = CloudinaryFileField(
+    image: ImageField = forms.ImageField(
         required=True,
         widget=forms.ClearableFileInput(attrs={"allow_multiple_selected": True}),
     )

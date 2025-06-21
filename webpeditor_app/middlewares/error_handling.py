@@ -18,9 +18,7 @@ class ErrorHandlingMiddleware:
         self.get_response: Callable[[HttpRequest], HttpResponseBase] = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
-        return self.__process(request, self.get_response(request))
-
-    def __process(self, request: HttpRequest, response: HttpResponseBase) -> HttpResponseBase:
+        response = self.get_response(request)
         return (
             self.__process_http_error_response(request, response)
             if isinstance(response, HttpResponse) and self.__is_error_response(response.status_code)
@@ -49,7 +47,7 @@ class ErrorHandlingMiddleware:
         elif isinstance(response_data, dict):
             self.__log_mapped_error(request, cast(dict[str, object], response_data))
         else:
-            self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.content.decode()}")
+            self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.text}")
 
         return response
 
@@ -61,7 +59,7 @@ class ErrorHandlingMiddleware:
             return Failure(exc)
 
     def __log_mapped_error(self, request: HttpRequest, data: dict[str, object]) -> None:
-        if "message" in data and "reasons" in data:
+        if "message" in data.keys() and "reasons" in data.keys():
             reasons = cast(list[str], data["reasons"])
             message = f"{data['message']}. Reasons: [{', '.join(reasons) if len(reasons) > 0 else ''}]"
             self.__logger.log_request_error(request, message)

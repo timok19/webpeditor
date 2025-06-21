@@ -7,8 +7,8 @@ from ninja import UploadedFile
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
 from webpeditor_app.application.converter.settings import ConverterSettings
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
@@ -47,7 +47,8 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         if files_count == 0:
             return Option[str].Some("No files uploaded")
         if files_count > self.__converter_settings.MAX_FILES_LIMIT:
-            return Option[str].Some("Too many files uploaded")
+            message = f"Too many files uploaded. Allowed {self.__converter_settings.MAX_FILES_LIMIT} files to upload"
+            return Option[str].Some(message)
         return Option[str].Nothing()
 
     def __validate_filename(self, filename: Optional[str]) -> Option[str]:

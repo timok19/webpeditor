@@ -1,57 +1,14 @@
-from enum import IntEnum, auto
-from typing import Awaitable, Collection, Optional, Callable, override, Any, Generator
+from typing import TYPE_CHECKING, Union, Optional, Callable, override, Awaitable
 
 from expression import Result
-from ninja import Field, Schema
-from pydantic import ConfigDict
 from types_linq import Enumerable
 
+from webpeditor_app.core.decorators import acontext_result, aenumerable_context_result
+from webpeditor_app.core.error_context import ErrorContext
 
-class ErrorContext(Schema):
-    class ErrorCode(IntEnum):
-        BAD_REQUEST = auto()
-        UNAUTHORIZED = auto()
-        FORBIDDEN = auto()
-        NOT_FOUND = auto()
-        INTERNAL_SERVER_ERROR = auto()
 
-    model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
-
-    error_code: ErrorCode
-    message: str = Field(default_factory=str)
-    reasons: list[str] = Field(default_factory=list[str])
-
-    @classmethod
-    def bad_request(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
-        return cls.create(cls.ErrorCode.BAD_REQUEST, message, reasons)
-
-    @classmethod
-    def unauthorized(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
-        return cls.create(cls.ErrorCode.UNAUTHORIZED, message, reasons)
-
-    @classmethod
-    def forbidden(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
-        return cls.create(cls.ErrorCode.FORBIDDEN, message, reasons)
-
-    @classmethod
-    def not_found(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
-        return cls.create(cls.ErrorCode.NOT_FOUND, message, reasons)
-
-    @classmethod
-    def server_error(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
-        return cls.create(cls.ErrorCode.INTERNAL_SERVER_ERROR, message, reasons)
-
-    @classmethod
-    def create(
-        cls,
-        error_code: ErrorCode,
-        message: Optional[str] = None,
-        reasons: Optional[list[str]] = None,
-    ) -> "ErrorContext":
-        return cls(error_code=error_code, message=message or "", reasons=reasons or [])
-
-    def to_str(self) -> str:
-        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
+if TYPE_CHECKING:
+    from webpeditor_app.core.enumerable_context_result import EnumerableContextResult
 
 
 class ContextResult[TOut](Result[TOut, ErrorContext]):
@@ -69,12 +26,18 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         message: Optional[str] = None,
         reasons: Optional[list[str]] = None,
     ) -> "ContextResult[TOut]":
-        error = ErrorContext(error_code=error_code, message=message or "", reasons=reasons or [])
-        return ContextResult(tag="error", error=error)
+        return ContextResult(
+            tag="error",
+            error=ErrorContext(
+                error_code=error_code,
+                message=message or "",
+                reasons=reasons or [],
+            ),
+        )
 
     @staticmethod
     def failures(*errors: ErrorContext) -> "EnumerableContextResult[TOut]":
-        return EnumerableContextResult[TOut]([ContextResult[TOut].failure(error) for error in errors])
+        return EnumerableContextResult[TOut](Enumerable(errors).select(ContextResult[TOut].failure))
 
     @classmethod
     def from_result(cls, result: Result[TOut, ErrorContext]) -> "ContextResult[TOut]":
@@ -128,50 +91,103 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 return ContextResult[TNewOut].unexpected()
 
-    def or_else2(self, other: "ContextResult[TOut]") -> "ContextResult[TOut]":
-        return self if self.is_ok() else other
+    @override
+    def or_else(self, other: Result[TOut, ErrorContext]) -> "ContextResult[TOut]":
+        return self if self.is_ok() else ContextResult[TOut].from_result(other)
 
-    def abind[TNewOut](
+    @acontext_result
+    async def aor_else(self, other: Awaitable["ContextResult[TOut]"]) -> "ContextResult[TOut]":
+        return self if self.is_ok() else await other
+
+    def if_then_else[TNewOut](
+        self,
+        predicate: Callable[[TOut], bool],
+        then_mapper: Callable[[TOut], "ContextResult[TNewOut]"],
+        else_mapper: Callable[[TOut], "ContextResult[TNewOut]"],
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return then_mapper(value) if predicate(value) else else_mapper(value)
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
+
+    @acontext_result
+    async def abind[TNewOut](
         self,
         mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]],
-    ) -> "AwaitableContextResult[TNewOut]":
-        async def abind() -> ContextResult[TNewOut]:
-            match self:
-                case ContextResult(tag="ok", ok=value):
-                    return ContextResult[TNewOut].from_result(await mapper(value))
-                case ContextResult(tag="error", error=error):
-                    return ContextResult[TNewOut].failure(error)
-                case _:
-                    return ContextResult[TNewOut].unexpected()
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return ContextResult[TNewOut].from_result(await mapper(value))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
 
-        return AwaitableContextResult(abind())
+    @acontext_result
+    async def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return ContextResult[TNewOut].success(await mapper(value))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
 
-    def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "AwaitableContextResult[TNewOut]":
-        async def amap() -> ContextResult[TNewOut]:
-            match self:
-                case ContextResult(tag="ok", ok=value):
-                    return ContextResult[TNewOut].success(await mapper(value))
-                case ContextResult(tag="error", error=error):
-                    return ContextResult[TNewOut].failure(error)
-                case _:
-                    return ContextResult[TNewOut].unexpected()
+    @acontext_result
+    async def amap2[TOutOther, TNewOut](
+        self,
+        other: "ContextResult[TOutOther]",
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return other.map(lambda value_: mapper(value, value_))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
 
-        return AwaitableContextResult(amap())
-
-    def abind_many[TNewOut](
+    @aenumerable_context_result
+    async def abind_many[TNewOut](
         self,
         mapper: Callable[[TOut], Awaitable["EnumerableContextResult[TNewOut]"]],
-    ) -> "AwaitableEnumerableContextResult[TNewOut]":
-        async def abind_many() -> EnumerableContextResult[TNewOut]:
-            match self:
-                case ContextResult(tag="ok", ok=value):
-                    return await mapper(value)
-                case ContextResult(tag="error", error=error):
-                    return ContextResult[TNewOut].failures(error)
-                case _:
-                    return ContextResult[TNewOut].unexpected_many()
+    ) -> "EnumerableContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return await mapper(value)
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failures(error)
+            case _:
+                return ContextResult[TNewOut].unexpected_many()
 
-        return AwaitableEnumerableContextResult(abind_many())
+    @acontext_result
+    async def aif_then_else[TNewOut](
+        self,
+        predicate: Callable[[TOut], Union[bool, Awaitable[bool]]],
+        then_mapper: Callable[[TOut], Union["ContextResult[TNewOut]", Awaitable["ContextResult[TNewOut]"]]],
+        else_mapper: Callable[[TOut], Union["ContextResult[TNewOut]", Awaitable["ContextResult[TNewOut]"]]],
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                pred_result = predicate(value)
+                if isinstance(pred_result, Awaitable):
+                    pred_result = await pred_result
+
+                if pred_result:
+                    mapper_result = then_mapper(value)
+                else:
+                    mapper_result = else_mapper(value)
+
+                if isinstance(mapper_result, Awaitable):
+                    return await mapper_result
+                return mapper_result
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
 
     @staticmethod
     def unexpected() -> "ContextResult[TOut]":
@@ -180,113 +196,3 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     @staticmethod
     def unexpected_many() -> "EnumerableContextResult[TOut]":
         return EnumerableContextResult[TOut]([ContextResult[TOut].unexpected()])
-
-
-# TODO: convert to Future instead
-class AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
-    def __init__(self, awaitable: Awaitable[ContextResult[TOut]]) -> None:
-        self.__awaitable_result: Awaitable[ContextResult[TOut]] = awaitable
-
-    def __await__(self) -> Generator[Any, Any, ContextResult[TOut]]:
-        return self.__awaitable_result.__await__()
-
-    def abind[TNewOut](
-        self,
-        mapper: Callable[[TOut], Awaitable[ContextResult[TNewOut]]],
-    ) -> "AwaitableContextResult[TNewOut]":
-        async def bind_async() -> ContextResult[TNewOut]:
-            return await (await self.__awaitable_result).abind(mapper)
-
-        return AwaitableContextResult(bind_async())
-
-    def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "AwaitableContextResult[TNewOut]":
-        async def amap() -> ContextResult[TNewOut]:
-            return await (await self.__awaitable_result).amap(mapper)
-
-        return AwaitableContextResult(amap())
-
-    def abind_many[TNewOut](
-        self,
-        mapper: Callable[[TOut], Awaitable["EnumerableContextResult[TNewOut]"]],
-    ) -> "AwaitableEnumerableContextResult[TNewOut]":
-        async def abind_many() -> EnumerableContextResult[TNewOut]:
-            return await (await self.__awaitable_result).abind_many(mapper)
-
-        return AwaitableEnumerableContextResult(abind_many())
-
-    def match(
-        self,
-        success_func: Callable[[TOut], TOut],
-        error_func: Callable[[ErrorContext], ErrorContext],
-    ) -> "AwaitableContextResult[TOut]":
-        async def amatch() -> ContextResult[TOut]:
-            return (await self.__awaitable_result).match(success_func, error_func)
-
-        return AwaitableContextResult(amatch())
-
-    def or_else(self, other: ContextResult[TOut]) -> "AwaitableContextResult[TOut]":
-        async def aor_else() -> ContextResult[TOut]:
-            return (await self.__awaitable_result).or_else2(other)
-
-        return AwaitableContextResult(aor_else())
-
-    def aor_else(self, other: Awaitable[ContextResult[TOut]]) -> "AwaitableContextResult[TOut]":
-        async def aor_else() -> ContextResult[TOut]:
-            return (await self.__awaitable_result).or_else2(await other)
-
-        return AwaitableContextResult(aor_else())
-
-    def bind[TNewOut](self, mapper: Callable[[TOut], ContextResult[TNewOut]]) -> "AwaitableContextResult[TNewOut]":
-        async def bind_async() -> ContextResult[TNewOut]:
-            return (await self.__awaitable_result).bind(mapper)
-
-        return AwaitableContextResult(bind_async())
-
-    def map[TNewOut](self, mapper: Callable[[TOut], TNewOut]) -> "AwaitableContextResult[TNewOut]":
-        async def amap() -> ContextResult[TNewOut]:
-            return (await self.__awaitable_result).map(mapper)
-
-        return AwaitableContextResult(amap())
-
-
-class EnumerableContextResult[TOut](Enumerable[ContextResult[TOut]]):
-    @staticmethod
-    def from_results(results: Collection[ContextResult[TOut]]) -> "EnumerableContextResult[TOut]":
-        return EnumerableContextResult[TOut](results)
-
-    def match(
-        self,
-        success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
-        error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
-    ) -> "EnumerableContextResult[TOut]":
-        if self.any(lambda result: result.is_error()):
-            errors = self.where(lambda result: result.is_error()).select(lambda result: result.error)
-            return EnumerableContextResult(error_func(errors).select(ContextResult[TOut].failure))
-
-        values = self.where(lambda result: result.is_ok()).select(lambda result: result.ok)
-        return EnumerableContextResult(success_func(values).select(ContextResult[TOut].success))
-
-
-class AwaitableEnumerableContextResult[TOut](Awaitable[EnumerableContextResult[TOut]]):
-    def __init__(self, awaitable: Awaitable[EnumerableContextResult[TOut]]) -> None:
-        self.__awaitable_result: Awaitable[EnumerableContextResult[TOut]] = awaitable
-
-    def __await__(self) -> Generator[Any, Any, EnumerableContextResult[TOut]]:
-        return self.__awaitable_result.__await__()
-
-    @staticmethod
-    def afrom_results(results: Awaitable[Collection[ContextResult[TOut]]]) -> "AwaitableEnumerableContextResult[TOut]":
-        async def afrom_results() -> EnumerableContextResult[TOut]:
-            return EnumerableContextResult(await results)
-
-        return AwaitableEnumerableContextResult(afrom_results())
-
-    def match(
-        self,
-        success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
-        error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
-    ) -> "AwaitableEnumerableContextResult[TOut]":
-        async def amatch() -> EnumerableContextResult[TOut]:
-            return (await self.__awaitable_result).match(success_func, error_func)
-
-        return AwaitableEnumerableContextResult(amatch())

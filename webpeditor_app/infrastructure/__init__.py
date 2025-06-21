@@ -12,8 +12,8 @@ from webpeditor_app.infrastructure.database.user_repository import UserRepositor
 
 class InfrastructureModule(Module):
     @provider(scope="singleton")
-    def provide_cloudinary_client(self) -> CloudinaryClient:
-        return CloudinaryClient()
+    def provide_cloudinary_client(self, logger: WebPEditorLoggerABC) -> CloudinaryClient:
+        return CloudinaryClient(logger=logger)
 
     @provider(scope="request")
     def provide_user_queries(self, logger: WebPEditorLoggerABC) -> UserRepositoryABC:
