@@ -31,7 +31,8 @@ class CloudinaryService(CloudinaryServiceABC):
 
         return (
             await self.__cloudinary_client.aget_resources(user_id, relative_folder_path)
-            .map(lambda response: Enumerable(response.resources).select(lambda resource: resource.public_id).to_list())
+            .map(lambda response: Enumerable(response.resources))
+            .map(lambda resources: resources.select(lambda resource: resource.public_id).to_list())
             .abind(self.__cloudinary_client.adelete_resources)
             .match(log_success, log_error)
         )

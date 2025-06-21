@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from PIL.ImageFile import ImageFile
 
-from webpeditor_app.application.common.image_file.schemas.image_file import ImageFileInfo
+from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 from webpeditor_app.core.context_result import ContextResult
 
 

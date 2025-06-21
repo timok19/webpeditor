@@ -16,9 +16,24 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
+from webpeditor_app.application.common.cloudinary.cloudinary_service import CloudinaryService
+from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
+from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
 
 class ApplicationModule(Module):
+    @provider(scope="request")
+    def image_file_utility_provider(self, logger: WebPEditorLoggerABC) -> ImageFileUtilityABC:
+        return ImageFileUtility(logger=logger)
+
+    @provider(scope="singleton")
+    def cloudinary_service_provider(
+        self,
+        logger: WebPEditorLoggerABC,
+        cloudinary_client: CloudinaryClient,
+    ) -> CloudinaryServiceABC:
+        return CloudinaryService(cloudinary_client=cloudinary_client, logger=logger)
+
     @provider(scope="singleton")
     def provide_converter_settings(self) -> ConverterSettings:
         return ConverterSettings()

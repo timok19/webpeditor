@@ -10,7 +10,7 @@ from types_linq import Enumerable
 
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
-from webpeditor_app.application.common import ImageFileUtilityABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.core.context_result import ContextResult, ErrorContext
 from webpeditor_app.application.converter.schemas.output_formats import (
     ImageConverterAllOutputFormats,

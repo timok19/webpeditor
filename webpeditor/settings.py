@@ -84,7 +84,6 @@ ANYDI: dict[str, Any] = {
         # Should follow the order. Synchronous dependency resolution
         "webpeditor_app.core.CoreModule",
         "webpeditor_app.infrastructure.InfrastructureModule",
-        "webpeditor_app.common.CommonModule",
         "webpeditor_app.application.ApplicationModule",
     ],
 }

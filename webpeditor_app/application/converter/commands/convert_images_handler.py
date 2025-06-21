@@ -2,10 +2,10 @@ import asyncio
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
-from ninja import UploadedFile
 from types_linq import Enumerable
-from typing import Collection, Final, final
+from typing import Final, final, Optional
 
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
@@ -20,7 +20,6 @@ from webpeditor_app.core import (
     aenumerable_context_result,
 )
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.application.common import ImageFileUtilityABC
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
@@ -78,32 +77,33 @@ class ConvertImagesHandler:
             self.__logger.log_error(f"Failed to convert images for user '{user_id}'. [{reasons}]")
             return errors
 
-        return await self.__abatch_convert(user_id, request.files, request.options).match(log_success, log_errors)
+        results = await asyncio.gather(
+            *Enumerable(request.files)
+            .select(lambda file: (Image.open(file), file.name))
+            .select(lambda pair: self.__abatch_convert(user_id, *pair, request.options))
+        )
 
-    @aenumerable_context_result
+        return EnumerableContextResult[ConversionResponse].from_results(results).match(log_success, log_errors)
+
+    @acontext_result
     async def __abatch_convert(
         self,
         user_id: str,
-        files: Collection[UploadedFile],
+        image: ImageFile,
+        filename: Optional[str],
         options: ConversionRequest.Options,
-    ) -> EnumerableContextResult[ConversionResponse]:
-        return EnumerableContextResult[ConversionResponse].from_results(
-            await asyncio.gather(
-                *Enumerable(files)
-                .select(lambda file: (Image.open(file), file.name))
-                .select(
-                    lambda image_name_pair: self.__acleanup_previous_images(user_id)
-                    .abind(lambda _: self.__user_repository.aget_user(user_id))
-                    .abind(self.__converter_repository.aget_or_create_asset)
-                    .abind(
-                        lambda asset: self.__image_file_utility.normalize_filename(image_name_pair[1])
-                        .bind(lambda name: self.__image_file_utility.update_filename(image_name_pair[0], name))
-                        .abind(
-                            lambda image: self.__acreate_original_asset_file(image, asset).amap3(
-                                self.__aconvert_and_save_asset_file(image, asset, options),
-                                self.__to_response,
-                            )
-                        )
+    ) -> ContextResult[ConversionResponse]:
+        return await (
+            self.__acleanup_previous_images(user_id)
+            .abind(lambda _: self.__user_repository.aget_user(user_id))
+            .abind(self.__converter_repository.aget_or_create_asset)
+            .abind(
+                lambda asset: self.__image_file_utility.normalize_filename(filename)
+                .bind(lambda new_filename: self.__image_file_utility.update_filename(image, new_filename))
+                .abind(
+                    lambda updated_image: self.__acreate_original_asset_file(updated_image, asset).amap3(
+                        self.__aconvert_and_save_asset_file(updated_image, asset, options),
+                        self.__to_response,
                     )
                 )
             )

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from webpeditor_app.application.common.image_file.schemas.image_file import ImageFileInfo
 from webpeditor_app.core import ContextResult, acontext_result
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
@@ -8,6 +8,9 @@ from webpeditor_app.models.converter import (
     ConverterOriginalImageAssetFile,
     ConverterConvertedImageAssetFile,
 )
+
+if TYPE_CHECKING:
+    from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 
 
 class ConverterRepositoryABC(ABC):
@@ -32,7 +35,7 @@ class ConverterRepositoryABC(ABC):
     async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         self,
         asset_file_type: type[T],
-        file_info: ImageFileInfo,
+        file_info: "ImageFileInfo",
         file_url: str,
         asset: ConverterImageAsset,
     ) -> ContextResult[T]: ...
