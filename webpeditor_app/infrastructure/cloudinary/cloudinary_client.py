@@ -9,7 +9,7 @@ from webpeditor import settings
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
-from webpeditor_app.infrastructure.cloudinary.schemas import GetResourcesResponse, UploadImageResponse
+from webpeditor_app.infrastructure.cloudinary.schemas import GetResourcesResponse, UploadFileResponse
 
 
 _FileContent = Union[IO[bytes], bytes, str]
@@ -39,13 +39,13 @@ class CloudinaryClient:
         self.__logger: WebPEditorLoggerABC = logger
 
     @acontext_result
-    async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadImageResponse]:
+    async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadFileResponse]:
         return await self.__asend_request(
             HTTPMethod.POST,
             "image/upload",
             data=self.__create_form_data({"public_id": public_id}),
             files={"file": file_content},
-            response_type=UploadImageResponse,
+            response_type=UploadFileResponse,
         )
 
     @acontext_result
@@ -67,7 +67,7 @@ class CloudinaryClient:
         )
 
     def __create_form_data(self, params: MutableMapping[str, str]) -> Mapping[str, str]:
-        # Add api_key and timestamp if not provided
+        # Add api_key and timestamp if not present
         if "api_key" not in params.keys():
             params["api_key"] = settings.CLOUDINARY_API_KEY
         if "timestamp" not in params.keys():

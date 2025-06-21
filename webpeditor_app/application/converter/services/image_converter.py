@@ -29,8 +29,8 @@ class ImageConverter(ImageConverterABC):
     ) -> ContextResult[ImageFile]:
         return (
             self.__update_filename(image, options)
-            .bind(lambda img_new_filename: self.__convert_color_mode(img_new_filename, options))
-            .map(lambda img_converted_color_mode: self.__convert_format(img_converted_color_mode, options))
+            .bind(lambda with_new_filename: self.__convert_color_mode(with_new_filename, options))
+            .map(lambda with_converted_color_mode: self.__convert_format(with_converted_color_mode, options))
         )
 
     def __update_filename(
