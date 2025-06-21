@@ -5,6 +5,7 @@ from PIL.ImageFile import ImageFile
 
 from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 from webpeditor_app.core.result import ContextResult
+from webpeditor_app.globals import Unit
 
 
 class ImageFileUtilityABC(ABC):
@@ -27,4 +28,4 @@ class ImageFileUtilityABC(ABC):
     def trim_filename(self, filename: Optional[Union[str, bytes]], max_length: int) -> ContextResult[str]: ...
 
     @abstractmethod
-    def close_file(self, image: ImageFile) -> ContextResult[None]: ...
+    def close_file(self, image: ImageFile) -> ContextResult[Unit]: ...

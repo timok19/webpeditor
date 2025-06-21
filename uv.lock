@@ -631,15 +631,12 @@ wheels = [
 ]
 
 [[package]]
-name = "exif"
-version = "1.6.1"
+name = "exifread"
+version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "plum-py" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/52/21/34c46fbda54648afdcc66f0eec0ac91675361017abcdcdd23bd88fa74cc5/exif-1.6.1.tar.gz", hash = "sha256:763599b89b9b67495713060a703f32d1874abf8f0628c9d77711c2c06a5f44c8", size = 24052, upload-time = "2024-12-10T04:38:35.812Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/d4/6aabccc3da60e7c47f235002d4e15844f24dadaf862dd4f3b0fe2c142538/exifread-3.3.1.tar.gz", hash = "sha256:320d8596c1f674a1da2c10cf30408bb9675262c4c0181bebbd3570679d2f1340", size = 51928, upload-time = "2025-05-12T20:54:29.976Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/07/a47a78be02b0a2d273358312f3e2eecc4981d4604f8a6e6b8ef27c1e9c2d/exif-1.6.1-py3-none-any.whl", hash = "sha256:2879830e2d8f0e5f1503110736bceb83a1e9c2121b32c23208c04284be5afbec", size = 30461, upload-time = "2024-12-10T04:38:33.547Z" },
+    { url = "https://files.pythonhosted.org/packages/60/2c/44ecdb24b6b9e895470ba793a37442f4593ca1d54a3a786f72d7d6fdbdd6/exifread-3.3.1-py3-none-any.whl", hash = "sha256:b7405f890738dbca9992f74a326a4ac3d51512cd129353950d69e774dc5a1767", size = 54322, upload-time = "2025-05-12T20:54:28.769Z" },
 ]
 
 [[package]]
@@ -1062,15 +1059,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/fe/8b/3c73abc9c759ecd3f1f7ceff6685840859e8070c4d947c93fae71f6a0bf2/platformdirs-4.3.8.tar.gz", hash = "sha256:3d512d96e16bcb959a814c9f348431070822a6496326a4be0911c40b5a74c2bc", size = 21362, upload-time = "2025-05-07T22:47:42.121Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/39/979e8e21520d4e47a0bbe349e2713c0aac6f3d853d0e5b34d76206c439aa/platformdirs-4.3.8-py3-none-any.whl", hash = "sha256:ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4", size = 18567, upload-time = "2025-05-07T22:47:40.376Z" },
-]
-
-[[package]]
-name = "plum-py"
-version = "0.8.7"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3a/2a/a650b0cde5a15f4a9375df43bd7eacaffb65b30c8395b6b6cd84df2bf7ae/plum-py-0.8.7.tar.gz", hash = "sha256:40a25a70f7fd213f57cdd1decc65874df2d213d19d63478a1addcca748c13c4e", size = 116231, upload-time = "2024-05-12T02:01:48.18Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/da/8a9bdf5d3ea4b13d3142e0c77d6e85e4c2668aef6e4b9d5e9a6619049bdc/plum_py-0.8.7-py3-none-any.whl", hash = "sha256:d791f059ef159adbe3c3b036557b5b431fa07db226a9de106a74e5e57441741d", size = 69991, upload-time = "2023-08-14T21:56:31.953Z" },
 ]
 
 [[package]]
@@ -1607,7 +1595,7 @@ dependencies = [
     { name = "djhtml" },
     { name = "dnspython" },
     { name = "docutils" },
-    { name = "exif" },
+    { name = "exifread" },
     { name = "expression", extra = ["pydantic"] },
     { name = "gunicorn" },
     { name = "httpx" },
@@ -1668,7 +1656,7 @@ requires-dist = [
     { name = "djhtml", specifier = ">=3.0.7" },
     { name = "dnspython", specifier = ">=2.7.0" },
     { name = "docutils", specifier = ">=0.21.2" },
-    { name = "exif", specifier = ">=1.6.1" },
+    { name = "exifread", specifier = ">=3.3.1" },
     { name = "expression", extras = ["pydantic"], specifier = ">=5.6.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "httpx", specifier = ">=0.28.1" },

@@ -1,5 +1,4 @@
 import base64
-import exif
 import os
 import re
 
@@ -7,16 +6,18 @@ from decimal import ROUND_UP, Decimal
 from io import BytesIO
 from http import HTTPStatus
 
+import exifread
 from httpx import AsyncClient
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
-from typing import Callable, Final, Optional, Union, final
+from typing import Final, Optional, Union, final
 
 from webpeditor import settings
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
+from webpeditor_app.globals import Unit
 
 
 @final
@@ -54,42 +55,40 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].success(file_response.content)
 
     def get_file_info(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
-        filename_result = self.normalize_filename(image.filename)
-        if filename_result.is_error():
-            return ContextResult[ImageFileInfo].failure(filename_result.error)
-
-        trimmed_filename_result = self.trim_filename(image.filename, self.__max_filename_length)
-        if trimmed_filename_result.is_error():
-            return ContextResult[ImageFileInfo].failure(trimmed_filename_result.error)
-
         buffer = BytesIO()
+
         image.save(buffer, format=image.format)
 
-        file_content = buffer.getvalue()
-        exif_data = self.__get_exif_data(buffer)
-        file_size = self.__get_file_size(buffer)
-        aspect_ratio = self.__get_aspect_ratio(image.size)
-
-        buffer.close()
-
-        return ContextResult[ImageFileInfo].success(
-            ImageFileInfo(
-                filename=filename_result.ok,
-                filename_shorter=trimmed_filename_result.ok,
-                file_format=str(image.format),
-                file_format_description=image.format_description or "",
-                file_content=file_content,
-                size=file_size,
-                width=image.size[0],
-                height=image.size[1],
-                aspect_ratio=aspect_ratio,
-                color_mode=image.mode,
-                exif_data=exif_data,
+        image_file_info_result = (
+            self.normalize_filename(image.filename)
+            .map2(
+                self.trim_filename(image.filename, self.__max_filename_length),
+                lambda normalized, trimmed: (normalized, trimmed),
+            )
+            .map(
+                lambda normalized_trimmed_pair: ImageFileInfo(
+                    filename=normalized_trimmed_pair[0],
+                    filename_shorter=normalized_trimmed_pair[1],
+                    file_basename=self.__get_basename(normalized_trimmed_pair[0]),
+                    file_format=str(image.format),
+                    file_format_description=image.format_description or "",
+                    file_content=buffer.getvalue(),
+                    size=self.__get_file_size(buffer),
+                    width=image.size[0],
+                    height=image.size[1],
+                    aspect_ratio=self.__get_aspect_ratio(image.size),
+                    color_mode=image.mode,
+                    exif_data=self.__get_exif_data(buffer),
+                )
             )
         )
 
+        buffer.close()
+
+        return image_file_info_result
+
     def update_filename(self, image: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
-        return self.normalize_filename(new_filename).map(self.__update_filename(image))
+        return self.normalize_filename(new_filename).map(lambda normalized: self.__update_filename(image, normalized))
 
     def normalize_filename(self, filename: Optional[Union[str, bytes]]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
@@ -115,16 +114,15 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[str].success(re.sub(self.__filename_regex, "_", filename))
 
     def trim_filename(self, filename: Optional[Union[str, bytes]], max_length: int) -> ContextResult[str]:
-        if max_length <= 0:
-            raise ValueError(f"Maximum length must be greater than 0, got {max_length}")
-        return self.normalize_filename(filename).bind(self.__trim_filename(max_length))
+        return self.normalize_filename(filename).bind(lambda normalized: self.__trim_filename(max_length, normalized))
 
-    def close_file(self, image: ImageFile) -> ContextResult[None]:
+    def close_file(self, image: ImageFile) -> ContextResult[Unit]:
         try:
-            return ContextResult[None].success(image.close())
+            image.close()
+            return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to close image file '{image}'")
-            return ContextResult[None].failure(ErrorContext.server_error())
+            return ContextResult[Unit].failure(ErrorContext.server_error())
 
     @staticmethod
     def __get_aspect_ratio(resolution: tuple[int, int]) -> Decimal:
@@ -141,41 +139,46 @@ class ImageFileUtility(ImageFileUtilityABC):
             return ContextResult[str].failure(ErrorContext.server_error(message))
 
     @staticmethod
-    def __update_filename(image_file: ImageFile) -> Callable[[str], ImageFile]:
-        def _update_filename(new_filename: str) -> ImageFile:
-            image_file.filename = new_filename
-            return image_file
-
-        return _update_filename
+    def __update_filename(image_file: ImageFile, new_filename: str) -> ImageFile:
+        image_file.filename = new_filename
+        return image_file
 
     @staticmethod
-    def __trim_filename(max_length: int) -> Callable[[str], ContextResult[str]]:
-        def _trim_filename(filename: str) -> ContextResult[str]:
-            basename, extension = os.path.splitext(filename)
-
-            ellipsis_: Final[str] = "..."
-            min_length: Final[int] = 5
-
-            filename_length = len(filename)
-
-            if filename_length > max_length:
-                result = basename[: max_length - len(ellipsis_) - len(extension)] + ellipsis_ + extension
-                return ContextResult[str].success(result)
-
-            if min_length <= filename_length <= max_length:
-                return ContextResult[str].success(filename)
-
-            message = f"Filename '{filename}' is too short. Minimal length: {min_length}"
-            return ContextResult[str].failure(ErrorContext.bad_request(message))
-
-        return _trim_filename
+    def __get_basename(filename: str) -> str:
+        basename, _ = os.path.splitext(filename)
+        return basename
 
     @staticmethod
-    def __get_exif_data(buffer: BytesIO) -> dict[str, str]:
+    def __trim_filename(max_length: int, filename: str) -> ContextResult[str]:
+        if max_length <= 0:
+            raise ValueError(f"Maximum length must be greater than 0, got {max_length}")
+
+        basename, extension = os.path.splitext(filename)
+
+        ellipsis_: Final[str] = "..."
+        min_length: Final[int] = 5
+
+        filename_length = len(filename)
+
+        if filename_length > max_length:
+            result = basename[: max_length - len(ellipsis_) - len(extension)] + ellipsis_ + extension
+            return ContextResult[str].success(result)
+
+        if min_length <= filename_length <= max_length:
+            return ContextResult[str].success(filename)
+
+        message = f"Filename '{filename}' is too short. Minimal length: {min_length}"
+        return ContextResult[str].failure(ErrorContext.bad_request(message))
+
+    def __get_exif_data(self, buffer: BytesIO) -> dict[str, str]:
         if buffer.closed:
             return {}
-        exif_image = exif.Image(buffer)
-        return {} if not exif_image.has_exif else {k: str(v) for k, v in exif_image.get_all().items()}
+        try:
+            exif_image = exifread.process_file(buffer, debug=True)
+            return {k: str(v) for k, v in exif_image.items()}
+        except Exception as exception:
+            self.__logger.log_debug(f"Unable to parse EXIF data. Reason: {exception}")
+            return {}
 
     @staticmethod
     def __get_file_size(buffer: BytesIO) -> int:

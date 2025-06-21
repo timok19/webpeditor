@@ -22,7 +22,7 @@ class CloudinaryService(CloudinaryServiceABC):
     @acontext_result
     async def adelete_files(self, user_id: str, relative_folder_path: str) -> ContextResult[Unit]:
         def log_success(unit: Unit) -> Unit:
-            self.__logger.log_info(f"File have been deleted for user '{user_id}'")
+            self.__logger.log_info(f"File has been deleted for user '{user_id}'")
             return unit
 
         def log_error(error: ErrorContext) -> ErrorContext:

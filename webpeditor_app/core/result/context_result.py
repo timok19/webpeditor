@@ -38,6 +38,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     @staticmethod
     def failures(*errors: ErrorContext) -> "EnumerableContextResult[TOut]":
         from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
+
         return EnumerableContextResult[TOut](Enumerable(errors).select(ContextResult[TOut].failure))
 
     @classmethod
@@ -68,6 +69,20 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         match self:
             case ContextResult(tag="ok", ok=value):
                 return ContextResult[TNewOut].success(mapper(value))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                return ContextResult[TNewOut].unexpected()
+
+    @override
+    def map2[TOutOther, TNewOut](
+        self,
+        other: Result[TOutOther, ErrorContext],
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return ContextResult[TNewOut].from_result(other.map(lambda value_: mapper(value, value_)))
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
@@ -205,4 +220,5 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     @staticmethod
     def unexpected_many() -> "EnumerableContextResult[TOut]":
         from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
+
         return EnumerableContextResult[TOut]([ContextResult[TOut].unexpected()])

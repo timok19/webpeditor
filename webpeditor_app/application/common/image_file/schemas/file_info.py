@@ -9,6 +9,7 @@ class ImageFileInfo(Schema):
 
     filename: str
     filename_shorter: str
+    file_basename: str
     file_format: str
     file_format_description: str
     file_content: bytes

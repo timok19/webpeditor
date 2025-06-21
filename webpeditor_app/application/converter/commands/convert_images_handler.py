@@ -127,9 +127,11 @@ class ConvertImagesHandler:
         image: ImageFile,
         asset: ConverterImageAsset,
     ) -> ContextResult[ConverterOriginalImageAssetFile]:
-        public_id = f"{user_id}/converter/original"
         return await self.__image_file_utility.get_file_info(image).abind(
-            lambda file_info: self.__cloudinary_service.aupload_file(public_id, file_info.file_content).abind(
+            lambda file_info: self.__cloudinary_service.aupload_file(
+                f"{user_id}/converter/original/{file_info.file_basename}",
+                file_info.file_content,
+            ).abind(
                 lambda file_url: self.__converter_repository.acreate_asset_file(
                     ConverterOriginalImageAssetFile,
                     file_info,
@@ -147,13 +149,15 @@ class ConvertImagesHandler:
         asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConverterConvertedImageAssetFile]:
-        public_id = f"{user_id}/converter/converted"
         return (
             await self.__converter_service.convert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)
-            .bind(lambda file_info: self.__image_file_utility.close_file(image).map(lambda _: file_info))
+            .map2(self.__image_file_utility.close_file(image), lambda file_info, _: file_info)
             .abind(
-                lambda file_info: self.__cloudinary_service.aupload_file(public_id, file_info.file_content).abind(
+                lambda file_info: self.__cloudinary_service.aupload_file(
+                    f"{user_id}/converter/converted/{file_info.file_basename}",
+                    file_info.file_content,
+                ).abind(
                     lambda file_url: self.__converter_repository.acreate_asset_file(
                         ConverterConvertedImageAssetFile,
                         file_info,
