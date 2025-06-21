@@ -7,11 +7,7 @@ from django.utils import timezone
 from expression import Option
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core import (
-    ContextResult,
-    ErrorContext,
-    acontext_result,
-)
+from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
@@ -66,7 +62,7 @@ class SessionService:
             )
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to get {self.__user_id_key} from session")
-            await self.__clear_session()
+            await self.__aclear()
             return ContextResult[str].failure(ErrorContext.server_error())
 
     @acontext_result
@@ -89,7 +85,7 @@ class SessionService:
     @acontext_result
     async def __acreate_session(self) -> ContextResult[None]:
         try:
-            await self.__clear_session()
+            await self.__aclear()
             await self.__request.session.acreate()
             return ContextResult[None].success(None)
         except Exception as exception:
@@ -103,7 +99,7 @@ class SessionService:
             return await self.__user_repository.aget_or_create_user(session_key, session_key_expiration_date)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to get or create user")
-            await self.__clear_session()
+            await self.__aclear()
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
     async def __aset_signed_user_id_and_expiry(self, user: AppUser) -> str:
@@ -121,7 +117,7 @@ class SessionService:
             return str(signed_user_id)
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to set {self.__user_id_key} in session")
-            await self.__clear_session()
+            await self.__aclear()
             return ""
 
     @acontext_result
@@ -144,23 +140,24 @@ class SessionService:
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
             .amap(lambda converted: converted.adelete())
             .map(lambda _: self.__logger.log_debug(f"Converter: Asset of User '{user_id}' has been deleted "))
-            # .amap(lambda _: self.__cloudinary_service.adelete_editor_images(user_id))
-            # .amap(lambda _: self.__cloudinary_service.adelete_converted_images(user_id))
+            .abind(lambda _: self.__cloudinary_service.adelete_files(user_id, "converter"))
+            .abind(lambda _: self.__cloudinary_service.adelete_files(user_id, "editor"))
+            # TODO: delete folders
             .amap(lambda _: self.__request.session.aclear_expired())
             .map(lambda _: user_id)
             .match(log_success, log_error)
-            if await self.__asession_expired()
+            if await self.__ais_expired()
             else ContextResult[str].success(user_id)
         )
 
-    async def __asession_expired(self) -> bool:
+    async def __ais_expired(self) -> bool:
         try:
             session_expiry_date = await self.__request.session.aget_expiry_date()
             return timezone.now() > session_expiry_date
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to check if session expired")
-            await self.__clear_session()
+            await self.__aclear()
             return True
 
-    async def __clear_session(self) -> None:
+    async def __aclear(self) -> None:
         return await sync_to_async(self.__request.session.clear)()

@@ -4,7 +4,7 @@ from typing import Optional, final
 from ninja import Schema, Field
 from pydantic import ConfigDict
 
-from webpeditor_app.core import ErrorContext, ContextResult, EnumerableContextResult
+from webpeditor_app.core.result import EnumerableContextResult, ContextResult, ErrorContext
 
 type HTTPResultWithStatus[T: Schema] = tuple[HTTPStatus, HTTPResult[T]]
 type HTTPResultListWithStatus[T: Schema] = tuple[HTTPStatus, list[HTTPResult[T]]]

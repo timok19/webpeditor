@@ -8,11 +8,11 @@ from typing import Final, final, Optional
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.auth.session_service import SessionService
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
-from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
+from webpeditor_app.application.converter.schemas import ConversionRequest, ConversionResponse
 
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core import (
+from webpeditor_app.core.result import (
     ContextResult,
     EnumerableContextResult,
     ErrorContext,
@@ -101,8 +101,8 @@ class ConvertImagesHandler:
                 lambda asset: self.__image_file_utility.normalize_filename(filename)
                 .bind(lambda new_filename: self.__image_file_utility.update_filename(image, new_filename))
                 .abind(
-                    lambda updated_image: self.__acreate_original_asset_file(updated_image, asset).amap3(
-                        self.__aconvert_and_save_asset_file(updated_image, asset, options),
+                    lambda updated_image: self.__acreate_original_asset_file(user_id, updated_image, asset).amap3(
+                        self.__aconvert_and_save_asset_file(user_id, updated_image, asset, options),
                         self.__to_response,
                     )
                 )
@@ -123,10 +123,11 @@ class ConvertImagesHandler:
     @acontext_result
     async def __acreate_original_asset_file(
         self,
+        user_id: str,
         image: ImageFile,
         asset: ConverterImageAsset,
     ) -> ContextResult[ConverterOriginalImageAssetFile]:
-        public_id = f"{asset.user.id}/converter/original"
+        public_id = f"{user_id}/converter/original"
         return await self.__image_file_utility.get_file_info(image).abind(
             lambda file_info: self.__cloudinary_service.aupload_file(public_id, file_info.file_content).abind(
                 lambda file_url: self.__converter_repository.acreate_asset_file(
@@ -141,11 +142,12 @@ class ConvertImagesHandler:
     @acontext_result
     async def __aconvert_and_save_asset_file(
         self,
+        user_id: str,
         image: ImageFile,
         asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConverterConvertedImageAssetFile]:
-        public_id = f"{asset.user.id}/converter/converted"
+        public_id = f"{user_id}/converter/converted"
         return (
             await self.__converter_service.convert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)

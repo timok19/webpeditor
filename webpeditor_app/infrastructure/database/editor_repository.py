@@ -1,6 +1,6 @@
 from typing import final
 from expression import Option
-from webpeditor_app.core.context_result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
 

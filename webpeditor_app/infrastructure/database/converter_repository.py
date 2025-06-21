@@ -2,7 +2,7 @@ from typing import Final, final
 from expression import Option
 from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.context_result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
@@ -54,8 +54,7 @@ class ConverterRepository(ConverterRepositoryABC):
                 self.__logger.log_debug(f"Deleted '{model}': {count} for User '{user_id}'")
             return ContextResult[None].success(None)
         except Exception as exception:
-            message = f"Failed to delete Converter Image Asset for User '{user_id}'"
-            self.__logger.log_exception(exception, message)
+            self.__logger.log_exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")
             return ContextResult[None].failure(ErrorContext.bad_request())
 
     @acontext_result

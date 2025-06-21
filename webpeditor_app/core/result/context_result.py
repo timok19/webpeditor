@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, Union, Optional, Callable, override, Awaitable
 from expression import Result
 from types_linq import Enumerable
 
-from webpeditor_app.core.decorators import acontext_result, aenumerable_context_result
-from webpeditor_app.core.error_context import ErrorContext
+from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
+from webpeditor_app.core.result.error_context import ErrorContext
 
 
 if TYPE_CHECKING:
-    from webpeditor_app.core.enumerable_context_result import EnumerableContextResult
+    from webpeditor_app.core.result import EnumerableContextResult
 
 
 class ContextResult[TOut](Result[TOut, ErrorContext]):
@@ -37,6 +37,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @staticmethod
     def failures(*errors: ErrorContext) -> "EnumerableContextResult[TOut]":
+        from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
         return EnumerableContextResult[TOut](Enumerable(errors).select(ContextResult[TOut].failure))
 
     @classmethod
@@ -150,6 +151,14 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 return ContextResult[TNewOut].unexpected()
 
+    @acontext_result
+    async def amap3[TOutOther, TNewOut](
+        self,
+        other: Awaitable["ContextResult[TOutOther]"],
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        return await self.amap2(await other, mapper)
+
     @aenumerable_context_result
     async def abind_many[TNewOut](
         self,
@@ -172,11 +181,11 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     ) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                pred_result = predicate(value)
-                if isinstance(pred_result, Awaitable):
-                    pred_result = await pred_result
+                predicate_result = predicate(value)
+                if isinstance(predicate_result, Awaitable):
+                    predicate_result = await predicate_result
 
-                if pred_result:
+                if predicate_result:
                     mapper_result = then_mapper(value)
                 else:
                     mapper_result = else_mapper(value)
@@ -195,4 +204,5 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @staticmethod
     def unexpected_many() -> "EnumerableContextResult[TOut]":
+        from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
         return EnumerableContextResult[TOut]([ContextResult[TOut].unexpected()])

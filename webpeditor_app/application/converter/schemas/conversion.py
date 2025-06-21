@@ -1,21 +1,43 @@
 from decimal import Decimal
-
+from enum import StrEnum
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 
-from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
 from webpeditor_app.models.base import BaseImageAssetFile
 
 
+class ImageConverterAllOutputFormats(StrEnum):
+    JPEG = "JPEG"
+    BMP = "BMP"
+    TIFF = "TIFF"
+    WEBP = "WEBP"
+    PNG = "PNG"
+    GIF = "GIF"
+    ICO = "ICO"
+
+
+class ImageConverterOutputFormats(StrEnum):
+    JPEG = "JPEG"
+    BMP = "BMP"
+    TIFF = "TIFF"
+
+
+class ImageConverterOutputFormatsWithAlphaChannel(StrEnum):
+    WEBP = "WEBP"
+    PNG = "PNG"
+    GIF = "GIF"
+    ICO = "ICO"
+
+
 class ConversionRequest(Schema):
+    model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
+    files: list[UploadedFile]
+    options: "Options"
+
     class Options(Schema):
         model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
         output_format: ImageConverterAllOutputFormats
         quality: int
-
-    model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
-    files: list[UploadedFile]
-    options: Options
 
     @staticmethod
     def create(
@@ -23,13 +45,8 @@ class ConversionRequest(Schema):
         output_format: ImageConverterAllOutputFormats,
         quality: int,
     ) -> "ConversionRequest":
-        return ConversionRequest(
-            files=files,
-            options=ConversionRequest.Options(
-                output_format=output_format,
-                quality=quality,
-            ),
-        )
+        options = ConversionRequest.Options(output_format=output_format, quality=quality)
+        return ConversionRequest(files=files, options=options)
 
 
 class ConversionResponse(Schema):

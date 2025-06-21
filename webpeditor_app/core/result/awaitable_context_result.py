@@ -1,11 +1,11 @@
 from typing import Awaitable, Any, Generator, Callable, Union, TYPE_CHECKING
 
-from webpeditor_app.core.decorators import acontext_result, aenumerable_context_result
-from webpeditor_app.core.error_context import ErrorContext
+from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
+from webpeditor_app.core.result.error_context import ErrorContext
 
 if TYPE_CHECKING:
-    from webpeditor_app.core.context_result import ContextResult
-    from webpeditor_app.core.enumerable_context_result import EnumerableContextResult
+    from webpeditor_app.core.result.context_result import ContextResult
+    from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
 
 
 class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):

@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from types import NoneType
 from ninja import Schema
 from pydantic import ConfigDict, Field
 
-from webpeditor_app.core.context_result import ContextResult, ErrorContext
+from webpeditor_app.core.result import ContextResult, ErrorContext
+from webpeditor_app.globals import Unit
 
 
 class ValidationResult(Schema):
@@ -17,11 +17,11 @@ class ValidationResult(Schema):
     def has_errors(self) -> bool:
         return any(self.errors)
 
-    def to_context_result(self) -> ContextResult[NoneType]:
+    def to_context_result(self) -> ContextResult[Unit]:
         return (
-            ContextResult[NoneType].failure(ErrorContext.bad_request("Validation failed", self.errors))
+            ContextResult[Unit].failure(ErrorContext.bad_request("Request is invalid", self.errors))
             if self.has_errors()
-            else ContextResult[NoneType].success(None)
+            else ContextResult[Unit].success(Unit())
         )
 
 

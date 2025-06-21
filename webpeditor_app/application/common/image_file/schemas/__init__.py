@@ -1,3 +1,3 @@
-from webpeditor_app.application.common.image_file.schemas.image_file import ImageFileInfo
+from webpeditor_app.application.common.image_file.schemas.file_info import ImageFileInfo
 
-__all__ = ["ImageFileInfo"]
+__all__: list[str] = ["ImageFileInfo"]

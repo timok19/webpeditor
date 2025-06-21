@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
 import hashlib
+from datetime import datetime, UTC
 from http import HTTPMethod
 from typing import Final, MutableMapping, final, Optional, Any, Mapping, Union, IO, Sequence
 from httpx import AsyncClient, BasicAuth, QueryParams
@@ -7,10 +7,9 @@ from pydantic import BaseModel
 
 from webpeditor import settings
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.context_result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
-from webpeditor_app.infrastructure.cloudinary.schemas.resource import GetResourcesResponse
-from webpeditor_app.infrastructure.cloudinary.schemas.upload import UploadImageResponse
+from webpeditor_app.infrastructure.cloudinary.schemas import GetResourcesResponse, UploadImageResponse
 
 
 _FileContent = Union[IO[bytes], bytes, str]

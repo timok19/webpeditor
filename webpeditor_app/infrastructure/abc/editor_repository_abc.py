@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from webpeditor_app.core.context_result import ContextResult, acontext_result
+from webpeditor_app.core.result import ContextResult, acontext_result
 from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
 
 

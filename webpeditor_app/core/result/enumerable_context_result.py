@@ -2,10 +2,10 @@ from typing import Callable, Collection, TYPE_CHECKING
 
 from types_linq import Enumerable
 
-from webpeditor_app.core.error_context import ErrorContext
+from webpeditor_app.core.result.error_context import ErrorContext
 
 if TYPE_CHECKING:
-    from webpeditor_app.core.context_result import ContextResult
+    from webpeditor_app.core.result.context_result import ContextResult
 
 
 class EnumerableContextResult[TOut](Enumerable["ContextResult[TOut]"]):
@@ -18,7 +18,7 @@ class EnumerableContextResult[TOut](Enumerable["ContextResult[TOut]"]):
         success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
         error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
     ) -> "EnumerableContextResult[TOut]":
-        from webpeditor_app.core.context_result import ContextResult
+        from webpeditor_app.core.result.context_result import ContextResult
 
         if self.any(lambda result: result.is_error()):
             errors = self.where(lambda result: result.is_error()).select(lambda result: result.error)

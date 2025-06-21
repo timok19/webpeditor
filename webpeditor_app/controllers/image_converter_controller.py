@@ -8,11 +8,14 @@ from ninja_extra import api_controller, http_post  # pyright: ignore
 
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
-from webpeditor_app.application.converter.schemas.conversion import ConversionRequest, ConversionResponse
-from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
-from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
+from webpeditor_app.application.converter.schemas import (
+    ConversionRequest,
+    ConversionResponse,
+    DownloadAllZipResponse,
+    ImageConverterAllOutputFormats,
+)
 from webpeditor_app.controllers.controller_base import WebPEditorControllerBase
-from webpeditor_app.controllers.schemas.http_result import HTTPResult, HTTPResultListWithStatus, HTTPResultWithStatus
+from webpeditor_app.controllers.schemas import HTTPResult, HTTPResultListWithStatus, HTTPResultWithStatus
 
 
 # TODO: Add other endpoints from "__converter" folder

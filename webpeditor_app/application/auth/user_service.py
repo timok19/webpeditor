@@ -4,7 +4,7 @@ from django.core import signing
 from webpeditor import settings
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.context_result import ContextResult, ErrorContext
+from webpeditor_app.core.result import ContextResult, ErrorContext
 
 
 @final

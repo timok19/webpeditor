@@ -11,8 +11,8 @@ from types_linq import Enumerable
 from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.core.context_result import ContextResult, ErrorContext
-from webpeditor_app.application.converter.schemas.output_formats import (
+from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
+from webpeditor_app.application.converter.schemas import (
     ImageConverterAllOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,
 )
@@ -94,6 +94,9 @@ class ConverterService(ConverterServiceABC):
     def __to_rgb(self, rgba_image: Image.Image) -> Image.Image:
         white_color = (255, 255, 255, 255)
         white_background: Image.Image = Image.new(mode=self.__mode_rgba, size=rgba_image.size, color=white_color)
+        # Ensure rgba_image is in RGBA mode before compositing
+        if rgba_image.mode != self.__mode_rgba:
+            rgba_image = rgba_image.convert(self.__mode_rgba)
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(self.__mode_rgb)
 

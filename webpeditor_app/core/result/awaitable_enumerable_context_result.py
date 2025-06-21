@@ -2,11 +2,11 @@ from typing import Awaitable, Any, Generator, Callable, TYPE_CHECKING
 
 from types_linq import Enumerable
 
-from webpeditor_app.core.decorators import aenumerable_context_result
-from webpeditor_app.core.error_context import ErrorContext
+from webpeditor_app.core.result.decorators import aenumerable_context_result
+from webpeditor_app.core.result.error_context import ErrorContext
 
 if TYPE_CHECKING:
-    from webpeditor_app.core.enumerable_context_result import EnumerableContextResult
+    from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
 
 
 class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[TOut]"]):
@@ -22,7 +22,7 @@ class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[
         success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
         error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
     ) -> "EnumerableContextResult[TOut]":
-        async def amatch() -> "EnumerableContextResult[TOut]":
+        async def _amatch() -> "EnumerableContextResult[TOut]":
             return (await self.__awaitable_result).match(success_func, error_func)
 
-        return await amatch()
+        return await _amatch()

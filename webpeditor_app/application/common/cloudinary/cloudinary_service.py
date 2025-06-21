@@ -4,7 +4,7 @@ from types_linq.enumerable import Enumerable
 
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.core.context_result import ContextResult, acontext_result, ErrorContext
+from webpeditor_app.core.result import ContextResult, acontext_result, ErrorContext
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
@@ -22,11 +22,11 @@ class CloudinaryService(CloudinaryServiceABC):
     @acontext_result
     async def adelete_files(self, user_id: str, relative_folder_path: str) -> ContextResult[Unit]:
         def log_success(unit: Unit) -> Unit:
-            self.__logger.log_info(f"Files have been deleted for user '{user_id}'")
+            self.__logger.log_info(f"File have been deleted for user '{user_id}'")
             return unit
 
         def log_error(error: ErrorContext) -> ErrorContext:
-            self.__logger.log_error(f"Failed to delete files for user '{user_id}'")
+            self.__logger.log_error(f"Failed to delete file for user '{user_id}'")
             return error
 
         return (

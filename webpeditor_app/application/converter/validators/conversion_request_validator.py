@@ -1,11 +1,10 @@
-from typing import IO, Any, Final, Optional, cast, final, Generator
+from typing import Any, Final, Optional, cast, final, Generator
 
 from PIL import UnidentifiedImageError, Image
 from expression import Option
 from ninja import UploadedFile
 
-from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
-from webpeditor_app.application.converter.schemas.output_formats import ImageConverterAllOutputFormats
+from webpeditor_app.application.converter.schemas import ConversionRequest, ImageConverterAllOutputFormats
 from webpeditor_app.application.converter.settings import ConverterSettings
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
@@ -71,7 +70,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
         try:
-            Image.open(cast(IO[bytes], file.file)).verify()
+            Image.open(file).verify()
             return Option[str].Nothing()
         except UnidentifiedImageError as image_error:
             message = f"File '{file.name}' cannot be processed. Incompatible file"
