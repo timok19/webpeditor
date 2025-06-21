@@ -55,37 +55,46 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].success(file_response.content)
 
     def get_file_info(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
+        normalized_filename_result = self.normalize_filename(image.filename)
+        if normalized_filename_result.is_error():
+            return ContextResult[ImageFileInfo].failure(normalized_filename_result.error)
+
+        basename_result = self.get_basename(normalized_filename_result.ok)
+        if basename_result.is_error():
+            return ContextResult[ImageFileInfo].failure(basename_result.error)
+
+        trimmed_filename_result = self.trim_filename(image.filename, self.__max_filename_length)
+        if trimmed_filename_result.is_error():
+            return ContextResult[ImageFileInfo].failure(trimmed_filename_result.error)
+
         buffer = BytesIO()
 
         image.save(buffer, format=image.format)
 
-        image_file_info_result = (
-            self.normalize_filename(image.filename)
-            .map2(
-                self.trim_filename(image.filename, self.__max_filename_length),
-                lambda normalized, trimmed: (normalized, trimmed),
-            )
-            .map(
-                lambda normalized_trimmed_pair: ImageFileInfo(
-                    filename=normalized_trimmed_pair[0],
-                    filename_shorter=normalized_trimmed_pair[1],
-                    file_basename=self.__get_basename(normalized_trimmed_pair[0]),
-                    file_format=str(image.format),
-                    file_format_description=image.format_description or "",
-                    file_content=buffer.getvalue(),
-                    size=self.__get_file_size(buffer),
-                    width=image.size[0],
-                    height=image.size[1],
-                    aspect_ratio=self.__get_aspect_ratio(image.size),
-                    color_mode=image.mode,
-                    exif_data=self.__get_exif_data(buffer),
-                )
-            )
-        )
+        file_content = buffer.getvalue()
+        size = self.__get_file_size(buffer)
+        aspect_ratio = self.__get_aspect_ratio(image.size)
+        exif_data = self.__get_exif_data(buffer)
+        width, height = image.size
 
         buffer.close()
 
-        return image_file_info_result
+        return ContextResult[ImageFileInfo].success(
+            ImageFileInfo(
+                filename=normalized_filename_result.ok,
+                filename_shorter=trimmed_filename_result.ok,
+                file_basename=basename_result.ok,
+                file_format=str(image.format),
+                file_format_description=image.format_description or "",
+                file_content=file_content,
+                size=size,
+                width=width,
+                height=height,
+                aspect_ratio=aspect_ratio,
+                color_mode=image.mode,
+                exif_data=exif_data,
+            )
+        )
 
     def update_filename(self, image: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
         return self.normalize_filename(new_filename).map(lambda normalized: self.__update_filename(image, normalized))
@@ -116,6 +125,14 @@ class ImageFileUtility(ImageFileUtilityABC):
     def trim_filename(self, filename: Optional[Union[str, bytes]], max_length: int) -> ContextResult[str]:
         return self.normalize_filename(filename).bind(lambda normalized: self.__trim_filename(max_length, normalized))
 
+    def get_basename(self, filename: str) -> ContextResult[str]:
+        try:
+            basename, _ = os.path.splitext(filename)
+            return ContextResult[str].success(basename)
+        except Exception as exception:
+            self.__logger.log_exception(exception, f"Unable to get basename from the filename '{filename}'")
+            return ContextResult[str].failure(ErrorContext.server_error())
+
     def close_file(self, image: ImageFile) -> ContextResult[Unit]:
         try:
             image.close()
@@ -142,11 +159,6 @@ class ImageFileUtility(ImageFileUtilityABC):
     def __update_filename(image_file: ImageFile, new_filename: str) -> ImageFile:
         image_file.filename = new_filename
         return image_file
-
-    @staticmethod
-    def __get_basename(filename: str) -> str:
-        basename, _ = os.path.splitext(filename)
-        return basename
 
     @staticmethod
     def __trim_filename(max_length: int, filename: str) -> ContextResult[str]:

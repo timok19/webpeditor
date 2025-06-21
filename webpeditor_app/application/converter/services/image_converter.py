@@ -1,14 +1,11 @@
-import os
-
 from typing import Final, Optional, Union
 from PIL import Image
 from PIL.ImageFile import ImageFile
 from io import BytesIO
 
 from expression import Option
-from types_linq import Enumerable
 
-from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
+from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
@@ -18,7 +15,7 @@ from webpeditor_app.application.converter.schemas import (
 )
 
 
-class ConverterService(ConverterServiceABC):
+class ImageConverter(ImageConverterABC):
     def __init__(self, image_file_utility: ImageFileUtilityABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__mode_rgb: Final[str] = "RGB"
@@ -46,7 +43,7 @@ class ConverterService(ConverterServiceABC):
             .of_optional(image_file.filename)
             .to_result(ErrorContext.server_error("Image file has no filename"))
             .bind(self.__image_file_utility.normalize_filename)
-            .map(lambda normalized: Enumerable(os.path.splitext(normalized)).first())
+            .bind(self.__image_file_utility.get_basename)
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
             .bind(lambda new_filename: self.__image_file_utility.update_filename(image_file, new_filename))
         )
@@ -93,7 +90,7 @@ class ConverterService(ConverterServiceABC):
 
     def __to_rgb(self, rgba_image: Image.Image) -> Image.Image:
         white_color = (255, 255, 255, 255)
-        white_background: Image.Image = Image.new(mode=self.__mode_rgba, size=rgba_image.size, color=white_color)
+        white_background = Image.new(mode=self.__mode_rgba, size=rgba_image.size, color=white_color)
         # Ensure rgba_image is in RGBA mode before compositing
         if rgba_image.mode != self.__mode_rgba:
             rgba_image = rgba_image.convert(self.__mode_rgba)

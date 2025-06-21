@@ -1,3 +1,3 @@
-from webpeditor_app.controllers.schemas.http_result import HTTPResult, HTTPResultWithStatus, HTTPResultListWithStatus
+from webpeditor_app.controllers.schemas.http_result import HTTPResult, HTTPResultWithStatus
 
-__all__: list[str] = ["HTTPResult", "HTTPResultWithStatus", "HTTPResultListWithStatus"]
+__all__: list[str] = ["HTTPResult", "HTTPResultWithStatus"]

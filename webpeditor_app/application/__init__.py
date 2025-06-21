@@ -4,9 +4,9 @@ from anydi import Module, provider
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.auth.user_service import UserService
-from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
+from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
-from webpeditor_app.application.converter.services.converter_service import ConverterService
+from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.settings import ConverterSettings
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
@@ -78,15 +78,15 @@ class ApplicationModule(Module):
         )
 
     @provider(scope="request")
-    def provide_converter_service(self, image_file_utility: ImageFileUtilityABC) -> ConverterServiceABC:
-        return ConverterService(image_file_utility=image_file_utility)
+    def provide_converter_service(self, image_file_utility: ImageFileUtilityABC) -> ImageConverterABC:
+        return ImageConverter(image_file_utility=image_file_utility)
 
     @provider(scope="request")
     def provide_convert_images_handler(
         self,
         conversion_request_validator: ValidatorABC["ConversionRequest"],
         cloudinary_service: CloudinaryServiceABC,
-        converter_service: ConverterServiceABC,
+        converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,

@@ -7,7 +7,7 @@ from typing import Final, final, Optional
 
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.auth.session_service import SessionService
-from webpeditor_app.application.converter.abc.converter_service_abc import ConverterServiceABC
+from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.schemas import ConversionRequest, ConversionResponse
 
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
@@ -36,7 +36,7 @@ class ConvertImagesHandler:
         self,
         conversion_request_validator: ValidatorABC[ConversionRequest],
         cloudinary_service: CloudinaryServiceABC,
-        converter_service: ConverterServiceABC,
+        converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,
@@ -44,7 +44,7 @@ class ConvertImagesHandler:
     ) -> None:
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
         self.__cloudinary_service: Final[CloudinaryServiceABC] = cloudinary_service
-        self.__converter_service: Final[ConverterServiceABC] = converter_service
+        self.__converter_service: Final[ImageConverterABC] = converter_service
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__converter_repository: Final[ConverterRepositoryABC] = converter_repository
         self.__user_repository: Final[UserRepositoryABC] = user_repository
@@ -111,10 +111,10 @@ class ConvertImagesHandler:
 
     @acontext_result
     async def __acleanup_previous_images(self, user_id: str) -> ContextResult[Unit]:
-        result = await self.__converter_repository.aasset_exists(user_id)
+        asset_exists_result = await self.__converter_repository.aasset_exists(user_id)
         return (
             ContextResult[Unit].success(Unit())
-            if result.is_error() or result.ok is False
+            if asset_exists_result.is_error() or asset_exists_result.ok is False
             else await self.__converter_repository.adelete_asset(user_id).abind(
                 lambda _: self.__cloudinary_service.adelete_files(user_id, "converter/")
             )

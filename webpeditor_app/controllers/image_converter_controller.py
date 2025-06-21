@@ -15,7 +15,7 @@ from webpeditor_app.application.converter.schemas import (
     ImageConverterAllOutputFormats,
 )
 from webpeditor_app.controllers.controller_base import WebPEditorControllerBase
-from webpeditor_app.controllers.schemas import HTTPResult, HTTPResultListWithStatus, HTTPResultWithStatus
+from webpeditor_app.controllers.schemas import HTTPResult, HTTPResultWithStatus
 
 
 # TODO: Add other endpoints from "__converter" folder
@@ -27,10 +27,10 @@ class ImageConverterController(WebPEditorControllerBase):
     @http_post(
         "/convert-images",
         response={
-            HTTPStatus.OK: list[HTTPResult[ConversionResponse]],
-            HTTPStatus.BAD_REQUEST: list[HTTPResult[ConversionResponse]],
-            HTTPStatus.NOT_FOUND: list[HTTPResult[ConversionResponse]],
-            HTTPStatus.INTERNAL_SERVER_ERROR: list[HTTPResult[ConversionResponse]],
+            HTTPStatus.OK: HTTPResult[ConversionResponse],
+            HTTPStatus.BAD_REQUEST: HTTPResult[ConversionResponse],
+            HTTPStatus.NOT_FOUND: HTTPResult[ConversionResponse],
+            HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[ConversionResponse],
         },
         summary="Convert images",
     )
@@ -61,7 +61,7 @@ class ImageConverterController(WebPEditorControllerBase):
                 description="Upload files to be converted into different format",
             ),
         ],
-    ) -> HTTPResultListWithStatus[ConversionResponse]:
+    ) -> HTTPResultWithStatus[ConversionResponse]:
         async with container.arequest_context():
             session_service_factory = await container.aresolve(SessionServiceFactory)
             convert_images_handler = await container.aresolve(ConvertImagesHandler)

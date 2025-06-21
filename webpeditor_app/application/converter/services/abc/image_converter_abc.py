@@ -6,7 +6,7 @@ from webpeditor_app.application.converter.schemas.conversion import ConversionRe
 from webpeditor_app.core.result import ContextResult
 
 
-class ConverterServiceABC(ABC):
+class ImageConverterABC(ABC):
     @abstractmethod
     def convert_image(
         self,
