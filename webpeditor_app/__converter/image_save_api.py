@@ -40,7 +40,9 @@ def image_save_api(request: WSGIRequest) -> UnauthorizedAccessResponseRedirect |
         if edited_image is None:
             return UnauthorizedAccessResponseRedirect()
 
-        request_body: Union[JsonResponse, tuple[Optional[str], str, str, Optional[Image]]] = extract_image_edit_data_from_request_body(request)
+        request_body: Union[JsonResponse, tuple[Optional[str], str, str, Optional[Image]]] = extract_image_edit_data_from_request_body(
+            request
+        )
         if isinstance(request_body, JsonResponse):
             return request_body
 

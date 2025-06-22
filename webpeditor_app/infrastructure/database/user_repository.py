@@ -38,15 +38,11 @@ class UserRepository(UserRepositoryABC):
     @acontext_result
     async def aget(self, user_id: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(id=user_id).afirst()
-        result = Option.of_optional(app_user).to_result(
-            ErrorContext.not_found(f"Unable to find current user '{user_id}'")
-        )
+        result = Option.of_optional(app_user).to_result(ErrorContext.not_found(f"Unable to find current user '{user_id}'"))
         return ContextResult[AppUser].from_result(result)
 
     @acontext_result
     async def aget_by_session_key(self, session_key: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(session_key=session_key).afirst()
-        result = Option.of_optional(app_user).to_result(
-            ErrorContext.not_found(f"Unable to find user with session key '{session_key}'")
-        )
+        result = Option.of_optional(app_user).to_result(ErrorContext.not_found(f"Unable to find user with session key '{session_key}'"))
         return ContextResult[AppUser].from_result(result)

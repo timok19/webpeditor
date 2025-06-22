@@ -68,17 +68,12 @@ class SessionService:
 
     @acontext_result
     async def __aget_or_create_session(self) -> ContextResult[str]:
-        return await self.__get_session_key().aor_else(
-            self.__acreate_session().bind(lambda _: self.__get_session_key())
-        )
+        return await self.__get_session_key().aor_else(self.__acreate_session().bind(lambda _: self.__get_session_key()))
 
     def __get_session_key(self) -> ContextResult[str]:
         try:
-            return ContextResult[str].from_result(
-                Option[str]
-                .of_optional(self.__request.session.session_key)
-                .to_result(ErrorContext.not_found("Session key not found"))
-            )
+            result = Option[str].of_optional(self.__request.session.session_key).to_result(ErrorContext.not_found("Session key not found"))
+            return ContextResult[str].from_result(result)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to get session key")
             return ContextResult[str].failure(ErrorContext.server_error())
@@ -137,9 +132,7 @@ class SessionService:
             lambda _: ContextResult[str].success(user_id),
             lambda _: self.__editor_repository.aget_original_asset(user_id)
             .amap(lambda original: original.adelete())
-            .map(
-                lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Original asset(s) for User '{user_id}'")
-            )
+            .map(lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Original asset(s) for User '{user_id}'"))
             .abind(lambda _: self.__editor_repository.aget_edited_asset(user_id))
             .amap(lambda edited: edited.adelete())
             .map(lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Edited asset(s) for User '{user_id}'"))

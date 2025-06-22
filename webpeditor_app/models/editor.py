@@ -18,12 +18,10 @@ class EditorOriginalImageAsset(BaseImageAsset):
 
 
 class EditorOriginalImageAssetFile(BaseImageAssetFile):
-    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = (
-        models.OneToOneField(
-            EditorOriginalImageAsset,
-            related_name="original_image_asset_file",
-            on_delete=models.CASCADE,
-        )
+    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = models.OneToOneField(
+        EditorOriginalImageAsset,
+        related_name="original_image_asset_file",
+        on_delete=models.CASCADE,
     )
 
     class Meta(BaseImageAssetFile.Meta):
@@ -37,12 +35,10 @@ class EditorEditedImageAsset(BaseImageAsset):
         related_name="user_edited_image_asset",
         on_delete=models.DO_NOTHING,
     )
-    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = (
-        models.OneToOneField(
-            EditorOriginalImageAsset,
-            related_name="edited_image_asset",
-            on_delete=models.CASCADE,
-        )
+    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = models.OneToOneField(
+        EditorOriginalImageAsset,
+        related_name="edited_image_asset",
+        on_delete=models.CASCADE,
     )
 
     class Meta(BaseImageAsset.Meta):

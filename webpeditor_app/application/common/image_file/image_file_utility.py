@@ -45,9 +45,7 @@ class ImageFileUtility(ImageFileUtilityABC):
             file_response = await client.get(file_url)
 
         if file_response.status_code == HTTPStatus.NOT_FOUND.value:
-            return ContextResult[bytes].failure(
-                ErrorContext.not_found(f"Unable to get content of image file from url '{file_url}'")
-            )
+            return ContextResult[bytes].failure(ErrorContext.not_found(f"Unable to get content of image file from url '{file_url}'"))
 
         if len(file_response.content) == 0:
             return ContextResult[bytes].failure(ErrorContext.not_found("File has no content"))

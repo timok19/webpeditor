@@ -30,9 +30,7 @@ class ConverterRepository(ConverterRepositoryABC):
     async def aget_or_create_asset(self, user: AppUser) -> ContextResult[ConverterImageAsset]:
         try:
             asset, exists = await ConverterImageAsset.objects.aget_or_create(user=user)
-            self.__logger.log_debug(
-                f"Asset '{asset.id}' for user '{user.id}' {'already exists' if exists else 'has been created'}"
-            )
+            self.__logger.log_debug(f"Asset '{asset.id}' for user '{user.id}' {'already exists' if exists else 'has been created'}")
             return ContextResult[ConverterImageAsset].success(asset)
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to create Converter Image Asset for User '{user.id}'")
@@ -87,6 +85,8 @@ class ConverterRepository(ConverterRepositoryABC):
             )
             return ContextResult[T].success(asset_file)
         except Exception as exception:
-            message = f"Failed to create Converter Original Image Asset File with filename '{file_info.filename}' for User '{asset.user.id}'"
+            message = (
+                f"Failed to create Converter Original Image Asset File with filename '{file_info.filename}' for User '{asset.user.id}'"
+            )
             self.__logger.log_exception(exception, message)
             return ContextResult[T].failure(ErrorContext.bad_request())

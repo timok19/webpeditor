@@ -27,9 +27,7 @@ def create_and_save_edited_image(
         "overwrite": True,
     }
     try:
-        cloudinary_image: CloudinaryImage = cloudinary.uploader.upload_image(
-            original_image_url, **cloudinary_parameters
-        )
+        cloudinary_image: CloudinaryImage = cloudinary.uploader.upload_image(original_image_url, **cloudinary_parameters)
     except cloudinary.uploader.Error as e:
         logger.failure(e)
         return redirect("image-not-found-view")
