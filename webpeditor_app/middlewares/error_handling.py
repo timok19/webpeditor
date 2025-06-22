@@ -1,14 +1,15 @@
-import json
-
 from anydi.ext.django import container
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase
-from expression import Success, Failure, Try
 from ninja.responses import codes_4xx, codes_5xx
+from pydantic import ValidationError
 from types_linq import Enumerable
-from typing import Callable, Union, cast, final, Final
+from typing import Any, Callable, final, Final
 
+from webpeditor_app.controllers.schemas import HTTPResult
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.result.context_result import ContextResult
+from webpeditor_app.core.result.error_context import ErrorContext
 
 
 @final
@@ -20,7 +21,7 @@ class ErrorHandlingMiddleware:
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
         response = self.get_response(request)
         return (
-            self.__process_http_error_response(request, response)
+            self.__process_error_response(request, response)
             if isinstance(response, HttpResponse) and self.__is_error_response(response.status_code)
             else response
         )
@@ -29,39 +30,25 @@ class ErrorHandlingMiddleware:
     def __is_error_response(status_code: int) -> bool:
         return Enumerable(codes_4xx).union(codes_5xx).any(lambda code: status_code == code)
 
-    def __process_http_error_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
-        # TODO: user pydantic json validation instead of manual
-        response_data_result = self.__get_response_data(response.content)
+    def __process_error_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+        validation_result = self.__validate_json(request, response)
 
-        if response_data_result.is_error():
-            message = f"Unhandled error. Reason: '{response.content.decode()}'"
-            self.__logger.log_request_exception(request, response_data_result.error, message)
+        # Skip error logging if a response object is not "HTTPResult"
+        if validation_result.is_error():
             return response
 
-        response_data = response_data_result.ok
+        http_errors = Enumerable(validation_result.ok.errors)
+        message = f"Errors: [{'; '.join(http_errors.select(lambda error: f'(Message: "{error.message}" | Reasons: [{", ".join(error.reasons)}])'))}]"
 
-        if isinstance(response_data, list):
-            for item in cast(list[Union[dict[str, object], object]], response_data):
-                if isinstance(item, dict):
-                    self.__log_mapped_error(request, cast(dict[str, object], item))
-        elif isinstance(response_data, dict):
-            self.__log_mapped_error(request, cast(dict[str, object], response_data))
-        else:
-            self.__logger.log_request_error(request, f"Unhandled error. Reason: {response.text}")
+        self.__logger.log_request_error(request, message)
 
         return response
 
-    @staticmethod
-    def __get_response_data(content: bytes) -> Try[object]:
+    def __validate_json(self, request: HttpRequest, response: HttpResponse) -> ContextResult[HTTPResult[Any]]:
         try:
-            return Success(json.loads(content))
-        except Exception as exc:
-            return Failure(exc)
-
-    def __log_mapped_error(self, request: HttpRequest, data: dict[str, object]) -> None:
-        if "message" in data.keys() and "reasons" in data.keys():
-            reasons = cast(list[str], data["reasons"])
-            message = f"{data['message']}. Reasons: [{', '.join(reasons) if len(reasons) > 0 else ''}]"
-            self.__logger.log_request_error(request, message)
-        else:
-            self.__logger.log_request_error(request, "Unexpected response")
+            return ContextResult[HTTPResult[Any]].success(HTTPResult[Any].model_validate_json(response.content))
+        except ValidationError:
+            return ContextResult[HTTPResult[Any]].failure(ErrorContext.server_error())
+        except Exception as exception:
+            self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{response.text}'")
+            return ContextResult[HTTPResult[Any]].failure(ErrorContext.server_error())

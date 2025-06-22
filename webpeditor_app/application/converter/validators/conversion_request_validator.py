@@ -56,7 +56,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
         return (
-            Option[str].Some(f"File {file.name} does not have size")
+            Option[str].Some(f"File '{file.name}' does not have size")
             if file.size is None or file.size == 0
             else Option[str].Nothing()
         )
@@ -64,7 +64,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __validate_max_file_size(self, file: UploadedFile) -> Option[str]:
         max_file_size = self.__converter_settings.MAX_FILE_SIZE
         if cast(int, file.size) > max_file_size:
-            message = f"File {file.name} size {file.size} exceeds the maximum allowed size {max_file_size}"
+            message = f"File '{file.name}' size {file.size} exceeds the maximum allowed size {max_file_size}"
             return Option[str].Some(message)
         return Option[str].Nothing()
 
