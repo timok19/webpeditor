@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -6,7 +7,7 @@ from django.utils import timezone
 
 
 class BaseImageAsset(models.Model):
-    id: models.AutoField[int, int] = models.AutoField(primary_key=True)
+    id: models.UUIDField[str, str] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at: models.DateTimeField[datetime, datetime] = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -18,7 +19,7 @@ class BaseImageAsset(models.Model):
 
 
 class BaseImageAssetFile(models.Model):
-    id: models.AutoField[int, int] = models.AutoField(primary_key=True)
+    id: models.UUIDField[str, str] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file_url: models.URLField[str, str] = models.URLField(blank=True)
     filename: models.CharField[str, str] = models.CharField(max_length=120, blank=True)
     filename_shorter: models.CharField[str, str] = models.CharField(max_length=30, blank=True)

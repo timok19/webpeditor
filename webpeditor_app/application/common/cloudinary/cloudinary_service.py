@@ -21,12 +21,12 @@ class CloudinaryService(CloudinaryServiceABC):
     @acontext_result
     async def adelete_resource_recursively(self, user_id: str, relative_folder_path: str) -> ContextResult[Unit]:
         def log_success(response: DeleteResourceResponse) -> DeleteResourceResponse:
-            message = f"Deleted {len(response.deleted.values())} files under '{user_id}/{relative_folder_path}' for user '{user_id}'"
+            message = f"Deleted {len(response.deleted.values())} files in the folder '{relative_folder_path}' for user '{user_id}'"
             self.__logger.log_info(message)
             return response
 
         def log_error(error: ErrorContext) -> ErrorContext:
-            message = f"Failed to delete files under '{user_id}/{relative_folder_path}' for user '{user_id}'"
+            message = f"Failed to delete files in the folder '{relative_folder_path}' for user '{user_id}'"
             self.__logger.log_error(message)
             return error
 

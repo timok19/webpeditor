@@ -96,7 +96,7 @@ class SessionService:
     async def __aget_or_create_user(self, session_key: str) -> ContextResult[AppUser]:
         try:
             session_key_expiration_date = await self.__request.session.aget_expiry_date()
-            return await self.__user_repository.aget_or_create_user(session_key, session_key_expiration_date)
+            return await self.__user_repository.aget_or_create(session_key, session_key_expiration_date)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to get or create user")
             await self.__aclear()

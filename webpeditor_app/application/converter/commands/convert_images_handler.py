@@ -79,7 +79,7 @@ class ConvertImagesHandler:
 
         return await (
             self.__acleanup_previous_images(user_id)
-            .abind(lambda _: self.__user_repository.aget_user(user_id))
+            .abind(lambda _: self.__user_repository.aget(user_id))
             .abind(self.__converter_repository.aget_or_create_asset)
             .map(lambda asset: (Enumerable(request.files), asset))
             .map(
@@ -96,12 +96,12 @@ class ConvertImagesHandler:
 
     @acontext_result
     async def __acleanup_previous_images(self, user_id: str) -> ContextResult[Unit]:
-        asset_exists_result = await self.__converter_repository.aasset_exists(user_id)
-        if asset_exists_result.is_error() or asset_exists_result.ok is False:
-            return ContextResult[Unit].success(Unit())
-
-        return await self.__converter_repository.adelete_asset(user_id).abind(
-            lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter")
+        return await self.__converter_repository.aasset_exists(user_id).aif_then_else(
+            lambda exists: not exists,
+            lambda _: ContextResult[Unit].success(Unit()),
+            lambda _: self.__converter_repository.adelete_asset(user_id).abind(
+                lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter")
+            ),
         )
 
     @acontext_result

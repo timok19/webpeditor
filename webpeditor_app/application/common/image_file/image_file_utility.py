@@ -187,7 +187,7 @@ class ImageFileUtility(ImageFileUtilityABC):
             return {}
 
         try:
-            exif_image = exifread.process_file(buffer)
+            exif_image = exifread.process_file(buffer, debug=True)
             return {k: str(v) for k, v in exif_image.items()}
         except Exception as exception:
             self.__logger.log_exception(exception, "Unable to parse EXIF data")

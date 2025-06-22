@@ -15,7 +15,7 @@ class UserRepository(UserRepositoryABC):
         self.__logger: Final[WebPEditorLoggerABC] = logger
 
     @acontext_result
-    async def aget_or_create_user(
+    async def aget_or_create(
         self,
         session_key: str,
         session_key_expiration_date: datetime,
@@ -36,7 +36,7 @@ class UserRepository(UserRepositoryABC):
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
     @acontext_result
-    async def aget_user(self, user_id: str) -> ContextResult[AppUser]:
+    async def aget(self, user_id: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(id=user_id).afirst()
         result = Option.of_optional(app_user).to_result(
             ErrorContext.not_found(f"Unable to find current user '{user_id}'")
@@ -44,7 +44,7 @@ class UserRepository(UserRepositoryABC):
         return ContextResult[AppUser].from_result(result)
 
     @acontext_result
-    async def aget_user_by_session_key(self, session_key: str) -> ContextResult[AppUser]:
+    async def aget_by_session_key(self, session_key: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(session_key=session_key).afirst()
         result = Option.of_optional(app_user).to_result(
             ErrorContext.not_found(f"Unable to find user with session key '{session_key}'")

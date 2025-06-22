@@ -43,6 +43,8 @@ charset-normalizer==3.4.2
     # via requests
 click==8.2.1
     # via deptry
+cmdkit==2.7.7
+    # via names-generator
 colorama==0.4.6 ; sys_platform == 'win32'
     # via
     #   click
@@ -180,6 +182,8 @@ loguru==0.7.3
     # via webpeditor
 mccabe==0.7.0
     # via webpeditor
+names-generator==0.2.0
+    # via webpeditor
 ninja-schema==0.14.2
     # via webpeditor
 oauthlib==3.3.1
@@ -285,6 +289,8 @@ tzdata==2025.2 ; sys_platform == 'win32'
     # via django
 urllib3==2.5.0
     # via requests
+uuid-utils==0.11.0
+    # via webpeditor
 whitenoise==6.9.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
