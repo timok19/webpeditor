@@ -113,7 +113,10 @@ class ConvertImagesHandler:
     ) -> ContextResult[ConversionResponse]:
         return await self.__acreate_original_asset_file(asset.user.id, image, asset).amap3(
             self.__aconvert_and_save_asset_file(asset.user.id, image, asset, options),
-            self.__to_response,
+            lambda original, converted: ConversionResponse(
+                original_data=ConversionResponse.ImageData.from_asset_file(original),
+                converted_data=ConversionResponse.ImageData.from_asset_file(converted),
+            ),
         )
 
     @acontext_result
@@ -145,8 +148,8 @@ class ConvertImagesHandler:
         asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConverterConvertedImageAssetFile]:
-        return (
-            await self.__converter_service.convert_image(image, options)
+        return await (
+            self.__converter_service.convert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)
             .map2(self.__image_file_utility.close_file(image), lambda file_info, _: file_info)
             .abind(
@@ -162,14 +165,4 @@ class ConvertImagesHandler:
                     )
                 )
             )
-        )
-
-    @staticmethod
-    def __to_response(
-        original_asset_file: ConverterOriginalImageAssetFile,
-        converted_asset_file: ConverterConvertedImageAssetFile,
-    ) -> ConversionResponse:
-        return ConversionResponse(
-            original_data=ConversionResponse.ImageData.from_asset_file(original_asset_file),
-            converted_data=ConversionResponse.ImageData.from_asset_file(converted_asset_file),
         )
