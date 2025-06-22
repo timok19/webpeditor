@@ -10,6 +10,7 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
+from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
@@ -46,7 +47,7 @@ class SessionService:
             .aor_else(
                 self.__aget_or_create_session()
                 .abind(self.__aget_or_create_user)
-                .amap(self.__aset_signed_user_id_and_expiry)
+                .abind(self.__aset_signed_user_id_and_expiry)
                 .bind(self.__user_service.unsign_id)
                 .abind(self.__adelete_expired_data)
             )
@@ -83,14 +84,14 @@ class SessionService:
             return ContextResult[str].failure(ErrorContext.server_error())
 
     @acontext_result
-    async def __acreate_session(self) -> ContextResult[None]:
+    async def __acreate_session(self) -> ContextResult[Unit]:
         try:
             await self.__aclear()
             await self.__request.session.acreate()
-            return ContextResult[None].success(None)
+            return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to create session")
-            return ContextResult[None].failure(ErrorContext.server_error())
+            return ContextResult[Unit].failure(ErrorContext.server_error())
 
     @acontext_result
     async def __aget_or_create_user(self, session_key: str) -> ContextResult[AppUser]:
@@ -102,23 +103,24 @@ class SessionService:
             await self.__aclear()
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
-    async def __aset_signed_user_id_and_expiry(self, user: AppUser) -> str:
+    @acontext_result
+    async def __aset_signed_user_id_and_expiry(self, user: AppUser) -> ContextResult[str]:
         try:
             signed_user_id = await self.__request.session.asetdefault(
                 self.__user_id_key,
                 self.__user_service.sign_id(user.id),
             )
-            self.__logger.log_debug(f"Signed {self.__user_id_key} '{signed_user_id}' has been set")
+            self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been set")
 
             await self.__request.session.aset_expiry(timedelta(minutes=15))
             session_expiry_date = await self.__request.session.aget_expiry_date()
             self.__logger.log_debug(f"Session expiry date has been set to {session_expiry_date}")
 
-            return str(signed_user_id)
+            return ContextResult[str].success(str(signed_user_id))
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to set {self.__user_id_key} in session")
             await self.__aclear()
-            return ""
+            return ContextResult[str].failure(ErrorContext.server_error("Session is corrupted"))
 
     @acontext_result
     async def __adelete_expired_data(self, user_id: str) -> ContextResult[str]:
@@ -130,33 +132,36 @@ class SessionService:
             self.__logger.log_error(error.message)
             return error
 
-        return (
-            await self.__editor_repository.aget_original_asset(user_id)
+        return await self.__ais_expired().aif_then_else(
+            lambda is_expired: not is_expired,
+            lambda _: ContextResult[str].success(user_id),
+            lambda _: self.__editor_repository.aget_original_asset(user_id)
             .amap(lambda original: original.adelete())
-            .map(lambda _: self.__logger.log_debug(f"Editor: Original asset of User '{user_id}' has been deleted "))
+            .map(
+                lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Original asset(s) for User '{user_id}'")
+            )
             .abind(lambda _: self.__editor_repository.aget_edited_asset(user_id))
             .amap(lambda edited: edited.adelete())
-            .map(lambda _: self.__logger.log_debug(f"Editor: Edited asset of User '{user_id}' has been deleted "))
+            .map(lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Edited asset(s) for User '{user_id}'"))
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
             .amap(lambda converted: converted.adelete())
-            .map(lambda _: self.__logger.log_debug(f"Converter: Asset of User '{user_id}' has been deleted "))
+            .map(lambda info: self.__logger.log_info(f"Converter: Deleted {info[0]} Asset(s) for User '{user_id}'"))
             .abind(lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter"))
             .abind(lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "editor"))
             .amap(lambda _: self.__request.session.aclear_expired())
             .map(lambda _: user_id)
-            .match(log_success, log_error)
-            if await self.__ais_expired()
-            else ContextResult[str].success(user_id)
+            .match(log_success, log_error),
         )
 
-    async def __ais_expired(self) -> bool:
+    @acontext_result
+    async def __ais_expired(self) -> ContextResult[bool]:
         try:
             session_expiry_date = await self.__request.session.aget_expiry_date()
-            return timezone.now() > session_expiry_date
+            return ContextResult[bool].success(timezone.now() > session_expiry_date)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to check if session expired")
             await self.__aclear()
-            return True
+            return ContextResult[bool].failure(ErrorContext.server_error("Session is corrupted"))
 
     async def __aclear(self) -> None:
         return await sync_to_async(self.__request.session.clear)()

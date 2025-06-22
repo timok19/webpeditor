@@ -6,7 +6,7 @@ class OriginalImageAssetForm(forms.Form):
     image: ImageField = forms.ImageField(required=True)
 
 
-class ConvertedImageAssetForm(forms.Form):
+class ImageConverterUploadFilesForm(forms.Form):
     image: ImageField = forms.ImageField(
         required=True,
         widget=forms.ClearableFileInput(attrs={"allow_multiple_selected": True}),

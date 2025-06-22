@@ -1,7 +1,5 @@
 from typing import Tuple
 
-import cloudinary.api
-import cloudinary.uploader
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
@@ -12,7 +10,7 @@ from PIL import Image as PilImage
 from PIL.Image import Image
 from PIL.Image import Image as ImageClass
 
-from webpeditor_app.forms import OriginalImageAssetForm
+from webpeditor_app.views.forms import OriginalImageAssetForm
 
 
 def clean_up_previous_images(user_id: str):

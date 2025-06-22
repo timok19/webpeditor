@@ -1,17 +1,21 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, override
 
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
-from django.views.generic import TemplateView
+from django.views.generic import FormView
+from httpx import AsyncClient
+
+from webpeditor_app.views.forms import ImageConverterUploadFilesForm
 
 
-class ConverterView(TemplateView):
+class ImageConverterView(FormView[ImageConverterUploadFilesForm]):
     template_name = "webpeditor_app/image-converter.html"
+    form_class = ImageConverterUploadFilesForm
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    @override
+    async def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore
         context: dict[str, Any] = self.get_context_data(**kwargs)
-
         context.update(
             {
                 "form": "form",  # TODO: Create an empty form
@@ -19,8 +23,20 @@ class ConverterView(TemplateView):
                 "converted_images": [],
             }
         )
-
         return self.render_to_response(context, status=HTTPStatus.OK)
+
+    @override
+    async def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore
+        absolute_uri = request.build_absolute_uri("/api/converter/convert-images")
+        # TODO
+        async with AsyncClient() as client:
+            await client.post(absolute_uri)
+
+        return HttpResponse()
+
+    @override
+    async def put(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore [reportIncompatibleMethodOverride]
+        return await self.post(request, *args, **kwargs)
 
     # image_form: ImageConverterForm = ImageConverterForm()
     # user_id: str | None = get_unsigned_user_id(request)
