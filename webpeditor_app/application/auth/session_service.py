@@ -140,9 +140,8 @@ class SessionService:
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
             .amap(lambda converted: converted.adelete())
             .map(lambda _: self.__logger.log_debug(f"Converter: Asset of User '{user_id}' has been deleted "))
-            .abind(lambda _: self.__cloudinary_service.adelete_files(user_id, "converter"))
-            .abind(lambda _: self.__cloudinary_service.adelete_files(user_id, "editor"))
-            # TODO: delete folders
+            .abind(lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter"))
+            .abind(lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "editor"))
             .amap(lambda _: self.__request.session.aclear_expired())
             .map(lambda _: user_id)
             .match(log_success, log_error)

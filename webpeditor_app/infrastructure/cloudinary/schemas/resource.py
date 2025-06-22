@@ -22,3 +22,9 @@ class GetResourcesResponse(BaseModel):
         asset_folder: str = Field(serialization_alias="asset_folder")
         url: str = Field(serialization_alias="url")
         secure_url: str = Field(serialization_alias="secure_url")
+
+
+class DeleteResourceResponse(BaseModel):
+    model_config = ConfigDict(frozen=True, serialize_by_alias=True)
+
+    deleted: dict[str, str] = Field(serialization_alias="deleted")

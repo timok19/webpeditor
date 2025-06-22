@@ -96,7 +96,7 @@ class ImageFileUtility(ImageFileUtilityABC):
             )
         )
 
-    def update_filename(self, image: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
+    def update_filename(self, image: ImageFile, new_filename: Optional[str]) -> ContextResult[ImageFile]:
         return self.normalize_filename(new_filename).map(lambda normalized: self.__update_filename(image, normalized))
 
     def normalize_filename(self, filename: Optional[Union[str, bytes]]) -> ContextResult[str]:
@@ -185,11 +185,12 @@ class ImageFileUtility(ImageFileUtilityABC):
     def __get_exif_data(self, buffer: BytesIO) -> dict[str, str]:
         if buffer.closed:
             return {}
+
         try:
-            exif_image = exifread.process_file(buffer, debug=True)
+            exif_image = exifread.process_file(buffer)
             return {k: str(v) for k, v in exif_image.items()}
         except Exception as exception:
-            self.__logger.log_debug(f"Unable to parse EXIF data. Reason: {exception}")
+            self.__logger.log_exception(exception, "Unable to parse EXIF data")
             return {}
 
     @staticmethod

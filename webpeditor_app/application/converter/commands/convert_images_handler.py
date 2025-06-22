@@ -3,7 +3,7 @@ import asyncio
 from PIL import Image
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
-from typing import Final, final, Optional
+from typing import Final, final
 
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.auth.session_service import SessionService
@@ -59,11 +59,11 @@ class ConvertImagesHandler:
             self.__conversion_request_validator.validate(request)
             .to_context_result()
             .abind(lambda _: session_service.asynchronize())
-            .abind_many(lambda user_id: self.__aconvert(user_id, request))
+            .abind_many2(lambda user_id: self.__aconvert_files(user_id, request))
         )
 
     @aenumerable_context_result
-    async def __aconvert(
+    async def __aconvert_files(
         self,
         user_id: str,
         request: ConversionRequest,
@@ -77,47 +77,43 @@ class ConvertImagesHandler:
             self.__logger.log_error(f"Failed to convert images for user '{user_id}'. [{reasons}]")
             return errors
 
-        results = await asyncio.gather(
-            *Enumerable(request.files)
-            .select(lambda file: (Image.open(file), file.name))
-            .select(lambda pair: self.__abatch_convert(user_id, *pair, request.options))
-        )
-
-        return EnumerableContextResult[ConversionResponse].from_results(results).match(log_success, log_errors)
-
-    @acontext_result
-    async def __abatch_convert(
-        self,
-        user_id: str,
-        image: ImageFile,
-        filename: Optional[str],
-        options: ConversionRequest.Options,
-    ) -> ContextResult[ConversionResponse]:
         return await (
             self.__acleanup_previous_images(user_id)
             .abind(lambda _: self.__user_repository.aget_user(user_id))
             .abind(self.__converter_repository.aget_or_create_asset)
-            .abind(
-                lambda asset: self.__image_file_utility.normalize_filename(filename)
-                .bind(lambda new_filename: self.__image_file_utility.update_filename(image, new_filename))
-                .abind(
-                    lambda updated_image: self.__acreate_original_asset_file(user_id, updated_image, asset).amap3(
-                        self.__aconvert_and_save_asset_file(user_id, updated_image, asset, options),
-                        self.__to_response,
-                    )
-                )
+            .map(lambda asset: (Enumerable(request.files), asset))
+            .map(
+                lambda pair: pair[0].select(
+                    lambda file: self.__image_file_utility.normalize_filename(file.name)
+                    .bind(lambda normalized: self.__image_file_utility.update_filename(Image.open(file), normalized))
+                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, pair[1], request.options))
+                ),
             )
+            .amap(lambda results: asyncio.gather(*results))
+            .abind_many(EnumerableContextResult[ConversionResponse].from_results)
+            .match(log_success, log_errors)
         )
 
     @acontext_result
     async def __acleanup_previous_images(self, user_id: str) -> ContextResult[Unit]:
         asset_exists_result = await self.__converter_repository.aasset_exists(user_id)
-        return (
-            ContextResult[Unit].success(Unit())
-            if asset_exists_result.is_error() or asset_exists_result.ok is False
-            else await self.__converter_repository.adelete_asset(user_id).abind(
-                lambda _: self.__cloudinary_service.adelete_files(user_id, "converter/")
-            )
+        if asset_exists_result.is_error() or asset_exists_result.ok is False:
+            return ContextResult[Unit].success(Unit())
+
+        return await self.__converter_repository.adelete_asset(user_id).abind(
+            lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter")
+        )
+
+    @acontext_result
+    async def __aconvert_and_save(
+        self,
+        image: ImageFile,
+        asset: ConverterImageAsset,
+        options: ConversionRequest.Options,
+    ) -> ContextResult[ConversionResponse]:
+        return await self.__acreate_original_asset_file(asset.user.id, image, asset).amap3(
+            self.__aconvert_and_save_asset_file(asset.user.id, image, asset, options),
+            self.__to_response,
         )
 
     @acontext_result

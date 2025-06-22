@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from webpeditor_app.core.result import ContextResult, acontext_result
+from webpeditor_app.globals import Unit
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
     ConverterImageAsset,
@@ -28,7 +29,7 @@ class ConverterRepositoryABC(ABC):
 
     @abstractmethod
     @acontext_result
-    async def adelete_asset(self, user_id: str) -> ContextResult[None]: ...
+    async def adelete_asset(self, user_id: str) -> ContextResult[Unit]: ...
 
     @abstractmethod
     @acontext_result

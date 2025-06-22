@@ -1,12 +1,11 @@
 from typing import Final, final
 
-from types_linq.enumerable import Enumerable
-
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.core.result import ContextResult, acontext_result, ErrorContext
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
+from webpeditor_app.infrastructure.cloudinary.schemas import DeleteResourceResponse
 
 
 @final
@@ -20,32 +19,22 @@ class CloudinaryService(CloudinaryServiceABC):
         return await self.__cloudinary_client.aupload_file(public_id, file_content).map(lambda res: str(res.secure_url))
 
     @acontext_result
-    async def adelete_files(self, user_id: str, relative_folder_path: str) -> ContextResult[Unit]:
-        def log_success(unit: Unit) -> Unit:
-            self.__logger.log_info(f"File has been deleted for user '{user_id}'")
-            return unit
+    async def adelete_resource_recursively(self, user_id: str, relative_folder_path: str) -> ContextResult[Unit]:
+        def log_success(response: DeleteResourceResponse) -> DeleteResourceResponse:
+            message = f"Deleted {len(response.deleted.values())} files under '{user_id}/{relative_folder_path}' for user '{user_id}'"
+            self.__logger.log_info(message)
+            return response
 
         def log_error(error: ErrorContext) -> ErrorContext:
-            self.__logger.log_error(f"Failed to delete file for user '{user_id}'")
+            message = f"Failed to delete files under '{user_id}/{relative_folder_path}' for user '{user_id}'"
+            self.__logger.log_error(message)
             return error
 
-        return (
-            await self.__cloudinary_client.aget_resources(user_id, relative_folder_path)
-            .map(lambda response: Enumerable(response.resources))
-            .map(lambda resources: resources.select(lambda resource: resource.public_id).to_list())
-            .abind(self.__cloudinary_client.adelete_resources)
+        return await (
+            self.__cloudinary_client.adelete_resource_recursively(user_id, relative_folder_path)
             .match(log_success, log_error)
+            .map(lambda _: Unit())
         )
-
-    # TODO
-    def delete_user_folder(self, user_id: str) -> None:
-        # cloudinary.api.delete_folder(user_id)
-        # self.__logger.log_info(f"Folder '{user_id}' and its content have been deleted")
-
-        # response = cloudinary.api.subfolders(folder_path)
-        # for folder in response['folders']:
-        #     delete_cloudinary_folder(folder['path'])
-        raise NotImplementedError()
 
     async def adelete_all_folders(self) -> None:
         # users_folders: list[str] = self.get_all_users_folders()
@@ -65,13 +54,4 @@ class CloudinaryService(CloudinaryServiceABC):
     def get_all_users_folders(self) -> list[str]:
         # response: Response = cloudinary.api.root_folders()
         # return [folder["path"] for folder in response["folders"]]
-        raise NotImplementedError()
-
-    async def adelete_editor_images(self, user_id: str) -> None:
-        # await self.adelete_files(user_id, subfolder="edited/")
-        # await self.adelete_files(user_id)
-        raise NotImplementedError()
-
-    async def adelete_converted_images(self, user_id: str) -> None:
-        # await self.adelete_files(user_id, subfolder="converted/")
         raise NotImplementedError()

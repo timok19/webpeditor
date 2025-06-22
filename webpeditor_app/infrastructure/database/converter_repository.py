@@ -3,6 +3,7 @@ from expression import Option
 from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
@@ -47,15 +48,15 @@ class ConverterRepository(ConverterRepositoryABC):
             return ContextResult[bool].failure(ErrorContext.bad_request())
 
     @acontext_result
-    async def adelete_asset(self, user_id: str) -> ContextResult[None]:
+    async def adelete_asset(self, user_id: str) -> ContextResult[Unit]:
         try:
             _, deleted_per_model = await ConverterImageAsset.objects.filter(user_id=user_id).adelete()
             for model, count in deleted_per_model.items():
                 self.__logger.log_debug(f"Deleted '{model}': {count} for User '{user_id}'")
-            return ContextResult[None].success(None)
+            return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")
-            return ContextResult[None].failure(ErrorContext.bad_request())
+            return ContextResult[Unit].failure(ErrorContext.bad_request())
 
     @acontext_result
     async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](

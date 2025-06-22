@@ -20,7 +20,7 @@ class HTTPResult[T: Schema](Schema):
     class HTTPError(Schema):
         model_config = ConfigDict(frozen=True)
 
-        message: str = ""
+        message: str
         reasons: list[str] = Field(default_factory=list[str])
 
     @classmethod

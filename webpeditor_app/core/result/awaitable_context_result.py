@@ -71,6 +71,16 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
     @aenumerable_context_result
     async def abind_many[TNewOut](
         self,
+        mapper: Callable[[TOut], "EnumerableContextResult[TNewOut]"],
+    ) -> "EnumerableContextResult[TNewOut]":
+        async def _abind_many() -> "EnumerableContextResult[TNewOut]":
+            return (await self.__awaitable_result).bind_many(mapper)
+
+        return await _abind_many()
+
+    @aenumerable_context_result
+    async def abind_many2[TNewOut](
+        self,
         mapper: Callable[[TOut], Awaitable["EnumerableContextResult[TNewOut]"]],
     ) -> "EnumerableContextResult[TNewOut]":
         async def _abind_many() -> "EnumerableContextResult[TNewOut]":

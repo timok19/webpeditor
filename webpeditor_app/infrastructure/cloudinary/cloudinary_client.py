@@ -9,8 +9,11 @@ from webpeditor import settings
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
-from webpeditor_app.infrastructure.cloudinary.schemas import GetResourcesResponse, UploadFileResponse
-
+from webpeditor_app.infrastructure.cloudinary.schemas import (
+    GetResourcesResponse,
+    UploadFileResponse,
+    DeleteResourceResponse,
+)
 
 _FileContent = Union[IO[bytes], bytes, str]
 _FileTypes = Union[
@@ -58,12 +61,16 @@ class CloudinaryClient:
         )
 
     @acontext_result
-    async def adelete_resources(self, public_ids: list[str]) -> ContextResult[Unit]:
+    async def adelete_resource_recursively(
+        self,
+        user_id: str,
+        relative_folder_path: str,
+    ) -> ContextResult[DeleteResourceResponse]:
         return await self.__asend_request(
             HTTPMethod.DELETE,
             "resources/image/upload",
-            query_params={"public_ids": public_ids},
-            response_type=Unit,  # TODO: Map to proper response for tracking how many files has been deleted
+            query_params={"prefix": f"{user_id}/{relative_folder_path}"},
+            response_type=DeleteResourceResponse,
         )
 
     def __create_form_data(self, params: MutableMapping[str, str]) -> Mapping[str, str]:
@@ -89,6 +96,7 @@ class CloudinaryClient:
         # Create SHA-1 hash
         return hashlib.sha1(to_sign.encode()).hexdigest()
 
+    @acontext_result
     async def __asend_request[TResponse: BaseModel](
         self,
         method: HTTPMethod,

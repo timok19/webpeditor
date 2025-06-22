@@ -174,6 +174,18 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     ) -> "ContextResult[TNewOut]":
         return await self.amap2(await other, mapper)
 
+    def bind_many[TNewOut](
+        self,
+        mapper: Callable[[TOut], "EnumerableContextResult[TNewOut]"],
+    ) -> "EnumerableContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return mapper(value)
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failures(error)
+            case _:
+                return ContextResult[TNewOut].unexpected_many()
+
     @aenumerable_context_result
     async def abind_many[TNewOut](
         self,
