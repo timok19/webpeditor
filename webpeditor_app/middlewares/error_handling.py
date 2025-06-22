@@ -36,10 +36,13 @@ class ErrorHandlingMiddleware:
         if validation_result.is_none():
             return response
 
-        http_errors = Enumerable(validation_result.some.errors)
-        message = f"Errors: [{'; '.join(http_errors.select(lambda error: f'(Message: "{error.message}" | Reasons: [{", ".join(error.reasons)}])'))}]"
+        errors = "; ".join(
+            Enumerable(validation_result.some.errors).select(
+                lambda error: f'(Message: "{error.message}" | Reasons: [{", ".join(error.reasons)}])'
+            )
+        )
 
-        self.__logger.log_request_error(request, message)
+        self.__logger.log_request_error(request, f"Errors: [{errors}]")
 
         return response
 
