@@ -13,8 +13,8 @@ class ConverterImageAsset(BaseImageAsset):
     )
 
     class Meta(BaseImageAsset.Meta):
-        verbose_name: str = str(_("Converted Image Asset"))
-        verbose_name_plural: str = str(_("Converted Image Assets"))
+        verbose_name: str = str(_("Converter Image Asset"))
+        verbose_name_plural: str = str(_("Converter Image Assets"))
 
 
 class ConverterOriginalImageAssetFile(BaseImageAssetFile):
@@ -25,8 +25,8 @@ class ConverterOriginalImageAssetFile(BaseImageAssetFile):
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = str(_("Original Image Asset File"))
-        verbose_name_plural: str = str(_("Original Image Asset Files"))
+        verbose_name: str = str(_("Converter Original Image Asset File"))
+        verbose_name_plural: str = str(_("Converter Original Image Asset Files"))
 
 
 class ConverterConvertedImageAssetFile(BaseImageAssetFile):
@@ -37,5 +37,5 @@ class ConverterConvertedImageAssetFile(BaseImageAssetFile):
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = str(_("Converted Image Asset File"))
-        verbose_name_plural: str = str(_("Converted Image Asset Files"))
+        verbose_name: str = str(_("Converter Converted Image Asset File"))
+        verbose_name_plural: str = str(_("Converter Converted Image Asset Files"))

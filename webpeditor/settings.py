@@ -64,11 +64,8 @@ INSTALLED_APPS: list[str] = [
     "django_otp",
     "django_otp.plugins.otp_totp",
     "django_extensions",
-    "silk",
     "corsheaders",
     "compressor",
-    "crispy_forms",
-    "crispy_tailwind",
     "ninja_extra",
     "webpeditor_app",
     "anydi.ext.django",
@@ -93,7 +90,6 @@ CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split
 MIDDLEWARE: list[str] = [
     "anydi.ext.django.middleware.request_scoped_middleware",
     "webpeditor_app.middlewares.error_handling.ErrorHandlingMiddleware",
-    "silk.middleware.SilkyMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -221,13 +217,9 @@ CLOUDINARY_CLOUD_NAME: str = str(os.getenv("CLOUDINARY_CLOUD_NAME"))
 CLOUDINARY_API_KEY: str = str(os.getenv("CLOUDINARY_API_KEY"))
 CLOUDINARY_API_SECRET: str = str(os.getenv("CLOUDINARY_API_SECRET"))
 
+# Filename settings
 FILENAME_MAX_SIZE: int = 255
-
 RESERVED_WINDOWS_FILENAMES: list[str] = str(os.getenv("RESERVED_WINDOWS_FILENAMES")).split(",")
-
-# Crispy forms
-CRISPY_ALLOWED_TEMPLATE_PACKS: str = "tailwind"
-CRISPY_TEMPLATE_PACK: str = "tailwind"
 
 # Application definition
 APP_VERSION: str = str(os.getenv("APP_VERSION"))
@@ -245,11 +237,6 @@ JAZZMIN_SETTINGS: dict[str, Any] = {
     "site_icon": "logo/pixoicon_32x32.svg",
     "welcome_sign": f"Welcome to {APP_VERBOSE_NAME}",
     "copyright": "Temirkhan Amanzhanov - WebP Editor",
-    "search_model": [
-        "webpeditor_app.OriginalImageAsset",
-        "webpeditor_app.EditedImageAsset",
-        "webpeditor_app.ConvertedImageAsset",
-    ],
     "user_avatar": None,
     "topmenu_links": [
         {
@@ -295,6 +282,7 @@ JAZZMIN_SETTINGS: dict[str, Any] = {
         "webpeditor_app.ConverterConvertedImageAssetFile": "fa-solid fa-file-code",
         "webpeditor_app.ConverterOriginalImageAssetFile": "fa-solid fa-file-code",
         "otp_totp.TOTPDevice": "fa-solid fa-shield",
+        "sessions.Session": "fa-solid fa-database",
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",

@@ -13,8 +13,8 @@ class EditorOriginalImageAsset(BaseImageAsset):
     )
 
     class Meta(BaseImageAsset.Meta):
-        verbose_name: str = str(_("Original Image Asset"))
-        verbose_name_plural: str = str(_("Original Image Assets"))
+        verbose_name: str = str(_("Editor Original Image Asset"))
+        verbose_name_plural: str = str(_("Editor Original Image Assets"))
 
 
 class EditorOriginalImageAssetFile(BaseImageAssetFile):
@@ -25,8 +25,8 @@ class EditorOriginalImageAssetFile(BaseImageAssetFile):
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = str(_("Original Image Asset File"))
-        verbose_name_plural: str = str(_("Original Image Asset Files"))
+        verbose_name: str = str(_("Editor Original Image Asset File"))
+        verbose_name_plural: str = str(_("Editor Original Image Asset Files"))
 
 
 class EditorEditedImageAsset(BaseImageAsset):
@@ -42,8 +42,8 @@ class EditorEditedImageAsset(BaseImageAsset):
     )
 
     class Meta(BaseImageAsset.Meta):
-        verbose_name: str = str(_("Edited Image Asset"))
-        verbose_name_plural: str = str(_("Edited Image Assets"))
+        verbose_name: str = str(_("Editor Edited Image Asset"))
+        verbose_name_plural: str = str(_("Editor Edited Image Assets"))
 
 
 class EditorEditedImageAssetFile(BaseImageAssetFile):
@@ -54,5 +54,5 @@ class EditorEditedImageAssetFile(BaseImageAssetFile):
     )
 
     class Meta(BaseImageAssetFile.Meta):
-        verbose_name: str = str(_("Edited Image Asset File"))
-        verbose_name_plural: str = str(_("Edited Image Asset Files"))
+        verbose_name: str = str(_("Editor Edited Image Asset File"))
+        verbose_name_plural: str = str(_("Editor Edited Image Asset Files"))

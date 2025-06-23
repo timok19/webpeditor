@@ -1,7 +1,7 @@
 from typing import Union
 
 from django.conf.urls.static import static  # pyright: ignore
-from django.urls import URLPattern, URLResolver, include, path
+from django.urls import URLPattern, URLResolver, path
 
 from webpeditor import settings
 from webpeditor_app.api import webpeditor_api
@@ -25,5 +25,3 @@ urlpatterns: list[Union[URLResolver, URLPattern]] = [
 if settings.IS_DEVELOPMENT:
     # Static files
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    # Django Silk
-    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]

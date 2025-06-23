@@ -31,8 +31,8 @@ class ConverterRepository(ConverterRepositoryABC):
     @acontext_result
     async def aget_or_create_asset(self, user: AppUser) -> ContextResult[ConverterImageAsset]:
         try:
-            asset, exists = await ConverterImageAsset.objects.aget_or_create(user=user)
-            self.__logger.log_debug(f"Asset '{asset.id}' for user '{user.id}' {'already exists' if exists else 'has been created'}")
+            asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
+            self.__logger.log_debug(f"Asset '{asset.id}' for User '{user.id}' has been created")
             return ContextResult[ConverterImageAsset].success(asset)
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to create Converter Image Asset for User '{user.id}'")

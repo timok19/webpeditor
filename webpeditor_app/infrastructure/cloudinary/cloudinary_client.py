@@ -53,7 +53,7 @@ class CloudinaryClient:
         )
 
     @acontext_result
-    async def aget_resources(self, user_id: str, relative_folder_path: str) -> ContextResult[GetResourcesResponse]:
+    async def aget_files(self, user_id: str, relative_folder_path: str) -> ContextResult[GetResourcesResponse]:
         return await self.__asend_request(
             HTTPMethod.GET,
             "resources/image/upload",
@@ -62,7 +62,7 @@ class CloudinaryClient:
         )
 
     @acontext_result
-    async def adelete_resource_recursively(
+    async def adelete_folder_recursively(
         self,
         user_id: str,
         relative_folder_path: str,

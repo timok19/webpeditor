@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
+from django.contrib.sessions.models import Session
 from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
@@ -21,7 +22,7 @@ from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 admin_site: JazzminOTPAdminSite = JazzminOTPAdminSite(name="OTPAdmin")
 
 # Auth Models
-admin_site.register([User, Group])  # pyright: ignore
+admin_site.register([User, Group, Session])  # pyright: ignore
 
 # OTP Models
 admin_site.register(TOTPDevice, TOTPDeviceAdmin)  # pyright: ignore

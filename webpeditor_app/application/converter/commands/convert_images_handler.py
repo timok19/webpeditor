@@ -15,7 +15,6 @@ from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import (
     ContextResult,
     EnumerableContextResult,
-    ErrorContext,
     acontext_result,
     aenumerable_context_result,
 )
@@ -67,15 +66,6 @@ class ConvertImagesHandler:
         user_id: str,
         request: ConversionRequest,
     ) -> EnumerableContextResult[ConversionResponse]:
-        def log_success(values: Enumerable[ConversionResponse]) -> Enumerable[ConversionResponse]:
-            self.__logger.log_info(f"Successfully converted {values.count()} image(s) for user '{user_id}'")
-            return values
-
-        def log_errors(errors: Enumerable[ErrorContext]) -> Enumerable[ErrorContext]:
-            reasons = "; ".join(errors.select(lambda error: error.to_str()))
-            self.__logger.log_error(f"Failed to convert images for user '{user_id}'. [{reasons}]")
-            return errors
-
         return await (
             self.__acleanup_previous_images(user_id)
             .abind(lambda _: self.__user_repository.aget(user_id))
@@ -90,7 +80,10 @@ class ConvertImagesHandler:
             )
             .amap(lambda results: asyncio.gather(*results))
             .abind_many(EnumerableContextResult[ConversionResponse].from_results)
-            .match(log_success, log_errors)
+            .alog_match(
+                lambda values: f"Successfully converted {values.count()} image(s) for User '{user_id}'",
+                lambda errors: f"Failed to convert images for User '{user_id}'. [{'; '.join(errors.select(lambda error: error.to_str()))}]",
+            )
         )
 
     @acontext_result
@@ -99,7 +92,7 @@ class ConvertImagesHandler:
             lambda exists: not exists,
             lambda _: ContextResult[Unit].success(Unit()),
             lambda _: self.__converter_repository.adelete_asset(user_id).abind(
-                lambda _: self.__cloudinary_service.adelete_resource_recursively(user_id, "converter")
+                lambda _: self.__cloudinary_service.adelete_folder_recursively(user_id, "converter")
             ),
         )
 

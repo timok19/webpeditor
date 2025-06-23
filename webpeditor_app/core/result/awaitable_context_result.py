@@ -89,15 +89,15 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
         return await _abind_many()
 
     @acontext_result
-    async def match(
+    async def alog_match(
         self,
-        success_func: Callable[[TOut], TOut],
-        error_func: Callable[[ErrorContext], ErrorContext],
+        success_func: Callable[[TOut], str],
+        error_func: Callable[[ErrorContext], str],
     ) -> "ContextResult[TOut]":
-        async def _match() -> "ContextResult[TOut]":
-            return (await self.__awaitable_result).match(success_func, error_func)
+        async def _alog_match() -> "ContextResult[TOut]":
+            return (await self.__awaitable_result).log_match(success_func, error_func)
 
-        return await _match()
+        return await _alog_match()
 
     @acontext_result
     async def or_else(self, other: "ContextResult[TOut]") -> "ContextResult[TOut]":

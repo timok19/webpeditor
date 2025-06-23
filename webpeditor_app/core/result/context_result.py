@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Awaitable, Callable, Optional, Union, override
 from expression import Result
 from types_linq import Enumerable
 
+from webpeditor_app.core import WebPEditorLoggerABC
 from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
 from webpeditor_app.core.result.error_context import ErrorContext
 
@@ -50,16 +51,21 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 return cls.unexpected()
 
-    def match(
+    def log_match(
         self,
-        success_func: Callable[[TOut], TOut],
-        error_func: Callable[[ErrorContext], ErrorContext],
+        success_func: Callable[[TOut], str],
+        error_func: Callable[[ErrorContext], str],
     ) -> "ContextResult[TOut]":
+        from anydi.ext.django import container
+
+        logger = container.resolve(WebPEditorLoggerABC)
         match self:
             case ContextResult(tag="ok", ok=value):
-                return self.success(success_func(value))
+                logger.log_info(success_func(value))
+                return self.success(value)
             case ContextResult(tag="error", error=error):
-                return self.failure(error_func(error))
+                logger.log_error(error_func(error))
+                return self.failure(error)
             case _:
                 return self.unexpected()
 

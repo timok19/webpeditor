@@ -21,17 +21,15 @@ class UserRepository(UserRepositoryABC):
         session_key_expiration_date: datetime,
     ) -> ContextResult[AppUser]:
         try:
-            app_user, exists = await AppUser.objects.aget_or_create(
+            app_user, _ = await AppUser.objects.aget_or_create(
                 session_key=session_key,
                 session_key_expiration_date=session_key_expiration_date,
             )
-            self.__logger.log_debug(
-                f"User '{app_user.id}' {'already exists' if exists else 'has been created'} "
-                + f"with session key '{session_key}' and expiration date '{session_key_expiration_date}'"
-            )
+            message = f"User '{app_user.id}' with session key '{session_key}' and expiration date '{session_key_expiration_date}' has been created"
+            self.__logger.log_debug(message)
             return ContextResult[AppUser].success(app_user)
         except Exception as exception:
-            message = f"Failed to create user with session key '{session_key}' and expiration date '{session_key_expiration_date}'"
+            message = f"Failed to create User with session key '{session_key}' and expiration date '{session_key_expiration_date}'"
             self.__logger.log_exception(exception, message)
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 

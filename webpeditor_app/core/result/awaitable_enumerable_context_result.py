@@ -17,12 +17,12 @@ class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[
         return self.__awaitable_result.__await__()
 
     @aenumerable_context_result
-    async def match(
+    async def alog_match(
         self,
-        success_func: Callable[[Enumerable[TOut]], Enumerable[TOut]],
-        error_func: Callable[[Enumerable[ErrorContext]], Enumerable[ErrorContext]],
+        success_func: Callable[[Enumerable[TOut]], str],
+        error_func: Callable[[Enumerable[ErrorContext]], str],
     ) -> "EnumerableContextResult[TOut]":
-        async def _amatch() -> "EnumerableContextResult[TOut]":
-            return (await self.__awaitable_result).match(success_func, error_func)
+        async def _alog_match() -> "EnumerableContextResult[TOut]":
+            return (await self.__awaitable_result).log_match(success_func, error_func)
 
-        return await _amatch()
+        return await _alog_match()
