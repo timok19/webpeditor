@@ -57,7 +57,7 @@ platformdirs==4.3.8
 pre-commit==4.2.0
 py-serializable==2.0.0
     # via cyclonedx-python-lib
-pygments==2.19.1
+pygments==2.19.2
     # via rich
 pyparsing==3.2.3
     # via pip-requirements-parser
