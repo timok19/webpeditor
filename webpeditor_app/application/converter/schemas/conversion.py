@@ -1,5 +1,6 @@
 from decimal import Decimal
 from enum import StrEnum
+
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 

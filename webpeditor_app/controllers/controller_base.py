@@ -1,7 +1,8 @@
+from typing import Optional
+
 from django.http import HttpRequest, HttpResponse
 from ninja_extra import ControllerBase
 from ninja_extra.context import RouteContext
-from typing import Optional
 
 
 class WebPEditorControllerBase(ControllerBase):

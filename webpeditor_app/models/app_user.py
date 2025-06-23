@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from django.utils import timezone
 from django.db import models
+from django.utils import timezone
 from names_generator import generate_name
 from uuid_utils import uuid7
 

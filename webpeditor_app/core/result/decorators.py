@@ -1,11 +1,11 @@
 from functools import wraps
-from typing import ParamSpec, TypeVar, Callable, Awaitable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Awaitable, Callable, ParamSpec, TypeVar
 
 if TYPE_CHECKING:
-    from webpeditor_app.core.result.context_result import ContextResult
     from webpeditor_app.core.result.awaitable_context_result import AwaitableContextResult
-    from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
     from webpeditor_app.core.result.awaitable_enumerable_context_result import AwaitableEnumerableContextResult
+    from webpeditor_app.core.result.context_result import ContextResult
+    from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
 
 
 P = ParamSpec("P")

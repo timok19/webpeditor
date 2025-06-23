@@ -1,4 +1,4 @@
-from typing import Awaitable, Any, Generator, Callable, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Generator, Union
 
 from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
 from webpeditor_app.core.result.error_context import ErrorContext

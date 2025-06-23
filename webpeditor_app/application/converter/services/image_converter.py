@@ -1,18 +1,18 @@
-from typing import Final, Optional, Union
-from PIL import Image
-from PIL.ImageFile import ImageFile
 from io import BytesIO
+from typing import Final, Optional, Union
 
 from expression import Option
+from PIL import Image
+from PIL.ImageFile import ImageFile
 
-from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
-from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
 from webpeditor_app.application.converter.schemas import (
     ImageConverterAllOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,
 )
+from webpeditor_app.application.converter.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
+from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
 
 
 class ImageConverter(ImageConverterABC):

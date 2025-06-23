@@ -5,7 +5,7 @@ from pydantic import ConfigDict
 
 
 class ImageFileInfo(Schema):
-    model_config = ConfigDict(frozen=True, strict=True, extra="forbid", arbitrary_types_allowed=True)
+    model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
     filename: str
     filename_shorter: str

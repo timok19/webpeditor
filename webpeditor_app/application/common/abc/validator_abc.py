@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from ninja import Schema
 from pydantic import ConfigDict, Field
 

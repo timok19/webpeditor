@@ -1,4 +1,4 @@
-from typing import Callable, Collection, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Collection
 
 from types_linq import Enumerable
 

@@ -1,3 +1,5 @@
+from typing import Any, Callable, Final, final
+
 from anydi.ext.django import container
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase
@@ -5,7 +7,6 @@ from expression import Option
 from ninja.responses import codes_4xx, codes_5xx
 from pydantic import ValidationError
 from types_linq import Enumerable
-from typing import Any, Callable, final, Final
 
 from webpeditor_app.controllers.schemas import HTTPResult
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC

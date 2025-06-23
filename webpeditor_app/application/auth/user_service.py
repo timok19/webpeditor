@@ -1,4 +1,5 @@
 from typing import Final, final
+
 from django.core import signing
 
 from webpeditor import settings

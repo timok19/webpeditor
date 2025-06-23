@@ -1,12 +1,12 @@
 from typing import Union
 
 from django.contrib.auth.views import (
-    PasswordResetView,
-    PasswordResetDoneView,
-    PasswordResetConfirmView,
     PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
 )
-from django.urls import path, include, URLPattern, URLResolver, re_path
+from django.urls import URLPattern, URLResolver, include, path, re_path
 
 from webpeditor_app.admin import admin_site
 from webpeditor_app.views.content_not_found_view import ContentNotFoundView

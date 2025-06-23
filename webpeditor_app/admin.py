@@ -1,19 +1,19 @@
 from django.contrib import admin
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from webpeditor_app.models.app_user import AppUser
 from webpeditor_app.models.converter import (
+    ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
-    ConverterConvertedImageAssetFile,
 )
 from webpeditor_app.models.editor import (
-    EditorOriginalImageAsset,
-    EditorOriginalImageAssetFile,
     EditorEditedImageAsset,
     EditorEditedImageAssetFile,
+    EditorOriginalImageAsset,
+    EditorOriginalImageAssetFile,
 )
 from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 
@@ -21,10 +21,10 @@ from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 admin_site: JazzminOTPAdminSite = JazzminOTPAdminSite(name="OTPAdmin")
 
 # Auth Models
-admin_site.register([User, Group])  # pyright: ignore [reportUnknownMemberType]
+admin_site.register([User, Group])  # pyright: ignore
 
 # OTP Models
-admin_site.register(TOTPDevice, TOTPDeviceAdmin)  # pyright: ignore [reportUnknownMemberType]
+admin_site.register(TOTPDevice, TOTPDeviceAdmin)  # pyright: ignore
 
 
 @admin.register(AppUser, site=admin_site)

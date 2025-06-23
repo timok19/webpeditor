@@ -1,16 +1,15 @@
 import base64
 import os
 import re
-
 from decimal import ROUND_UP, Decimal
-from io import BytesIO
 from http import HTTPStatus
+from io import BytesIO
+from typing import Final, Optional, Union, final
 
 import exifread
 from httpx import AsyncClient
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
-from typing import Final, Optional, Union, final
 
 from webpeditor import settings
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC

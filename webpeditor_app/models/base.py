@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
+
 from django.db import models
 from django.utils import timezone
 

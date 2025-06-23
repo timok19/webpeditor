@@ -1,7 +1,7 @@
 from typing import Union
 
 from django.conf.urls.static import static  # pyright: ignore
-from django.urls import path, URLResolver, URLPattern, include
+from django.urls import URLPattern, URLResolver, include, path
 
 from webpeditor import settings
 from webpeditor_app.api import webpeditor_api

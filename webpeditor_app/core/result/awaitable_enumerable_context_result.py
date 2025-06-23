@@ -1,4 +1,4 @@
-from typing import Awaitable, Any, Generator, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Generator
 
 from types_linq import Enumerable
 

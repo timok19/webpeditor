@@ -17,7 +17,6 @@ from webpeditor_app.application.converter.schemas import (
 from webpeditor_app.controllers.controller_base import WebPEditorControllerBase
 from webpeditor_app.controllers.schemas import HTTPResult, HTTPResultWithStatus
 
-
 # TODO: Add other endpoints from "__converter" folder
 
 
