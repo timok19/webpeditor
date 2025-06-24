@@ -16,7 +16,7 @@ class WebPEditorLogger(WebPEditorLoggerABC):
             level="DEBUG" if settings.IS_DEVELOPMENT else "INFO",
             sink=sys.stderr,
             colorize=True,
-            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <6}</level> | {module}:{function}:{line} - <level>{message}</level>",
+            format="<green>{time:YYYY-MM-DD HH:mm:ss,SSS}</green> <level>{level: <8}</level> <cyan>{module}</cyan>:<yellow>{function}</yellow>:<white>{line}</white> - <level>{message}</level>",
         )
 
     @staticmethod

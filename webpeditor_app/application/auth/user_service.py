@@ -14,17 +14,12 @@ class UserService(UserServiceABC):
         self.__logger: Final[WebPEditorLoggerABC] = logger
 
     def sign_id(self, user_id: str) -> str:
-        return signing.dumps(user_id, salt=settings.WEBPEDITOR_SALT_KEY)
+        return signing.dumps(user_id, salt=settings.WEBPEDITOR_SALT_KEY, compress=True)
 
     def unsign_id(self, signed_user_id: str) -> ContextResult[str]:
         try:
-            return ContextResult[str].success(
-                signing.loads(
-                    signed_user_id,
-                    salt=settings.WEBPEDITOR_SALT_KEY,
-                    max_age=settings.SESSION_COOKIE_AGE,
-                )
-            )
+            return ContextResult[str].success(signing.loads(signed_user_id, salt=settings.WEBPEDITOR_SALT_KEY))
         except Exception as exception:
-            self.__logger.log_exception(exception, f"Invalid signed User ID: {signed_user_id}")
-            return ContextResult[str].failure(ErrorContext.bad_request())
+            message = f"Invalid signed User ID: {signed_user_id}"
+            self.__logger.log_exception(exception, message)
+            return ContextResult[str].failure(ErrorContext.bad_request(message))

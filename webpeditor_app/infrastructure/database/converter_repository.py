@@ -51,7 +51,7 @@ class ConverterRepository(ConverterRepositoryABC):
     async def adelete_asset(self, user_id: str) -> ContextResult[Unit]:
         try:
             number_of_deleted, deleted_per_model = await ConverterImageAsset.objects.filter(user_id=user_id).adelete()
-            self.__logger.log_info(f"Deleted {number_of_deleted} Converter Image Assets for User '{user_id}'")
+            self.__logger.log_info(f"Deleted {number_of_deleted} Converter Image Assets data for User '{user_id}'")
 
             for model, count in deleted_per_model.items():
                 self.__logger.log_debug(f"Deleted '{model}': {count} for User '{user_id}'")

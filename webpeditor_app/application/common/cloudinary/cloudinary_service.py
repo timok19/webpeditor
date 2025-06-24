@@ -22,7 +22,7 @@ class CloudinaryService(CloudinaryServiceABC):
         return await (
             self.__cloudinary_client.adelete_folder_recursively(user_id, relative_folder_path)
             .alog_match(
-                lambda response: f"Deleted {len(response.deleted.values())} files in the folder '{relative_folder_path}' for User '{user_id}'",
+                lambda response: f"Deleted {len(response.deleted.values())} files in the folder '{user_id}/{relative_folder_path}'",
                 lambda error: error.message,
             )
             .map(lambda _: Unit())
