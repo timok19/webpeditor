@@ -8,13 +8,13 @@ from ninja_extra.context import RouteContext
 class WebPEditorControllerBase(ControllerBase):
     @property
     def request(self) -> HttpRequest:
-        ctx = self.__validate_context(self.context)
-        return self.__validate_request(ctx.request)
+        context = self.__validate_context(self.context)
+        return self.__validate_request(context.request)
 
     @property
     def response(self) -> HttpResponse:
-        ctx = self.__validate_context(self.context)
-        return self.__validate_response(ctx.response)
+        context = self.__validate_context(self.context)
+        return self.__validate_response(context.response)
 
     @staticmethod
     def __validate_context(context: Optional[RouteContext]) -> RouteContext:

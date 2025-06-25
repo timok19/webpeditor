@@ -98,11 +98,14 @@ class SessionService:
     @acontext_result
     async def __aupdate_session_expiry(self, user_id: str) -> ContextResult[Unit]:
         try:
-            current_session_expiry_date = await self.__request.session.aget_expiry_date()
-            self.__logger.log_debug(f"Current session expires at '{current_session_expiry_date}' for User '{user_id}'")
+            current_expiry_date = await self.__request.session.aget_expiry_date()
+            self.__logger.log_debug(f"Current session expires at '{current_expiry_date}' for User '{user_id}'")
+
             await self.__request.session.aset_expiry(timedelta(minutes=15))
-            updated_session_expiry_date = await self.__request.session.aget_expiry_date()
-            self.__logger.log_debug(f"Updated session expires at '{updated_session_expiry_date}' for User '{user_id}'")
+
+            updated_expiry_date = await self.__request.session.aget_expiry_date()
+            self.__logger.log_debug(f"Updated session expires at '{updated_expiry_date}' for User '{user_id}'")
+
             return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, f"Unable to update session expiry date for User '{user_id}'")
