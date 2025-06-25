@@ -62,15 +62,11 @@ class CloudinaryClient:
         )
 
     @acontext_result
-    async def adelete_folder_recursively(
-        self,
-        user_id: str,
-        relative_folder_path: str,
-    ) -> ContextResult[DeleteResourceResponse]:
+    async def adelete_folder_recursively(self, relative_folder_path: str) -> ContextResult[DeleteResourceResponse]:
         return await self.__asend_request(
             HTTPMethod.DELETE,
             "resources/image/upload",
-            query_params={"prefix": f"{user_id}/{relative_folder_path}"},
+            query_params={"prefix": relative_folder_path},
             response_type=DeleteResourceResponse,
         )
 

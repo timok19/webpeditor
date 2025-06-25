@@ -36,10 +36,10 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         yield self.__validate_output_format(value.options.output_format)
         yield self.__validate_quality(value.options.quality)
         for file in value.files:
+            yield self.__validate_file_integrity(file)
+            yield self.__validate_filename(file.name)
             yield self.__validate_empty_file_size(file)
             yield self.__validate_max_file_size(file)
-            yield self.__validate_filename(file.name)
-            yield self.__validate_file_compatibility(file)
 
     def __validate_file_count(self, files: list[UploadedFile]) -> Option[str]:
         files_count = len(files)
@@ -64,13 +64,13 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             return Option[str].Some(message)
         return Option[str].Nothing()
 
-    def __validate_file_compatibility(self, file: UploadedFile) -> Option[str]:
+    def __validate_file_integrity(self, file: UploadedFile) -> Option[str]:
         try:
             Image.open(file).verify()
             return Option[str].Nothing()
-        except UnidentifiedImageError as image_error:
-            message = f"File '{file.name}' cannot be processed. Incompatible file"
-            self.__logger.log_exception(image_error, message)
+        except UnidentifiedImageError:
+            message = f"File '{file.name}' cannot be processed. Incompatible file type '{file.content_type}'"
+            self.__logger.log_debug(message)
             return Option[str].Some(message)
         except Exception as exception:
             message = f"File '{file.name}' cannot be processed. Corrupted or damaged file"

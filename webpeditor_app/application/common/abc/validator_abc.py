@@ -15,13 +15,10 @@ class ValidationResult(Schema):
     def add_error(self, message: str) -> None:
         self.errors.append(message)
 
-    def has_errors(self) -> bool:
-        return any(self.errors)
-
     def to_context_result(self) -> ContextResult[Unit]:
         return (
             ContextResult[Unit].failure(ErrorContext.bad_request("Request is invalid", self.errors))
-            if self.has_errors()
+            if any(self.errors)
             else ContextResult[Unit].success(Unit())
         )
 

@@ -1,9 +1,8 @@
-from typing import TYPE_CHECKING, Awaitable, Callable, Optional, Union, override
+from typing import TYPE_CHECKING, Awaitable, Callable, override
 
 from expression import Result
 from types_linq import Enumerable
 
-from webpeditor_app.core import WebPEditorLoggerABC
 from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
 from webpeditor_app.core.result.error_context import ErrorContext
 
@@ -16,27 +15,29 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def success(value: TOut) -> "ContextResult[TOut]":
         return ContextResult(tag="ok", ok=value)
 
-    @staticmethod
-    def failure(error: ErrorContext) -> "ContextResult[TOut]":
-        return ContextResult[TOut].failure2(error.error_code, error.message, error.reasons)
+    @classmethod
+    @acontext_result
+    async def asuccess(cls, value: TOut) -> "ContextResult[TOut]":
+        return cls.success(value)
 
     @staticmethod
-    def failure2(
-        error_code: ErrorContext.ErrorCode,
-        message: Optional[str] = None,
-        reasons: Optional[list[str]] = None,
-    ) -> "ContextResult[TOut]":
+    def failure(error: ErrorContext) -> "ContextResult[TOut]":
         return ContextResult(
             tag="error",
             error=ErrorContext(
-                error_code=error_code,
-                message=message or "",
-                reasons=reasons or [],
+                error_code=error.error_code,
+                message=error.message or "",
+                reasons=error.reasons or [],
             ),
         )
 
-    @staticmethod
-    def failures(*errors: ErrorContext) -> "EnumerableContextResult[TOut]":
+    @classmethod
+    @acontext_result
+    async def afailure(cls, error: ErrorContext) -> "ContextResult[TOut]":
+        return cls.failure(error)
+
+    @classmethod
+    def failures(cls, *errors: ErrorContext) -> "EnumerableContextResult[TOut]":
         from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
 
         return EnumerableContextResult[TOut](Enumerable(errors).select(ContextResult[TOut].failure))
@@ -49,25 +50,22 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case Result(tag="error", error=error):
                 return cls.failure(error)
             case _:
-                return cls.unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(result)}'")
 
-    def log_match(
+    def log_result(
         self,
-        success_func: Callable[[TOut], str],
-        error_func: Callable[[ErrorContext], str],
+        log_success: Callable[[TOut], None],
+        log_error: Callable[[ErrorContext], None],
     ) -> "ContextResult[TOut]":
-        from anydi.ext.django import container
-
-        logger = container.resolve(WebPEditorLoggerABC)
         match self:
             case ContextResult(tag="ok", ok=value):
-                logger.log_info(success_func(value))
+                log_success(value)
                 return self.success(value)
             case ContextResult(tag="error", error=error):
-                logger.log_error(error_func(error))
+                log_error(error)
                 return self.failure(error)
             case _:
-                return self.unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @override
     def map[TNewOut](self, mapper: Callable[[TOut], TNewOut]) -> "ContextResult[TNewOut]":
@@ -77,7 +75,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @override
     def map2[TOutOther, TNewOut](
@@ -91,7 +89,25 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
+
+    @acontext_result
+    async def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return ContextResult[TNewOut].success(await mapper(value))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
+
+    @acontext_result
+    async def amap2[TOutOther, TNewOut](
+        self,
+        other: Awaitable["ContextResult[TOutOther]"],
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        return self.map2(await other, mapper)
 
     @override
     def bind[TNewOut](self, mapper: Callable[[TOut], Result[TNewOut, ErrorContext]]) -> "ContextResult[TNewOut]":
@@ -101,16 +117,17 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    def bind2[TNewOut](self, mapper: Callable[[TOut], "ContextResult[TNewOut]"]) -> "ContextResult[TNewOut]":
+    @acontext_result
+    async def abind[TNewOut](self, mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                return mapper(value)
+                return ContextResult[TNewOut].from_result(await mapper(value))
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @override
     def or_else(self, other: Result[TOut, ErrorContext]) -> "ContextResult[TOut]":
@@ -132,52 +149,22 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @acontext_result
-    async def abind[TNewOut](
+    async def aif_then_else[TNewOut](
         self,
-        mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]],
+        predicate: Callable[[TOut], bool],
+        then_mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]],
+        else_mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]],
     ) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
-                return ContextResult[TNewOut].from_result(await mapper(value))
+                return await then_mapper(value) if predicate(value) else await else_mapper(value)
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failure(error)
             case _:
-                return ContextResult[TNewOut].unexpected()
-
-    @acontext_result
-    async def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "ContextResult[TNewOut]":
-        match self:
-            case ContextResult(tag="ok", ok=value):
-                return ContextResult[TNewOut].success(await mapper(value))
-            case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].failure(error)
-            case _:
-                return ContextResult[TNewOut].unexpected()
-
-    @acontext_result
-    async def amap2[TOutOther, TNewOut](
-        self,
-        other: "ContextResult[TOutOther]",
-        mapper: Callable[[TOut, TOutOther], TNewOut],
-    ) -> "ContextResult[TNewOut]":
-        match self:
-            case ContextResult(tag="ok", ok=value):
-                return other.map(lambda value_: mapper(value, value_))
-            case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].failure(error)
-            case _:
-                return ContextResult[TNewOut].unexpected()
-
-    @acontext_result
-    async def amap3[TOutOther, TNewOut](
-        self,
-        other: Awaitable["ContextResult[TOutOther]"],
-        mapper: Callable[[TOut, TOutOther], TNewOut],
-    ) -> "ContextResult[TNewOut]":
-        return await self.amap2(await other, mapper)
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     def bind_many[TNewOut](
         self,
@@ -189,7 +176,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failures(error)
             case _:
-                return ContextResult[TNewOut].unexpected_many()
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @aenumerable_context_result
     async def abind_many[TNewOut](
@@ -202,40 +189,4 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case ContextResult(tag="error", error=error):
                 return ContextResult[TNewOut].failures(error)
             case _:
-                return ContextResult[TNewOut].unexpected_many()
-
-    @acontext_result
-    async def aif_then_else[TNewOut](
-        self,
-        predicate: Callable[[TOut], Union[bool, Awaitable[bool]]],
-        then_mapper: Callable[[TOut], Union["ContextResult[TNewOut]", Awaitable["ContextResult[TNewOut]"]]],
-        else_mapper: Callable[[TOut], Union["ContextResult[TNewOut]", Awaitable["ContextResult[TNewOut]"]]],
-    ) -> "ContextResult[TNewOut]":
-        match self:
-            case ContextResult(tag="ok", ok=value):
-                predicate_result = predicate(value)
-                if isinstance(predicate_result, Awaitable):
-                    predicate_result = await predicate_result
-
-                if predicate_result:
-                    mapper_result = then_mapper(value)
-                else:
-                    mapper_result = else_mapper(value)
-
-                if isinstance(mapper_result, Awaitable):
-                    return await mapper_result
-                return mapper_result
-            case ContextResult(tag="error", error=error):
-                return ContextResult[TNewOut].failure(error)
-            case _:
-                return ContextResult[TNewOut].unexpected()
-
-    @staticmethod
-    def unexpected() -> "ContextResult[TOut]":
-        return ContextResult[TOut].failure(ErrorContext.server_error("Unexpected error"))
-
-    @staticmethod
-    def unexpected_many() -> "EnumerableContextResult[TOut]":
-        from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
-
-        return EnumerableContextResult[TOut]([ContextResult[TOut].unexpected()])
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")

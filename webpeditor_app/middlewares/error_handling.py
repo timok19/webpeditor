@@ -1,4 +1,4 @@
-from typing import Any, Callable, Final, final, cast
+from typing import Any, Callable, Collection, Final, final, cast
 
 from anydi.ext.django import container
 from django.http.request import HttpRequest
@@ -33,9 +33,9 @@ class ErrorHandlingMiddleware:
         if validation_result.is_none():
             return response
 
-        errors = "; ".join(f'(Message: "{e.message}" | Reasons: [{", ".join(e.reasons)}])' for e in validation_result.some.errors)
+        message = self.__get_error_message(validation_result.some.errors)
 
-        self.__logger.log_request_error(request, f"Errors: [{errors}]")
+        self.__logger.log_request_error(request, message)
 
         return response
 
@@ -48,3 +48,10 @@ class ErrorHandlingMiddleware:
         except Exception as exception:
             self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{response.text}'")
             return Option[HTTPResult[Any]].Nothing()
+
+    def __get_error_message(self, errors: Collection[HTTPResult.HTTPError]) -> str:
+        return f"Errors: [{'; '.join(f'(Message: "{e.message}" | Reasons: [{self.__reasons_to_str(e.reasons)}])' for e in errors)}]"
+
+    @staticmethod
+    def __reasons_to_str(reasons: Collection[str]) -> str:
+        return "; ".join(f'"{reason}"' for reason in reasons)

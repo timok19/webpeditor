@@ -11,18 +11,15 @@ if TYPE_CHECKING:
 
 class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[TOut]"]):
     def __init__(self, awaitable: Awaitable["EnumerableContextResult[TOut]"]) -> None:
-        self.__awaitable_result: Awaitable["EnumerableContextResult[TOut]"] = awaitable
+        self.__awaitable_results: Awaitable["EnumerableContextResult[TOut]"] = awaitable
 
     def __await__(self) -> Generator[Any, Any, "EnumerableContextResult[TOut]"]:
-        return self.__awaitable_result.__await__()
+        return self.__awaitable_results.__await__()
 
     @aenumerable_context_result
-    async def alog_match(
+    async def log_results(
         self,
-        success_func: Callable[[Enumerable[TOut]], str],
-        error_func: Callable[[Enumerable[ErrorContext]], str],
+        log_success: Callable[[Enumerable[TOut]], None],
+        log_error: Callable[[Enumerable[ErrorContext]], None],
     ) -> "EnumerableContextResult[TOut]":
-        async def _alog_match() -> "EnumerableContextResult[TOut]":
-            return (await self.__awaitable_result).log_match(success_func, error_func)
-
-        return await _alog_match()
+        return (await self.__awaitable_results).log_results(log_success, log_error)

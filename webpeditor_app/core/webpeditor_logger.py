@@ -20,16 +20,16 @@ class WebPEditorLogger(WebPEditorLoggerABC):
         )
 
     @staticmethod
-    def log_debug(message: str) -> None:
-        logger.opt(depth=1).debug(message)
+    def log_debug(message: str, *, depth: int = 1) -> None:
+        return logger.opt(depth=depth).debug(message)
 
     @staticmethod
-    def log_info(message: str) -> None:
-        logger.opt(depth=1).info(message)
+    def log_info(message: str, *, depth: int = 1) -> None:
+        return logger.opt(depth=depth).info(message)
 
     @staticmethod
-    def log_request_info(request: HttpRequest, message: str) -> None:
-        logger.opt(depth=1).info(
+    def log_request_info(request: HttpRequest, message: str, *, depth: int = 1) -> None:
+        return logger.opt(depth=depth).info(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
@@ -37,8 +37,8 @@ class WebPEditorLogger(WebPEditorLoggerABC):
         )
 
     @staticmethod
-    def log_request_error(request: HttpRequest, message: str) -> None:
-        logger.opt(depth=1).error(
+    def log_request_error(request: HttpRequest, message: str, *, depth: int = 1) -> None:
+        return logger.opt(depth=depth).error(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
@@ -46,24 +46,18 @@ class WebPEditorLogger(WebPEditorLoggerABC):
         )
 
     @staticmethod
-    def log_error(message: str) -> None:
-        logger.opt(depth=1).error(message)
+    def log_error(message: str, *, depth: int = 1) -> None:
+        return logger.opt(depth=depth).error(message)
 
     @staticmethod
-    def log_exception(exception: Exception, message: str) -> None:
-        logger.opt(exception=exception, colors=True, ansi=True, depth=1).exception(message)
-
-    def log_exception_500(self, exception: Exception) -> None:
-        self.log_exception(exception, "Internal server error")
+    def log_exception(exception: Exception, message: str, *, depth: int = 1) -> None:
+        return logger.opt(exception=exception, colors=True, ansi=True, depth=depth).exception(message)
 
     @staticmethod
-    def log_request_exception(request: HttpRequest, exception: Exception, message: str) -> None:
-        logger.opt(exception=exception, colors=True, ansi=True, depth=1).exception(
+    def log_request_exception(request: HttpRequest, exception: Exception, message: str, *, depth: int = 1) -> None:
+        return logger.opt(exception=exception, colors=True, ansi=True, depth=depth).exception(
             "Request {method} {path} - {message}, Exception:",
             method=request.method,
             path=request.path,
             message=message,
         )
-
-    def log_request_exception_500(self, request: HttpRequest, exception: Exception) -> None:
-        self.log_request_exception(request, exception, "Internal server error")

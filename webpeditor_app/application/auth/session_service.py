@@ -38,17 +38,20 @@ class SessionService:
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__user_id_key: Final[str] = "USER_ID"
 
+    @property
+    def request(self) -> HttpRequest:
+        return self.__request
+
     @acontext_result
     async def asynchronize(self) -> ContextResult[str]:
         return await (
-            self.__aget_signed_user_id()
-            .bind(self.__user_service.unsign_id)
-            .abind(self.__aupdate_session_expiry)
+            self.__aget_user_id()
+            .abind(lambda user_id: self.__aupdate_session_expiry(user_id).map(lambda _: user_id))
             .aor_else(
                 self.__aget_or_create_session()
                 .abind(self.__aget_or_create_user)
                 .abind(self.__aset_signed_user_id)
-                .bind(self.__user_service.unsign_id)
+                .abind(lambda _: self.__aget_user_id())
             )
         )
 
@@ -56,7 +59,7 @@ class SessionService:
     async def adelete_expired_data(self, user_id: str) -> ContextResult[Unit]:
         return await self.__ais_expired().aif_then_else(
             lambda is_expired: not is_expired,
-            lambda _: ContextResult[Unit].success(Unit()),
+            lambda _: ContextResult[Unit].asuccess(Unit()),
             lambda _: self.__editor_repository.aget_original_asset(user_id)
             .amap(lambda original: original.adelete())
             .map(lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Original asset(s) for User '{user_id}'"))
@@ -67,10 +70,17 @@ class SessionService:
             .amap(lambda converted: converted.adelete())
             .map(lambda info: self.__logger.log_info(f"Converter: Deleted {info[0]} Asset(s) for User '{user_id}'"))
             .amap(lambda _: self.__request.session.aclear_expired())
-            .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(user_id, "converter"))
-            .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(user_id, "editor"))
-            .alog_match(lambda _: f"Data for User '{user_id}' have been removed", lambda error: error.message),
+            .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/converter"))
+            .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/editor"))
+            .log_result(
+                lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed"),
+                lambda error: self.__logger.log_error(error.message),
+            ),
         )
+
+    @acontext_result
+    async def __aget_user_id(self) -> ContextResult[str]:
+        return await self.__aget_signed_user_id().bind(self.__user_service.unsign_id)
 
     @acontext_result
     async def __aget_signed_user_id(self) -> ContextResult[str]:
@@ -86,18 +96,18 @@ class SessionService:
             return ContextResult[str].failure(ErrorContext.server_error())
 
     @acontext_result
-    async def __aupdate_session_expiry(self, user_id: str) -> ContextResult[str]:
+    async def __aupdate_session_expiry(self, user_id: str) -> ContextResult[Unit]:
         try:
             current_session_expiry_date = await self.__request.session.aget_expiry_date()
             self.__logger.log_debug(f"Current session expires at '{current_session_expiry_date}' for User '{user_id}'")
             await self.__request.session.aset_expiry(timedelta(minutes=15))
             updated_session_expiry_date = await self.__request.session.aget_expiry_date()
             self.__logger.log_debug(f"Updated session expires at '{updated_session_expiry_date}' for User '{user_id}'")
-            return ContextResult[str].success(user_id)
+            return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, f"Unable to update session expiry date for User '{user_id}'")
             await self.__aclear()
-            return ContextResult[str].failure(ErrorContext.server_error())
+            return ContextResult[Unit].failure(ErrorContext.server_error())
 
     @acontext_result
     async def __aget_or_create_session(self) -> ContextResult[str]:
@@ -132,15 +142,16 @@ class SessionService:
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
     @acontext_result
-    async def __aset_signed_user_id(self, user: AppUser) -> ContextResult[str]:
+    async def __aset_signed_user_id(self, user: AppUser) -> ContextResult[Unit]:
         try:
-            signed_user_id = await self.__request.session.asetdefault(self.__user_id_key, self.__user_service.sign_id(user.id))
+            signed_user_id = self.__user_service.sign_id(user.id)
+            await self.__request.session.aset(self.__user_id_key, signed_user_id)
             self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been set")
-            return ContextResult[str].success(str(signed_user_id))
+            return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, f"Failed to set {self.__user_id_key} in session")
             await self.__aclear()
-            return ContextResult[str].failure(ErrorContext.server_error("Session is corrupted"))
+            return ContextResult[Unit].failure(ErrorContext.server_error("Session is corrupted"))
 
     @acontext_result
     async def __ais_expired(self) -> ContextResult[bool]:
