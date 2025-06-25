@@ -1,4 +1,4 @@
-from typing import Any, Callable, Final, final
+from typing import Any, Callable, Final, final, cast
 
 from anydi.ext.django import container
 from django.http.request import HttpRequest
@@ -20,15 +20,11 @@ class ErrorHandlingMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
         response = self.get_response(request)
-        return (
-            self.__process(request, response)
-            if isinstance(response, HttpResponse) and self.__is_error_response(response.status_code)
-            else response
-        )
+        return self.__process(request, cast(HttpResponse, response)) if self.__is_error_response(response) else response
 
     @staticmethod
-    def __is_error_response(status_code: int) -> bool:
-        return Enumerable(codes_4xx).union(codes_5xx).any(lambda code: status_code == code)
+    def __is_error_response(response: HttpResponseBase) -> bool:
+        return isinstance(response, HttpResponse) and Enumerable(codes_4xx).union(codes_5xx).any(lambda code: response.status_code == code)
 
     def __process(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
         validation_result = self.__validate_json(request, response)
