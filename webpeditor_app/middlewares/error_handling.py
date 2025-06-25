@@ -37,11 +37,7 @@ class ErrorHandlingMiddleware:
         if validation_result.is_none():
             return response
 
-        errors = "; ".join(
-            Enumerable(validation_result.some.errors).select(
-                lambda error: f'(Message: "{error.message}" | Reasons: [{", ".join(error.reasons)}])'
-            )
-        )
+        errors = "; ".join(f'(Message: "{e.message}" | Reasons: [{", ".join(e.reasons)}])' for e in validation_result.some.errors)
 
         self.__logger.log_request_error(request, f"Errors: [{errors}]")
 
@@ -50,7 +46,8 @@ class ErrorHandlingMiddleware:
     def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[HTTPResult[Any]]:
         try:
             return Option[HTTPResult[Any]].Some(HTTPResult[Any].model_validate_json(response.content))
-        except ValidationError:
+        except ValidationError as validation_error:
+            self.__logger.log_debug(validation_error.json(indent=4))
             return Option[HTTPResult[Any]].Nothing()
         except Exception as exception:
             self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{response.text}'")
