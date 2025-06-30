@@ -35,7 +35,7 @@ msgpack==1.1.1
     # via cachecontrol
 nodeenv==1.9.1
     # via pre-commit
-nodejs-wheel-binaries==22.16.0
+nodejs-wheel-binaries==22.17.0
     # via basedpyright
 packageurl-python==0.17.1
     # via cyclonedx-python-lib
@@ -69,7 +69,7 @@ requests==2.32.4
     #   pip-audit
 rich==14.0.0
     # via pip-audit
-ruff==0.12.0
+ruff==0.12.1
 sortedcontainers==2.4.0
     # via cyclonedx-python-lib
 toml==0.10.2

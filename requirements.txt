@@ -6,7 +6,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.41.0
+anydi==0.44.0
     # via webpeditor
 anyio==4.9.0
     # via
@@ -185,7 +185,7 @@ lazy-object-proxy==1.11.0
     # via webpeditor
 loguru==0.7.3
     # via webpeditor
-lxml==5.4.0
+lxml==6.0.0
     # via reactpy
 mccabe==0.7.0
     # via webpeditor
@@ -283,7 +283,7 @@ twisted==25.5.0
     # via
     #   daphne
     #   webpeditor
-txaio==23.1.1
+txaio==25.6.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
