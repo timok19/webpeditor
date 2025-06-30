@@ -18,12 +18,12 @@ class CloudinaryService(CloudinaryServiceABC):
         return await self.__cloudinary_client.aupload_file(public_id, file_content).map(lambda res: str(res.secure_url))
 
     @acontext_result
-    async def adelete_folder_recursively(self, relative_folder_path: str) -> ContextResult[Unit]:
+    async def adelete_folder_recursively(self, folder_path: str) -> ContextResult[Unit]:
         return await (
-            self.__cloudinary_client.adelete_folder_recursively(relative_folder_path)
+            self.__cloudinary_client.adelete_folder_recursively(folder_path)
             .log_result(
-                lambda data: self.__logger.log_info(f"Deleted {len(data.deleted.values())} files in the folder '{relative_folder_path}'"),
-                lambda error: self.__logger.log_error(error.message),
+                lambda data: self.__logger.log_info(f"Deleted {len(data.deleted.values())} files in the folder '{folder_path}'", depth=5),
+                lambda _: None,
             )
             .map(lambda _: Unit())
         )

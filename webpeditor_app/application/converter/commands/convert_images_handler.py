@@ -81,12 +81,10 @@ class ConvertImagesHandler:
             .bind_many(EnumerableContextResult[ConversionResponse].from_results)
             .log_results(
                 lambda values: self.__logger.log_request_info(
-                    session_service.request,
-                    f"Successfully converted {values.count()} image(s) for User '{user_id}'",
+                    session_service.request, f"Successfully converted {values.count()} image(s) for User '{user_id}'", depth=4
                 ),
                 lambda errors: self.__logger.log_request_error(
-                    session_service.request,
-                    f"Failed to convert images for User '{user_id}'",
+                    session_service.request, f"Failed to convert images for User '{user_id}'", depth=4
                 ),
             )
         )
