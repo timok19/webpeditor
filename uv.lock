@@ -36,16 +36,16 @@ wheels = [
 
 [[package]]
 name = "anydi"
-version = "0.44.0"
+version = "0.44.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1f/5c/487ce791292438ad004992764e64176ed18b943153de7ab1a702d1570c8e/anydi-0.44.0.tar.gz", hash = "sha256:af892485e6dbe6c9836accac83a70721b5ade850bea5acd3310f427621110dc7", size = 120377, upload-time = "2025-06-27T15:08:39.446Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/38/d0/5d0d415a80568baf2d01b26921f2088d69b694587e5bd8fd0f73c8baea75/anydi-0.44.1.tar.gz", hash = "sha256:e84c9dbc1a0e453d17631c7172e084656934b9619da763e8bc3009664801842f", size = 120376, upload-time = "2025-07-01T12:48:34.182Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/1f/0d4e14cfc361925c8b013f5c1a56e1ae33b409318e5899d6b593654a8cd9/anydi-0.44.0-py3-none-any.whl", hash = "sha256:c09fcee3b4702b87b37e2280fa8930d970a0c63eda4d020b6c14099a57b5295a", size = 31163, upload-time = "2025-06-27T15:08:37.268Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/6d/037192230bad72c94a318830f8d0368132cc5d414957cc1757938a1d7037/anydi-0.44.1-py3-none-any.whl", hash = "sha256:bd0e258eb9d63b15778882daa0e9421eaaae8bc096cc3d117368863456762d61", size = 31160, upload-time = "2025-07-01T12:48:32.532Z" },
 ]
 
 [[package]]
@@ -1808,7 +1808,7 @@ dev = [
 requires-dist = [
     { name = "aiofiles", specifier = ">=24.1.0" },
     { name = "aioreactive", specifier = ">=0.20.0" },
-    { name = "anydi", specifier = ">=0.39.3" },
+    { name = "anydi", specifier = ">=0.44.0" },
     { name = "asgiref", specifier = ">=3.8.1" },
     { name = "certifi", specifier = ">=2024.12.14" },
     { name = "channels", extras = ["daphne"], specifier = ">=4.2.0" },

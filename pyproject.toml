@@ -9,7 +9,7 @@ authors = [{name = "Temirkhan Amanzhanov", email = "tima1199@gmail.com"}]
 dependencies = [
     "aiofiles>=24.1.0",
     "aioreactive>=0.20.0",
-    "anydi>=0.39.3",
+    "anydi>=0.44.0",
     "asgiref>=3.8.1",
     "certifi>=2024.12.14",
     "channels[daphne]>=4.2.0",

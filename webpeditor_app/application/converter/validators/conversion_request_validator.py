@@ -55,10 +55,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         return Option[str].Some(f"File '{file.name}' does not have size") if file.size is None or file.size == 0 else Option[str].Nothing()
 
     def __validate_max_file_size(self, file: UploadedFile) -> Option[str]:
-        if cast(int, file.size) > self.__settings.MAX_FILE_SIZE:
-            message = f"File '{file.name}' with size {file.size} exceeds the maximum allowed size {self.__settings.MAX_FILE_SIZE}"
-            return Option[str].Some(message)
-        return Option[str].Nothing()
+        return (
+            Option[str].Some(f"File '{file.name}' with size {file.size} exceeds the maximum allowed size {self.__settings.MAX_FILE_SIZE}")
+            if cast(int, file.size) > self.__settings.MAX_FILE_SIZE
+            else Option[str].Nothing()
+        )
 
     def __validate_file_integrity(self, file: UploadedFile) -> Option[str]:
         try:
@@ -75,11 +76,15 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     @staticmethod
     def __validate_output_format(output_format: str) -> Option[str]:
-        if output_format.strip().upper() not in ImageConverterAllOutputFormats:
-            return Option[str].Some(f"Invalid output format '{output_format}'")
-        return Option[str].Nothing()
+        return (
+            Option[str].Some(f"Invalid output format '{output_format}'")
+            if output_format.strip().upper() not in ImageConverterAllOutputFormats
+            else Option[str].Nothing()
+        )
 
     def __validate_quality(self, quality: int) -> Option[str]:
-        if not (self.__settings.MIN_QUALITY <= quality <= self.__settings.MAX_QUALITY):
-            return Option[str].Some(f"Quality must be between {self.__settings.MIN_QUALITY} and {self.__settings.MAX_QUALITY}")
-        return Option[str].Nothing()
+        return (
+            Option[str].Some(f"Quality must be between {self.__settings.MIN_QUALITY} and {self.__settings.MAX_QUALITY}")
+            if not (self.__settings.MIN_QUALITY <= quality <= self.__settings.MAX_QUALITY)
+            else Option[str].Nothing()
+        )

@@ -76,7 +76,6 @@ ANYDI: dict[str, Any] = {
     "PATCH_NINJA": True,
     "REGISTER_COMPONENTS": True,
     "REGISTER_SETTINGS": True,
-    "STRICT_MODE": True,
     "MODULES": [
         # Should follow the order. Synchronous dependency resolution
         "webpeditor_app.core.CoreModule",

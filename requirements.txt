@@ -6,7 +6,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.44.0
+anydi==0.44.1
     # via webpeditor
 anyio==4.9.0
     # via
