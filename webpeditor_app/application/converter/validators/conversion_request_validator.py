@@ -28,16 +28,16 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         return ValidationResult(errors=self.__validate(value))
 
     def __validate(self, value: ConversionRequest) -> list[str]:
-        results: Enumerable[Option[str]] = Enumerable([])
-        results.append(self.__validate_file_count(value.files))
-        results.append(self.__validate_output_format(value.options.output_format))
-        results.append(self.__validate_quality(value.options.quality))
+        results: set[Option[str]] = set[Option[str]]()
+        results.add(self.__validate_file_count(value.files))
+        results.add(self.__validate_output_format(value.options.output_format))
+        results.add(self.__validate_quality(value.options.quality))
         for file in value.files:
-            results.append(self.__validate_file_integrity(file))
-            results.append(self.__validate_filename(file.name))
-            results.append(self.__validate_empty_file_size(file))
-            results.append(self.__validate_max_file_size(file))
-        return results.where(lambda result: result.is_some()).select(lambda result: result.some).to_list()
+            results.add(self.__validate_file_integrity(file))
+            results.add(self.__validate_filename(file.name))
+            results.add(self.__validate_empty_file_size(file))
+            results.add(self.__validate_max_file_size(file))
+        return Enumerable(results).where(lambda result: result.is_some()).select(lambda result: result.some).to_list()
 
     def __validate_file_count(self, files: list[UploadedFile]) -> Option[str]:
         files_count = len(files)
