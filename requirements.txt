@@ -206,7 +206,7 @@ packaging==25.0
     #   deptry
     #   gunicorn
     #   requirements-parser
-pillow==11.2.1
+pillow==11.3.0
     # via webpeditor
 platformdirs==4.3.8
     # via webpeditor

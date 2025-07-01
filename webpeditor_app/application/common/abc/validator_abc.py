@@ -12,9 +12,6 @@ class ValidationResult(Schema):
 
     errors: list[str] = Field(default_factory=list[str])
 
-    def add_error(self, message: str) -> None:
-        self.errors.append(message)
-
     def to_context_result(self) -> ContextResult[Unit]:
         return (
             ContextResult[Unit].failure(ErrorContext.bad_request("Request is invalid", self.errors))
