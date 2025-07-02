@@ -6,7 +6,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.44.1
+anydi==0.46.0
     # via webpeditor
 anyio==4.9.0
     # via
@@ -62,7 +62,7 @@ constantly==23.10.4
     # via twisted
 contextlib2==21.6.0
     # via django-ninja-extra
-cryptography==45.0.4
+cryptography==45.0.5
     # via
     #   autobahn
     #   fido2
@@ -70,7 +70,7 @@ cryptography==45.0.4
     #   pyopenssl
     #   service-identity
     #   webpeditor
-daphne==4.2.0
+daphne==4.2.1
     # via channels
 deptry==0.23.0
     # via webpeditor
@@ -78,7 +78,7 @@ dill==0.4.0
     # via
     #   reactpy-django
     #   webpeditor
-django==5.2.3
+django==5.2.4
     # via
     #   channels
     #   django-allauth
