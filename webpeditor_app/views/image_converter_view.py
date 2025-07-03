@@ -35,7 +35,7 @@ class ImageConverterView(FormView[ImageConverterUploadFilesForm]):
         return HttpResponse()
 
     @override
-    async def put(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore [reportIncompatibleMethodOverride]
+    async def put(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore
         return await self.post(request, *args, **kwargs)
 
     # image_form: ImageConverterForm = ImageConverterForm()
