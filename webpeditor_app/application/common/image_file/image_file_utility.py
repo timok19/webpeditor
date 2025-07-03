@@ -14,15 +14,15 @@ from types_linq import Enumerable
 from webpeditor import settings
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.image_file.models import ImageFileInfo
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.globals import Unit
 
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
-    def __init__(self, logger: WebPEditorLoggerABC) -> None:
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+    def __init__(self, logger: LoggerABC) -> None:
+        self.__logger: Final[LoggerABC] = logger
         self.__filename_regex: Final[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
         self.__max_filename_length: Final[int] = 25
 

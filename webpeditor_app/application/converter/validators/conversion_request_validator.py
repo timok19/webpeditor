@@ -9,7 +9,7 @@ from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFi
 from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ImageConverterAllOutputFormats
 from webpeditor_app.application.converter.settings import ConverterSettings
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 
 @final
@@ -18,11 +18,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         self,
         image_file_utility: ImageFileUtilityABC,
         converter_settings: ConverterSettings,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
     ) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__settings: Final[ConverterSettings] = converter_settings
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+        self.__logger: Final[LoggerABC] = logger
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
         return ValidationResult(errors=self.__validate(value))

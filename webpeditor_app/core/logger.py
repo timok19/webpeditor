@@ -5,11 +5,11 @@ from django.http.request import HttpRequest
 from loguru import logger
 
 from webpeditor import settings
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 
 @final
-class WebPEditorLogger(WebPEditorLoggerABC):
+class Logger(LoggerABC):
     def __init__(self) -> None:
         logger.remove()
         logger.add(

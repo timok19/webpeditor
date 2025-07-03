@@ -12,7 +12,7 @@ from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.common.image_file.models.file_info import ImageFileInfo
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import (
     ContextResult,
     EnumerableContextResult,
@@ -39,7 +39,7 @@ class ConvertImagesHandler:
         image_file_utility: ImageFileUtilityABC,
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
     ) -> None:
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
         self.__cloudinary_service: Final[CloudinaryServiceABC] = cloudinary_service
@@ -47,7 +47,7 @@ class ConvertImagesHandler:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__converter_repository: Final[ConverterRepositoryABC] = converter_repository
         self.__user_repository: Final[UserRepositoryABC] = user_repository
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+        self.__logger: Final[LoggerABC] = logger
 
     @aenumerable_context_result
     async def ahandle(self, request: ConversionRequest, session_service: SessionService) -> EnumerableContextResult[ConversionResponse]:

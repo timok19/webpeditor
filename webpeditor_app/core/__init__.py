@@ -1,10 +1,10 @@
 from anydi import Module, provider
 
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
-from webpeditor_app.core.webpeditor_logger import WebPEditorLogger
+from webpeditor_app.core.abc.logger_abc import LoggerABC
+from webpeditor_app.core.logger import Logger
 
 
 class CoreModule(Module):
     @provider(scope="singleton")
-    def provide_logger(self) -> WebPEditorLoggerABC:
-        return WebPEditorLogger()
+    def provide_logger(self) -> LoggerABC:
+        return Logger()

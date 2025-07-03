@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from django.http.request import HttpRequest
 
 
-class WebPEditorLoggerABC(ABC):
+class LoggerABC(ABC):
     @staticmethod
     @abstractmethod
     def log_debug(message: str, *, depth: int = 1) -> None: ...

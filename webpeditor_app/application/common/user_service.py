@@ -4,14 +4,14 @@ from django.core import signing
 
 from webpeditor import settings
 from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 
 
 @final
 class UserService(UserServiceABC):
-    def __init__(self, logger: WebPEditorLoggerABC) -> None:
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+    def __init__(self, logger: LoggerABC) -> None:
+        self.__logger: Final[LoggerABC] = logger
 
     def sign_id(self, user_id: str) -> str:
         return signing.dumps(user_id, salt=settings.WEBPEDITOR_SALT_KEY, compress=True)

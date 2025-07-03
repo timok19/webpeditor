@@ -14,7 +14,7 @@ from webpeditor_app.application.converter.services.abc.image_converter_abc impor
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.settings import ConverterSettings
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
@@ -26,13 +26,13 @@ if TYPE_CHECKING:
 
 class ApplicationModule(Module):
     @provider(scope="request")
-    def provide_image_file_utility(self, logger: WebPEditorLoggerABC) -> ImageFileUtilityABC:
+    def provide_image_file_utility(self, logger: LoggerABC) -> ImageFileUtilityABC:
         return ImageFileUtility(logger=logger)
 
     @provider(scope="singleton")
     def provide_cloudinary_service(
         self,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
         cloudinary_client: CloudinaryClient,
     ) -> CloudinaryServiceABC:
         return CloudinaryService(cloudinary_client=cloudinary_client, logger=logger)
@@ -46,7 +46,7 @@ class ApplicationModule(Module):
         self,
         image_file_utility: ImageFileUtilityABC,
         converter_settings: ConverterSettings,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
     ) -> ValidatorABC["ConversionRequest"]:
         return ConversionRequestValidator(
             image_file_utility=image_file_utility,
@@ -55,7 +55,7 @@ class ApplicationModule(Module):
         )
 
     @provider(scope="request")
-    def provide_user_service(self, logger: WebPEditorLoggerABC) -> UserServiceABC:
+    def provide_user_service(self, logger: LoggerABC) -> UserServiceABC:
         return UserService(logger=logger)
 
     @provider(scope="request")
@@ -63,7 +63,7 @@ class ApplicationModule(Module):
         self,
         user_service: UserServiceABC,
         cloudinary_service: CloudinaryServiceABC,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
         editor_repository: EditorRepositoryABC,
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,
@@ -90,7 +90,7 @@ class ApplicationModule(Module):
         image_file_utility: ImageFileUtilityABC,
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,
-        logger: WebPEditorLoggerABC,
+        logger: LoggerABC,
     ) -> ConvertImagesHandler:
         return ConvertImagesHandler(
             conversion_request_validator=conversion_request_validator,

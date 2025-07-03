@@ -7,7 +7,7 @@ from httpx import AsyncClient, BasicAuth, QueryParams
 from pydantic import BaseModel
 
 from webpeditor import settings
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.schemas import (
@@ -38,9 +38,9 @@ _RequestData = Mapping[str, Any]
 
 @final
 class CloudinaryClient:
-    def __init__(self, logger: WebPEditorLoggerABC) -> None:
+    def __init__(self, logger: LoggerABC) -> None:
         self.__max_results: Final[int] = 500
-        self.__logger: WebPEditorLoggerABC = logger
+        self.__logger: Final[LoggerABC] = logger
 
     @acontext_result
     async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadFileResponse]:

@@ -1,7 +1,7 @@
 from typing import Final, final
 
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, acontext_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
@@ -9,9 +9,9 @@ from webpeditor_app.infrastructure.cloudinary.cloudinary_client import Cloudinar
 
 @final
 class CloudinaryService(CloudinaryServiceABC):
-    def __init__(self, cloudinary_client: CloudinaryClient, logger: WebPEditorLoggerABC) -> None:
+    def __init__(self, cloudinary_client: CloudinaryClient, logger: LoggerABC) -> None:
         self.__cloudinary_client: Final[CloudinaryClient] = cloudinary_client
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+        self.__logger: Final[LoggerABC] = logger
 
     @acontext_result
     async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[str]:

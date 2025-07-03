@@ -3,7 +3,7 @@ from typing import Final, final
 from expression import Option
 
 from webpeditor_app.application.common.image_file.models import ImageFileInfo
-from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
@@ -17,8 +17,8 @@ from webpeditor_app.infrastructure.database.models import (
 
 @final
 class ConverterRepository(ConverterRepositoryABC):
-    def __init__(self, logger: WebPEditorLoggerABC) -> None:
-        self.__logger: Final[WebPEditorLoggerABC] = logger
+    def __init__(self, logger: LoggerABC) -> None:
+        self.__logger: Final[LoggerABC] = logger
 
     @acontext_result
     async def aget_asset(self, user_id: str) -> ContextResult[ConverterImageAsset]:
