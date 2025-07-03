@@ -6,5 +6,5 @@ from webpeditor_app.core.webpeditor_logger import WebPEditorLogger
 
 class CoreModule(Module):
     @provider(scope="singleton")
-    def logger_provider(self) -> WebPEditorLoggerABC:
+    def provide_logger(self) -> WebPEditorLoggerABC:
         return WebPEditorLogger()

@@ -1,11 +1,11 @@
 from typing import Optional
 
 from django.http import HttpRequest, HttpResponse
-from ninja_extra import ControllerBase
+from ninja_extra import ControllerBase as DefaultController
 from ninja_extra.context import RouteContext
 
 
-class WebPEditorControllerBase(ControllerBase):
+class ControllerBase(DefaultController):
     @property
     def request(self) -> HttpRequest:
         context = self.__validate_context(self.context)

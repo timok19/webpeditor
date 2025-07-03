@@ -3,12 +3,8 @@ from typing import Optional
 
 from django.db import models
 from django.utils import timezone
-from names_generator import generate_name
-from uuid_utils import uuid7
 
-
-def generate_id() -> str:
-    return f"{generate_name(style='hyphen')}-{uuid7()}"
+from webpeditor_app.infrastructure.database.utils import generate_id
 
 
 class AppUser(models.Model):

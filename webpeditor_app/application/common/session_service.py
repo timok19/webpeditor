@@ -6,7 +6,7 @@ from django.http.request import HttpRequest
 from django.utils import timezone
 from expression import Option
 
-from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
+from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
@@ -14,7 +14,7 @@ from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
-from webpeditor_app.models.app_user import AppUser
+from webpeditor_app.infrastructure.database.models.app_user import AppUser
 
 
 @final
@@ -37,10 +37,6 @@ class SessionService:
         self.__converter_repository: Final[ConverterRepositoryABC] = converter_repository
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__user_id_key: Final[str] = "USER_ID"
-
-    @property
-    def request(self) -> HttpRequest:
-        return self.__request
 
     @acontext_result
     async def asynchronize(self) -> ContextResult[str]:
@@ -165,3 +161,33 @@ class SessionService:
 
     async def __aclear(self) -> None:
         return await sync_to_async(self.__request.session.clear)()
+
+
+@final
+class SessionServiceFactory:
+    def __init__(
+        self,
+        user_service: UserServiceABC,
+        cloudinary_service: CloudinaryServiceABC,
+        logger: WebPEditorLoggerABC,
+        editor_repository: EditorRepositoryABC,
+        converter_repository: ConverterRepositoryABC,
+        user_repository: UserRepositoryABC,
+    ) -> None:
+        self.__user_service: Final[UserServiceABC] = user_service
+        self.__cloudinary_service: Final[CloudinaryServiceABC] = cloudinary_service
+        self.__logger: Final[WebPEditorLoggerABC] = logger
+        self.__editor_repository: Final[EditorRepositoryABC] = editor_repository
+        self.__converter_repository: Final[ConverterRepositoryABC] = converter_repository
+        self.__user_repository: Final[UserRepositoryABC] = user_repository
+
+    def create(self, request: HttpRequest) -> SessionService:
+        return SessionService(
+            request=request,
+            user_service=self.__user_service,
+            cloudinary_service=self.__cloudinary_service,
+            logger=self.__logger,
+            editor_repository=self.__editor_repository,
+            converter_repository=self.__converter_repository,
+            user_repository=self.__user_repository,
+        )

@@ -1,5 +1,5 @@
-from webpeditor_app.application.converter.schemas.download import DownloadAllZipResponse
-from webpeditor_app.application.converter.schemas.conversion import (
+from webpeditor_app.application.converter.handlers.schemas.download import DownloadAllZipResponse
+from webpeditor_app.application.converter.handlers.schemas.conversion import (
     ConversionRequest,
     ConversionResponse,
     ImageConverterAllOutputFormats,

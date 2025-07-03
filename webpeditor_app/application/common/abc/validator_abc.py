@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 
-from ninja import Schema
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.globals import Unit
 
 
-class ValidationResult(Schema):
+class ValidationResult(BaseModel):
     model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
 
     errors: list[str] = Field(default_factory=list[str])

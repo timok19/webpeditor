@@ -5,12 +5,12 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
-from webpeditor_app.application.auth.session_service import SessionService
+from webpeditor_app.application.common.session_service import SessionService
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.application.common.image_file.schemas.file_info import ImageFileInfo
-from webpeditor_app.application.converter.schemas import ConversionRequest, ConversionResponse
+from webpeditor_app.application.common.image_file.models.file_info import ImageFileInfo
+from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import (
@@ -22,7 +22,7 @@ from webpeditor_app.core.result import (
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
-from webpeditor_app.models.converter import (
+from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
@@ -55,7 +55,7 @@ class ConvertImagesHandler:
             self.__conversion_request_validator.validate(request)
             .to_context_result()
             .abind(lambda _: session_service.asynchronize())
-            .abind_many(lambda user_id: self.__aconvert_files(user_id, request, session_service))
+            .abind_many(lambda user_id: self.__aconvert_files(user_id, request))
         )
 
     @aenumerable_context_result
@@ -63,7 +63,6 @@ class ConvertImagesHandler:
         self,
         user_id: str,
         request: ConversionRequest,
-        session_service: SessionService,
     ) -> EnumerableContextResult[ConversionResponse]:
         return await (
             self.__acleanup_previous_images(user_id)
@@ -80,12 +79,8 @@ class ConvertImagesHandler:
             .amap(lambda results: asyncio.gather(*results))
             .bind_many(EnumerableContextResult[ConversionResponse].from_results)
             .log_results(
-                lambda values: self.__logger.log_request_info(
-                    session_service.request, f"Successfully converted {values.count()} image(s) for User '{user_id}'", depth=4
-                ),
-                lambda errors: self.__logger.log_request_error(
-                    session_service.request, f"Failed to convert images for User '{user_id}'", depth=4
-                ),
+                lambda values: self.__logger.log_info(f"Successfully converted {values.count()} image(s) for User '{user_id}'", depth=4),
+                lambda errors: self.__logger.log_error(f"Failed to convert images for User '{user_id}'", depth=4),
             )
         )
 

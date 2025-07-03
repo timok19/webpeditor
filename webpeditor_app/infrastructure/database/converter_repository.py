@@ -2,13 +2,13 @@ from typing import Final, final
 
 from expression import Option
 
-from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
+from webpeditor_app.application.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
-from webpeditor_app.models.app_user import AppUser
-from webpeditor_app.models.converter import (
+from webpeditor_app.infrastructure.database.models import AppUser
+from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,

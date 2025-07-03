@@ -23,7 +23,6 @@ class EnumerableContextResult[TOut](Enumerable["ContextResult[TOut]"]):
         if self.any(lambda result: result.is_error()):
             errors = self.where(lambda result: result.is_error()).select(lambda result: result.error)
             log_error(errors)
-
             return EnumerableContextResult(errors.select(ContextResult[TOut].failure))
 
         values = self.where(lambda result: result.is_ok()).select(lambda result: result.ok)

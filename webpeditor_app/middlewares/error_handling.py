@@ -8,7 +8,7 @@ from ninja.responses import codes_4xx, codes_5xx
 from pydantic import ValidationError
 from types_linq import Enumerable
 
-from webpeditor_app.controllers.schemas import HTTPResult
+from webpeditor_app.api.controllers.schemas import HTTPResult
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 
 
@@ -33,9 +33,7 @@ class ErrorHandlingMiddleware:
         if validation_result.is_none():
             return response
 
-        message = self.__get_error_message(validation_result.some.errors)
-
-        self.__logger.log_request_error(request, message)
+        self.__logger.log_request_error(request, self.__to_error_message(validation_result.some.errors))
 
         return response
 
@@ -49,7 +47,7 @@ class ErrorHandlingMiddleware:
             self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{response.text}'")
             return Option[HTTPResult[Any]].Nothing()
 
-    def __get_error_message(self, errors: Collection[HTTPResult.HTTPError]) -> str:
+    def __to_error_message(self, errors: Collection[HTTPResult.HTTPError]) -> str:
         return f"Errors: [{'; '.join(f'(Message: "{e.message}" | Reasons: [{self.__reasons_to_str(e.reasons)}])' for e in errors)}]"
 
     @staticmethod

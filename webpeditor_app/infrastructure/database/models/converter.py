@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from webpeditor_app.models.app_user import AppUser
-from webpeditor_app.models.base import BaseImageAsset, BaseImageAssetFile
+from webpeditor_app.infrastructure.database.models.app_user import AppUser
+from webpeditor_app.infrastructure.database.models.base import BaseImageAsset, BaseImageAssetFile
 
 
 class ConverterImageAsset(BaseImageAsset):

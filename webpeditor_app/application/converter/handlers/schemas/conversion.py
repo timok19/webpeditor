@@ -4,7 +4,7 @@ from enum import StrEnum
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
 
-from webpeditor_app.models.base import BaseImageAssetFile
+from webpeditor_app.infrastructure.database.models.base import BaseImageAssetFile
 
 
 class ImageConverterAllOutputFormats(StrEnum):

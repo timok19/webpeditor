@@ -7,7 +7,7 @@ from types_linq import Enumerable
 
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
-from webpeditor_app.application.converter.schemas import ConversionRequest, ImageConverterAllOutputFormats
+from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ImageConverterAllOutputFormats
 from webpeditor_app.application.converter.settings import ConverterSettings
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 

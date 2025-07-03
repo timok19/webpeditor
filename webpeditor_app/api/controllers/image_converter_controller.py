@@ -6,23 +6,21 @@ from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_post  # pyright: ignore
 
-from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
-from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
-from webpeditor_app.application.converter.schemas import (
+from webpeditor_app.application.common.session_service import SessionServiceFactory
+from webpeditor_app.application.converter.handlers.convert_images_handler import ConvertImagesHandler
+from webpeditor_app.application.converter.handlers.schemas import (
     ConversionRequest,
     ConversionResponse,
     DownloadAllZipResponse,
     ImageConverterAllOutputFormats,
 )
-from webpeditor_app.controllers.controller_base import WebPEditorControllerBase
-from webpeditor_app.controllers.schemas import HTTPResult, HTTPResultWithStatus
-
-# TODO: Add other endpoints from "__converter" folder
+from webpeditor_app.api.controllers.base import ControllerBase
+from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus
 
 
 @final
 @api_controller("/converter", tags="Image Converter")
-class ImageConverterController(WebPEditorControllerBase):
+class ImageConverterController(ControllerBase):
     @http_post(
         "/convert-images",
         response={

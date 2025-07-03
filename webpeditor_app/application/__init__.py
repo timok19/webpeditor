@@ -2,15 +2,14 @@ from typing import TYPE_CHECKING
 
 from anydi import Module, provider
 
-from webpeditor_app.application.auth.abc.user_service_abc import UserServiceABC
-from webpeditor_app.application.auth.session_service_factory import SessionServiceFactory
-from webpeditor_app.application.auth.user_service import UserService
+from webpeditor_app.application.common.session_service import SessionServiceFactory
+from webpeditor_app.application.common.user_service import UserService, UserServiceABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.application.common.cloudinary.cloudinary_service import CloudinaryService
+from webpeditor_app.application.common.cloudinary_service import CloudinaryService
 from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
-from webpeditor_app.application.converter.commands.convert_images_handler import ConvertImagesHandler
+from webpeditor_app.application.converter.handlers.convert_images_handler import ConvertImagesHandler
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.settings import ConverterSettings
@@ -22,16 +21,16 @@ from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepository
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
 if TYPE_CHECKING:
-    from webpeditor_app.application.converter.schemas import ConversionRequest
+    from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
 
 
 class ApplicationModule(Module):
     @provider(scope="request")
-    def image_file_utility_provider(self, logger: WebPEditorLoggerABC) -> ImageFileUtilityABC:
+    def provide_image_file_utility(self, logger: WebPEditorLoggerABC) -> ImageFileUtilityABC:
         return ImageFileUtility(logger=logger)
 
     @provider(scope="singleton")
-    def cloudinary_service_provider(
+    def provide_cloudinary_service(
         self,
         logger: WebPEditorLoggerABC,
         cloudinary_client: CloudinaryClient,

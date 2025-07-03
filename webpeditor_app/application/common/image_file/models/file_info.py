@@ -1,10 +1,9 @@
 from decimal import Decimal
 
-from ninja import Schema
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
-class ImageFileInfo(Schema):
+class ImageFileInfo(BaseModel):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
     filename: str

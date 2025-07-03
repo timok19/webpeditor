@@ -4,13 +4,13 @@ from django.contrib.sessions.models import Session
 from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from webpeditor_app.models.app_user import AppUser
-from webpeditor_app.models.converter import (
+from webpeditor_app.infrastructure.database.models import AppUser
+from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
 )
-from webpeditor_app.models.editor import (
+from webpeditor_app.infrastructure.database.models import (
     EditorEditedImageAsset,
     EditorEditedImageAssetFile,
     EditorOriginalImageAsset,

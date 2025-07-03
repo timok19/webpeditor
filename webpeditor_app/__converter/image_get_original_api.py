@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from webpeditor_app.__converter.utils.api_response_presets import ResultJsonResponse, Result
-from webpeditor_app.models import EditorOriginalImageAsset
+from webpeditor_app.infrastructure.database.models import EditorOriginalImageAsset
 from webpeditor_app.services import get_data_from_image_url, get_original_image
 from webpeditor_app.services import get_unsigned_user_id
 

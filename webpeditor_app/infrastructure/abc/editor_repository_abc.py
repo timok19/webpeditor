@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from webpeditor_app.core.result import ContextResult, acontext_result
-from webpeditor_app.models.editor import EditorOriginalImageAsset, EditorEditedImageAsset
+from webpeditor_app.infrastructure.database.models import EditorOriginalImageAsset, EditorEditedImageAsset
 
 
 class EditorRepositoryABC(ABC):

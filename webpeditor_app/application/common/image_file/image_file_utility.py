@@ -13,7 +13,7 @@ from types_linq import Enumerable
 
 from webpeditor import settings
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.application.common.image_file.schemas import ImageFileInfo
+from webpeditor_app.application.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.webpeditor_logger_abc import WebPEditorLoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.globals import Unit
