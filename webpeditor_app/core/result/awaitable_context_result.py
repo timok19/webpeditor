@@ -59,7 +59,11 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
         return await (await self.__awaitable_result).abind_many(mapper)
 
     @acontext_result
-    async def log_result(self, log_success: Callable[[TOut], None], log_error: Callable[["ErrorContext"], None]) -> "ContextResult[TOut]":
+    async def log_result(
+        self,
+        log_success: Callable[[TOut], None] = lambda _: None,
+        log_error: Callable[["ErrorContext"], None] = lambda _: None,
+    ) -> "ContextResult[TOut]":
         return (await self.__awaitable_result).log_result(log_success, log_error)
 
     @acontext_result

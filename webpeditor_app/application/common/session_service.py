@@ -68,7 +68,7 @@ class SessionService:
             .amap(lambda _: self.__request.session.aclear_expired())
             .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/converter"))
             .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/editor"))
-            .log_result(lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed"), lambda _: None),
+            .log_result(lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed")),
         )
 
     @acontext_result

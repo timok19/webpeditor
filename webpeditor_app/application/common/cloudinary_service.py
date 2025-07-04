@@ -22,8 +22,10 @@ class CloudinaryService(CloudinaryServiceABC):
         return await (
             self.__cloudinary_client.adelete_folder_recursively(folder_path)
             .log_result(
-                lambda data: self.__logger.log_info(f"Deleted {len(data.deleted.values())} files in the folder '{folder_path}'", depth=5),
-                lambda _: None,
+                lambda data: self.__logger.log_info(
+                    f"Deleted {len(data.deleted.values())} files in the folder '{folder_path}'",
+                    depth=5,
+                )
             )
             .map(lambda _: Unit())
         )

@@ -15,8 +15,8 @@ class EnumerableContextResult[TOut](Enumerable["ContextResult[TOut]"]):
 
     def log_results(
         self,
-        log_success: Callable[[Enumerable[TOut]], None],
-        log_error: Callable[[Enumerable[ErrorContext]], None],
+        log_success: Callable[[Enumerable[TOut]], None] = lambda _: None,
+        log_error: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
     ) -> "EnumerableContextResult[TOut]":
         from webpeditor_app.core.result.context_result import ContextResult
 

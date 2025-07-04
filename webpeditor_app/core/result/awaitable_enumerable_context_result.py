@@ -19,7 +19,7 @@ class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[
     @aenumerable_context_result
     async def log_results(
         self,
-        log_success: Callable[[Enumerable[TOut]], None],
-        log_error: Callable[[Enumerable[ErrorContext]], None],
+        log_success: Callable[[Enumerable[TOut]], None] = lambda _: None,
+        log_error: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
     ) -> "EnumerableContextResult[TOut]":
         return (await self.__awaitable_results).log_results(log_success, log_error)

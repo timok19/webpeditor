@@ -54,8 +54,8 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     def log_result(
         self,
-        log_success: Callable[[TOut], None],
-        log_error: Callable[[ErrorContext], None],
+        log_success: Callable[[TOut], None] = lambda _: None,
+        log_error: Callable[[ErrorContext], None] = lambda _: None,
     ) -> "ContextResult[TOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
