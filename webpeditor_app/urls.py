@@ -1,11 +1,11 @@
 from typing import Union
 
-from django.conf.urls.static import static  # pyright: ignore
+from django.conf.urls.static import static
 from django.urls import URLPattern, URLResolver, path
 from ninja_extra import NinjaExtraAPI
 
 from webpeditor import settings
-from webpeditor_app.api.authenticator import APIKeyAuthenticator
+from webpeditor_app.api.authentication.authenticator import APIKeyAuthenticator
 from webpeditor_app.api.controllers.image_converter_controller import ImageConverterController
 from webpeditor_app.views.about_view import AboutView
 from webpeditor_app.views.contact_view import ContactView

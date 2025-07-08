@@ -39,8 +39,6 @@ elif IS_STAGE:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY: str = os.getenv("SECRET_KEY", default=get_random_secret_key())
 
-WEBPEDITOR_API_KEY: str = str(os.getenv("WEBPEDITOR_API_KEY"))
-
 WEBPEDITOR_SALT_KEY: str = str(os.getenv("WEBPEDITOR_SALT_KEY"))
 
 # SECURITY WARNING: don't run with debug turned on in production!

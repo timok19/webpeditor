@@ -6,7 +6,7 @@ from webpeditor_app.infrastructure.database.models.base import BaseImageAsset, B
 
 
 class EditorOriginalImageAsset(BaseImageAsset):
-    user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
+    user: models.OneToOneField[AppUser] = models.OneToOneField(
         AppUser,
         related_name="user_original_image_asset",
         on_delete=models.DO_NOTHING,
@@ -18,7 +18,7 @@ class EditorOriginalImageAsset(BaseImageAsset):
 
 
 class EditorOriginalImageAssetFile(BaseImageAssetFile):
-    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = models.OneToOneField(
+    original_image_asset: models.OneToOneField[EditorOriginalImageAsset] = models.OneToOneField(
         EditorOriginalImageAsset,
         related_name="original_image_asset_file",
         on_delete=models.CASCADE,
@@ -30,12 +30,12 @@ class EditorOriginalImageAssetFile(BaseImageAssetFile):
 
 
 class EditorEditedImageAsset(BaseImageAsset):
-    user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
+    user: models.OneToOneField[AppUser] = models.OneToOneField(
         AppUser,
         related_name="user_edited_image_asset",
         on_delete=models.DO_NOTHING,
     )
-    original_image_asset: models.OneToOneField[EditorOriginalImageAsset, EditorOriginalImageAsset] = models.OneToOneField(
+    original_image_asset: models.OneToOneField[EditorOriginalImageAsset] = models.OneToOneField(
         EditorOriginalImageAsset,
         related_name="edited_image_asset",
         on_delete=models.CASCADE,
@@ -47,7 +47,7 @@ class EditorEditedImageAsset(BaseImageAsset):
 
 
 class EditorEditedImageAssetFile(BaseImageAssetFile):
-    edited_image_asset: models.OneToOneField[EditorEditedImageAsset, EditorEditedImageAsset] = models.OneToOneField(
+    edited_image_asset: models.OneToOneField[EditorEditedImageAsset] = models.OneToOneField(
         EditorEditedImageAsset,
         related_name="edited_image_asset_file",
         on_delete=models.CASCADE,

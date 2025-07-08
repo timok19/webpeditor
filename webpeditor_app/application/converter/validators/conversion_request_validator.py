@@ -1,4 +1,4 @@
-from typing import Final, Optional, cast, final
+from typing import Final, Optional, final
 
 from expression import Option
 from ninja import UploadedFile
@@ -52,12 +52,12 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
-        return Option[str].Some(f"File '{file.name}' does not have size") if file.size is None or file.size == 0 else Option[str].Nothing()
+        return Option[str].Some(f"File '{file.name}' does not have size") if file.size == 0 else Option[str].Nothing()
 
     def __validate_max_file_size(self, file: UploadedFile) -> Option[str]:
         return (
             Option[str].Some(f"File '{file.name}' with size {file.size} exceeds the maximum allowed size {self.__settings.MAX_FILE_SIZE}")
-            if cast(int, file.size) > self.__settings.MAX_FILE_SIZE
+            if file.size > self.__settings.MAX_FILE_SIZE
             else Option[str].Nothing()
         )
 

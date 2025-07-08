@@ -41,5 +41,6 @@ class ErrorHandlingMiddleware:
             self.__logger.log_debug(validation_error.json(indent=4))
             return Option[HTTPResult[Any]].Nothing()
         except Exception as exception:
-            self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{response.text}'")
+            reason = response.content.decode(response.charset or "utf-8")
+            self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
             return Option[HTTPResult[Any]].Nothing()

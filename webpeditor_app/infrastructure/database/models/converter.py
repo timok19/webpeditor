@@ -6,7 +6,7 @@ from webpeditor_app.infrastructure.database.models.base import BaseImageAsset, B
 
 
 class ConverterImageAsset(BaseImageAsset):
-    user: models.OneToOneField[AppUser, AppUser] = models.OneToOneField(
+    user: models.OneToOneField[AppUser] = models.OneToOneField(
         AppUser,
         related_name="user_converted_image_asset",
         on_delete=models.DO_NOTHING,
@@ -18,7 +18,7 @@ class ConverterImageAsset(BaseImageAsset):
 
 
 class ConverterOriginalImageAssetFile(BaseImageAssetFile):
-    image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
+    image_asset: models.ForeignKey[ConverterImageAsset] = models.ForeignKey(
         ConverterImageAsset,
         related_name="original_image_asset_files",
         on_delete=models.CASCADE,
@@ -30,7 +30,7 @@ class ConverterOriginalImageAssetFile(BaseImageAssetFile):
 
 
 class ConverterConvertedImageAssetFile(BaseImageAssetFile):
-    image_asset: models.ForeignKey[ConverterImageAsset, ConverterImageAsset] = models.ForeignKey(
+    image_asset: models.ForeignKey[ConverterImageAsset] = models.ForeignKey(
         ConverterImageAsset,
         related_name="converted_image_asset_files",
         on_delete=models.CASCADE,

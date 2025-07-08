@@ -18,9 +18,9 @@ from webpeditor_app.core.result.context_result import ContextResult, ErrorContex
 class ImageConverter(ImageConverterABC):
     def __init__(self, image_file_utility: ImageFileUtilityABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
-        self.__mode_rgb: Final[str] = "RGB"
-        self.__mode_rgba: Final[str] = "RGBA"
-        self.__mode_palette: Final[str] = "P"
+        self.__rgb_mode: Final[str] = "RGB"
+        self.__rgba_mode: Final[str] = "RGBA"
+        self.__palette_mode: Final[str] = "P"
 
     def convert_image(
         self,
@@ -29,8 +29,8 @@ class ImageConverter(ImageConverterABC):
     ) -> ContextResult[ImageFile]:
         return (
             self.__update_filename(image, options)
-            .bind(lambda with_new_filename: self.__convert_color_mode(with_new_filename, options))
-            .map(lambda with_converted_color_mode: self.__convert_format(with_converted_color_mode, options))
+            .bind(lambda updated_image: self.__convert_color_mode(updated_image, options))
+            .map(lambda updated_image: self.__convert_format(updated_image, options))
         )
 
     def __update_filename(
@@ -60,42 +60,36 @@ class ImageConverter(ImageConverterABC):
         filename = image.filename
 
         # Determine if source and target formats support alpha
-        source_has_alpha = self.__has_alpha(image)
+        source_has_alpha = (image.mode == self.__rgba_mode) or (str(image.format).upper() in ImageConverterOutputFormatsWithAlphaChannel)
         target_has_alpha = options.output_format in ImageConverterOutputFormatsWithAlphaChannel
 
         # Determine the appropriate conversion based on image mode and alpha support
-        if image.mode in self.__mode_palette:
+        if image.mode in self.__palette_mode:
             # For palette mode, convert to RGBA or RGB based on target format
-            target_mode = self.__mode_rgba if target_has_alpha else self.__mode_rgb
-            converted_image = image.convert(target_mode)
+            converted_image = image.convert(self.__rgba_mode if target_has_alpha else self.__rgb_mode)
         elif source_has_alpha and target_has_alpha:
             # Both source and target support alpha, keep RGBA
-            converted_image = image.convert(self.__mode_rgba)
+            converted_image = image.convert(self.__rgba_mode)
         elif source_has_alpha:
             # Source has alpha but target doesn't, convert to RGB
             converted_image = self.__to_rgb(image)
         else:
             # Source doesn't have alpha, convert to RGB
-            converted_image = image.convert(self.__mode_rgb)
+            converted_image = image.convert(self.__rgb_mode)
 
         buffer = BytesIO()
         converted_image.save(buffer, format=image.format)
 
         return ContextResult[ImageFile].success(self.__to_image_file(buffer, filename))
 
-    def __has_alpha(self, image: ImageFile) -> bool:
-        has_rgba_mode = image.mode == self.__mode_rgba
-        format_supports_alpha = str(image.format).upper() in ImageConverterOutputFormatsWithAlphaChannel
-        return has_rgba_mode or format_supports_alpha
-
     def __to_rgb(self, rgba_image: Image.Image) -> Image.Image:
         white_color = (255, 255, 255, 255)
-        white_background = Image.new(mode=self.__mode_rgba, size=rgba_image.size, color=white_color)
+        white_background = Image.new(mode=self.__rgba_mode, size=rgba_image.size, color=white_color)
         # Ensure rgba_image is in RGBA mode before compositing
-        if rgba_image.mode != self.__mode_rgba:
-            rgba_image = rgba_image.convert(self.__mode_rgba)
+        if rgba_image.mode != self.__rgba_mode:
+            rgba_image = rgba_image.convert(self.__rgba_mode)
         # Merge RGBA into RGB with a white background
-        return Image.alpha_composite(white_background, rgba_image).convert(self.__mode_rgb)
+        return Image.alpha_composite(white_background, rgba_image).convert(self.__rgb_mode)
 
     def __convert_format(self, image: ImageFile, options: ConversionRequest.Options) -> ImageFile:
         filename = image.filename
@@ -104,8 +98,7 @@ class ImageConverter(ImageConverterABC):
         match options.output_format:
             case ImageConverterAllOutputFormats.JPEG:
                 # Convert palette mode (P) to RGB before saving as JPEG
-                image_to_save = image.convert(self.__mode_rgb) if image.mode == self.__mode_palette else image
-                image_to_save.save(
+                image.convert(self.__rgb_mode if image.mode == self.__palette_mode else None).save(
                     buffer,
                     format=ImageConverterAllOutputFormats.JPEG,
                     quality=options.quality,
@@ -120,20 +113,22 @@ class ImageConverter(ImageConverterABC):
                     quality=options.quality,
                     exif=image.getexif(),
                     optimize=True,
-                    compression="jpeg" if image.format == ImageConverterAllOutputFormats.JPEG else None,
+                    compression=ImageConverterAllOutputFormats.JPEG.lower()
+                    if image.format == ImageConverterAllOutputFormats.JPEG
+                    else None,
                 )
             case ImageConverterAllOutputFormats.BMP:
                 image.save(
                     buffer,
                     format=ImageConverterAllOutputFormats.BMP,
-                    bitmap_format="bmp",
+                    bitmap_format=ImageConverterAllOutputFormats.BMP.lower(),
                     optimize=True,
                 )
             case ImageConverterAllOutputFormats.PNG:
                 image.save(
                     buffer,
                     format=ImageConverterAllOutputFormats.PNG,
-                    bitmap_format="png",
+                    bitmap_format=ImageConverterAllOutputFormats.PNG.lower(),
                     exif=image.getexif(),
                     optimize=True,
                 )
