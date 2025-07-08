@@ -36,10 +36,10 @@ class AppUserAdmin(admin.ModelAdmin[AppUser]):
 
 @admin.register(ConverterImageAsset, site=admin_site)
 class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
-    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile, ConverterOriginalImageAssetFile]):
+    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
         model = ConverterOriginalImageAssetFile
 
-    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile, ConverterConvertedImageAssetFile]):
+    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile]):
         model = ConverterConvertedImageAssetFile
 
     list_display = ("id", "created_at", "user")
@@ -92,7 +92,7 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedI
 
 @admin.register(EditorOriginalImageAsset, site=admin_site)
 class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
-    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile, EditorOriginalImageAssetFile]):
+    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile]):
         model = EditorOriginalImageAssetFile
         extra = 1
 
@@ -125,7 +125,7 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
 
 @admin.register(EditorEditedImageAsset, site=admin_site)
 class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
-    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile, EditorEditedImageAssetFile]):
+    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile]):
         model = EditorEditedImageAssetFile
         extra = 1
 
