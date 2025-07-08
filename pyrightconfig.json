@@ -11,9 +11,14 @@
   ],
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
+  "reportDuplicateImport": true,
   "pythonVersion": "3.13",
   "typeCheckingMode": "strict",
   "enableExperimentalFeatures": true,
   "useLibraryCodeForTypes": true,
-  "reportWildcardImportFromLibrary": true
+  "analyzeUnannotatedFunctions": true,
+  "reportWildcardImportFromLibrary": true,
+  "pythonPlatform": "All",
+  "venvPath": ".",
+  "venv": ".venv"
 }
