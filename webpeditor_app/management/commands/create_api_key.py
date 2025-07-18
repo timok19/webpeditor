@@ -8,4 +8,4 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         key = secrets.token_hex(32)
-        self.stdout.write(self.style.SUCCESS(f"API key '{key}' has been created"))
+        self.stdout.write(self.style.SUCCESS(f"API key: {key}"))
