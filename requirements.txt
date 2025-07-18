@@ -137,7 +137,7 @@ email-validator==2.2.0
     # via pydantic
 exceptiongroup==1.3.0
     # via reactpy
-exifread==3.3.1
+exifread==3.3.2
     # via webpeditor
 expression==5.6.0
     # via
@@ -284,7 +284,7 @@ txaio==25.6.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20250516
+types-psycopg2==2.9.21.20250718
     # via django-types
 types-pyyaml==6.0.12.20250516
     # via django-stubs
