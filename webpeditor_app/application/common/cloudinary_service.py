@@ -27,7 +27,7 @@ class CloudinaryService(CloudinaryServiceABC):
                     depth=5,
                 )
             )
-            .map(lambda _: Unit())
+            .to_unit()
         )
 
     async def adelete_all_folders(self) -> None:

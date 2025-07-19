@@ -5,6 +5,7 @@ from types_linq import Enumerable
 
 from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
 from webpeditor_app.core.result.error_context import ErrorContext
+from webpeditor_app.globals import Unit
 
 if TYPE_CHECKING:
     from webpeditor_app.core.result import EnumerableContextResult
@@ -190,3 +191,6 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
                 return ContextResult[TNewOut].failures(error)
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
+
+    def to_unit(self) -> "ContextResult[Unit]":
+        return self.map(lambda _: Unit())

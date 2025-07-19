@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Generator
 
 from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
+from webpeditor_app.globals import Unit
 
 if TYPE_CHECKING:
     from webpeditor_app.core.result.context_result import ContextResult
@@ -91,3 +92,7 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
         else_mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]],
     ) -> "ContextResult[TNewOut]":
         return await (await self.__awaitable_result).aif_then_else(predicate, then_mapper, else_mapper)
+
+    @acontext_result
+    async def to_unit(self) -> "ContextResult[Unit]":
+        return (await self.__awaitable_result).to_unit()
