@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User, Group
 from django.contrib.sessions.models import Session
-from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
-from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
@@ -16,25 +14,19 @@ from webpeditor_app.infrastructure.database.models import (
     EditorOriginalImageAsset,
     EditorOriginalImageAssetFile,
 )
-from webpeditor_app.views.admin_site import JazzminOTPAdminSite
 
-# Admin site
-admin_site: JazzminOTPAdminSite = JazzminOTPAdminSite(name="OTPAdmin")
 
 # Auth Models
-admin_site.register([User, Group, Session])  # pyright: ignore
-
-# OTP Models
-admin_site.register(TOTPDevice, TOTPDeviceAdmin)  # pyright: ignore
+admin.site.register([User, Group, Session])
 
 
-@admin.register(AppUser, site=admin_site)
+@admin.register(AppUser)
 class AppUserAdmin(admin.ModelAdmin[AppUser]):
     list_display = ("id", "session_key", "session_key_expiration_date")
     list_filter = ("session_key_expiration_date",)
 
 
-@admin.register(ConverterImageAsset, site=admin_site)
+@admin.register(ConverterImageAsset)
 class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
     class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
         model = ConverterOriginalImageAssetFile
@@ -48,7 +40,7 @@ class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
     inlines = [OriginalImageAssetFileInline, ConvertedImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
-@admin.register(ConverterOriginalImageAssetFile, site=admin_site)
+@admin.register(ConverterOriginalImageAssetFile)
 class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalImageAssetFile]):
     list_display = (
         "id",
@@ -69,7 +61,7 @@ class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalIma
     list_filter = ("image_asset",)
 
 
-@admin.register(ConverterConvertedImageAssetFile, site=admin_site)
+@admin.register(ConverterConvertedImageAssetFile)
 class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedImageAssetFile]):
     list_display = (
         "id",
@@ -90,7 +82,7 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedI
     list_filter = ("image_asset",)
 
 
-@admin.register(EditorOriginalImageAsset, site=admin_site)
+@admin.register(EditorOriginalImageAsset)
 class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
     class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile]):
         model = EditorOriginalImageAssetFile
@@ -102,7 +94,7 @@ class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
     inlines = [EditorOriginalImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
-@admin.register(EditorOriginalImageAssetFile, site=admin_site)
+@admin.register(EditorOriginalImageAssetFile)
 class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAssetFile]):
     list_display = (
         "id",
@@ -123,7 +115,7 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
     list_filter = ("original_image_asset",)
 
 
-@admin.register(EditorEditedImageAsset, site=admin_site)
+@admin.register(EditorEditedImageAsset)
 class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
     class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile]):
         model = EditorEditedImageAssetFile
@@ -135,7 +127,7 @@ class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
     inlines = [EditorEditedImageAssetFileInline]  # pyright: ignore [reportUnknownVariableType]
 
 
-@admin.register(EditorEditedImageAssetFile, site=admin_site)
+@admin.register(EditorEditedImageAssetFile)
 class EditorEditedImageAssetFileAdmin(admin.ModelAdmin[EditorEditedImageAssetFile]):
     list_display = (
         "id",

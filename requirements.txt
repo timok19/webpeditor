@@ -86,12 +86,11 @@ django==5.2.4
     #   django-compressor
     #   django-cors-headers
     #   django-extensions
-    #   django-jazzmin
     #   django-ninja
     #   django-ninja-extra
-    #   django-otp
     #   django-stubs
     #   django-stubs-ext
+    #   django-unfold
     #   ninja-schema
     #   reactpy-django
     #   webpeditor
@@ -107,15 +106,11 @@ django-cors-headers==4.7.0
     # via webpeditor
 django-extensions==4.1
     # via webpeditor
-django-jazzmin==3.0.1
-    # via webpeditor
 django-ninja==1.4.3
     # via
     #   django-ninja-extra
     #   webpeditor
 django-ninja-extra==0.30.1
-    # via webpeditor
-django-otp==1.6.1
     # via webpeditor
 django-stubs==5.2.2
     # via webpeditor
@@ -124,6 +119,8 @@ django-stubs-ext==5.2.2
     #   django-stubs
     #   webpeditor
 django-types==0.22.0
+    # via webpeditor
+django-unfold==0.62.0
     # via webpeditor
 djhtml==3.0.8
     # via webpeditor

@@ -37,8 +37,7 @@ class ErrorHandlingMiddleware:
     def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[HTTPResult[Any]]:
         try:
             return Option[HTTPResult[Any]].Some(HTTPResult[Any].model_validate_json(response.content))
-        except ValidationError as validation_error:
-            self.__logger.log_debug(validation_error.json(indent=4))
+        except ValidationError:
             return Option[HTTPResult[Any]].Nothing()
         except Exception as exception:
             reason = response.content.decode(response.charset or "utf-8")

@@ -1,5 +1,6 @@
 from typing import Union
 
+from django.contrib import admin
 from django.contrib.auth.views import (
     PasswordResetCompleteView,
     PasswordResetConfirmView,
@@ -8,13 +9,12 @@ from django.contrib.auth.views import (
 )
 from django.urls import URLPattern, URLResolver, include, path, re_path
 
-from webpeditor_app.admin import admin_site
 from webpeditor_app.views.content_not_found_view import ContentNotFoundView
 
 # Admin
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
     # TODO: Make dynamic URL Admin page access based on OTP code -> check out the perplexity chat
-    path("admin/", admin_site.urls),
+    path("admin/", admin.site.urls),
     path("admin/doc/", include("django.contrib.admindocs.urls")),
 ]
 
@@ -22,22 +22,22 @@ urlpatterns: list[Union[URLResolver, URLPattern]] = [
 urlpatterns += [
     path(
         "accounts/password_reset/",
-        PasswordResetView.as_view(extra_context={"site_header": admin_site.site_header}),
+        PasswordResetView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="admin_password_reset",
     ),
     path(
         "accounts/password_reset/done/",
-        PasswordResetDoneView.as_view(extra_context={"site_header": admin_site.site_header}),
+        PasswordResetDoneView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="password_reset_done",
     ),
     path(
         "accounts/reset/<uidb64>/<token>/",
-        PasswordResetConfirmView.as_view(extra_context={"site_header": admin_site.site_header}),
+        PasswordResetConfirmView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="password_reset_confirm",
     ),
     path(
         "accounts/reset/done/",
-        PasswordResetCompleteView.as_view(extra_context={"site_header": admin_site.site_header}),
+        PasswordResetCompleteView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="password_reset_complete",
     ),
 ]
