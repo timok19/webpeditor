@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Awaitable, Callable, Generator
 
 from types_linq import Enumerable
 
-from webpeditor_app.core.result.decorators import aenumerable_context_result
+from webpeditor_app.core.result.decorators import as_awaitable_enumerable_result
 from webpeditor_app.core.result.error_context import ErrorContext
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[
     def __await__(self) -> Generator[Any, Any, "EnumerableContextResult[TOut]"]:
         return self.__awaitable_results.__await__()
 
-    @aenumerable_context_result
+    @as_awaitable_enumerable_result
     async def log_results(
         self,
         log_success: Callable[[Enumerable[TOut]], None] = lambda _: None,

@@ -9,7 +9,7 @@ from expression import Option
 from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
@@ -38,7 +38,7 @@ class SessionService:
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__user_id_key: Final[str] = "USER_ID"
 
-    @acontext_result
+    @as_awaitable_result
     async def asynchronize(self) -> ContextResult[str]:
         return await (
             self.__aget_user_id()
@@ -51,7 +51,7 @@ class SessionService:
             )
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def adelete_expired_data(self, user_id: str) -> ContextResult[Unit]:
         return await self.__ais_expired().aif_then_else(
             lambda is_expired: not is_expired,
@@ -71,11 +71,11 @@ class SessionService:
             .log_result(lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed")),
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def __aget_user_id(self) -> ContextResult[str]:
         return await self.__aget_signed_user_id().bind(self.__user_service.unsign_id)
 
-    @acontext_result
+    @as_awaitable_result
     async def __aget_signed_user_id(self) -> ContextResult[str]:
         try:
             return ContextResult[str].from_result(
@@ -88,7 +88,7 @@ class SessionService:
             await self.__aclear()
             return ContextResult[str].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def __aupdate_session_expiry(self, user_id: str) -> ContextResult[Unit]:
         try:
             current_expiry_date = await self.__request.session.aget_expiry_date()
@@ -105,7 +105,7 @@ class SessionService:
             await self.__aclear()
             return ContextResult[Unit].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def __aget_or_create_session(self) -> ContextResult[str]:
         return await self.__get_session_key().aor_else(self.__acreate_session().bind(lambda _: self.__get_session_key()))
 
@@ -117,7 +117,7 @@ class SessionService:
             self.__logger.log_exception(exception, "Failed to get session key")
             return ContextResult[str].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def __acreate_session(self) -> ContextResult[Unit]:
         try:
             await self.__aclear()
@@ -127,7 +127,7 @@ class SessionService:
             self.__logger.log_exception(exception, "Failed to create session")
             return ContextResult[Unit].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def __aget_or_create_user(self, session_key: str) -> ContextResult[AppUser]:
         try:
             session_key_expiration_date = await self.__request.session.aget_expiry_date()
@@ -137,7 +137,7 @@ class SessionService:
             await self.__aclear()
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def __aset_signed_user_id(self, user: AppUser) -> ContextResult[Unit]:
         try:
             signed_user_id = self.__user_service.sign_id(user.id)
@@ -149,7 +149,7 @@ class SessionService:
             await self.__aclear()
             return ContextResult[Unit].failure(ErrorContext.server_error("Session is corrupted"))
 
-    @acontext_result
+    @as_awaitable_result
     async def __ais_expired(self) -> ContextResult[bool]:
         try:
             session_expiry_date = await self.__request.session.aget_expiry_date()

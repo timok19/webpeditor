@@ -2,7 +2,7 @@ from typing import Final, final
 
 from webpeditor_app.application.common.abc.cloudinary_service_abc import CloudinaryServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.core.result import ContextResult, acontext_result
+from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
@@ -13,11 +13,11 @@ class CloudinaryService(CloudinaryServiceABC):
         self.__cloudinary_client: Final[CloudinaryClient] = cloudinary_client
         self.__logger: Final[LoggerABC] = logger
 
-    @acontext_result
+    @as_awaitable_result
     async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[str]:
         return await self.__cloudinary_client.aupload_file(public_id, file_content).map(lambda res: str(res.secure_url))
 
-    @acontext_result
+    @as_awaitable_result
     async def adelete_folder_recursively(self, folder_path: str) -> ContextResult[Unit]:
         return await (
             self.__cloudinary_client.adelete_folder_recursively(folder_path)

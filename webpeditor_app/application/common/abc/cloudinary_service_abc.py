@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
 
-from webpeditor_app.core.result import ContextResult, acontext_result
+from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.globals import Unit
 
 
 class CloudinaryServiceABC(ABC):
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[str]: ...
 
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def adelete_folder_recursively(self, folder_path: str) -> ContextResult[Unit]: ...
 
     @abstractmethod

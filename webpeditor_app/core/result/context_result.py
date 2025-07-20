@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Awaitable, Callable, override
 from expression import Result
 from types_linq import Enumerable
 
-from webpeditor_app.core.result.decorators import acontext_result, aenumerable_context_result
+from webpeditor_app.core.result.decorators import as_awaitable_result, as_awaitable_enumerable_result
 from webpeditor_app.core.result.error_context import ErrorContext
 from webpeditor_app.globals import Unit
 
@@ -17,7 +17,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         return ContextResult(tag="ok", ok=value)
 
     @classmethod
-    @acontext_result
+    @as_awaitable_result
     async def asuccess(cls, value: TOut) -> "ContextResult[TOut]":
         return cls.success(value)
 
@@ -33,7 +33,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         )
 
     @classmethod
-    @acontext_result
+    @as_awaitable_result
     async def afailure(cls, error: ErrorContext) -> "ContextResult[TOut]":
         return cls.failure(error)
 
@@ -92,7 +92,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    @acontext_result
+    @as_awaitable_result
     async def amap[TNewOut](self, mapper: Callable[[TOut], Awaitable[TNewOut]]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
@@ -102,7 +102,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    @acontext_result
+    @as_awaitable_result
     async def amap2[TOutOther, TNewOut](
         self,
         other: Awaitable["ContextResult[TOutOther]"],
@@ -120,7 +120,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    @acontext_result
+    @as_awaitable_result
     async def abind[TNewOut](self, mapper: Callable[[TOut], Awaitable["ContextResult[TNewOut]"]]) -> "ContextResult[TNewOut]":
         match self:
             case ContextResult(tag="ok", ok=value):
@@ -134,7 +134,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def or_else(self, other: Result[TOut, ErrorContext]) -> "ContextResult[TOut]":
         return self if self.is_ok() else ContextResult[TOut].from_result(other)
 
-    @acontext_result
+    @as_awaitable_result
     async def aor_else(self, other: Awaitable["ContextResult[TOut]"]) -> "ContextResult[TOut]":
         return self if self.is_ok() else await other
 
@@ -152,7 +152,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    @acontext_result
+    @as_awaitable_result
     async def aif_then_else[TNewOut](
         self,
         predicate: Callable[[TOut], bool],
@@ -179,7 +179,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    @aenumerable_context_result
+    @as_awaitable_enumerable_result
     async def abind_many[TNewOut](
         self,
         mapper: Callable[[TOut], Awaitable["EnumerableContextResult[TNewOut]"]],

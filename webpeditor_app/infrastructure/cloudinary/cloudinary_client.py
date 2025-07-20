@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from webpeditor import settings
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.schemas import (
     DeleteResourceResponse,
@@ -42,7 +42,7 @@ class CloudinaryClient:
         self.__max_results: Final[int] = 500
         self.__logger: Final[LoggerABC] = logger
 
-    @acontext_result
+    @as_awaitable_result
     async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadFileResponse]:
         return await self.__asend_request(
             HTTPMethod.POST,
@@ -52,7 +52,7 @@ class CloudinaryClient:
             response_type=UploadFileResponse,
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def aget_files(self, user_id: str, relative_folder_path: str) -> ContextResult[GetResourcesResponse]:
         return await self.__asend_request(
             HTTPMethod.GET,
@@ -61,7 +61,7 @@ class CloudinaryClient:
             response_type=GetResourcesResponse,
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def adelete_folder_recursively(self, folder_path: str) -> ContextResult[DeleteResourceResponse]:
         return await self.__asend_request(
             HTTPMethod.DELETE,
@@ -93,7 +93,7 @@ class CloudinaryClient:
         # Create SHA-1 hash
         return hashlib.sha1(to_sign.encode()).hexdigest()
 
-    @acontext_result
+    @as_awaitable_result
     async def __asend_request[TResponse: BaseModel](
         self,
         method: HTTPMethod,

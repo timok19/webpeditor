@@ -16,8 +16,8 @@ from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import (
     ContextResult,
     EnumerableContextResult,
-    acontext_result,
-    aenumerable_context_result,
+    as_awaitable_result,
+    as_awaitable_enumerable_result,
 )
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
@@ -49,7 +49,7 @@ class ConvertImagesHandler:
         self.__user_repository: Final[UserRepositoryABC] = user_repository
         self.__logger: Final[LoggerABC] = logger
 
-    @aenumerable_context_result
+    @as_awaitable_enumerable_result
     async def ahandle(self, request: ConversionRequest, session_service: SessionService) -> EnumerableContextResult[ConversionResponse]:
         return await (
             self.__conversion_request_validator.validate(request)
@@ -58,7 +58,7 @@ class ConvertImagesHandler:
             .abind_many(lambda user_id: self.__aconvert_files(user_id, request))
         )
 
-    @aenumerable_context_result
+    @as_awaitable_enumerable_result
     async def __aconvert_files(
         self,
         user_id: str,
@@ -84,7 +84,7 @@ class ConvertImagesHandler:
             )
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def __acleanup_previous_images(self, user_id: str) -> ContextResult[Unit]:
         return await self.__converter_repository.aasset_exists(user_id).aif_then_else(
             lambda exists: not exists,
@@ -94,7 +94,7 @@ class ConvertImagesHandler:
             ),
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def __aconvert_and_save(
         self,
         image: ImageFile,
@@ -117,12 +117,12 @@ class ConvertImagesHandler:
             ),
         )
 
-    @acontext_result
+    @as_awaitable_result
     async def __aupload_file(self, path_to_upload: str, file_info: ImageFileInfo) -> ContextResult[tuple[ImageFileInfo, str]]:
         public_id = f"{path_to_upload}/{file_info.file_basename}"
         return await self.__cloudinary_service.aupload_file(public_id, file_info.file_content).map(lambda file_url: (file_info, file_url))
 
-    @acontext_result
+    @as_awaitable_result
     async def __acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         self,
         asset_file_type: type[T],

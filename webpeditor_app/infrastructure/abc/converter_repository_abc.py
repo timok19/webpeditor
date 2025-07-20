@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from webpeditor_app.core.result import ContextResult, acontext_result
+from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
@@ -16,23 +16,23 @@ if TYPE_CHECKING:
 
 class ConverterRepositoryABC(ABC):
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def aget_asset(self, user_id: str) -> ContextResult[ConverterImageAsset]: ...
 
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def aget_or_create_asset(self, user: AppUser) -> ContextResult[ConverterImageAsset]: ...
 
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def aasset_exists(self, user_id: str) -> ContextResult[bool]: ...
 
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def adelete_asset(self, user_id: str) -> ContextResult[Unit]: ...
 
     @abstractmethod
-    @acontext_result
+    @as_awaitable_result
     async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         self,
         asset_file_type: type[T],

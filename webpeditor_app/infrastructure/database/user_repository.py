@@ -4,7 +4,7 @@ from typing import Final, final
 from expression import Option
 
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.core.result import ContextResult, ErrorContext, acontext_result
+from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 from webpeditor_app.infrastructure.database.models import AppUser
 
@@ -14,7 +14,7 @@ class UserRepository(UserRepositoryABC):
     def __init__(self, logger: LoggerABC) -> None:
         self.__logger: Final[LoggerABC] = logger
 
-    @acontext_result
+    @as_awaitable_result
     async def aget_or_create(
         self,
         session_key: str,
@@ -33,13 +33,13 @@ class UserRepository(UserRepositoryABC):
             self.__logger.log_exception(exception, message)
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
-    @acontext_result
+    @as_awaitable_result
     async def aget(self, user_id: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(id=user_id).afirst()
         result = Option.of_optional(app_user).to_result(ErrorContext.not_found(f"Unable to find current user '{user_id}'"))
         return ContextResult[AppUser].from_result(result)
 
-    @acontext_result
+    @as_awaitable_result
     async def aget_by_session_key(self, session_key: str) -> ContextResult[AppUser]:
         app_user = await AppUser.objects.filter(session_key=session_key).afirst()
         result = Option.of_optional(app_user).to_result(ErrorContext.not_found(f"Unable to find user with session key '{session_key}'"))
