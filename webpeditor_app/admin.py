@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.models import User, Group
-from django.contrib.sessions.models import Session
 
 from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
@@ -14,10 +12,6 @@ from webpeditor_app.infrastructure.database.models import (
     EditorOriginalImageAsset,
     EditorOriginalImageAssetFile,
 )
-
-
-# Auth Models
-admin.site.register([User, Group, Session])
 
 
 @admin.register(AppUser)
