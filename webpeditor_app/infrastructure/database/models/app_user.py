@@ -3,6 +3,7 @@ from typing import Optional
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from webpeditor_app.infrastructure.database.utils import generate_id
 
@@ -14,3 +15,7 @@ class AppUser(models.Model):
 
     def __str__(self) -> str:
         return str(self.id)
+
+    class Meta:
+        verbose_name: str = _("App User")
+        verbose_name_plural: str = _("App Users")
