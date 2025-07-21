@@ -553,14 +553,14 @@ wheels = [
 
 [[package]]
 name = "django-unfold"
-version = "0.62.0"
+version = "0.63.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/23/cd/a50fe52cd1cad37dec0c437ed179c218bc7534fece9c1da266bcc62118c6/django_unfold-0.62.0.tar.gz", hash = "sha256:fa931018b5c3f501b589d1785c430964a5b37ab1259ecb3ccb516efe075311bc", size = 1064095, upload-time = "2025-07-02T10:06:47.482Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/03/aeba7c10824f9631980e8342ab8d872c37b353e899c1e2dc5a94467b5abe/django_unfold-0.63.0.tar.gz", hash = "sha256:a32bb7c4a860a2e95a597778ce4f50f1d1a809a6ac06f6551dd0ebd371611cdf", size = 1067071, upload-time = "2025-07-21T07:04:18.269Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/e4/d88e06cdacb883d329f01757133858a5527ae0be4913525f77883ddf1b8b/django_unfold-0.62.0-py3-none-any.whl", hash = "sha256:58889ba0069cd272a471458a48b4c86b5e5580649fe50a8b21543bf2d82f18fd", size = 1170897, upload-time = "2025-07-02T10:06:45.92Z" },
+    { url = "https://files.pythonhosted.org/packages/17/68/2023a7dfaf2d967dc62ec68c506c00a022a192b7523e0506fab270d041e3/django_unfold-0.63.0-py3-none-any.whl", hash = "sha256:9bab010edc95965d1811aeca2ed1b7621aa5b5483e1c673146dc2d7b3b388ea4", size = 1175337, upload-time = "2025-07-21T07:04:16.599Z" },
 ]
 
 [[package]]
@@ -1190,14 +1190,14 @@ wheels = [
 
 [[package]]
 name = "py-serializable"
-version = "2.0.0"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "defusedxml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/75/813967eae0542776314c6def33feac687642a193b9d5591c20684b2eafd8/py_serializable-2.0.0.tar.gz", hash = "sha256:e9e6491dd7d29c31daf1050232b57f9657f9e8a43b867cca1ff204752cf420a5", size = 51617, upload-time = "2025-02-09T13:41:55.768Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/73/21/d250cfca8ff30c2e5a7447bc13861541126ce9bd4426cd5d0c9f08b5547d/py_serializable-2.1.0.tar.gz", hash = "sha256:9d5db56154a867a9b897c0163b33a793c804c80cee984116d02d49e4578fc103", size = 52368, upload-time = "2025-07-21T09:56:48.07Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/0e/8601d2331dea0825f3be769688b48a95f387a83c918cca6a8c9cee4b9eb7/py_serializable-2.0.0-py3-none-any.whl", hash = "sha256:1721e4c0368adeec965c183168da4b912024702f19e15e13f8577098b9a4f8fe", size = 22824, upload-time = "2025-02-09T13:41:54.236Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/bf/7595e817906a29453ba4d99394e781b6fabe55d21f3c15d240f85dd06bb1/py_serializable-2.1.0-py3-none-any.whl", hash = "sha256:b56d5d686b5a03ba4f4db5e769dc32336e142fc3bd4d68a8c25579ebb0a67304", size = 23045, upload-time = "2025-07-21T09:56:46.848Z" },
 ]
 
 [[package]]
@@ -1713,16 +1713,16 @@ wheels = [
 
 [[package]]
 name = "virtualenv"
-version = "20.31.2"
+version = "20.32.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "distlib" },
     { name = "filelock" },
     { name = "platformdirs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/2c/444f465fb2c65f40c3a104fd0c495184c4f2336d65baf398e3c75d72ea94/virtualenv-20.31.2.tar.gz", hash = "sha256:e10c0a9d02835e592521be48b332b6caee6887f332c111aa79a09b9e79efc2af", size = 6076316, upload-time = "2025-05-08T17:58:23.811Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/96/0834f30fa08dca3738614e6a9d42752b6420ee94e58971d702118f7cfd30/virtualenv-20.32.0.tar.gz", hash = "sha256:886bf75cadfdc964674e6e33eb74d787dff31ca314ceace03ca5810620f4ecf0", size = 6076970, upload-time = "2025-07-21T04:09:50.985Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/40/b1c265d4b2b62b58576588510fc4d1fe60a86319c8de99fd8e9fec617d2c/virtualenv-20.31.2-py3-none-any.whl", hash = "sha256:36efd0d9650ee985f0cad72065001e66d49a6f24eb44d98980f630686243cf11", size = 6057982, upload-time = "2025-05-08T17:58:21.15Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/c6/f8f28009920a736d0df434b52e9feebfb4d702ba942f15338cb4a83eafc1/virtualenv-20.32.0-py3-none-any.whl", hash = "sha256:2c310aecb62e5aa1b06103ed7c2977b81e042695de2697d01017ff0f1034af56", size = 6057761, upload-time = "2025-07-21T04:09:48.059Z" },
 ]
 
 [[package]]
