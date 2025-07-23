@@ -832,14 +832,14 @@ wheels = [
 
 [[package]]
 name = "license-expression"
-version = "30.4.3"
+version = "30.4.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boolean-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/79/efb4637d56dcd265cb9329ab502be0e01f4daed80caffdc5065b4b7956df/license_expression-30.4.3.tar.gz", hash = "sha256:49f439fea91c4d1a642f9f2902b58db1d42396c5e331045f41ce50df9b40b1f2", size = 183031, upload-time = "2025-06-25T13:02:25.76Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/40/71/d89bb0e71b1415453980fd32315f2a037aad9f7f70f695c7cec7035feb13/license_expression-30.4.4.tar.gz", hash = "sha256:73448f0aacd8d0808895bdc4b2c8e01a8d67646e4188f887375398c761f340fd", size = 186402, upload-time = "2025-07-22T11:13:32.17Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/ba/f6f6573bb21e51b838f1e7b0e8ef831d50db6d0530a5afaba700a34d9e12/license_expression-30.4.3-py3-none-any.whl", hash = "sha256:fd3db53418133e0eef917606623bc125fbad3d1225ba8d23950999ee87c99280", size = 117085, upload-time = "2025-06-25T13:02:24.503Z" },
+    { url = "https://files.pythonhosted.org/packages/af/40/791891d4c0c4dab4c5e187c17261cedc26285fd41541577f900470a45a4d/license_expression-30.4.4-py3-none-any.whl", hash = "sha256:421788fdcadb41f049d2dc934ce666626265aeccefddd25e162a26f23bcbf8a4", size = 120615, upload-time = "2025-07-22T11:13:31.217Z" },
 ]
 
 [[package]]
@@ -959,15 +959,15 @@ wheels = [
 
 [[package]]
 name = "ninja-schema"
-version = "0.14.2"
+version = "0.14.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "pydantic", extra = ["email"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d5/da/07f75bb9f88269433bbef60c6ca66bca506de7b827e9188d66738fdff9aa/ninja_schema-0.14.2.tar.gz", hash = "sha256:0ac14c82725116d4b604892baf855f8f81b370a051106e6d2a47e82ead6d5fa7", size = 18431, upload-time = "2025-04-26T06:24:43.888Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/15/b8bdcd7f685f51ccbc2f6306aaccb12c07708fa4d00c463e980520f448bd/ninja_schema-0.14.3.tar.gz", hash = "sha256:7edce24c3fd8c15ab2dc38423af9417a58b4dd9e156d67be77815ebed46af952", size = 18484, upload-time = "2025-07-23T07:24:44.199Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/7c/18d111415c16965e3d5c994f5dcd6e015ef29a3cf1a5edc09629ac082bfd/ninja_schema-0.14.2-py3-none-any.whl", hash = "sha256:f128cc38e5317694ff8293a109a3c0ac96262986fa182ed20baf0df00876ed95", size = 20658, upload-time = "2025-04-26T06:24:42.426Z" },
+    { url = "https://files.pythonhosted.org/packages/38/55/b0b35229b01f28163f964c5185f9d602dd588040134cec1bb2c29b95c15d/ninja_schema-0.14.3-py3-none-any.whl", hash = "sha256:b6e8ca08e793b7f91922f488c3b47cd62252e5fb076093c1cf527eae1e891751", size = 20804, upload-time = "2025-07-23T07:24:43.037Z" },
 ]
 
 [[package]]

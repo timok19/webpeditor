@@ -25,7 +25,7 @@ identify==2.6.12
     # via pre-commit
 idna==3.10
     # via requests
-license-expression==30.4.3
+license-expression==30.4.4
     # via cyclonedx-python-lib
 markdown-it-py==3.0.0
     # via rich
