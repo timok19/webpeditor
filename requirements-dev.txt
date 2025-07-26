@@ -67,7 +67,7 @@ requests==2.32.4
     # via
     #   cachecontrol
     #   pip-audit
-rich==14.0.0
+rich==14.1.0
     # via pip-audit
 ruff==0.12.5
 sortedcontainers==2.4.0
