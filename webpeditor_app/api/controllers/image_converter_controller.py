@@ -7,7 +7,7 @@ from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_post  # pyright: ignore
 
 from webpeditor_app.application.common.session_service import SessionServiceFactory
-from webpeditor_app.application.converter.handlers.convert_images_handler import ConvertImagesHandler
+from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
 from webpeditor_app.application.converter.handlers.schemas import (
     ConversionRequest,
     ConversionResponse,
@@ -61,10 +61,10 @@ class ImageConverterController(ControllerBase):
     ) -> HTTPResultWithStatus[ConversionResponse]:
         async with container.arequest_context():
             session_service_factory = await container.aresolve(SessionServiceFactory)
-            convert_images_handler = await container.aresolve(ConvertImagesHandler)
+            image_conversion_handler = await container.aresolve(ImageConversionHandler)
             session_service = session_service_factory.create(self.request)
             request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images_handler.ahandle(request, session_service)
+            results = await image_conversion_handler.ahandle(request, session_service)
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_post(

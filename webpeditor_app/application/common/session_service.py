@@ -80,7 +80,7 @@ class SessionService:
         try:
             return ContextResult[str].from_result(
                 Option[str]
-                .of_optional(await self.__request.session.aget(self.__user_id_key, None))
+                .of_optional(await self.__request.session.aget(self.__user_id_key))
                 .to_result(ErrorContext.not_found(f"{self.__user_id_key} not found in session"))
             )
         except Exception as exception:

@@ -9,7 +9,7 @@ from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFi
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.common.cloudinary_service import CloudinaryService
 from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
-from webpeditor_app.application.converter.handlers.convert_images_handler import ConvertImagesHandler
+from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.settings import ConverterSettings
@@ -91,13 +91,13 @@ class ApplicationModule(Module):
         converter_repository: ConverterRepositoryABC,
         user_repository: UserRepositoryABC,
         logger: LoggerABC,
-    ) -> ConvertImagesHandler:
-        return ConvertImagesHandler(
+    ) -> ImageConversionHandler:
+        return ImageConversionHandler(
             conversion_request_validator=conversion_request_validator,
             cloudinary_service=cloudinary_service,
             converter_service=converter_service,
             image_file_utility=image_file_utility,
-            converter_repository=converter_repository,
-            user_repository=user_repository,
+            converter_repo=converter_repository,
+            user_repo=user_repository,
             logger=logger,
         )

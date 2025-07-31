@@ -20,5 +20,6 @@
   "reportWildcardImportFromLibrary": true,
   "pythonPlatform": "All",
   "venvPath": ".",
-  "venv": ".venv"
+  "venv": ".venv",
+  "stubPath": "./typings"
 }
