@@ -72,7 +72,7 @@ cryptography==45.0.5
     #   webpeditor
 daphne==4.2.1
     # via channels
-deptry==0.23.0
+deptry==0.23.1
     # via webpeditor
 dill==0.4.0
     # via
