@@ -39,13 +39,13 @@ certifi==2025.7.14
     #   webpeditor
 cffi==1.17.1 ; platform_python_implementation != 'PyPy'
     # via cryptography
-channels==4.3.0
+channels==4.3.1
     # via
     #   reactpy-django
     #   webpeditor
 charset-normalizer==3.4.2
     # via requests
-click==8.2.1
+click==8.2.2
     # via deptry
 cmdkit==2.7.7
     # via names-generator
