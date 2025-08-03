@@ -31,7 +31,7 @@ autobahn==24.4.2
     # via daphne
 automat==25.4.16
     # via twisted
-certifi==2025.7.14
+certifi==2025.8.3
     # via
     #   httpcore
     #   httpx
@@ -45,7 +45,7 @@ channels==4.3.1
     #   webpeditor
 charset-normalizer==3.4.2
     # via requests
-click==8.2.2
+click==8.2.1
     # via deptry
 cmdkit==2.7.7
     # via names-generator
