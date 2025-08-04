@@ -13,7 +13,7 @@
     "graceful-fs": "^4.2.11"
   },
   "scripts": {
-    "update-css": "pnpx tailwindcss -i static/src/input.css -o static/src/output.css --watch"
+    "update-css": "pnpm dlx @tailwindcss/cli -i static/src/input.css -o static/src/output.css --watch"
   },
   "packageManager": "pnpm@10.12.4"
 }

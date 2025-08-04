@@ -53,21 +53,6 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(result)}'")
 
-    def log_result(
-        self,
-        log_success: Callable[[TOut], None] = lambda _: None,
-        log_error: Callable[[ErrorContext], None] = lambda _: None,
-    ) -> "ContextResult[TOut]":
-        match self:
-            case ContextResult(tag="ok", ok=value):
-                log_success(value)
-                return self.success(value)
-            case ContextResult(tag="error", error=error):
-                log_error(error)
-                return self.failure(error)
-            case _:
-                raise TypeError(f"Unexpected result of type '{repr(self)}'")
-
     @override
     def map[TNewOut](self, mapper: Callable[[TOut], TNewOut]) -> "ContextResult[TNewOut]":
         match self:

@@ -40,14 +40,9 @@ class ConversionRequest(Schema):
         output_format: ImageConverterAllOutputFormats
         quality: int
 
-    @staticmethod
-    def create(
-        files: list[UploadedFile],
-        output_format: ImageConverterAllOutputFormats,
-        quality: int,
-    ) -> "ConversionRequest":
-        options = ConversionRequest.Options(output_format=output_format, quality=quality)
-        return ConversionRequest(files=files, options=options)
+    @classmethod
+    def create(cls, files: list[UploadedFile], output_format: ImageConverterAllOutputFormats, quality: int) -> "ConversionRequest":
+        return cls(files=files, options=cls.Options(output_format=output_format, quality=quality))
 
 
 class ConversionResponse(Schema):

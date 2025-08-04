@@ -78,8 +78,8 @@ class ApplicationModule(Module):
         )
 
     @provider(scope="request")
-    def provide_converter_service(self, image_file_utility: ImageFileUtilityABC) -> ImageConverterABC:
-        return ImageConverter(image_file_utility=image_file_utility)
+    def provide_converter_service(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> ImageConverterABC:
+        return ImageConverter(image_file_utility=image_file_utility, logger=logger)
 
     @provider(scope="request")
     def provide_convert_images_handler(

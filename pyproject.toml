@@ -7,6 +7,7 @@ license = "MIT License"
 readme = "README.md"
 authors = [{name = "Temirkhan Amanzhanov", email = "tima1199@gmail.com"}]
 dependencies = [
+    "aiocache[memcached]>=0.12.3",
     "aiofiles>=24.1.0",
     "aioreactive>=0.20.0",
     "anydi>=0.44.0",
@@ -40,6 +41,7 @@ dependencies = [
     "mccabe>=0.7.0",
     "names-generator>=0.2.0",
     "ninja-schema>=0.14.1",
+    "numpy>=2.3.2",
     "pillow>=11.1.0",
     "platformdirs>=4.3.6",
     "pycodestyle>=2.12.1",

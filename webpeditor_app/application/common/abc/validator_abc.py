@@ -7,11 +7,11 @@ from webpeditor_app.globals import Unit
 
 
 class ValidationResult(BaseModel):
-    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
     errors: list[str] = Field(default_factory=list[str])
 
-    def to_context_result(self) -> ContextResult[Unit]:
+    def to_result(self) -> ContextResult[Unit]:
         return (
             ContextResult[Unit].failure(ErrorContext.bad_request("Request is invalid", self.errors))
             if any(self.errors)

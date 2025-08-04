@@ -19,7 +19,7 @@ from webpeditor_app.core.result import (
     as_awaitable_result,
     as_awaitable_enumerable_result,
 )
-from webpeditor_app.globals import Unit
+from webpeditor_app.globals import Pair, Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 from webpeditor_app.infrastructure.database.models import (
@@ -53,7 +53,7 @@ class ImageConversionHandler:
     async def ahandle(self, request: ConversionRequest, session_service: SessionService) -> EnumerableContextResult[ConversionResponse]:
         return await (
             self.__conversion_request_validator.validate(request)
-            .to_context_result()
+            .to_result()
             .abind(lambda _: session_service.asynchronize())
             .abind_many(lambda user_id: self.__aconvert_files(user_id, request))
         )
@@ -68,12 +68,12 @@ class ImageConversionHandler:
             self.__acleanup_previous_images(user_id)
             .abind(lambda _: self.__user_repo.aget(user_id))
             .abind(self.__converter_repo.aget_or_create_asset)
-            .map(lambda asset: (Enumerable(request.files), asset))
+            .map(lambda asset: Pair(Enumerable(request.files), asset))
             .map(
-                lambda files_asset_pair: files_asset_pair[0].select(
+                lambda pair: pair.item1.select(
                     lambda file: self.__image_file_utility.normalize_filename(file.name)
                     .bind(lambda normalized: self.__image_file_utility.update_filename(Image.open(file), normalized))
-                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, files_asset_pair[1], request.options))
+                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, pair.item2, request.options))
                 ),
             )
             .amap(lambda results: asyncio.gather(*results))
@@ -104,13 +104,13 @@ class ImageConversionHandler:
         return await (
             self.__image_file_utility.get_file_info(image)
             .abind(lambda file_info: self.__aupload_file(f"{asset.user.id}/converter/original", file_info))
-            .abind(lambda info_url_pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, *info_url_pair, asset))
+            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.item1, pair.item2, asset))
         ).amap2(
             self.__converter_service.convert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)
-            .map2(self.__image_file_utility.close_file(image), lambda file_info, _: file_info)
             .abind(lambda file_info: self.__aupload_file(f"{asset.user.id}/converter/converted", file_info))
-            .abind(lambda info_url_pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, *info_url_pair, asset)),
+            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
+            .map2(self.__image_file_utility.close_file(image), lambda result, _: result),
             lambda original, converted: ConversionResponse(
                 original_data=ConversionResponse.ImageData.from_asset_file(original),
                 converted_data=ConversionResponse.ImageData.from_asset_file(converted),
@@ -118,6 +118,8 @@ class ImageConversionHandler:
         )
 
     @as_awaitable_result
-    async def __aupload_file(self, path_to_upload: str, file_info: ImageFileInfo) -> ContextResult[tuple[ImageFileInfo, str]]:
+    async def __aupload_file(self, path_to_upload: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
         public_id = f"{path_to_upload}/{file_info.file_basename}"
-        return await self.__cloudinary_service.aupload_file(public_id, file_info.file_content).map(lambda file_url: (file_info, file_url))
+        return await self.__cloudinary_service.aupload_file(public_id, file_info.file_content).map(
+            lambda file_url: Pair(item1=file_info, item2=file_url)
+        )

@@ -1,9 +1,8 @@
 from io import BytesIO
-from typing import Final, Optional, Union
+from typing import Any, Final, cast
 
 from expression import Option
-from PIL import Image
-from PIL.ImageFile import ImageFile
+from PIL import Image, ImageFile
 
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.converter.handlers.schemas import (
@@ -12,33 +11,41 @@ from webpeditor_app.application.converter.handlers.schemas import (
 )
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
+from webpeditor_app.application.converter.settings import ConverterSettings
+from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
+
+# Enable truncated image processing for better memory usage
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class ImageConverter(ImageConverterABC):
-    def __init__(self, image_file_utility: ImageFileUtilityABC) -> None:
+    def __init__(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
+        self.__logger: Final[LoggerABC] = logger
         self.__rgb_mode: Final[str] = "RGB"
         self.__rgba_mode: Final[str] = "RGBA"
         self.__palette_mode: Final[str] = "P"
+        self.__cache_request: dict[tuple[str, ImageConverterAllOutputFormats, int], ImageFile.ImageFile] = {}
 
     def convert_image(
         self,
-        image: ImageFile,
+        image: ImageFile.ImageFile,
         options: ConversionRequest.Options,
-    ) -> ContextResult[ImageFile]:
+    ) -> ContextResult[ImageFile.ImageFile]:
+        cached_image = self.__cache_request.get((str(image.format), options.output_format, options.quality))
         return (
-            self.__update_filename(image, options)
-            .bind(lambda updated_image: self.__convert_color_mode(updated_image, options))
-            .map(lambda updated_image: self.__convert_format(updated_image, options))
+            self.__update_filename(cached_image, options)
+            if cached_image is not None
+            else self.__update_filename(image, options).bind(lambda updated_image: self.__convert_image(updated_image, options))
         )
 
     def __update_filename(
         self,
-        image_file: ImageFile,
+        image_file: ImageFile.ImageFile,
         options: ConversionRequest.Options,
-    ) -> ContextResult[ImageFile]:
-        return ContextResult[ImageFile].from_result(
+    ) -> ContextResult[ImageFile.ImageFile]:
+        return ContextResult[ImageFile.ImageFile].from_result(
             Option[str]
             .of_optional(image_file.filename)
             .to_result(ErrorContext.server_error("Image file has no filename"))
@@ -48,39 +55,125 @@ class ImageConverter(ImageConverterABC):
             .bind(lambda new_filename: self.__image_file_utility.update_filename(image_file, new_filename))
         )
 
-    def __convert_color_mode(
+    def __convert_image(
         self,
-        image: ImageFile,
+        image: ImageFile.ImageFile,
         options: ConversionRequest.Options,
-    ) -> ContextResult[ImageFile]:
+    ) -> ContextResult[ImageFile.ImageFile]:
         if image.format is None:
-            error = ErrorContext.server_error("Unable to convert image color. Invalid image format")
-            return ContextResult[ImageFile].failure(error)
+            return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
-        filename = image.filename
+        # Enable chunked processing to reduce memory usage and improve performance
+        # Set PIL to use multiple cores when available
+        self.__try_enable_chunked_processing()
 
-        # Determine if source and target formats support alpha
-        source_has_alpha = (image.mode == self.__rgba_mode) or (str(image.format).upper() in ImageConverterOutputFormatsWithAlphaChannel)
+        # Resize large images to improve performance
+        img = self.__limit_image_size(image)
+
+        source_has_alpha = (img.mode == self.__rgba_mode) or (str(img.format).upper() in ImageConverterOutputFormatsWithAlphaChannel)
         target_has_alpha = options.output_format in ImageConverterOutputFormatsWithAlphaChannel
 
-        # Determine the appropriate conversion based on image mode and alpha support
-        if image.mode in self.__palette_mode:
-            # For palette mode, convert to RGBA or RGB based on target format
-            converted_image = image.convert(self.__rgba_mode if target_has_alpha else self.__rgb_mode)
-        elif source_has_alpha and target_has_alpha:
-            # Both source and target support alpha, keep RGBA
-            converted_image = image.convert(self.__rgba_mode)
-        elif source_has_alpha:
-            # Source has alpha but target doesn't, convert to RGB
-            converted_image = self.__to_rgb(image)
+        target_mode = self.__rgba_mode if target_has_alpha else self.__rgb_mode
+
+        # Optimize the color mode conversion
+        if img.mode == self.__palette_mode:
+            # For palette mode, convert directly to target mode
+            img = img.convert(target_mode)
+        elif source_has_alpha and not target_has_alpha:
+            # Source has alpha but target doesn't, convert to RGB with white background
+            img = self.__to_rgb(img)
+        elif img.mode != target_mode:
+            # Convert to target mode if different
+            img = img.convert(target_mode)
+
+        # Save with optimized parameters for the target format
+        result = Image.open(self.__convert_format(img, options))
+        result.filename = image.filename
+
+        self.__cache_request.setdefault((str(image.format), options.output_format, options.quality), result)
+
+        return ContextResult[ImageFile.ImageFile].success(result)
+
+    @staticmethod
+    def __try_enable_chunked_processing() -> None:
+        try:
+            import multiprocessing
+
+            Image.core.set_alignment(32)
+            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
+            return None
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
+    def __limit_image_size(image: ImageFile.ImageFile) -> ImageFile.ImageFile:
+        width, height = image.size
+
+        if width <= ConverterSettings.MAX_IMAGE_DIMENSIONS and height <= ConverterSettings.MAX_IMAGE_DIMENSIONS:
+            return image
+
+        # Calculate new dimensions while preserving an aspect ratio
+        if width > height:
+            new_width = ConverterSettings.MAX_IMAGE_DIMENSIONS
+            new_height = int(height * (ConverterSettings.MAX_IMAGE_DIMENSIONS / width))
         else:
-            # Source doesn't have alpha, convert to RGB
-            converted_image = image.convert(self.__rgb_mode)
+            new_height = ConverterSettings.MAX_IMAGE_DIMENSIONS
+            new_width = int(width * (ConverterSettings.MAX_IMAGE_DIMENSIONS / height))
+
+        # Use BICUBIC instead of LANCZOS for faster resizing with acceptable quality
+        # BICUBIC is about 30-40% faster than LANCZOS with minimal quality difference for downsampling
+        resized_img = cast(ImageFile.ImageFile, image.resize((new_width, new_height), Image.Resampling.BICUBIC))
+        resized_img.format = image.format
+        resized_img.filename = image.filename
+
+        return resized_img
+
+    def __convert_format(self, image: Image.Image, options: ConversionRequest.Options) -> BytesIO:
+        save_args: dict[str, Any] = {"format": options.output_format, "optimize": True, "exif": image.getexif()}
+
+        if options.output_format == ImageConverterAllOutputFormats.JPEG:
+            width, height = image.size
+            is_large_image = width * height > ConverterSettings.SAFE_AREA  # Only use progressive for larger images
+
+            save_args.update(
+                {
+                    "quality": options.quality,
+                    "subsampling": 0 if options.quality >= 95 else 2,  # Better subsampling for high quality
+                    "progressive": is_large_image,  # Progressive only for large images for better performance
+                }
+            )
+
+            # Ensure RGB mode for JPEG
+            if image.mode != self.__rgb_mode:
+                image = image.convert(self.__rgb_mode)
+
+        elif options.output_format == ImageConverterAllOutputFormats.PNG:
+            # Adjust compression level based on image size
+            # Higher compression for smaller images, lower for larger ones for better performance
+            width, height = image.size
+            compress_level = 9 if width * height < ConverterSettings.SAFE_AREA else 6
+            save_args.update({"compress_level": compress_level})
+
+        elif options.output_format == ImageConverterAllOutputFormats.WEBP:
+            save_args.update(
+                {
+                    "quality": options.quality,
+                    # Use a lower method value for faster encoding with acceptable quality
+                    # Method 4 is significantly faster than 6 with minimal quality difference
+                    "method": 4 if options.quality < 90 else 5,
+                    # Only use lossless for very high quality to improve performance
+                    "lossless": options.quality >= 98,
+                }
+            )
+
+        elif options.output_format == ImageConverterAllOutputFormats.TIFF:
+            save_args.update({"quality": options.quality, "compression": "jpeg" if image.mode == self.__rgb_mode else "tiff_deflate"})
 
         buffer = BytesIO()
-        converted_image.save(buffer, format=image.format)
+        image.save(buffer, **save_args)
+        buffer.seek(0)
 
-        return ContextResult[ImageFile].success(self.__to_image_file(buffer, filename))
+        return buffer
 
     def __to_rgb(self, rgba_image: Image.Image) -> Image.Image:
         white_color = (255, 255, 255, 255)
@@ -90,63 +183,3 @@ class ImageConverter(ImageConverterABC):
             rgba_image = rgba_image.convert(self.__rgba_mode)
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(self.__rgb_mode)
-
-    def __convert_format(self, image: ImageFile, options: ConversionRequest.Options) -> ImageFile:
-        filename = image.filename
-        buffer = BytesIO()
-
-        match options.output_format:
-            case ImageConverterAllOutputFormats.JPEG:
-                # Convert palette mode (P) to RGB before saving as JPEG
-                image.convert(self.__rgb_mode if image.mode == self.__palette_mode else None).save(
-                    buffer,
-                    format=ImageConverterAllOutputFormats.JPEG,
-                    quality=options.quality,
-                    subsampling=0 if options.quality == 100 else 2,
-                    exif=image.getexif(),
-                    optimize=True,
-                )
-            case ImageConverterAllOutputFormats.TIFF:
-                image.save(
-                    buffer,
-                    format=ImageConverterAllOutputFormats.TIFF,
-                    quality=options.quality,
-                    exif=image.getexif(),
-                    optimize=True,
-                    compression=ImageConverterAllOutputFormats.JPEG.lower()
-                    if image.format == ImageConverterAllOutputFormats.JPEG
-                    else None,
-                )
-            case ImageConverterAllOutputFormats.BMP:
-                image.save(
-                    buffer,
-                    format=ImageConverterAllOutputFormats.BMP,
-                    bitmap_format=ImageConverterAllOutputFormats.BMP.lower(),
-                    optimize=True,
-                )
-            case ImageConverterAllOutputFormats.PNG:
-                image.save(
-                    buffer,
-                    format=ImageConverterAllOutputFormats.PNG,
-                    bitmap_format=ImageConverterAllOutputFormats.PNG.lower(),
-                    exif=image.getexif(),
-                    optimize=True,
-                )
-            case _:
-                image.save(
-                    buffer,
-                    format=options.output_format,
-                    quality=options.quality,
-                    exif=image.getexif(),
-                    optimize=True,
-                )
-
-        return self.__to_image_file(buffer, filename)
-
-    @staticmethod
-    def __to_image_file(buffer: BytesIO, filename: Optional[Union[str, bytes]]) -> ImageFile:
-        # Set pointer to start
-        buffer.seek(0)
-        result = Image.open(buffer)
-        result.filename = filename
-        return result

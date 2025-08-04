@@ -65,10 +65,11 @@ class SessionService:
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
             .amap(lambda converted: converted.adelete())
             .map(lambda info: self.__logger.log_info(f"Converter: Deleted {info[0]} Asset(s) for User '{user_id}'"))
-            .amap(lambda _: self.__request.session.aclear_expired())
+            .amap(lambda _: sync_to_async(self.__request.session.clear_expired)())
             .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/converter"))
             .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/editor"))
-            .log_result(lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed")),
+            .map(lambda _: self.__logger.log_info(f"Data for User '{user_id}' have been removed", depth=5))
+            .to_unit(),
         )
 
     @as_awaitable_result
@@ -80,7 +81,7 @@ class SessionService:
         try:
             return ContextResult[str].from_result(
                 Option[str]
-                .of_optional(await self.__request.session.aget(self.__user_id_key))
+                .of_optional(await sync_to_async(self.__request.session.get)(self.__user_id_key))
                 .to_result(ErrorContext.not_found(f"{self.__user_id_key} not found in session"))
             )
         except Exception as exception:
@@ -91,12 +92,12 @@ class SessionService:
     @as_awaitable_result
     async def __aupdate_session_expiry(self, user_id: str) -> ContextResult[Unit]:
         try:
-            current_expiry_date = await self.__request.session.aget_expiry_date()
+            current_expiry_date = await sync_to_async(self.__request.session.get_expiry_date)()
             self.__logger.log_debug(f"Current session expires at '{current_expiry_date}' for User '{user_id}'")
 
-            await self.__request.session.aset_expiry(timedelta(minutes=15))
+            await sync_to_async(self.__request.session.set_expiry)(timezone.now() + timedelta(minutes=15))
 
-            updated_expiry_date = await self.__request.session.aget_expiry_date()
+            updated_expiry_date = await sync_to_async(self.__request.session.get_expiry_date)()
             self.__logger.log_debug(f"Updated session expires at '{updated_expiry_date}' for User '{user_id}'")
 
             return ContextResult[Unit].success(Unit())
@@ -121,7 +122,7 @@ class SessionService:
     async def __acreate_session(self) -> ContextResult[Unit]:
         try:
             await self.__aclear()
-            await self.__request.session.acreate()
+            await sync_to_async(self.__request.session.create)()
             return ContextResult[Unit].success(Unit())
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to create session")
@@ -130,7 +131,7 @@ class SessionService:
     @as_awaitable_result
     async def __aget_or_create_user(self, session_key: str) -> ContextResult[AppUser]:
         try:
-            session_key_expiration_date = await self.__request.session.aget_expiry_date()
+            session_key_expiration_date = await sync_to_async(self.__request.session.get_expiry_date)()
             return await self.__user_repository.aget_or_create(session_key, session_key_expiration_date)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to get or create user")
@@ -141,7 +142,7 @@ class SessionService:
     async def __aset_signed_user_id(self, user: AppUser) -> ContextResult[Unit]:
         try:
             signed_user_id = self.__user_service.sign_id(user.id)
-            await self.__request.session.aset(self.__user_id_key, signed_user_id)
+            await sync_to_async(self.__request.session.__setitem__)(self.__user_id_key, signed_user_id)
             self.__logger.log_debug(f"Signed User ID '{signed_user_id}' has been set")
             return ContextResult[Unit].success(Unit())
         except Exception as exception:
@@ -152,7 +153,7 @@ class SessionService:
     @as_awaitable_result
     async def __ais_expired(self) -> ContextResult[bool]:
         try:
-            session_expiry_date = await self.__request.session.aget_expiry_date()
+            session_expiry_date = await sync_to_async(self.__request.session.get_expiry_date)()
             return ContextResult[bool].success(timezone.now() > session_expiry_date)
         except Exception as exception:
             self.__logger.log_exception(exception, "Failed to check if session expired")

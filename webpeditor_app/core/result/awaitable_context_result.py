@@ -6,7 +6,6 @@ from webpeditor_app.globals import Unit
 if TYPE_CHECKING:
     from webpeditor_app.core.result.context_result import ContextResult
     from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
-    from webpeditor_app.core.result.error_context import ErrorContext
 
 
 class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
@@ -58,14 +57,6 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
         mapper: Callable[[TOut], Awaitable["EnumerableContextResult[TNewOut]"]],
     ) -> "EnumerableContextResult[TNewOut]":
         return await (await self.__awaitable_result).abind_many(mapper)
-
-    @as_awaitable_result
-    async def log_result(
-        self,
-        log_success: Callable[[TOut], None] = lambda _: None,
-        log_error: Callable[["ErrorContext"], None] = lambda _: None,
-    ) -> "ContextResult[TOut]":
-        return (await self.__awaitable_result).log_result(log_success, log_error)
 
     @as_awaitable_result
     async def or_else(self, other: "ContextResult[TOut]") -> "ContextResult[TOut]":
