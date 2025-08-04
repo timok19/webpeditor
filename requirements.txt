@@ -8,7 +8,7 @@ annotated-types==0.7.0
     # via pydantic
 anydi==0.47.0
     # via webpeditor
-anyio==4.9.0
+anyio==4.10.0
     # via
     #   anydi
     #   httpx
