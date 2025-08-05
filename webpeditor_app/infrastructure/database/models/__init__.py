@@ -1,5 +1,10 @@
+from webpeditor_app.infrastructure.database.models.api import APIKey
 from webpeditor_app.infrastructure.database.models.app_user import AppUser
-from webpeditor_app.infrastructure.database.models.converter import ConverterConvertedImageAssetFile, ConverterImageAsset, ConverterOriginalImageAssetFile
+from webpeditor_app.infrastructure.database.models.converter import (
+    ConverterConvertedImageAssetFile,
+    ConverterImageAsset,
+    ConverterOriginalImageAssetFile,
+)
 from webpeditor_app.infrastructure.database.models.editor import (
     EditorEditedImageAsset,
     EditorEditedImageAssetFile,
@@ -8,6 +13,7 @@ from webpeditor_app.infrastructure.database.models.editor import (
 )
 
 __all__: list[str] = [
+    "APIKey",
     "AppUser",
     "ConverterImageAsset",
     "ConverterOriginalImageAssetFile",

@@ -13,13 +13,10 @@ from webpeditor_app.views.content_not_found_view import ContentNotFoundView
 
 # Admin
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
+    path("admin/doc/", include("django.contrib.admindocs.urls")),
     # TODO: Make dynamic URL Admin page access based on OTP code -> check out the perplexity chat
     path("admin/", admin.site.urls),
-    path("admin/doc/", include("django.contrib.admindocs.urls")),
-]
-
-# Account reset
-urlpatterns += [
+    # Account reset
     path(
         "accounts/password_reset/",
         PasswordResetView.as_view(extra_context={"site_header": admin.site.site_header}),
@@ -40,10 +37,8 @@ urlpatterns += [
         PasswordResetCompleteView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="password_reset_complete",
     ),
+    # WebP Editor
+    path("", include("webpeditor_app.urls")),
+    # For all non-existing (not allowed) urls
+    re_path(r"^.+$", ContentNotFoundView.as_view(), name="content-not-found-view"),
 ]
-
-# WebP Editor
-urlpatterns += [path("", include("webpeditor_app.urls"))]
-
-# For all non-existing (not allowed) urls
-urlpatterns += [re_path(r"^.+$", ContentNotFoundView.as_view(), name="content-not-found-view")]

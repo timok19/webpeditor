@@ -50,8 +50,8 @@ CSRF_TRUSTED_ORIGINS: list[str] = str(os.getenv("CSRF_TRUSTED_ORIGINS")).split("
 
 INSTALLED_APPS: list[str] = [
     "daphne",
-    "django.contrib.admin",
     "django.contrib.admindocs",
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
