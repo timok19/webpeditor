@@ -121,5 +121,5 @@ class ImageConversionHandler:
     async def __aupload_file(self, path_to_upload: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
         public_id = f"{path_to_upload}/{file_info.file_basename}"
         return await self.__cloudinary_service.aupload_file(public_id, file_info.file_content).map(
-            lambda file_url: Pair(item1=file_info, item2=file_url)
+            lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=file_url)
         )
