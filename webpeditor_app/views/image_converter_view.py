@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import Any, override
 
+from asgiref.sync import sync_to_async
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.views.generic import FormView
@@ -16,18 +17,24 @@ class ImageConverterView(FormView[ImageConverterUploadFilesForm]):
     @override
     async def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore
         context: dict[str, Any] = self.get_context_data(**kwargs)
+
+        # Use sync_to_async to access session data
+        error_message = await sync_to_async(lambda: request.session.get("error_message"))()
+
         context.update(
             {
                 "form": "form",  # TODO: Create an empty form
-                "error": request.session.get("error_message"),
+                "error": error_message,
                 "converted_images": [],
             }
         )
-        return self.render_to_response(context, status=HTTPStatus.OK)
+        return await sync_to_async(self.render_to_response)(context, status=HTTPStatus.OK)
 
     @override
     async def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:  # pyright: ignore
-        absolute_uri = request.build_absolute_uri("/api/converter/convert-images")
+        # Use sync_to_async for any potential session operations
+        absolute_uri = await sync_to_async(lambda: request.build_absolute_uri("/api/converter/convert-images"))()
+
         # TODO
         async with AsyncClient() as client:
             await client.post(absolute_uri)

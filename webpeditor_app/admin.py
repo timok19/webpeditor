@@ -29,10 +29,12 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
     readonly_fields = ("key_hash", "created_at")
 
     def get_urls(self) -> list[URLPattern]:
-        custom_urls = [
-            path("generate-key/<int:api_key_id>/", self.admin_site.admin_view(self.generate_new_key_view), name="generate-api-key")
-        ]
-        return custom_urls + super().get_urls()
+        generate_api_key_url = path(
+            "generate-key/<int:api_key_id>/",
+            self.admin_site.admin_view(self.generate_new_key_view),
+            name="generate-api-key",
+        )
+        return [generate_api_key_url] + super().get_urls()
 
     def save_model(self, request: HttpRequest, obj: APIKey, form: ModelForm, change: bool) -> None:
         if change:
@@ -66,7 +68,7 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
 
     @staticmethod
     def __notify_api_key_created(request: HttpRequest, email: str, api_key: str) -> None:
-        messages.success(request, f"New API key generated for '{email}': {api_key} (Save this key, it won't be shown again)")
+        messages.success(request, f'New API key generated for "{email}": {api_key} (Save this key, it won\'t be shown again)')
 
 
 @admin.register(AppUser)

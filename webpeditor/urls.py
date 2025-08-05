@@ -2,12 +2,14 @@ from typing import Union
 
 from django.contrib import admin
 from django.contrib.auth.views import (
+    LoginView,
     PasswordResetCompleteView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
     PasswordResetView,
 )
 from django.urls import URLPattern, URLResolver, include, path, re_path
+from django.views.generic import TemplateView
 
 from webpeditor_app.views.content_not_found_view import ContentNotFoundView
 
@@ -37,6 +39,8 @@ urlpatterns: list[Union[URLResolver, URLPattern]] = [
         PasswordResetCompleteView.as_view(extra_context={"site_header": admin.site.site_header}),
         name="password_reset_complete",
     ),
+    path("accounts/login/", LoginView.as_view(extra_context={"site_header": admin.site.site_header}), name="login"),
+    path("accounts/profile/", TemplateView.as_view(template_name="registration/profile.html", extra_context={"site_header": admin.site.site_header}), name="profile"),
     # WebP Editor
     path("", include("webpeditor_app.urls")),
     # For all non-existing (not allowed) urls

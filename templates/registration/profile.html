@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        &rsaquo; {% translate 'User Profile' %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <h1>{% translate 'User Profile' %}</h1>
+
+        <div class="module">
+            <h2>{% translate 'Welcome' %} {{ user.username }}</h2>
+            <p>{% translate 'You are now logged in.' %}</p>
+
+            <div class="form-row">
+                <p><strong>{% translate 'Username:' %}</strong> {{ user.username }}</p>
+            </div>
+
+            <div class="form-row">
+                <p><strong>{% translate 'Email:' %}</strong> {{ user.email }}</p>
+            </div>
+
+            <div class="form-row">
+                <p><strong>{% translate 'Last login:' %}</strong> {{ user.last_login }}</p>
+            </div>
+        </div>
+
+        <div class="submit-row">
+            <a href="{% url 'admin:index' %}" class="button">{% translate 'Go to Admin' %}</a>
+        </div>
+    </div>
+{% endblock %}

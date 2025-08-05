@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="webpeditor - Stage" type="UvRunConfigurationType" factoryName="UvRunConfigurationType">
+  <configuration default="false" name="webpeditor - Staging" type="UvRunConfigurationType" factoryName="UvRunConfigurationType">
     <option name="args">
       <list>
         <option value="-b" />
@@ -12,7 +12,7 @@
     <option name="checkSync" value="true" />
     <option name="env">
       <map>
-        <entry key="DJANGO_ENVIRONMENT" value="Stage" />
+        <entry key="DJANGO_ENVIRONMENT" value="Staging" />
         <entry key="DJANGO_SETTINGS_MODULE" value="webpeditor.settings" />
         <entry key="PYTHONUNBUFFERED" value="1" />
       </map>

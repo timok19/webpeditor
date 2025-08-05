@@ -25,12 +25,12 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 DJANGO_ENVIRONMENT: Optional[str] = os.getenv("DJANGO_ENVIRONMENT")
 
 IS_DEVELOPMENT: bool = DJANGO_ENVIRONMENT == "Development"
-IS_STAGE: bool = DJANGO_ENVIRONMENT == "Stage"
+IS_STAGING: bool = DJANGO_ENVIRONMENT == "Staging"
 IS_PRODUCTION: bool = DJANGO_ENVIRONMENT == "Production"
 
 if IS_DEVELOPMENT:
     load_dotenv(dotenv_path=BASE_DIR / ".env.dev", override=True, verbose=True)
-elif IS_STAGE:
+elif IS_STAGING:
     load_dotenv(dotenv_path=BASE_DIR / ".env", override=True, verbose=True)
 
 # Quick-start development settings - unsuitable for production
@@ -118,7 +118,7 @@ ASGI_APPLICATION: str = "webpeditor.asgi.application"
 
 # Database
 
-DATABASES = {
+DATABASES: dict[str, Any] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -155,8 +155,13 @@ USE_I18N: bool = True
 
 USE_TZ: bool = True
 
-# TODO: change to real EmailBackend
-EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = str(os.getenv("EMAIL_HOST"))
+EMAIL_PORT = int(str(os.getenv("EMAIL_PORT", "587")))
+EMAIL_USE_TLS = bool(int(str(os.getenv("EMAIL_USE_TLS", "1"))))
+EMAIL_HOST_USER = str(os.getenv("EMAIL_HOST_USER"))
+EMAIL_HOST_PASSWORD = str(os.getenv("EMAIL_HOST_PASSWORD"))
+DEFAULT_FROM_EMAIL = str(os.getenv("DEFAULT_FROM_EMAIL"))
 
 # Session handling
 SESSION_ENGINE: str = "django.contrib.sessions.backends.db"

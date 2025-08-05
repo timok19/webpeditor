@@ -76,5 +76,5 @@ toml==0.10.2
     # via pip-audit
 urllib3==2.5.0
     # via requests
-virtualenv==20.33.0
+virtualenv==20.33.1
     # via pre-commit
