@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class ContextResult[TOut](Result[TOut, ErrorContext]):
     @staticmethod
     def success(value: TOut) -> "ContextResult[TOut]":
-        return ContextResult(tag="ok", ok=value)
+        return ContextResult[TOut](tag="ok", ok=value)
 
     @classmethod
     @as_awaitable_result
@@ -31,11 +31,6 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
                 reasons=error.reasons or [],
             ),
         )
-
-    @classmethod
-    @as_awaitable_result
-    async def afailure(cls, error: ErrorContext) -> "ContextResult[TOut]":
-        return cls.failure(error)
 
     @classmethod
     def failures(cls, *errors: ErrorContext) -> "EnumerableContextResult[TOut]":

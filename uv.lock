@@ -634,11 +634,11 @@ wheels = [
 
 [[package]]
 name = "exifread"
-version = "3.3.2"
+version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/06/e4/a1464fda6c9daac90d7d64ed4d5fc6e908896e0886326de23c923ddfbfce/exifread-3.3.2.tar.gz", hash = "sha256:45c6a6564dd52e63a5d93c5e216fd65c38513b450167bee6d73183415db71358", size = 52029, upload-time = "2025-07-17T21:24:05.508Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2b/7d/64635d837ffbb9827f3d1a46a8669847c191a8831962682475091b7cac40/exifread-3.4.0.tar.gz", hash = "sha256:dc7f8da77396709ca414a0eee1c262902f713afc9c043baa8b82337d76306ffc", size = 56236, upload-time = "2025-08-04T20:59:10.724Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/6f/3ba3c792ee420a4fe467d19e01fb31bfe358641110baa2937573a620d3b2/exifread-3.3.2-py3-none-any.whl", hash = "sha256:f927cf4522827cc3ecfade8d0da37bbd5421f636eda7e650b61e9ce4c9a451fe", size = 54340, upload-time = "2025-07-17T21:24:04.005Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/b8/180dea8ab44e34eb921705aa0d8837b93b4d8f6bec313d49dfbc9d246ec8/exifread-3.4.0-py3-none-any.whl", hash = "sha256:21a15d068642b850cfe2b4d584b90be99b8a83b70eeff9b8c34184add73dcb2c", size = 58979, upload-time = "2025-08-04T20:59:09.227Z" },
 ]
 
 [[package]]
