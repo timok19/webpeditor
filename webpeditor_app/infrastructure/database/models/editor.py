@@ -5,6 +5,7 @@ from webpeditor_app.infrastructure.database.models.app_user import AppUser
 from webpeditor_app.infrastructure.database.models.base import BaseImageAsset, BaseImageAssetFile
 
 
+# TODO: Merge into one EditorImageAsset that will contain 2 asset files - EditorOriginalImageAssetFile and EditorEditedImageAssetFile
 class EditorOriginalImageAsset(BaseImageAsset):
     user: models.OneToOneField[AppUser] = models.OneToOneField(
         AppUser,

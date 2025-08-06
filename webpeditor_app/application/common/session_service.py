@@ -63,7 +63,7 @@ class SessionService:
             .amap(lambda edited: edited.adelete())
             .map(lambda info: self.__logger.log_info(f"Editor: Deleted {info[0]} Edited asset(s) for User '{user_id}'"))
             .abind(lambda _: self.__converter_repository.aget_asset(user_id))
-            .amap(lambda converted: converted.adelete())
+            .amap(lambda converter_asset: converter_asset.adelete())
             .map(lambda info: self.__logger.log_info(f"Converter: Deleted {info[0]} Asset(s) for User '{user_id}'"))
             .amap(lambda _: sync_to_async(self.__request.session.clear_expired)())
             .abind(lambda _: self.__cloudinary_service.adelete_folder_recursively(f"{user_id}/converter"))
