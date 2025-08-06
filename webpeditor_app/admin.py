@@ -1,10 +1,12 @@
+from typing import Union
 from django.contrib import admin, messages
 from django.forms import ModelForm
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import redirect
 from django.urls import URLPattern, path
 from django.utils.html import format_html
 from django.utils.safestring import SafeText
+from django.utils.translation import gettext_lazy as _
 
 from webpeditor_app.common import api_key_utils
 from webpeditor_app.globals import Pair
@@ -23,7 +25,7 @@ from webpeditor_app.infrastructure.database.models import (
 
 @admin.register(APIKey)
 class APIKeyAdmin(admin.ModelAdmin[APIKey]):
-    list_display = ("email", "key_hash", "created_at", "generate_new_key_button")
+    list_display = ("email", "key_hash", "created_at", "generate_new_key")
     list_filter = ("email", "created_at")
     date_hierarchy = "created_at"
     readonly_fields = ("key_hash", "created_at")
@@ -45,7 +47,7 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
             super().save_model(request, obj, form, change)
             self.__notify_api_key_created(request, obj.email, api_key)
 
-    def generate_new_key_view(self, request: HttpRequest, api_key_id: int):
+    def generate_new_key_view(self, request: HttpRequest, api_key_id: int) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
         api_key, key_hash = self.__create_api_key_and_hash()
 
         api_key_obj = APIKey.objects.get(pk=api_key_id)
@@ -57,8 +59,8 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
         return redirect("admin:webpeditor_app_apikey_changelist")
 
     @staticmethod
-    def generate_new_key_button(obj: APIKey) -> SafeText:
-        return format_html('<a class="button" href="/admin/webpeditor_app/apikey/generate-key/{}/">Generate New Key</a>', obj.pk)
+    def generate_new_key(obj: APIKey) -> SafeText:
+        return format_html('<a class="button" href="/admin/webpeditor_app/apikey/generate-key/{}/">{}</a>', obj.pk, _("Generate New Key"))
 
     @staticmethod
     def __create_api_key_and_hash() -> Pair[str, str]:
@@ -68,7 +70,8 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
 
     @staticmethod
     def __notify_api_key_created(request: HttpRequest, email: str, api_key: str) -> None:
-        messages.success(request, f'New API key generated for "{email}": {api_key} (Save this key, it won\'t be shown again)')
+        message = _("New API key generated for") + f' "{email}": {api_key} ' + _("(Save this key, it won't be shown again)")
+        messages.success(request, message)
 
 
 @admin.register(AppUser)
