@@ -9,7 +9,7 @@ certifi==2025.8.3
     # via requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 cyclonedx-python-lib==9.1.0
     # via pip-audit
@@ -21,13 +21,13 @@ filelock==3.18.0
     # via
     #   cachecontrol
     #   virtualenv
-identify==2.6.12
+identify==2.6.13
     # via pre-commit
 idna==3.10
     # via requests
 license-expression==30.4.4
     # via cyclonedx-python-lib
-markdown-it-py==3.0.0
+markdown-it-py==4.0.0
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
@@ -54,7 +54,7 @@ platformdirs==4.3.8
     # via
     #   pip-audit
     #   virtualenv
-pre-commit==4.2.0
+pre-commit==4.3.0
 py-serializable==2.1.0
     # via cyclonedx-python-lib
 pygments==2.19.2

@@ -47,7 +47,7 @@ channels==4.3.1
     # via
     #   reactpy-django
     #   webpeditor
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 click==8.2.1
     # via deptry
@@ -124,7 +124,7 @@ django-stubs-ext==5.2.2
     #   webpeditor
 django-types==0.22.0
     # via webpeditor
-django-unfold==0.63.0
+django-unfold==0.64.2
     # via webpeditor
 djhtml==3.0.8
     # via webpeditor
@@ -287,9 +287,9 @@ txaio==25.6.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20250718
+types-psycopg2==2.9.21.20250809
     # via django-types
-types-pyyaml==6.0.12.20250516
+types-pyyaml==6.0.12.20250809
     # via django-stubs
 typing-extensions==4.14.1
     # via
@@ -319,7 +319,7 @@ whitenoise==6.9.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
     # via loguru
-wrapt==1.17.2
+wrapt==1.17.3
     # via
     #   anydi
     #   webpeditor
