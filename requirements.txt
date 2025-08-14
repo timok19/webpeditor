@@ -126,7 +126,7 @@ django-types==0.22.0
     # via webpeditor
 django-unfold==0.64.2
     # via webpeditor
-djhtml==3.0.8
+djhtml==3.0.9
     # via webpeditor
 dnspython==2.7.0
     # via
@@ -202,7 +202,7 @@ numpy==2.3.2
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
-orjson==3.11.1
+orjson==3.11.2
     # via reactpy-django
 packaging==25.0
     # via
