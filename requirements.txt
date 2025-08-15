@@ -98,7 +98,7 @@ django==5.2.5
     #   ninja-schema
     #   reactpy-django
     #   webpeditor
-django-allauth==65.10.0
+django-allauth==65.11.0
     # via webpeditor
 django-appconf==1.1.0
     # via
@@ -144,7 +144,7 @@ expression==5.6.0
     # via
     #   aioreactive
     #   webpeditor
-fastjsonschema==2.21.1
+fastjsonschema==2.21.2
     # via reactpy
 fido2==2.0.0
     # via django-allauth
