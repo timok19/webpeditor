@@ -116,7 +116,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @as_awaitable_result
     async def aor_else(self, other: Awaitable["ContextResult[TOut]"]) -> "ContextResult[TOut]":
-        return self if self.is_ok() else await other
+        return self.or_else(await other)
 
     def if_then_else[TNewOut](
         self,
