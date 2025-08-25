@@ -8,7 +8,7 @@ from types_linq import Enumerable
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ImageConverterAllOutputFormats
-from webpeditor_app.application.converter.settings import ConverterSettings
+from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 
@@ -17,11 +17,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __init__(
         self,
         image_file_utility: ImageFileUtilityABC,
-        converter_settings: ConverterSettings,
+        converter_settings: ConverterConstants,
         logger: LoggerABC,
     ) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
-        self.__settings: Final[ConverterSettings] = converter_settings
+        self.__settings: Final[ConverterConstants] = converter_settings
         self.__logger: Final[LoggerABC] = logger
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
@@ -67,11 +67,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
             return Option[str].Nothing()
         except UnidentifiedImageError:
             message = f"File '{file.name}' cannot be processed. Incompatible file type '{file.content_type}'"
-            self.__logger.log_debug(message)
+            self.__logger.debug(message)
             return Option[str].Some(message)
         except Exception as exception:
             message = f"File '{file.name}' cannot be processed. Corrupted or damaged file"
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return Option[str].Some(message)
 
     @staticmethod

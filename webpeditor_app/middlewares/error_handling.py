@@ -30,7 +30,7 @@ class ErrorHandlingMiddleware:
         validation_result = self.__validate_json(request, response)
 
         if validation_result.is_some():
-            self.__logger.log_request_error(request, validation_result.some.model_dump_json())
+            self.__logger.request_error(request, validation_result.some.model_dump_json())
 
         return response
 
@@ -41,5 +41,5 @@ class ErrorHandlingMiddleware:
             return Option[HTTPResult[Any]].Nothing()
         except Exception as exception:
             reason = response.content.decode(response.charset or "utf-8")
-            self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
+            self.__logger.request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
             return Option[HTTPResult[Any]].Nothing()

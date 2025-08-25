@@ -1,16 +1,23 @@
-class Unit(tuple[object]): ...
+from typing import Any, Self, override
+
+
+class Unit(tuple[Any]):
+    @override
+    def __new__(cls) -> Self:
+        return super().__new__(cls, ())
 
 
 class Pair[T1, T2](tuple[T1, T2]):
     __slots__ = ()
 
-    def __new__(cls, item1: T1, item2: T2):
-        return super().__new__(cls, (item1, item2))
+    @override
+    def __new__(cls, first: T1, second: T2) -> Self:
+        return super().__new__(cls, (first, second))
 
     @property
-    def item1(self) -> T1:
+    def first(self) -> T1:
         return self[0]
 
     @property
-    def item2(self) -> T2:
+    def second(self) -> T2:
         return self[1]

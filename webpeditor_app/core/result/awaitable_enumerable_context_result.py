@@ -17,9 +17,9 @@ class AwaitableEnumerableContextResult[TOut](Awaitable["EnumerableContextResult[
         return self.__awaitable_results.__await__()
 
     @as_awaitable_enumerable_result
-    async def log_results(
+    async def tap_either(
         self,
-        log_success: Callable[[Enumerable[TOut]], None] = lambda _: None,
-        log_error: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
+        success_func: Callable[[Enumerable[TOut]], None] = lambda _: None,
+        error_func: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
     ) -> "EnumerableContextResult[TOut]":
-        return (await self.__awaitable_results).log_results(log_success, log_error)
+        return (await self.__awaitable_results).tap_either(success_func, error_func)

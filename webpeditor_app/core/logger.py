@@ -1,8 +1,8 @@
 import sys
 from typing import final
 
+import loguru
 from django.http.request import HttpRequest
-from loguru import logger as loguru_logger
 
 from webpeditor import settings
 from webpeditor_app.core.abc.logger_abc import LoggerABC
@@ -11,8 +11,8 @@ from webpeditor_app.core.abc.logger_abc import LoggerABC
 @final
 class Logger(LoggerABC):
     def __init__(self) -> None:
-        loguru_logger.remove()
-        loguru_logger.add(
+        loguru.logger.remove()
+        loguru.logger.add(
             level="DEBUG" if settings.IS_DEVELOPMENT else "INFO",
             sink=sys.stderr,
             colorize=True,
@@ -20,16 +20,16 @@ class Logger(LoggerABC):
         )
 
     @staticmethod
-    def log_debug(message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(depth=depth).debug(message)
+    def debug(message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(depth=depth).debug(message)
 
     @staticmethod
-    def log_info(message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(depth=depth).info(message)
+    def info(message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(depth=depth).info(message)
 
     @staticmethod
-    def log_request_info(request: HttpRequest, message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(depth=depth).info(
+    def request_info(request: HttpRequest, message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(depth=depth).info(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
@@ -37,8 +37,8 @@ class Logger(LoggerABC):
         )
 
     @staticmethod
-    def log_request_error(request: HttpRequest, message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(depth=depth).error(
+    def request_error(request: HttpRequest, message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(depth=depth).error(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
@@ -46,16 +46,16 @@ class Logger(LoggerABC):
         )
 
     @staticmethod
-    def log_error(message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(depth=depth).error(message)
+    def error(message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(depth=depth).error(message)
 
     @staticmethod
-    def log_exception(exception: Exception, message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(exception=exception, colors=True, ansi=True, depth=depth).exception(message)
+    def exception(exception: Exception, message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(exception=exception, depth=depth).exception(message)
 
     @staticmethod
-    def log_request_exception(request: HttpRequest, exception: Exception, message: str, *, depth: int = 1) -> None:
-        return loguru_logger.opt(exception=exception, colors=True, ansi=True, depth=depth).exception(
+    def request_exception(request: HttpRequest, exception: Exception, message: str, *, depth: int = 1) -> None:
+        return loguru.logger.opt(exception=exception, depth=depth).exception(
             "Request {method} {path} - {message}, Exception:",
             method=request.method,
             path=request.path,

@@ -1,6 +1,5 @@
 from typing import Any
 
-from cloudinary.utils import download_zip_url
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt

@@ -11,7 +11,7 @@ from webpeditor_app.application.converter.handlers.schemas import (
 )
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
-from webpeditor_app.application.converter.settings import ConverterSettings
+from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
 
@@ -109,16 +109,16 @@ class ImageConverter(ImageConverterABC):
     def __limit_image_size(image: ImageFile.ImageFile) -> ImageFile.ImageFile:
         width, height = image.size
 
-        if width <= ConverterSettings.MAX_IMAGE_DIMENSIONS and height <= ConverterSettings.MAX_IMAGE_DIMENSIONS:
+        if width <= ConverterConstants.MAX_IMAGE_DIMENSIONS and height <= ConverterConstants.MAX_IMAGE_DIMENSIONS:
             return image
 
         # Calculate new dimensions while preserving an aspect ratio
         if width > height:
-            new_width = ConverterSettings.MAX_IMAGE_DIMENSIONS
-            new_height = int(height * (ConverterSettings.MAX_IMAGE_DIMENSIONS / width))
+            new_width = ConverterConstants.MAX_IMAGE_DIMENSIONS
+            new_height = int(height * (ConverterConstants.MAX_IMAGE_DIMENSIONS / width))
         else:
-            new_height = ConverterSettings.MAX_IMAGE_DIMENSIONS
-            new_width = int(width * (ConverterSettings.MAX_IMAGE_DIMENSIONS / height))
+            new_height = ConverterConstants.MAX_IMAGE_DIMENSIONS
+            new_width = int(width * (ConverterConstants.MAX_IMAGE_DIMENSIONS / height))
 
         # Use BICUBIC instead of LANCZOS for faster resizing with acceptable quality
         # BICUBIC is about 30-40% faster than LANCZOS with minimal quality difference for downsampling
@@ -133,7 +133,7 @@ class ImageConverter(ImageConverterABC):
 
         if options.output_format == ImageConverterAllOutputFormats.JPEG:
             width, height = image.size
-            is_large_image = width * height > ConverterSettings.SAFE_AREA  # Only use progressive for larger images
+            is_large_image = width * height > ConverterConstants.SAFE_AREA  # Only use progressive for larger images
 
             save_args.update(
                 {
@@ -151,7 +151,7 @@ class ImageConverter(ImageConverterABC):
             # Adjust compression level based on image size
             # Higher compression for smaller images, lower for larger ones for better performance
             width, height = image.size
-            compress_level = 9 if width * height < ConverterSettings.SAFE_AREA else 6
+            compress_level = 9 if width * height < ConverterConstants.SAFE_AREA else 6
             save_args.update({"compress_level": compress_level})
 
         elif options.output_format == ImageConverterAllOutputFormats.WEBP:

@@ -7,6 +7,7 @@ from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_post  # pyright: ignore
 
 from webpeditor_app.application.common.session_service import SessionServiceFactory
+from webpeditor_app.application.converter.handlers.download_all_zip_handler import DownloadAllZipHandler
 from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
 from webpeditor_app.application.converter.handlers.schemas import (
     ConversionRequest,
@@ -71,10 +72,15 @@ class ImageConverterController(ControllerBase):
         "/download-all-zip",
         response={
             HTTPStatus.OK: HTTPResult[DownloadAllZipResponse],
+            HTTPStatus.NOT_FOUND: HTTPResult[DownloadAllZipResponse],
             HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[DownloadAllZipResponse],
         },
-        summary="Download all zip files",
+        summary="Download all files as ZIP archive",
     )
-    async def adownload_all_as_zip(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
-        # session_service = self.__session_service_factory.create(self.get_request(self.context))
-        return HTTPResult[DownloadAllZipResponse].failure_500("Not implemented")
+    async def adownload_all_zip(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
+        async with container.arequest_context():
+            session_service_factory = await container.aresolve(SessionServiceFactory)
+            download_all_zip_handler = await container.aresolve(DownloadAllZipHandler)
+            session_service = session_service_factory.create(self.request)
+            result = await download_all_zip_handler.ahandle(session_service)
+            return HTTPResult[DownloadAllZipResponse].from_result(result)

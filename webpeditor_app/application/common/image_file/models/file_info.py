@@ -11,7 +11,7 @@ class ImageFileInfo(BaseModel):
     file_basename: str
     file_format: str
     file_format_description: str
-    file_content: bytes
+    content: bytes
     size: int
     width: int
     height: int

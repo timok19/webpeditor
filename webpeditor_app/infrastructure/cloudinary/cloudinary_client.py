@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from webpeditor import settings
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
-from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.schemas import (
     DeleteResourceResponse,
     GetResourcesResponse,
@@ -43,12 +42,12 @@ class CloudinaryClient:
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadFileResponse]:
+    async def aupload_file(self, public_id: str, content: bytes) -> ContextResult[UploadFileResponse]:
         return await self.__asend_request(
             HTTPMethod.POST,
             "image/upload",
             data=self.__create_form_data({"public_id": public_id}),
-            files={"file": file_content},
+            files={"file": content},
             response_type=UploadFileResponse,
         )
 
@@ -69,6 +68,10 @@ class CloudinaryClient:
             query_params={"prefix": folder_path},
             response_type=DeleteResourceResponse,
         )
+
+    # TODO
+    @as_awaitable_result
+    async def adownload_all_zip(self, public_ids: list[str]) -> ContextResult[str]: ...
 
     def __create_form_data(self, params: MutableMapping[str, str]) -> Mapping[str, str]:
         # Add api_key and timestamp if not present
@@ -108,12 +111,8 @@ class CloudinaryClient:
             response = await client.request(method, url, params=query_params, data=data, files=files)
 
             if response.is_error:
-                message = f"Unexpected Cloudinary error occurred when calling {method} {response.url} {response.text}"
-                self.__logger.log_error(message)
+                self.__logger.error(f"Unexpected Cloudinary error occurred when calling {method} {response.url} {response.text}")
                 return ContextResult[TResponse].failure(ErrorContext.server_error())
-
-            if response_type is Unit:
-                return ContextResult[TResponse].success(response_type())
 
             return ContextResult[TResponse].success(response_type.model_validate(response.json()))
 

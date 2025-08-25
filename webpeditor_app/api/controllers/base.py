@@ -1,11 +1,11 @@
 from typing import Optional
 
 from django.http import HttpRequest, HttpResponse
-from ninja_extra import ControllerBase as FactoryControllerBase
+from ninja_extra import ControllerBase as NinjaControllerBase
 from ninja_extra.context import RouteContext
 
 
-class ControllerBase(FactoryControllerBase):
+class ControllerBase(NinjaControllerBase):
     @property
     def request(self) -> HttpRequest:
         context = self.__validate_context(self.context)

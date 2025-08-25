@@ -68,11 +68,11 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         image.save(buffer, format=image.format)
 
-        file_content = buffer.getvalue()
+        content = buffer.getvalue()
         size = self.__get_file_size(buffer)
-        aspect_ratio = self.__get_aspect_ratio(image.size)
-        exif_data = self.__get_exif_data(buffer)
         width, height = image.size
+        aspect_ratio = self.__get_aspect_ratio(width, height)
+        exif_data = self.__get_exif_data(buffer)
 
         buffer.close()
 
@@ -81,9 +81,9 @@ class ImageFileUtility(ImageFileUtilityABC):
                 filename=normalized_filename_result.ok,
                 filename_shorter=trimmed_filename_result.ok,
                 file_basename=basename_result.ok,
-                file_format=str(image.format),
+                file_format=image.format or "",
                 file_format_description=image.format_description or "",
-                file_content=file_content,
+                content=content,
                 size=size,
                 width=width,
                 height=height,
@@ -127,7 +127,7 @@ class ImageFileUtility(ImageFileUtilityABC):
             basename, _ = os.path.splitext(filename)
             return ContextResult[str].success(basename)
         except Exception as exception:
-            self.__logger.log_exception(exception, f"Unable to get basename from the filename '{filename}'")
+            self.__logger.exception(exception, f"Unable to get basename from the filename '{filename}'")
             return ContextResult[str].failure(ErrorContext.server_error())
 
     def close_file(self, image: ImageFile) -> ContextResult[Unit]:
@@ -135,21 +135,19 @@ class ImageFileUtility(ImageFileUtilityABC):
             image.close()
             return ContextResult[Unit].success(Unit())
         except Exception as exception:
-            self.__logger.log_exception(exception, f"Failed to close image file '{image}'")
+            self.__logger.exception(exception, f"Failed to close image file '{image}'")
             return ContextResult[Unit].failure(ErrorContext.server_error())
 
     @staticmethod
-    def __get_aspect_ratio(resolution: tuple[int, int]) -> Decimal:
-        width, height = resolution
-        aspect_ratio = Decimal(width / height).quantize(Decimal(".1"), rounding=ROUND_UP)
-        return aspect_ratio
+    def __get_aspect_ratio(width: int, height: int) -> Decimal:
+        return Decimal(width / height).quantize(Decimal(".1"), rounding=ROUND_UP)
 
     def __decode_filename(self, filename: bytes) -> ContextResult[str]:
         try:
             return ContextResult[str].success(filename.decode())
         except Exception as exception:
             message = f"Invalid filename: {filename}"
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return ContextResult[str].failure(ErrorContext.server_error(message))
 
     @staticmethod
@@ -187,7 +185,7 @@ class ImageFileUtility(ImageFileUtilityABC):
             exif_image = exifread.process_file(buffer, debug=True)
             return {k: str(v) for k, v in exif_image.items()}
         except Exception as exception:
-            self.__logger.log_exception(exception, "Unable to parse EXIF data")
+            self.__logger.exception(exception, "Unable to parse EXIF data")
             return {}
 
     @staticmethod

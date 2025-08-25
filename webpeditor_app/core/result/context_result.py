@@ -23,7 +23,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @staticmethod
     def failure(error: ErrorContext) -> "ContextResult[TOut]":
-        return ContextResult(
+        return ContextResult[TOut](
             tag="error",
             error=ErrorContext(
                 error_code=error.error_code,
