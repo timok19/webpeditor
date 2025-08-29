@@ -50,4 +50,4 @@ class ErrorContext(Schema):
         return cls(error_code=error_code, message=message or "", reasons=reasons or [])
 
     def to_str(self) -> str:
-        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
+        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{', '.join(self.reasons) if any(self.reasons) else ''}]"
