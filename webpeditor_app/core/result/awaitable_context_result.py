@@ -93,7 +93,7 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
     async def filter_with(
         self,
         predicate: Callable[[TOut], bool],
-        default: Callable[[TOut], ErrorContext],
+        default: Callable[[TOut], "ErrorContext"],
     ) -> "ContextResult[TOut]":
         from webpeditor_app.core.result.context_result import ContextResult
 

@@ -46,8 +46,8 @@ class HTTPResult[T: Schema](Schema):
 
         if results.any(lambda result: result.is_error()):
             errors = results.where(lambda result: result.is_error()).select(lambda result: result.error)
-            error_code = errors.select(lambda e: e.error_code).first()
-            http_errors = errors.select(lambda e: HTTPResult.HTTPError(message=e.message, reasons=e.reasons)).to_list()
+            error_code = errors.select(lambda error: error.error_code).first()
+            http_errors = errors.select(lambda error: HTTPResult.HTTPError(message=error.message, reasons=error.reasons)).to_list()
             return cls.__map_status_code(error_code), cls(errors=http_errors)
 
         values = results.select(lambda result: result.ok).to_list()

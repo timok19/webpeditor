@@ -6,7 +6,7 @@ from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_post  # pyright: ignore
 
-from webpeditor_app.application.common.session_service import SessionServiceFactory
+from webpeditor_app.application.common.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.converter.handlers.download_all_zip_handler import DownloadAllZipHandler
 from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
 from webpeditor_app.application.converter.handlers.schemas import (

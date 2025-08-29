@@ -7,7 +7,7 @@ from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFi
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
-from webpeditor_app.application.common.session_service import SessionServiceFactory
+from webpeditor_app.application.common.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.common.user_service import UserService, UserServiceABC
 from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
