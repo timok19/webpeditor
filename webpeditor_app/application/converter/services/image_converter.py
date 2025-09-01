@@ -11,12 +11,9 @@ from webpeditor_app.application.converter.handlers.schemas import (
 )
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
-from webpeditor_app.application.converter.settings import ConverterSettings
+from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
-
-# Enable truncated image processing for better memory usage
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class ImageConverter(ImageConverterABC):
@@ -27,6 +24,7 @@ class ImageConverter(ImageConverterABC):
         self.__rgba_mode: Final[str] = "RGBA"
         self.__palette_mode: Final[str] = "P"
         self.__cache_request: dict[tuple[str, ImageConverterAllOutputFormats, int], ImageFile.ImageFile] = {}
+        self.__try_enable_chunked_processing()
 
     def convert_image(
         self,
@@ -63,10 +61,6 @@ class ImageConverter(ImageConverterABC):
         if image.format is None:
             return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
-        # Enable chunked processing to reduce memory usage and improve performance
-        # Set PIL to use multiple cores when available
-        self.__try_enable_chunked_processing()
-
         # Resize large images to improve performance
         img = self.__limit_image_size(image)
 
@@ -95,30 +89,19 @@ class ImageConverter(ImageConverterABC):
         return ContextResult[ImageFile.ImageFile].success(result)
 
     @staticmethod
-    def __try_enable_chunked_processing() -> None:
-        try:
-            import multiprocessing
-
-            Image.core.set_alignment(32)
-            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
-            return None
-        except (ImportError, AttributeError):
-            return None
-
-    @staticmethod
     def __limit_image_size(image: ImageFile.ImageFile) -> ImageFile.ImageFile:
         width, height = image.size
 
-        if width <= ConverterSettings.MAX_IMAGE_DIMENSIONS and height <= ConverterSettings.MAX_IMAGE_DIMENSIONS:
+        if width <= ConverterConstants.MAX_IMAGE_DIMENSIONS and height <= ConverterConstants.MAX_IMAGE_DIMENSIONS:
             return image
 
         # Calculate new dimensions while preserving an aspect ratio
         if width > height:
-            new_width = ConverterSettings.MAX_IMAGE_DIMENSIONS
-            new_height = int(height * (ConverterSettings.MAX_IMAGE_DIMENSIONS / width))
+            new_width = ConverterConstants.MAX_IMAGE_DIMENSIONS
+            new_height = int(height * (ConverterConstants.MAX_IMAGE_DIMENSIONS / width))
         else:
-            new_height = ConverterSettings.MAX_IMAGE_DIMENSIONS
-            new_width = int(width * (ConverterSettings.MAX_IMAGE_DIMENSIONS / height))
+            new_height = ConverterConstants.MAX_IMAGE_DIMENSIONS
+            new_width = int(width * (ConverterConstants.MAX_IMAGE_DIMENSIONS / height))
 
         # Use BICUBIC instead of LANCZOS for faster resizing with acceptable quality
         # BICUBIC is about 30-40% faster than LANCZOS with minimal quality difference for downsampling
@@ -133,7 +116,7 @@ class ImageConverter(ImageConverterABC):
 
         if options.output_format == ImageConverterAllOutputFormats.JPEG:
             width, height = image.size
-            is_large_image = width * height > ConverterSettings.SAFE_AREA  # Only use progressive for larger images
+            is_large_image = width * height > ConverterConstants.SAFE_AREA  # Only use progressive for larger images
 
             save_args.update(
                 {
@@ -151,7 +134,7 @@ class ImageConverter(ImageConverterABC):
             # Adjust compression level based on image size
             # Higher compression for smaller images, lower for larger ones for better performance
             width, height = image.size
-            compress_level = 9 if width * height < ConverterSettings.SAFE_AREA else 6
+            compress_level = 9 if width * height < ConverterConstants.SAFE_AREA else 6
             save_args.update({"compress_level": compress_level})
 
         elif options.output_format == ImageConverterAllOutputFormats.WEBP:
@@ -183,3 +166,19 @@ class ImageConverter(ImageConverterABC):
             rgba_image = rgba_image.convert(self.__rgba_mode)
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(self.__rgb_mode)
+
+    @staticmethod
+    def __try_enable_chunked_processing() -> None:
+        try:
+            import multiprocessing
+
+            # Enable truncated image processing for better memory usage
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+            # Enable chunked processing to reduce memory usage and improve performance
+            # Set PIL to use multiple cores when available
+            Image.core.set_alignment(32)
+            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
+            return None
+        except (ImportError, AttributeError):
+            return None

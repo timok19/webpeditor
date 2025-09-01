@@ -5,7 +5,7 @@ from PIL.ImageFile import ImageFile
 
 from webpeditor_app.application.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.result import ContextResult
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 
 
 class ImageFileUtilityABC(ABC):

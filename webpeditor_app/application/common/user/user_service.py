@@ -21,5 +21,5 @@ class UserService(UserServiceABC):
             return ContextResult[str].success(signing.loads(signed_user_id, salt=settings.WEBPEDITOR_SALT_KEY))
         except Exception as exception:
             message = f"Invalid signed User ID: {signed_user_id}"
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return ContextResult[str].failure(ErrorContext.bad_request(message))

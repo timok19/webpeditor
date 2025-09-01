@@ -4,7 +4,7 @@ from typing import final
 from ninja import Schema, Field
 from pydantic import ConfigDict
 
-from webpeditor_app.core.result import EnumerableContextResult, ErrorContext
+from webpeditor_app.core.result import EnumerableContextResult, ErrorContext, ContextResult
 
 type HTTPResultWithStatus[T: Schema] = tuple[HTTPStatus, HTTPResult[T]]
 
@@ -20,7 +20,7 @@ class HTTPResult[T: Schema](Schema):
     class HTTPError(Schema):
         model_config = ConfigDict(frozen=True)
 
-        message: str
+        message: str = Field(default_factory=str)
         reasons: list[str] = Field(default_factory=list[str])
 
     @classmethod
@@ -32,14 +32,22 @@ class HTTPResult[T: Schema](Schema):
         return status_code, cls(errors=[HTTPResult.HTTPError(message=message)])
 
     @classmethod
+    def from_result(cls, result: ContextResult[T]) -> HTTPResultWithStatus[T]:
+        if result.is_error():
+            http_error = HTTPResult.HTTPError(message=result.error.message, reasons=result.error.reasons)
+            return cls.__map_status_code(result.error.error_code), cls(errors=[http_error])
+
+        return HTTPStatus.OK, cls(values=[result.ok])
+
+    @classmethod
     def from_results(cls, results: EnumerableContextResult[T]) -> HTTPResultWithStatus[T]:
         if results.count() == 0:
             return cls.no_content()
 
         if results.any(lambda result: result.is_error()):
             errors = results.where(lambda result: result.is_error()).select(lambda result: result.error)
-            error_code = errors.select(lambda result: result.error_code).first()
-            http_errors = errors.select(lambda e: HTTPResult.HTTPError(message=e.message, reasons=e.reasons)).to_list()
+            error_code = errors.select(lambda error: error.error_code).first()
+            http_errors = errors.select(lambda error: HTTPResult.HTTPError(message=error.message, reasons=error.reasons)).to_list()
             return cls.__map_status_code(error_code), cls(errors=http_errors)
 
         values = results.select(lambda result: result.ok).to_list()

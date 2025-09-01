@@ -3,14 +3,14 @@ default_install_hook_types:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-yaml
   - id: end-of-file-fixer
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.8.2
+  rev: 0.8.11
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"

@@ -5,7 +5,7 @@ from types_linq import Enumerable
 
 from webpeditor_app.core.result.decorators import as_awaitable_result, as_awaitable_enumerable_result
 from webpeditor_app.core.result.error_context import ErrorContext
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 
 if TYPE_CHECKING:
     from webpeditor_app.core.result import EnumerableContextResult
@@ -23,7 +23,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
 
     @staticmethod
     def failure(error: ErrorContext) -> "ContextResult[TOut]":
-        return ContextResult(
+        return ContextResult[TOut](
             tag="error",
             error=ErrorContext(
                 error_code=error.error_code,

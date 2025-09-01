@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Generator
 
 from webpeditor_app.core.result.decorators import as_awaitable_result, as_awaitable_enumerable_result
-from webpeditor_app.globals import Unit
 
 if TYPE_CHECKING:
     from webpeditor_app.core.result.context_result import ContextResult
     from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
+    from webpeditor_app.core.result.error_context import ErrorContext
+    from webpeditor_app.types import Unit
 
 
 class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
@@ -87,3 +88,13 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
     @as_awaitable_result
     async def to_unit(self) -> "ContextResult[Unit]":
         return (await self.__awaitable_result).to_unit()
+
+    @as_awaitable_result
+    async def filter_with(
+        self,
+        predicate: Callable[[TOut], bool],
+        default: Callable[[TOut], "ErrorContext"],
+    ) -> "ContextResult[TOut]":
+        from webpeditor_app.core.result.context_result import ContextResult
+
+        return ContextResult[TOut].from_result((await self.__awaitable_result).filter_with(predicate, default))

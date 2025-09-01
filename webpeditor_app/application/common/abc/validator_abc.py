@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, ConfigDict, Field
 
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 
 
 class ValidationResult(BaseModel):

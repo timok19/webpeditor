@@ -26,11 +26,11 @@ class UserRepository(UserRepositoryABC):
                 session_key_expiration_date=session_key_expiration_date,
             )
             message = f"User '{app_user.id}' with session key '{session_key}' and expiration date '{session_key_expiration_date}' has been created"
-            self.__logger.log_debug(message)
+            self.__logger.debug(message)
             return ContextResult[AppUser].success(app_user)
         except Exception as exception:
             message = f"Failed to create User with session key '{session_key}' and expiration date '{session_key_expiration_date}'"
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return ContextResult[AppUser].failure(ErrorContext.server_error())
 
     @as_awaitable_result

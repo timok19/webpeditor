@@ -13,18 +13,19 @@ class EnumerableContextResult[TOut](Enumerable["ContextResult[TOut]"]):
     def from_results(results: Collection["ContextResult[TOut]"]) -> "EnumerableContextResult[TOut]":
         return EnumerableContextResult[TOut](results)
 
-    def log_results(
+    def tap_either(
         self,
-        log_success: Callable[[Enumerable[TOut]], None] = lambda _: None,
-        log_error: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
+        success_func: Callable[[Enumerable[TOut]], None] = lambda _: None,
+        error_func: Callable[[Enumerable[ErrorContext]], None] = lambda _: None,
     ) -> "EnumerableContextResult[TOut]":
         from webpeditor_app.core.result.context_result import ContextResult
 
         if self.any(lambda result: result.is_error()):
             errors = self.where(lambda result: result.is_error()).select(lambda result: result.error)
-            log_error(errors)
-            return EnumerableContextResult(errors.select(ContextResult[TOut].failure))
+            error_func(errors)
+            return EnumerableContextResult[TOut](errors.select(ContextResult[TOut].failure))
 
         values = self.where(lambda result: result.is_ok()).select(lambda result: result.ok)
-        log_success(values)
-        return EnumerableContextResult(values.select(ContextResult[TOut].success))
+        success_func(values)
+
+        return EnumerableContextResult[TOut](values.select(ContextResult[TOut].success))

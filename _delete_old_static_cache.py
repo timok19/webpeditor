@@ -2,13 +2,14 @@ import math
 import os
 import time
 from datetime import UTC, datetime
+from typing import Final
 
 from webpeditor.settings import STATIC_ROOT
 
 
 def delete_static_files(folder_path: str, with_extension: str) -> int:
     deleted_files_count = 0
-    one_day_in_seconds = 86400
+    one_day_in_seconds: Final[int] = 86400
 
     try:
         filenames = os.listdir(folder_path)

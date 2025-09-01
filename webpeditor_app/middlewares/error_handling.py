@@ -1,4 +1,4 @@
-from typing import Any, Callable, Final, final, cast
+from typing import Any, Callable, Final, final
 
 from anydi.ext.django import container
 from django.http.request import HttpRequest
@@ -20,19 +20,23 @@ class ErrorHandlingMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponseBase:
         response = self.get_response(request)
-        return self.__process(request, cast(HttpResponse, response)) if self.__is_error_response(response) else response
 
-    @staticmethod
-    def __is_error_response(response: HttpResponseBase) -> bool:
-        return isinstance(response, HttpResponse) and Enumerable(codes_4xx).union(codes_5xx).any(lambda code: response.status_code == code)
-
-    def __process(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
-        validation_result = self.__validate_json(request, response)
-
-        if validation_result.is_some():
-            self.__logger.log_request_error(request, validation_result.some.model_dump_json())
+        if isinstance(response, HttpResponse) and self.__is_error(response):
+            self.__process(request, response)
 
         return response
+
+    @staticmethod
+    def __is_error(response: HttpResponse) -> bool:
+        return Enumerable[int](codes_4xx).union(codes_5xx).any(lambda status_code: response.status_code == status_code)
+
+    def __process(self, request: HttpRequest, response: HttpResponse) -> None:
+        validation_result = self.__validate_json(request, response)
+        if validation_result.is_none():
+            return None
+
+        self.__logger.request_error(request, validation_result.some.model_dump_json())
+        return None
 
     def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[HTTPResult[Any]]:
         try:
@@ -41,5 +45,5 @@ class ErrorHandlingMiddleware:
             return Option[HTTPResult[Any]].Nothing()
         except Exception as exception:
             reason = response.content.decode(response.charset or "utf-8")
-            self.__logger.log_request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
+            self.__logger.request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
             return Option[HTTPResult[Any]].Nothing()

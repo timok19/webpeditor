@@ -73,9 +73,9 @@ ANYDI: dict[str, Any] = {
     "REGISTER_SETTINGS": True,
     "MODULES": [
         # Should follow the order. Synchronous dependency resolution
-        "webpeditor_app.core.CoreModule",
-        "webpeditor_app.infrastructure.InfrastructureModule",
-        "webpeditor_app.application.ApplicationModule",
+        "webpeditor_app.core.di.CoreModule",
+        "webpeditor_app.infrastructure.di.InfrastructureModule",
+        "webpeditor_app.application.di.ApplicationModule",
     ],
 }
 

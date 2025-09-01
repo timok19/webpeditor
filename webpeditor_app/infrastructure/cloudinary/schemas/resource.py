@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from ninja import Field
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, HttpUrl
 
 
 class GetResourcesResponse(BaseModel):
@@ -10,7 +10,7 @@ class GetResourcesResponse(BaseModel):
     resources: list["GetResourcesResponse.ResourceData"] = Field(serialization_alias="resources")
 
     class ResourceData(BaseModel):
-        model_config = ConfigDict(frozen=True, serialize_by_alias=True)
+        model_config = ConfigDict(frozen=True, strict=True, serialize_by_alias=True)
 
         asset_id: str = Field(serialization_alias="asset_id")
         public_id: str = Field(serialization_alias="public_id")
@@ -21,10 +21,10 @@ class GetResourcesResponse(BaseModel):
         height: int = Field(serialization_alias="height")
         asset_folder: str = Field(serialization_alias="asset_folder")
         url: str = Field(serialization_alias="url")
-        secure_url: str = Field(serialization_alias="secure_url")
+        secure_url: HttpUrl = Field(serialization_alias="secure_url")
 
 
 class DeleteResourceResponse(BaseModel):
-    model_config = ConfigDict(frozen=True, serialize_by_alias=True)
+    model_config = ConfigDict(frozen=True, strict=True, serialize_by_alias=True)
 
     deleted: dict[str, str] = Field(serialization_alias="deleted")

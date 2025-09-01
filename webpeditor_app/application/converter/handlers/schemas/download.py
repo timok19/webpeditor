@@ -2,7 +2,7 @@ from ninja import Schema
 from pydantic import ConfigDict
 
 
-class DownloadAllZipResponse(Schema):
+class ZipConvertedImagesResponse(Schema):
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
-    zip_file_url: str
+    zip_url: str

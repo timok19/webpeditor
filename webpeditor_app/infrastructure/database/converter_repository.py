@@ -5,7 +5,7 @@ from expression import Option
 from webpeditor_app.application.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
@@ -32,10 +32,10 @@ class ConverterRepository(ConverterRepositoryABC):
     async def aget_or_create_asset(self, user: AppUser) -> ContextResult[ConverterImageAsset]:
         try:
             asset, _ = await ConverterImageAsset.objects.aget_or_create(user=user)
-            self.__logger.log_debug(f"Asset '{asset.id}' for User '{user.id}' has been created")
+            self.__logger.debug(f"Asset '{asset.id}' for User '{user.id}' has been created")
             return ContextResult[ConverterImageAsset].success(asset)
         except Exception as exception:
-            self.__logger.log_exception(exception, f"Failed to create Converter Image Asset for User '{user.id}'")
+            self.__logger.exception(exception, f"Failed to create Converter Image Asset for User '{user.id}'")
             return ContextResult[ConverterImageAsset].failure(ErrorContext.bad_request())
 
     @as_awaitable_result
@@ -44,21 +44,21 @@ class ConverterRepository(ConverterRepositoryABC):
             return ContextResult[bool].success(await ConverterImageAsset.objects.filter(user_id=user_id).aexists())
         except Exception as exception:
             message = f"Failed to check if Converter Image Asset exists for User '{user_id}'"
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return ContextResult[bool].failure(ErrorContext.bad_request())
 
     @as_awaitable_result
     async def adelete_asset(self, user_id: str) -> ContextResult[Unit]:
         try:
             number_of_deleted, deleted_per_model = await ConverterImageAsset.objects.filter(user_id=user_id).adelete()
-            self.__logger.log_info(f"Deleted {number_of_deleted} Converter Image Assets related records for User '{user_id}'")
+            self.__logger.info(f"Deleted {number_of_deleted} Converter Image Assets related records for User '{user_id}'")
 
             for model, count in deleted_per_model.items():
-                self.__logger.log_debug(f"Deleted '{model}': {count} for User '{user_id}'")
+                self.__logger.debug(f"Deleted '{model}': {count} for User '{user_id}'")
 
             return ContextResult[Unit].success(Unit())
         except Exception as exception:
-            self.__logger.log_exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")
+            self.__logger.exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")
             return ContextResult[Unit].failure(ErrorContext.bad_request())
 
     @as_awaitable_result
@@ -90,5 +90,5 @@ class ConverterRepository(ConverterRepositoryABC):
             message = (
                 f"Failed to create Converter Original Image Asset File with filename '{file_info.filename}' for User '{asset.user.id}'"
             )
-            self.__logger.log_exception(exception, message)
+            self.__logger.exception(exception, message)
             return ContextResult[T].failure(ErrorContext.bad_request())

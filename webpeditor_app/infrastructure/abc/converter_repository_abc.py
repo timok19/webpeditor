@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,

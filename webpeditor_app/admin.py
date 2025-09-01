@@ -9,7 +9,7 @@ from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 
 from webpeditor_app.common import api_key_utils
-from webpeditor_app.globals import Pair
+from webpeditor_app.types import Pair
 from webpeditor_app.infrastructure.database.models import (
     APIKey,
     AppUser,
@@ -65,7 +65,7 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
     @staticmethod
     def __create_api_key_and_hash() -> Pair[str, str]:
         api_key = api_key_utils.create_api_key()
-        api_key_hash = api_key_utils.create_api_key_hash(api_key)
+        api_key_hash = api_key_utils.hash_api_key(api_key)
         return Pair[str, str](api_key, api_key_hash)
 
     @staticmethod

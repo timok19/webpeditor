@@ -1,39 +1,21 @@
 import hashlib
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from http import HTTPMethod
-from typing import IO, Any, Final, Mapping, MutableMapping, Optional, Sequence, Union, final
+from typing import Final, MutableMapping, Optional, final, Any
 
-from httpx import AsyncClient, BasicAuth, QueryParams
+from httpx import AsyncClient, BasicAuth
 from pydantic import BaseModel
 
 from webpeditor import settings
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
-from webpeditor_app.globals import Unit
 from webpeditor_app.infrastructure.cloudinary.schemas import (
     DeleteResourceResponse,
     GetResourcesResponse,
     UploadFileResponse,
 )
-
-_FileContent = Union[IO[bytes], bytes, str]
-_FileTypes = Union[
-    _FileContent,
-    tuple[Optional[str], _FileContent],
-    tuple[Optional[str], _FileContent, Optional[str]],
-    tuple[Optional[str], _FileContent, Optional[str], Mapping[str, str]],
-]
-_RequestFiles = Union[Mapping[str, _FileTypes], Sequence[tuple[str, _FileTypes]]]
-_PrimitiveData = Optional[Union[str, int, float, bool]]
-_QueryParamTypes = Union[
-    QueryParams,
-    Mapping[str, Union[_PrimitiveData, Sequence[_PrimitiveData]]],
-    list[tuple[str, _PrimitiveData]],
-    tuple[tuple[str, _PrimitiveData], ...],
-    str,
-    bytes,
-]
-_RequestData = Mapping[str, Any]
+from webpeditor_app.infrastructure.cloudinary.schemas.archive import GenerateArchiveResponse
+from webpeditor_app.infrastructure.cloudinary.types import QueryParamTypes, RequestData, RequestFiles
 
 
 @final
@@ -43,12 +25,12 @@ class CloudinaryClient:
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload_file(self, public_id: str, file_content: bytes) -> ContextResult[UploadFileResponse]:
+    async def aupload_file(self, public_id: str, content: bytes) -> ContextResult[UploadFileResponse]:
         return await self.__asend_request(
             HTTPMethod.POST,
             "image/upload",
             data=self.__create_form_data({"public_id": public_id}),
-            files={"file": file_content},
+            files={"file": content},
             response_type=UploadFileResponse,
         )
 
@@ -70,12 +52,25 @@ class CloudinaryClient:
             response_type=DeleteResourceResponse,
         )
 
-    def __create_form_data(self, params: MutableMapping[str, str]) -> Mapping[str, str]:
+    @as_awaitable_result
+    async def agenerate_zip_archive(
+        self,
+        folder_path_to_zip: str,
+        file_path_to_save: str,
+    ) -> ContextResult[GenerateArchiveResponse]:
+        return await self.__asend_request(
+            HTTPMethod.POST,
+            "image/generate_archive",
+            data=self.__create_form_data({"prefixes": folder_path_to_zip, "target_public_id": file_path_to_save}),
+            response_type=GenerateArchiveResponse,
+        )
+
+    def __create_form_data(self, params: MutableMapping[str, Any]) -> RequestData:
         # Add api_key and timestamp if not present
         if "api_key" not in params.keys():
             params["api_key"] = settings.CLOUDINARY_API_KEY
         if "timestamp" not in params.keys():
-            params["timestamp"] = str(int(datetime.now(UTC).timestamp()))
+            params["timestamp"] = str(int(datetime.now(timezone.utc).timestamp()))
 
         params["signature"] = self.__generate_signature(params)
         return params
@@ -99,21 +94,17 @@ class CloudinaryClient:
         method: HTTPMethod,
         url: str,
         *,
-        query_params: Optional[_QueryParamTypes] = None,
-        data: Optional[_RequestData] = None,
-        files: Optional[_RequestFiles] = None,
+        query_params: Optional[QueryParamTypes] = None,
+        data: Optional[RequestData] = None,
+        files: Optional[RequestFiles] = None,
         response_type: type[TResponse],
     ) -> ContextResult[TResponse]:
         async with self.__get_client() as client:
             response = await client.request(method, url, params=query_params, data=data, files=files)
 
             if response.is_error:
-                message = f"Unexpected Cloudinary error occurred when calling {method} {response.url} {response.text}"
-                self.__logger.log_error(message)
+                self.__logger.error(f"Unexpected Cloudinary error occurred when calling {method} {response.url} {response.text}")
                 return ContextResult[TResponse].failure(ErrorContext.server_error())
-
-            if response_type is Unit:
-                return ContextResult[TResponse].success(response_type())
 
             return ContextResult[TResponse].success(response_type.model_validate(response.json()))
 

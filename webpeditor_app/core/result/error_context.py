@@ -1,5 +1,4 @@
-from enum import IntEnum
-from http import HTTPStatus
+from enum import IntEnum, auto
 from typing import Optional
 
 from ninja import Field, Schema
@@ -7,18 +6,18 @@ from pydantic import ConfigDict
 
 
 class ErrorContext(Schema):
-    class ErrorCode(IntEnum):
-        BAD_REQUEST = HTTPStatus.BAD_REQUEST
-        UNAUTHORIZED = HTTPStatus.UNAUTHORIZED
-        FORBIDDEN = HTTPStatus.FORBIDDEN
-        NOT_FOUND = HTTPStatus.NOT_FOUND
-        INTERNAL_SERVER_ERROR = HTTPStatus.INTERNAL_SERVER_ERROR
-
     model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
-    error_code: ErrorCode
+    error_code: "ErrorCode"
     message: str = Field(default_factory=str)
     reasons: list[str] = Field(default_factory=list[str])
+
+    class ErrorCode(IntEnum):
+        BAD_REQUEST = auto()
+        UNAUTHORIZED = auto()
+        FORBIDDEN = auto()
+        NOT_FOUND = auto()
+        INTERNAL_SERVER_ERROR = auto()
 
     @classmethod
     def bad_request(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
@@ -49,5 +48,5 @@ class ErrorContext(Schema):
     ) -> "ErrorContext":
         return cls(error_code=error_code, message=message or "", reasons=reasons or [])
 
-    def to_str(self) -> str:
-        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{self.reasons if any(self.reasons) else ''}]"
+    def __str__(self) -> str:
+        return f"Error code: {self.error_code}, Message: {self.message}, Reasons: [{', '.join(self.reasons) if any(self.reasons) else ''}]"
