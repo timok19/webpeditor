@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods
 
 @csrf_exempt
 @require_http_methods(["GET"])
+# TODO: implement download for a single converted image
 def image_download_converted_api(request: WSGIRequest) -> JsonResponse:
     if request.method == "GET":
         converted_images: list[Any] = []
