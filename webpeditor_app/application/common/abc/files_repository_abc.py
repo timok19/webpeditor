@@ -1,17 +1,21 @@
 from abc import ABC, abstractmethod
 
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 
 
 class FilesRepositoryABC(ABC):
     @abstractmethod
     @as_awaitable_result
-    async def acleanup(self, user_id: str) -> ContextResult[Unit]: ...
+    async def aupload(self, user_id: str, relative_path: str, content: bytes) -> ContextResult[str]: ...
 
     @abstractmethod
     @as_awaitable_result
-    async def aget_zip(self, user_id: str) -> ContextResult[str]: ...
+    async def azip_folder(self, user_id: str, relative_path: str) -> ContextResult[str]: ...
+
+    @abstractmethod
+    @as_awaitable_result
+    async def acleanup(self, user_id: str) -> ContextResult[Unit]: ...
 
     @staticmethod
     @abstractmethod

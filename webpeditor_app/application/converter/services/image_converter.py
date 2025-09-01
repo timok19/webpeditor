@@ -15,9 +15,6 @@ from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result.context_result import ContextResult, ErrorContext
 
-# Enable truncated image processing for better memory usage
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
 
 class ImageConverter(ImageConverterABC):
     def __init__(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> None:
@@ -27,6 +24,7 @@ class ImageConverter(ImageConverterABC):
         self.__rgba_mode: Final[str] = "RGBA"
         self.__palette_mode: Final[str] = "P"
         self.__cache_request: dict[tuple[str, ImageConverterAllOutputFormats, int], ImageFile.ImageFile] = {}
+        self.__try_enable_chunked_processing()
 
     def convert_image(
         self,
@@ -63,10 +61,6 @@ class ImageConverter(ImageConverterABC):
         if image.format is None:
             return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
-        # Enable chunked processing to reduce memory usage and improve performance
-        # Set PIL to use multiple cores when available
-        self.__try_enable_chunked_processing()
-
         # Resize large images to improve performance
         img = self.__limit_image_size(image)
 
@@ -93,17 +87,6 @@ class ImageConverter(ImageConverterABC):
         self.__cache_request.setdefault((str(image.format), options.output_format, options.quality), result)
 
         return ContextResult[ImageFile.ImageFile].success(result)
-
-    @staticmethod
-    def __try_enable_chunked_processing() -> None:
-        try:
-            import multiprocessing
-
-            Image.core.set_alignment(32)
-            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
-            return None
-        except (ImportError, AttributeError):
-            return None
 
     @staticmethod
     def __limit_image_size(image: ImageFile.ImageFile) -> ImageFile.ImageFile:
@@ -183,3 +166,19 @@ class ImageConverter(ImageConverterABC):
             rgba_image = rgba_image.convert(self.__rgba_mode)
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(self.__rgb_mode)
+
+    @staticmethod
+    def __try_enable_chunked_processing() -> None:
+        try:
+            import multiprocessing
+
+            # Enable truncated image processing for better memory usage
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+            # Enable chunked processing to reduce memory usage and improve performance
+            # Set PIL to use multiple cores when available
+            Image.core.set_alignment(32)
+            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
+            return None
+        except (ImportError, AttributeError):
+            return None

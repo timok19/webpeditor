@@ -16,7 +16,7 @@ from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFi
 from webpeditor_app.application.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 
 
 @final

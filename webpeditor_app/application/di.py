@@ -1,16 +1,17 @@
-from typing import TYPE_CHECKING
-
+from typing import Annotated
 from anydi import Module, provider
 
-from webpeditor_app.application.common.abc.converter_files_repository_abc import ConverterFilesRepositoryABC
+from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
-from webpeditor_app.application.common.session_service_factory import SessionServiceFactory
-from webpeditor_app.application.common.user_service import UserService, UserServiceABC
+from webpeditor_app.application.common.session.session_service_factory import SessionServiceFactory
+from webpeditor_app.application.common.user.user_service import UserService, UserServiceABC
 from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
+from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.handlers.zip_converted_images_handler import ZipConvertedImagesHandler
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
@@ -20,9 +21,6 @@ from webpeditor_app.infrastructure.abc.converter_repository_abc import Converter
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
-
-if TYPE_CHECKING:
-    from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
 
 
 class ApplicationModule(Module):
@@ -35,7 +33,7 @@ class ApplicationModule(Module):
         self,
         logger: LoggerABC,
         cloudinary_client: CloudinaryClient,
-    ) -> ConverterFilesRepositoryABC:
+    ) -> Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]:
         return ConverterFilesRepository(cloudinary_client=cloudinary_client, logger=logger)
 
     @provider(scope="singleton")
@@ -52,7 +50,7 @@ class ApplicationModule(Module):
         image_file_utility: ImageFileUtilityABC,
         converter_settings: ConverterConstants,
         logger: LoggerABC,
-    ) -> ValidatorABC["ConversionRequest"]:
+    ) -> ValidatorABC[ConversionRequest]:
         return ConversionRequestValidator(
             image_file_utility=image_file_utility,
             converter_settings=converter_settings,
@@ -67,7 +65,6 @@ class ApplicationModule(Module):
     def provide_session_service_factory(
         self,
         user_service: UserServiceABC,
-        converter_files_repository: ConverterFilesRepositoryABC,
         logger: LoggerABC,
         editor_repository: EditorRepositoryABC,
         converter_repository: ConverterRepositoryABC,
@@ -75,7 +72,6 @@ class ApplicationModule(Module):
     ) -> SessionServiceFactory:
         return SessionServiceFactory(
             user_service=user_service,
-            converter_files_repository=converter_files_repository,
             logger=logger,
             editor_repository=editor_repository,
             converter_repository=converter_repository,
@@ -89,8 +85,8 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_convert_images_handler(
         self,
-        conversion_request_validator: ValidatorABC["ConversionRequest"],
-        converter_files_repository: ConverterFilesRepositoryABC,
+        conversion_request_validator: ValidatorABC[ConversionRequest],
+        converter_files_repository: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
         converter_repository: ConverterRepositoryABC,
@@ -99,10 +95,25 @@ class ApplicationModule(Module):
     ) -> ImageConversionHandler:
         return ImageConversionHandler(
             conversion_request_validator=conversion_request_validator,
-            converter_files_repository=converter_files_repository,
+            converter_files_repo=converter_files_repository,
             converter_service=converter_service,
             image_file_utility=image_file_utility,
-            converter_repository=converter_repository,
-            user_repository=user_repository,
+            converter_repo=converter_repository,
+            user_repo=user_repository,
+            logger=logger,
+        )
+
+    @provider(scope="request")
+    def provide_zip_converted_images_handler(
+        self,
+        converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
+        converter_repo: ConverterRepositoryABC,
+        user_repo: UserRepositoryABC,
+        logger: LoggerABC,
+    ) -> ZipConvertedImagesHandler:
+        return ZipConvertedImagesHandler(
+            converter_files_repo=converter_files_repo,
+            converter_repo=converter_repo,
+            user_repo=user_repo,
             logger=logger,
         )

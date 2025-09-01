@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from webpeditor_app.core.result.context_result import ContextResult
     from webpeditor_app.core.result.enumerable_context_result import EnumerableContextResult
     from webpeditor_app.core.result.error_context import ErrorContext
-    from webpeditor_app.globals import Unit
+    from webpeditor_app.types import Unit
 
 
 class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):

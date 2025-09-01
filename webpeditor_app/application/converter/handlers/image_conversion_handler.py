@@ -1,12 +1,13 @@
 import asyncio
-from typing import Final, final
+from typing import Annotated, Final, final
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
-from webpeditor_app.application.common.abc.converter_files_repository_abc import ConverterFilesRepositoryABC
-from webpeditor_app.application.common.session_service import SessionService
+from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.application.common.session.session_service import SessionService
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.common.image_file.models.file_info import ImageFileInfo
@@ -19,7 +20,7 @@ from webpeditor_app.core.result import (
     as_awaitable_result,
     as_awaitable_enumerable_result,
 )
-from webpeditor_app.globals import Pair, Unit
+from webpeditor_app.types import Pair, Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
 from webpeditor_app.infrastructure.database.models import (
@@ -34,19 +35,19 @@ class ImageConversionHandler:
     def __init__(
         self,
         conversion_request_validator: ValidatorABC[ConversionRequest],
-        converter_files_repository: ConverterFilesRepositoryABC,
+        converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
-        converter_repository: ConverterRepositoryABC,
-        user_repository: UserRepositoryABC,
+        converter_repo: ConverterRepositoryABC,
+        user_repo: UserRepositoryABC,
         logger: LoggerABC,
     ) -> None:
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
+        self.__converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__] = converter_files_repo
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__converter_service: Final[ImageConverterABC] = converter_service
-        self.__converter_files_repo: Final[ConverterFilesRepositoryABC] = converter_files_repository
-        self.__converter_repo: Final[ConverterRepositoryABC] = converter_repository
-        self.__user_repo: Final[UserRepositoryABC] = user_repository
+        self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo
+        self.__user_repo: Final[UserRepositoryABC] = user_repo
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_enumerable_result
@@ -70,10 +71,10 @@ class ImageConversionHandler:
             .abind(self.__converter_repo.aget_or_create_asset)
             .map(lambda asset: Pair(Enumerable(request.files), asset))
             .map(
-                lambda pair: pair.first.select(
+                lambda pair: pair.item1.select(
                     lambda file: self.__image_file_utility.normalize_filename(file.name)
                     .bind(lambda normalized: self.__image_file_utility.update_filename(Image.open(file), normalized))
-                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, pair.second, request.options))
+                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, pair.item2, request.options))
                 ),
             )
             .amap(lambda results: asyncio.gather(*results))
@@ -102,12 +103,12 @@ class ImageConversionHandler:
         return await (
             self.__image_file_utility.get_file_info(image)
             .abind(lambda file_info: self.__aupload_original(asset.user.id, file_info))
-            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.first, pair.second, asset))
+            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.item1, pair.item2, asset))
         ).amap2(
             self.__converter_service.convert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)
             .abind(lambda file_info: self.__aupload_converted(asset.user.id, file_info))
-            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.first, pair.second, asset))
+            .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
             .map2(self.__image_file_utility.close_file(image), lambda result, _: result),
             lambda original, converted: ConversionResponse(
                 original_data=ConversionResponse.ImageData.from_asset_file(original),
@@ -117,12 +118,12 @@ class ImageConversionHandler:
 
     @as_awaitable_result
     async def __aupload_original(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_original(user_id, file_info.file_basename, file_info.content).map(
-            lambda file_url: Pair(first=file_info, second=file_url)
+        return await self.__converter_files_repo.aupload(user_id, f"original/{file_info.filename}", file_info.content).map(
+            lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=file_url)
         )
 
     @as_awaitable_result
     async def __aupload_converted(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_converted(user_id, file_info.file_basename, file_info.content).map(
-            lambda file_url: Pair(first=file_info, second=file_url)
+        return await self.__converter_files_repo.aupload(user_id, f"converted/{file_info.filename}", file_info.content).map(
+            lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=file_url)
         )

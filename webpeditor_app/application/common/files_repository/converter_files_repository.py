@@ -1,26 +1,22 @@
+from datetime import datetime, timezone
 from typing import Final, final
 
-from webpeditor_app.application.common.abc.converter_files_repository_abc import ConverterFilesRepositoryABC
+from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
 
 @final
-class ConverterFilesRepository(ConverterFilesRepositoryABC):
+class ConverterFilesRepository(FilesRepositoryABC):
     def __init__(self, cloudinary_client: CloudinaryClient, logger: LoggerABC) -> None:
         self.__cloudinary_client: Final[CloudinaryClient] = cloudinary_client
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload_original(self, user_id: str, filename: str, content: bytes) -> ContextResult[str]:
-        public_id = f"{self._get_root_path(user_id)}/original/{filename}"
-        return await self.__cloudinary_client.aupload_file(public_id, content).map(lambda response: str(response.secure_url))
-
-    @as_awaitable_result
-    async def aupload_converted(self, user_id: str, filename: str, content: bytes) -> ContextResult[str]:
-        public_id = f"{self._get_root_path(user_id)}/converted/{filename}"
+    async def aupload(self, user_id: str, relative_path: str, content: bytes) -> ContextResult[str]:
+        public_id = f"{self._get_root_path(user_id)}/{relative_path}"
         return await self.__cloudinary_client.aupload_file(public_id, content).map(lambda response: str(response.secure_url))
 
     @as_awaitable_result
@@ -32,11 +28,13 @@ class ConverterFilesRepository(ConverterFilesRepositoryABC):
             .to_unit()
         )
 
-    # TODO
     @as_awaitable_result
-    async def aget_zip(self, user_id: str) -> ContextResult[str]:
-        ...
-        # return await self.__cloudinary_client.
+    async def azip_folder(self, user_id: str, relative_path: str) -> ContextResult[str]:
+        folder_path_to_zip = f"{self._get_root_path(user_id)}/{relative_path}"
+        file_path_to_save = f"{self._get_root_path(user_id)}/webpeditor_converted_{datetime.now(timezone.utc).date()}.zip"
+        return await self.__cloudinary_client.agenerate_zip_archive(folder_path_to_zip, file_path_to_save).map(
+            lambda response: str(response.secure_url)
+        )
 
     @staticmethod
     def _get_root_path(user_id: str) -> str:

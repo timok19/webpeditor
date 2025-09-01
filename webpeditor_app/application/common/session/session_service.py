@@ -7,11 +7,10 @@ from django.http.request import HttpRequest
 from django.utils import timezone
 from expression import Option
 
-from webpeditor_app.application.common.abc.converter_files_repository_abc import ConverterFilesRepositoryABC
 from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
-from webpeditor_app.globals import Unit
+from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.abc.user_repository_abc import UserRepositoryABC
@@ -24,7 +23,6 @@ class SessionService:
         self,
         request: HttpRequest,
         user_service: UserServiceABC,
-        converter_files_repo: ConverterFilesRepositoryABC,
         logger: LoggerABC,
         editor_repo: EditorRepositoryABC,
         converter_repo: ConverterRepositoryABC,
@@ -32,7 +30,6 @@ class SessionService:
     ) -> None:
         self.__request: Final[HttpRequest] = request
         self.__user_service: Final[UserServiceABC] = user_service
-        self.__converter_files_repo: Final[ConverterFilesRepositoryABC] = converter_files_repo
         self.__logger: Final[LoggerABC] = logger
         self.__editor_repo: Final[EditorRepositoryABC] = editor_repo
         self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo

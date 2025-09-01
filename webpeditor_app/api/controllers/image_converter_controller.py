@@ -6,13 +6,13 @@ from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_post  # pyright: ignore
 
-from webpeditor_app.application.common.session_service_factory import SessionServiceFactory
-from webpeditor_app.application.converter.handlers.download_all_zip_handler import DownloadAllZipHandler
+from webpeditor_app.application.common.session.session_service_factory import SessionServiceFactory
+from webpeditor_app.application.converter.handlers.zip_converted_images_handler import ZipConvertedImagesHandler
 from webpeditor_app.application.converter.handlers.image_conversion_handler import ImageConversionHandler
 from webpeditor_app.application.converter.handlers.schemas import (
     ConversionRequest,
     ConversionResponse,
-    DownloadAllZipResponse,
+    ZipConvertedImagesResponse,
     ImageConverterAllOutputFormats,
 )
 from webpeditor_app.api.controllers.base import ControllerBase
@@ -69,18 +69,18 @@ class ImageConverterController(ControllerBase):
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_post(
-        "/download-all-zip",
+        "/zip-converted-images",
         response={
-            HTTPStatus.OK: HTTPResult[DownloadAllZipResponse],
-            HTTPStatus.NOT_FOUND: HTTPResult[DownloadAllZipResponse],
-            HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[DownloadAllZipResponse],
+            HTTPStatus.OK: HTTPResult[ZipConvertedImagesResponse],
+            HTTPStatus.NOT_FOUND: HTTPResult[ZipConvertedImagesResponse],
+            HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[ZipConvertedImagesResponse],
         },
-        summary="Download all files as ZIP archive",
+        summary="Zip converted images",
     )
-    async def adownload_all_zip(self) -> HTTPResultWithStatus[DownloadAllZipResponse]:
+    async def azip_converted_images(self) -> HTTPResultWithStatus[ZipConvertedImagesResponse]:
         async with container.arequest_context():
             session_service_factory = await container.aresolve(SessionServiceFactory)
-            download_all_zip_handler = await container.aresolve(DownloadAllZipHandler)
+            zip_converted_images_handler = await container.aresolve(ZipConvertedImagesHandler)
             session_service = session_service_factory.create(self.request)
-            result = await download_all_zip_handler.ahandle(session_service)
-            return HTTPResult[DownloadAllZipResponse].from_result(result)
+            result = await zip_converted_images_handler.ahandle(session_service)
+            return HTTPResult[ZipConvertedImagesResponse].from_result(result)
