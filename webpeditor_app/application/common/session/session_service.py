@@ -11,8 +11,7 @@ from uuid_utils import uuid7
 
 from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.core.result.error_context import ErrorContext
+from webpeditor_app.core.result import ContextResult, as_awaitable_result, ErrorContext
 
 
 @final
@@ -56,7 +55,7 @@ class SessionService:
 
     async def __arefresh_expiry(self, user_id: str) -> str:
         expire_at = timezone.now() + timedelta(seconds=self.__session_lifetime_in_seconds)
-        self.__logger.debug(f"Session for User '{user_id}' will expire at '{expire_at.time()}'")
+        self.__logger.debug(f"Session for User '{user_id}' will expire at '{expire_at.time()}' UTC")
         await self.__aset_item(self.__expire_at_key, expire_at.timestamp())
         await self.__aset_expiry(self.__session_lifetime_in_seconds)
         return user_id

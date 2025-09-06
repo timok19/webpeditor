@@ -4,8 +4,7 @@ from webpeditor_app.application.common.abc.files_repository_abc import FilesRepo
 from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.application.common.session.session_service import SessionService
 from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
-from webpeditor_app.core.result.context_result import ContextResult
-from webpeditor_app.core.result.decorators import as_awaitable_result
+from webpeditor_app.core.result.context_result import ContextResult, as_awaitable_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.core.logger import LoggerABC
 

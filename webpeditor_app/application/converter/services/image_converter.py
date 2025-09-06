@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any, Final, cast
+from typing import Any, ClassVar, Final, cast
 
 from expression import Option
 from PIL import Image, ImageFile
@@ -17,12 +17,13 @@ from webpeditor_app.core.result.context_result import ContextResult, ErrorContex
 
 
 class ImageConverter(ImageConverterABC):
+    __rgb_mode: ClassVar[str] = "RGB"
+    __rgba_mode: ClassVar[str] = "RGBA"
+    __palette_mode: ClassVar[str] = "P"
+
     def __init__(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__logger: Final[LoggerABC] = logger
-        self.__rgb_mode: Final[str] = "RGB"
-        self.__rgba_mode: Final[str] = "RGBA"
-        self.__palette_mode: Final[str] = "P"
         self.__cache_request: dict[tuple[str, ImageConverterAllOutputFormats, int], ImageFile.ImageFile] = {}
         self.__try_enable_chunked_processing()
 
