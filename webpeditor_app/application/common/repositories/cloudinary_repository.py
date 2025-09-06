@@ -10,7 +10,7 @@ from webpeditor_app.infrastructure.cloudinary.cloudinary_client import Cloudinar
 
 
 @final
-class ConverterFilesRepository(FilesRepositoryABC):
+class CloudinaryRepository(FilesRepositoryABC):
     def __init__(self, cloudinary_client: CloudinaryClient, logger: LoggerABC) -> None:
         self.__cloudinary_client: Final[CloudinaryClient] = cloudinary_client
         self.__logger: Final[LoggerABC] = logger

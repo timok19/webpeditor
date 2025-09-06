@@ -6,7 +6,7 @@ from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
 from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
-from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.application.common.repositories.cloudinary_repository import CloudinaryRepository
 from webpeditor_app.application.common.session.session_service import SessionService
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
@@ -29,14 +29,14 @@ class ConvertImages:
     def __init__(
         self,
         conversion_request_validator: ValidatorABC[ConversionRequest],
-        converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
+        cloudinary_repo: Annotated[FilesRepositoryABC, CloudinaryRepository.__name__],
         converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
     ) -> None:
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
-        self.__converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__] = converter_files_repo
+        self.__cloudinary_repo: Annotated[FilesRepositoryABC, CloudinaryRepository.__name__] = cloudinary_repo
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__converter_service: Final[ImageConverterABC] = converter_service
         self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo
@@ -58,7 +58,8 @@ class ConvertImages:
         request: ConversionRequest,
     ) -> EnumerableContextResult[ConversionResponse]:
         return await (
-            self.__acleanup_previous_images(user_id)
+            self.__converter_repo.aasset_exists(user_id)
+            .abind(lambda asset_exists: self.__cleanup_if_exists(user_id, asset_exists))
             .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
             .map(lambda asset: Pair(Enumerable(request.files), asset))
             .map(
@@ -77,12 +78,10 @@ class ConvertImages:
         )
 
     @as_awaitable_result
-    async def __acleanup_previous_images(self, user_id: str) -> ContextResult[Unit]:
-        return await self.__converter_repo.aasset_exists(user_id).aif_then_else(
-            lambda exists: not exists,
-            lambda _: ContextResult[Unit].asuccess(Unit()),
-            lambda _: self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id)),
-        )
+    async def __cleanup_if_exists(self, user_id: str, asset_exists: bool) -> ContextResult[Unit]:
+        if not asset_exists:
+            return ContextResult[Unit].success(Unit())
+        return await self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__cloudinary_repo.acleanup(user_id))
 
     @as_awaitable_result
     async def __aconvert_and_save(
@@ -109,12 +108,12 @@ class ConvertImages:
 
     @as_awaitable_result
     async def __aupload_original(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_file(user_id, f"original/{file_info.filename}", file_info.content).map(
+        return await self.__cloudinary_repo.aupload_file(user_id, f"original/{file_info.filename}", file_info.content).map(
             lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url))
         )
 
     @as_awaitable_result
     async def __aupload_converted(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_file(user_id, f"converted/{file_info.filename}", file_info.content).map(
+        return await self.__cloudinary_repo.aupload_file(user_id, f"converted/{file_info.filename}", file_info.content).map(
             lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url))
         )

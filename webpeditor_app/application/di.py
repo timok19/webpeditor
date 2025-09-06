@@ -4,7 +4,7 @@ from anydi import Module, provider
 from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.application.common.files_repository.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.application.common.repositories.cloudinary_repository import CloudinaryRepository
 from webpeditor_app.application.common.image_file.image_file_utility import ImageFileUtility
 from webpeditor_app.application.common.session.session_service_factory import SessionServiceFactory
 from webpeditor_app.application.common.user.user_service import UserService, UserServiceABC
@@ -27,12 +27,12 @@ class ApplicationModule(Module):
         return ImageFileUtility(logger)
 
     @provider(scope="singleton")
-    def provide_converter_files_repository(
+    def provide_cloudinary_repository(
         self,
         logger: LoggerABC,
         cloudinary_client: CloudinaryClient,
-    ) -> Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]:
-        return ConverterFilesRepository(cloudinary_client, logger)
+    ) -> Annotated[FilesRepositoryABC, CloudinaryRepository.__name__]:
+        return CloudinaryRepository(cloudinary_client, logger)
 
     @provider(scope="singleton")
     def provide_converter_constants(self) -> ConverterConstants:
@@ -67,7 +67,7 @@ class ApplicationModule(Module):
     def provide_convert_images_handler(
         self,
         conversion_request_validator: ValidatorABC[ConversionRequest],
-        converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
+        cloudinary_repo: Annotated[FilesRepositoryABC, CloudinaryRepository.__name__],
         converter_service: ImageConverterABC,
         image_file_utility: ImageFileUtilityABC,
         converter_repo: ConverterRepositoryABC,
@@ -75,7 +75,7 @@ class ApplicationModule(Module):
     ) -> ConvertImages:
         return ConvertImages(
             conversion_request_validator,
-            converter_files_repo,
+            cloudinary_repo,
             converter_service,
             image_file_utility,
             converter_repo,
@@ -85,8 +85,8 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_get_zip_handler(
         self,
-        converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
+        cloudinary_repo: Annotated[FilesRepositoryABC, CloudinaryRepository.__name__],
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
     ) -> GetZip:
-        return GetZip(converter_files_repo, converter_repo, logger)
+        return GetZip(cloudinary_repo, converter_repo, logger)
