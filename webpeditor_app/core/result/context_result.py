@@ -83,6 +83,20 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
     @as_awaitable_result
+    async def amap1[TOutOther, TNewOut](
+        self,
+        other: Awaitable[TOutOther],
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        match self:
+            case ContextResult(tag="ok", ok=value):
+                return ContextResult[TNewOut].success(mapper(value, await other))
+            case ContextResult(tag="error", error=error):
+                return ContextResult[TNewOut].failure(error)
+            case _:
+                raise TypeError(f"Unexpected result of type '{repr(self)}'")
+
+    @as_awaitable_result
     async def amap2[TOutOther, TNewOut](
         self,
         other: Awaitable["ContextResult[TOutOther]"],

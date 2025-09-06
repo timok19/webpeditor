@@ -29,7 +29,7 @@ class CloudinaryClient:
         return await self.__asend_request(
             HTTPMethod.POST,
             "image/upload",
-            data=self.__create_form_data({"public_id": public_id}),
+            data=self.__create_request_data({"public_id": public_id}),
             files={"file": content},
             response_type=UploadFileResponse,
         )
@@ -53,19 +53,15 @@ class CloudinaryClient:
         )
 
     @as_awaitable_result
-    async def agenerate_zip_archive(
-        self,
-        folder_path_to_zip: str,
-        file_path_to_save: str,
-    ) -> ContextResult[GenerateArchiveResponse]:
+    async def agenerate_zip_archive(self, folder_path: str, zip_path: str) -> ContextResult[GenerateArchiveResponse]:
         return await self.__asend_request(
             HTTPMethod.POST,
             "image/generate_archive",
-            data=self.__create_form_data({"prefixes": folder_path_to_zip, "target_public_id": file_path_to_save}),
+            data=self.__create_request_data({"prefixes": folder_path, "target_public_id": zip_path}),
             response_type=GenerateArchiveResponse,
         )
 
-    def __create_form_data(self, params: MutableMapping[str, Any]) -> RequestData:
+    def __create_request_data(self, params: MutableMapping[str, Any]) -> RequestData:
         # Add api_key and timestamp if not present
         if "api_key" not in params.keys():
             params["api_key"] = settings.CLOUDINARY_API_KEY

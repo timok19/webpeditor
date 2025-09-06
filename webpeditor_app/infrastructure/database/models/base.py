@@ -9,6 +9,7 @@ from django.utils import timezone
 
 class BaseImageAsset(models.Model):
     id: models.UUIDField[uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_id: models.CharField[str] = models.CharField(max_length=100)
     created_at: models.DateTimeField[datetime] = models.DateTimeField(default=timezone.now)
 
     class Meta:

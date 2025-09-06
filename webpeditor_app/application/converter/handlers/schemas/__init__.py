@@ -1,4 +1,4 @@
-from webpeditor_app.application.converter.handlers.schemas.download import ZipConvertedImagesResponse
+from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
 from webpeditor_app.application.converter.handlers.schemas.conversion import (
     ConversionRequest,
     ConversionResponse,
@@ -13,5 +13,5 @@ __all__: list[str] = [
     "ImageConverterAllOutputFormats",
     "ImageConverterOutputFormats",
     "ImageConverterOutputFormatsWithAlphaChannel",
-    "ZipConvertedImagesResponse",
+    "GetZipResponse",
 ]

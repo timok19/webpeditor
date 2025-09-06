@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.types import Unit
-from webpeditor_app.infrastructure.database.models import AppUser
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
@@ -21,7 +20,7 @@ class ConverterRepositoryABC(ABC):
 
     @abstractmethod
     @as_awaitable_result
-    async def aget_or_create_asset(self, user: AppUser) -> ContextResult[ConverterImageAsset]: ...
+    async def aget_or_create_asset(self, user_id: str) -> ContextResult[ConverterImageAsset]: ...
 
     @abstractmethod
     @as_awaitable_result

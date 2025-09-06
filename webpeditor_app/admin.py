@@ -12,7 +12,6 @@ from webpeditor_app.common import api_key_utils
 from webpeditor_app.types import Pair
 from webpeditor_app.infrastructure.database.models import (
     APIKey,
-    AppUser,
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
@@ -74,12 +73,6 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
         messages.success(request, message)
 
 
-@admin.register(AppUser)
-class AppUserAdmin(admin.ModelAdmin[AppUser]):
-    list_display = ("id", "session_key", "session_key_expiration_date")
-    list_filter = ("session_key_expiration_date",)
-
-
 @admin.register(ConverterImageAsset)
 class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
     class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
@@ -88,8 +81,8 @@ class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
     class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile]):
         model = ConverterConvertedImageAssetFile
 
-    list_display = ("id", "created_at", "user")
-    list_filter = ("created_at", "user")
+    list_display = ("id", "created_at", "user_id")
+    list_filter = ("created_at", "user_id")
     date_hierarchy = "created_at"
     inlines = [OriginalImageAssetFileInline, ConvertedImageAssetFileInline]
 
@@ -142,8 +135,8 @@ class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
         model = EditorOriginalImageAssetFile
         extra = 1
 
-    list_display = ("id", "created_at", "user")
-    list_filter = ("created_at", "user")
+    list_display = ("id", "created_at", "user_id")
+    list_filter = ("created_at", "user_id")
     date_hierarchy = "created_at"
     inlines = [EditorOriginalImageAssetFileInline]
 
@@ -175,8 +168,8 @@ class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
         model = EditorEditedImageAssetFile
         extra = 1
 
-    list_display = ("id", "created_at", "user", "original_image_asset")
-    list_filter = ("created_at", "user", "original_image_asset")
+    list_display = ("id", "created_at", "user_id", "original_image_asset")
+    list_filter = ("created_at", "user_id", "original_image_asset")
     date_hierarchy = "created_at"
     inlines = [EditorEditedImageAssetFileInline]
 

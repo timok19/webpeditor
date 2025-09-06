@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
 from typing import Final, final
+
+from pydantic import HttpUrl
 
 from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
@@ -15,25 +16,24 @@ class ConverterFilesRepository(FilesRepositoryABC):
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload(self, user_id: str, relative_path: str, content: bytes) -> ContextResult[str]:
+    async def aupload_file(self, user_id: str, relative_path: str, content: bytes) -> ContextResult[HttpUrl]:
         public_id = f"{self._get_root_path(user_id)}/{relative_path}"
-        return await self.__cloudinary_client.aupload_file(public_id, content).map(lambda response: str(response.secure_url))
+        return await self.__cloudinary_client.aupload_file(public_id, content).map(lambda response: response.secure_url)
+
+    @as_awaitable_result
+    async def aget_zip_folder(self, user_id: str, relative_path: str) -> ContextResult[HttpUrl]:
+        root_folder_path = self._get_root_path(user_id)
+        folder_path = f"{root_folder_path}/{relative_path}"
+        zip_path = f"{root_folder_path}/webpeditor_converted.zip"
+        return await self.__cloudinary_client.agenerate_zip_archive(folder_path, zip_path).map(lambda response: response.secure_url)
 
     @as_awaitable_result
     async def acleanup(self, user_id: str) -> ContextResult[Unit]:
-        folder_path = self._get_root_path(user_id)
+        root_folder_path = self._get_root_path(user_id)
         return await (
-            self.__cloudinary_client.adelete_folder_recursively(folder_path)
-            .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{folder_path}'", depth=5))
+            self.__cloudinary_client.adelete_folder_recursively(root_folder_path)
+            .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{root_folder_path}'", depth=5))
             .to_unit()
-        )
-
-    @as_awaitable_result
-    async def azip_folder(self, user_id: str, relative_path: str) -> ContextResult[str]:
-        folder_path_to_zip = f"{self._get_root_path(user_id)}/{relative_path}"
-        file_path_to_save = f"{self._get_root_path(user_id)}/webpeditor_converted_{datetime.now(timezone.utc).date()}.zip"
-        return await self.__cloudinary_client.agenerate_zip_archive(folder_path_to_zip, file_path_to_save).map(
-            lambda response: str(response.secure_url)
         )
 
     @staticmethod

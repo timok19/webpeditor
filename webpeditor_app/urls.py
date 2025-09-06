@@ -6,7 +6,7 @@ from ninja_extra import NinjaExtraAPI
 
 from webpeditor import settings
 from webpeditor_app.api.authentication.authenticator import APIKeyAuthenticator
-from webpeditor_app.api.controllers.image_converter_controller import ImageConverterController
+from webpeditor_app.api.controllers.converter_controller import ConverterController
 from webpeditor_app.views.about_view import AboutView
 from webpeditor_app.views.contact_view import ContactView
 from webpeditor_app.views.image_converter_view import ImageConverterView
@@ -15,7 +15,7 @@ from webpeditor_app.views.image_not_found_view import ImageNotFoundView
 
 # API
 api = NinjaExtraAPI(title=settings.APP_VERBOSE_NAME, version=settings.APP_VERSION, auth=APIKeyAuthenticator())
-api.register_controllers(ImageConverterController)  # pyright: ignore
+api.register_controllers(ConverterController)  # pyright: ignore
 
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
     # API

@@ -41,6 +41,14 @@ class AwaitableContextResult[TOut](Awaitable["ContextResult[TOut]"]):
         return (await self.__awaitable_result).map2(other, mapper)
 
     @as_awaitable_result
+    async def amap1[TOutOther, TNewOut](
+        self,
+        other: Awaitable[TOutOther],
+        mapper: Callable[[TOut, TOutOther], TNewOut],
+    ) -> "ContextResult[TNewOut]":
+        return await (await self.__awaitable_result).amap1(other, mapper)
+
+    @as_awaitable_result
     async def amap2[TOutOther, TNewOut](
         self,
         other: "Awaitable[ContextResult[TOutOther]]",
