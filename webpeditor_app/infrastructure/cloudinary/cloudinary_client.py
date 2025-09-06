@@ -2,6 +2,7 @@ import hashlib
 from datetime import datetime, timezone
 from http import HTTPMethod
 from typing import Final, MutableMapping, Optional, final, Any
+from typing_extensions import ClassVar
 
 from httpx import AsyncClient, BasicAuth
 from pydantic import BaseModel
@@ -20,8 +21,9 @@ from webpeditor_app.infrastructure.cloudinary.types import QueryParamTypes, Requ
 
 @final
 class CloudinaryClient:
+    __max_results: ClassVar[int] = 500
+
     def __init__(self, logger: LoggerABC) -> None:
-        self.__max_results: Final[int] = 500
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result

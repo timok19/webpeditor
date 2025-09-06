@@ -5,12 +5,12 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
-from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
-from webpeditor_app.application.common.repositories.cloudinary_repository import CloudinaryRepository
-from webpeditor_app.application.common.session.session_service import SessionService
-from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.application.common.image_file.models.file_info import ImageFileInfo
+from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.common.repositories.cloudinary_repository import CloudinaryRepository
+from webpeditor_app.common.session.session_service import SessionService
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.validator_abc import ValidatorABC
+from webpeditor_app.common.image_file.models.file_info import ImageFileInfo
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC

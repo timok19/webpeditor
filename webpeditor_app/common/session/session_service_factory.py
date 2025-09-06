@@ -2,8 +2,8 @@ from typing import final, Final
 
 from django.http import HttpRequest
 
-from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
-from webpeditor_app.application.common.session.session_service import SessionService
+from webpeditor_app.common.abc.user_service_abc import UserServiceABC
+from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 

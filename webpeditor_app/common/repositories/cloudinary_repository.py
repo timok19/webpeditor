@@ -2,7 +2,7 @@ from typing import Final, final
 
 from pydantic import HttpUrl
 
-from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.types import Unit

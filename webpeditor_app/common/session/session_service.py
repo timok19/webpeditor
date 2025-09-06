@@ -9,7 +9,7 @@ from expression import Option
 from names_generator import generate_name
 from uuid_utils import uuid7
 
-from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
+from webpeditor_app.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, as_awaitable_result, ErrorContext
 

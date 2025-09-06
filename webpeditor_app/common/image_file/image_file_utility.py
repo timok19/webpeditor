@@ -4,7 +4,7 @@ import re
 from decimal import ROUND_UP, Decimal
 from http import HTTPStatus
 from io import BytesIO
-from typing import Final, Optional, Union, final
+from typing import ClassVar, Final, Optional, Union, final
 
 import exifread
 from httpx import AsyncClient
@@ -12,8 +12,8 @@ from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
 from webpeditor import settings
-from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.application.common.image_file.models import ImageFileInfo
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.types import Unit
@@ -21,10 +21,11 @@ from webpeditor_app.types import Unit
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
+    __filename_regex: ClassVar[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
+    __max_filename_length: ClassVar[int] = 25
+
     def __init__(self, logger: LoggerABC) -> None:
         self.__logger: Final[LoggerABC] = logger
-        self.__filename_regex: Final[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
-        self.__max_filename_length: Final[int] = 25
 
     def to_bytes(self, file_base64: str) -> ContextResult[bytes]:
         if len(file_base64) == 0:

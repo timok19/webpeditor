@@ -3,7 +3,7 @@ from typing import Final, final
 from django.core import signing
 
 from webpeditor import settings
-from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
+from webpeditor_app.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 

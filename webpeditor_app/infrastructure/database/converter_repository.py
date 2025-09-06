@@ -2,7 +2,7 @@ from typing import Final, final
 
 from expression import Option
 
-from webpeditor_app.application.common.image_file.models import ImageFileInfo
+from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.types import Unit

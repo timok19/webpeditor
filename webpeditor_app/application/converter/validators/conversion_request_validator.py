@@ -5,8 +5,8 @@ from ninja import UploadedFile
 from PIL import Image, UnidentifiedImageError
 from types_linq import Enumerable
 
-from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.application.common.abc.validator_abc import ValidationResult, ValidatorABC
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ImageConverterAllOutputFormats
 from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC

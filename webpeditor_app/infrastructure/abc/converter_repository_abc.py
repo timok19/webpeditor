@@ -10,7 +10,7 @@ from webpeditor_app.infrastructure.database.models import (
 )
 
 if TYPE_CHECKING:
-    from webpeditor_app.application.common.image_file.models import ImageFileInfo
+    from webpeditor_app.common.image_file.models.file_info import ImageFileInfo
 
 
 class ConverterRepositoryABC(ABC):

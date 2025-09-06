@@ -4,7 +4,7 @@ from typing import Any, ClassVar, Final, cast
 from expression import Option
 from PIL import Image, ImageFile
 
-from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.application.converter.handlers.schemas import (
     ImageConverterAllOutputFormats,
     ImageConverterOutputFormatsWithAlphaChannel,

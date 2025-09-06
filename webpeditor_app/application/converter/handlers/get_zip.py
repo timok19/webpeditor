@@ -1,8 +1,8 @@
 from typing import Annotated, final, Final
 
-from webpeditor_app.application.common.abc.files_repository_abc import FilesRepositoryABC
-from webpeditor_app.application.common.repositories.cloudinary_repository import CloudinaryRepository
-from webpeditor_app.application.common.session.session_service import SessionService
+from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.common.repositories.cloudinary_repository import CloudinaryRepository
+from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
 from webpeditor_app.core.result.context_result import ContextResult, as_awaitable_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
