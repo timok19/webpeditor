@@ -50,15 +50,14 @@ class SessionService:
                 .to_result(ErrorContext.not_found(f"Unable to find User in the {SessionStore.__name__}!"))
                 .bind(self.__user_service.unsign_id)
             )
-            .amap(self.__arefresh_expiry)
+            .amap1(self.__arefresh_expiry(), lambda user_id, _: user_id)
         )
 
-    async def __arefresh_expiry(self, user_id: str) -> str:
+    async def __arefresh_expiry(self) -> None:
         expire_at = timezone.now() + timedelta(seconds=self.__session_lifetime_in_seconds)
-        self.__logger.debug(f"Session for User '{user_id}' will expire at '{expire_at.time()}' UTC")
         await self.__aset_item(self.__expire_at_key, expire_at.timestamp())
         await self.__aset_expiry(self.__session_lifetime_in_seconds)
-        return user_id
+        return None
 
     async def __aset_expiry(self, value: Optional[Union[datetime, int]]) -> None:
         await sync_to_async(self.__request.session.set_expiry)(value)

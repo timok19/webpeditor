@@ -41,7 +41,7 @@ certifi==2025.8.3
     #   httpx
     #   requests
     #   webpeditor
-cffi==1.17.1 ; platform_python_implementation != 'PyPy'
+cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via cryptography
 channels==4.3.1
     # via
@@ -98,7 +98,7 @@ django==5.2.6
     #   ninja-schema
     #   reactpy-django
     #   webpeditor
-django-allauth==65.11.1
+django-allauth==65.11.2
     # via webpeditor
 django-appconf==1.1.0
     # via
@@ -106,7 +106,7 @@ django-appconf==1.1.0
     #   webpeditor
 django-compressor==4.5.1
     # via webpeditor
-django-cors-headers==4.7.0
+django-cors-headers==4.8.0
     # via webpeditor
 django-extensions==4.1
     # via webpeditor
@@ -128,7 +128,7 @@ django-unfold==0.65.0
     # via webpeditor
 djhtml==3.0.9
     # via webpeditor
-dnspython==2.7.0
+dnspython==2.8.0
     # via
     #   email-validator
     #   webpeditor
@@ -198,7 +198,7 @@ nest-asyncio==1.6.0
     # via reactpy-django
 ninja-schema==0.14.3
     # via webpeditor
-numpy==2.3.2
+numpy==2.3.3
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
@@ -223,7 +223,7 @@ pyasn1-modules==0.4.2
     # via service-identity
 pycodestyle==2.14.0
     # via webpeditor
-pycparser==2.22 ; platform_python_implementation != 'PyPy'
+pycparser==2.23 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
 pydantic==2.11.7
     # via
@@ -315,7 +315,7 @@ urllib3==2.5.0
     # via requests
 uuid-utils==0.11.0
     # via webpeditor
-whitenoise==6.9.0
+whitenoise==6.10.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
     # via loguru
