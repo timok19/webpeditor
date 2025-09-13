@@ -15,6 +15,7 @@ from webpeditor_app.core.result import ContextResult, as_awaitable_result, Error
 @final
 class SessionService:
     __user_id_key: ClassVar[str] = "USER_ID"
+    __session_expiry_set_key: ClassVar[str] = "SESSION_EXPIRY_SET"
     __session_lifetime_in_seconds: ClassVar[int] = 15 * 60
 
     def __init__(
@@ -55,12 +56,14 @@ class SessionService:
         await self.__request.session.aset_expiry(self.__session_lifetime_in_seconds)
         expire_at = await self.__request.session.aget_expiry_date()
         self.__logger.debug(f"Session will expire at {expire_at.time()} UTC.")
+        await self.__request.session.aset(self.__session_expiry_set_key, True)
         await self.__request.session.asave()
         return None
 
     async def __ais_expired(self) -> bool:
+        is_expiry_set = await self.__request.session.aget(self.__session_expiry_set_key)
         expire_at = await self.__request.session.aget_expiry_date()
-        return timezone.now() > expire_at
+        return not is_expiry_set or timezone.now() > expire_at
 
     @staticmethod
     def __generate_id() -> str:

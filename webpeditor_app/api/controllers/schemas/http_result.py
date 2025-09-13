@@ -68,5 +68,7 @@ class HTTPResult[T: Schema](Schema):
                 return HTTPStatus.FORBIDDEN
             case ErrorContext.ErrorCode.NOT_FOUND:
                 return HTTPStatus.NOT_FOUND
+            case ErrorContext.ErrorCode.UNPROCESSABLE_ENTITY:
+                return HTTPStatus.UNPROCESSABLE_ENTITY
             case _:
                 return HTTPStatus.INTERNAL_SERVER_ERROR

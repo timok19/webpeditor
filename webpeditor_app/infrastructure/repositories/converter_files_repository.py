@@ -10,7 +10,7 @@ from webpeditor_app.infrastructure.cloudinary.cloudinary_client import Cloudinar
 
 
 @final
-class CloudinaryRepository(FilesRepositoryABC):
+class ConverterFilesRepository(FilesRepositoryABC):
     def __init__(self, cloudinary_client: CloudinaryClient, logger: LoggerABC) -> None:
         self.__cloudinary_client: Final[CloudinaryClient] = cloudinary_client
         self.__logger: Final[LoggerABC] = logger
@@ -21,9 +21,9 @@ class CloudinaryRepository(FilesRepositoryABC):
         return await self.__cloudinary_client.aupload_file(public_id, content).map(lambda response: response.secure_url)
 
     @as_awaitable_result
-    async def aget_zip_folder(self, user_id: str, relative_path: str) -> ContextResult[HttpUrl]:
+    async def aget_zip_folder(self, user_id: str) -> ContextResult[HttpUrl]:
         root_folder_path = self._get_root_path(user_id)
-        folder_path = f"{root_folder_path}/{relative_path}"
+        folder_path = f"{root_folder_path}/converter"
         zip_path = f"{root_folder_path}/webpeditor_converted.zip"
         return await self.__cloudinary_client.agenerate_zip_archive(folder_path, zip_path).map(lambda response: response.secure_url)
 

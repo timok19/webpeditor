@@ -17,6 +17,7 @@ class ErrorContext(Schema):
         UNAUTHORIZED = auto()
         FORBIDDEN = auto()
         NOT_FOUND = auto()
+        UNPROCESSABLE_ENTITY = auto()
         INTERNAL_SERVER_ERROR = auto()
 
     @classmethod
@@ -34,6 +35,10 @@ class ErrorContext(Schema):
     @classmethod
     def not_found(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
         return cls.create(cls.ErrorCode.NOT_FOUND, message, reasons)
+
+    @classmethod
+    def unprocessable_entity(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
+        return cls.create(cls.ErrorCode.UNPROCESSABLE_ENTITY, message, reasons)
 
     @classmethod
     def server_error(cls, message: Optional[str] = None, reasons: Optional[list[str]] = None) -> "ErrorContext":
