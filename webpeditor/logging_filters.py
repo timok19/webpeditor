@@ -1,3 +1,4 @@
+from http import HTTPMethod
 import logging
 import os
 from typing import ClassVar, Final, Optional
@@ -13,8 +14,6 @@ class NinjaRequestMessageFilter(logging.Filter):
     Desired message:
       HTTP POST - Controller[action] /path 1.234 seconds - 200
     """
-
-    METHODS: ClassVar[tuple[str, ...]] = ("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD")
 
     def filter(self, record: logging.LogRecord) -> bool:
         try:
@@ -41,7 +40,7 @@ class NinjaRequestMessageFilter(logging.Filter):
 
             # Pattern 2: message starts directly with METHOD - ...
             upper = message.upper()
-            if any(upper.startswith(m) for m in self.METHODS):
+            if any(upper.startswith(method) for method in HTTPMethod):
                 # Append status code if available
                 status_code = self._get_status_code()
                 record.msg = f"HTTP {message}" + (f" - {status_code}" if status_code is not None else "")
