@@ -230,10 +230,7 @@ LOGGING: dict[str, Any] = {
     "disable_existing_loggers": True,
     "formatters": {
         "ninja_request": {
-            # Use custom color formatter (ANSI). Includes milliseconds with comma.
             "()": "webpeditor.logging_filters.ColorFormatter",
-            "format": "%(asctime)s,%(msecs)03d %(levelname)s %(name)s: %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
     "filters": {

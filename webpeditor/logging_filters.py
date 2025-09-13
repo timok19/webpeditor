@@ -158,10 +158,8 @@ class ColorFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
-        # Time with milliseconds: align with settings' format
-        asctime = self.formatTime(record, self.datefmt)
-        msecs = int(record.msecs)
-        ts = f"{asctime},{msecs:03d}"
+        # Time with milliseconds: use logging.Formatter default which already includes milliseconds
+        ts = self.formatTime(record, self.datefmt)
 
         # Colors
         level_color = self.LEVEL_COLORS.get(record.levelno, self.FG["white"])
