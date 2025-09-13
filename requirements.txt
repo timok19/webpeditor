@@ -116,9 +116,9 @@ django-ninja==1.4.3
     #   webpeditor
 django-ninja-extra==0.30.1
     # via webpeditor
-django-stubs==5.2.4
+django-stubs==5.2.5
     # via webpeditor
-django-stubs-ext==5.2.4
+django-stubs-ext==5.2.5
     # via
     #   django-stubs
     #   webpeditor
@@ -225,7 +225,7 @@ pycodestyle==2.14.0
     # via webpeditor
 pycparser==2.23 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.11.7
+pydantic==2.11.9
     # via
     #   django-ninja
     #   expression
