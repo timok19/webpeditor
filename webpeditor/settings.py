@@ -224,31 +224,24 @@ APP_VERSION: str = str(os.getenv("APP_VERSION"))
 APP_VERBOSE_NAME: str = f"{str(WebpeditorAppConfig.verbose_name)} - V{APP_VERSION}"
 
 # Logging configuration
-# Override ninja-extra request logger format by configuring Django's 'django.request' logger.
 LOGGING: dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": True,
     "formatters": {
         "ninja_request": {
-            "()": "webpeditor.logging_filters.ColorFormatter",
+            "()": "webpeditor.logging_formatters.ColorFormatter",
         },
-    },
-    "filters": {
-        "ninja_request_message": {
-            "()": "webpeditor.logging_filters.NinjaRequestMessageFilter",
-        }
     },
     "handlers": {
         "console_ninja_request": {
             "class": "logging.StreamHandler",
             "formatter": "ninja_request",
-            "filters": ["ninja_request_message"],
         },
     },
     "loggers": {
         "django.request": {
             "handlers": ["console_ninja_request"],
-            "level": "INFO",
+            "level": "DEBUG" if IS_DEVELOPMENT else "WARNING",
             "propagate": False,
         },
     },
