@@ -59,16 +59,16 @@ wheels = [
 
 [[package]]
 name = "anydi"
-version = "0.48.1"
+version = "0.48.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/59/4b/722ad94b21a09549fb3544e2d04b3a6d37de2e75d4b1dcdde920d161e9cb/anydi-0.48.1.tar.gz", hash = "sha256:e14be14447ee7dbac2b5174d132451c0893c35ec264b7b8a2b3abed4cb046c56", size = 21912, upload-time = "2025-09-12T06:38:08.572Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/64/a1b01bd5c44141b68d00b17800a857ca7005e570adb6b4f060af4ab5615a/anydi-0.48.2.tar.gz", hash = "sha256:c4bd499fc54ffb5d80541db4fc8b068fa454d31b3a11a3aadb2ddbb490ddd35a", size = 21884, upload-time = "2025-09-15T16:18:00.224Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/da/a3221cd76eb3194727d5f1d95ea9803c62cd7838529911c3711c725b4dde/anydi-0.48.1-py3-none-any.whl", hash = "sha256:7681d1d4231272c97609cc6d7228335b0dfa558e4def99c730387aaebde52bc7", size = 30554, upload-time = "2025-09-12T06:38:06.496Z" },
+    { url = "https://files.pythonhosted.org/packages/45/cf/e7f18a8995a72bf265815ae5b917329f99ed337d93bd3fe826db80c45ac3/anydi-0.48.2-py3-none-any.whl", hash = "sha256:5aee6af9453c9d37e31e578d6b9c5020d3d904b103c2a57305bc23b3b0817e95", size = 30515, upload-time = "2025-09-15T16:17:58.605Z" },
 ]
 
 [[package]]
