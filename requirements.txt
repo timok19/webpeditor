@@ -234,7 +234,7 @@ pydantic-core==2.33.2
     # via pydantic
 pyjwt==2.10.1
     # via django-allauth
-pyopenssl==25.1.0
+pyopenssl==25.2.0
     # via twisted
 python-dotenv==1.1.1
     # via webpeditor
@@ -287,9 +287,9 @@ txaio==25.6.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20250809
+types-psycopg2==2.9.21.20250915
     # via django-types
-types-pyyaml==6.0.12.20250822
+types-pyyaml==6.0.12.20250915
     # via django-stubs
 typing-extensions==4.15.0
     # via
