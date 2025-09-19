@@ -49,7 +49,7 @@ channels==4.3.1
     #   webpeditor
 charset-normalizer==3.4.3
     # via requests
-click==8.2.1
+click==8.3.0
     # via deptry
 cmdkit==2.7.7
     # via names-generator
@@ -106,7 +106,7 @@ django-appconf==1.1.0
     #   webpeditor
 django-compressor==4.5.1
     # via webpeditor
-django-cors-headers==4.8.0
+django-cors-headers==4.9.0
     # via webpeditor
 django-extensions==4.1
     # via webpeditor
@@ -132,7 +132,7 @@ dnspython==2.8.0
     # via
     #   email-validator
     #   webpeditor
-docutils==0.22
+docutils==0.22.1
     # via webpeditor
 email-validator==2.3.0
     # via pydantic
@@ -315,7 +315,7 @@ urllib3==2.5.0
     # via requests
 uuid-utils==0.11.0
     # via webpeditor
-whitenoise==6.10.0
+whitenoise==6.11.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
     # via loguru
