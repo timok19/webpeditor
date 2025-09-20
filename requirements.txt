@@ -132,7 +132,7 @@ dnspython==2.8.0
     # via
     #   email-validator
     #   webpeditor
-docutils==0.22.1
+docutils==0.22.2
     # via webpeditor
 email-validator==2.3.0
     # via pydantic
