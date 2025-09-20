@@ -79,9 +79,11 @@ class ConvertImages:
 
     @as_awaitable_result
     async def __cleanup_if_exists(self, user_id: str, asset_exists: bool) -> ContextResult[Unit]:
-        if not asset_exists:
-            return ContextResult[Unit].success(Unit())
-        return await self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id))
+        return (
+            await self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id))
+            if asset_exists
+            else ContextResult[Unit].success(Unit())
+        )
 
     @as_awaitable_result
     async def __aconvert_and_save(
