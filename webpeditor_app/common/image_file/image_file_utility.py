@@ -4,7 +4,7 @@ import re
 from decimal import ROUND_UP, Decimal
 from http import HTTPStatus
 from io import BytesIO
-from typing import ClassVar, Final, Optional, Union, final
+from typing import ClassVar, Final, Optional, Union, final, Callable
 
 import exifread
 from httpx import AsyncClient
@@ -95,7 +95,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         )
 
     def update_filename(self, image: ImageFile, new_filename: Optional[str]) -> ContextResult[ImageFile]:
-        return self.normalize_filename(new_filename).map(lambda normalized: self.__update_filename(image, normalized))
+        return self.normalize_filename(new_filename).map(self.__update_filename(image))
 
     def normalize_filename(self, filename: Optional[Union[str, bytes]]) -> ContextResult[str]:
         if filename is None or len(filename) == 0:
@@ -152,9 +152,12 @@ class ImageFileUtility(ImageFileUtilityABC):
             return ContextResult[str].failure(ErrorContext.server_error(message))
 
     @staticmethod
-    def __update_filename(image_file: ImageFile, new_filename: str) -> ImageFile:
-        image_file.filename = new_filename
-        return image_file
+    def __update_filename(image: ImageFile) -> Callable[[str], ImageFile]:
+        def update_filename(new_filename: str) -> ImageFile:
+            image.filename = new_filename
+            return image
+
+        return update_filename
 
     @staticmethod
     def __trim_filename(max_length: int, filename: str) -> ContextResult[str]:
