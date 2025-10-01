@@ -2,16 +2,16 @@ from typing import IO, Any, Mapping, Optional, Sequence, Union
 
 from httpx import QueryParams
 
-FileContent = Union[IO[bytes], bytes, str]
-FileTypes = Union[
+type FileContent = Union[IO[bytes], bytes, str]
+type FileTypes = Union[
     FileContent,
     tuple[Optional[str], FileContent],
     tuple[Optional[str], FileContent, Optional[str]],
     tuple[Optional[str], FileContent, Optional[str], Mapping[str, str]],
 ]
-RequestFiles = Union[Mapping[str, FileTypes], Sequence[tuple[str, FileTypes]]]
-PrimitiveData = Optional[Union[str, int, float, bool]]
-QueryParamTypes = Union[
+type RequestFiles = Union[Mapping[str, FileTypes], Sequence[tuple[str, FileTypes]]]
+type PrimitiveData = Optional[Union[str, int, float, bool]]
+type QueryParamTypes = Union[
     QueryParams,
     Mapping[str, Union[PrimitiveData, Sequence[PrimitiveData]]],
     list[tuple[str, PrimitiveData]],
@@ -19,4 +19,4 @@ QueryParamTypes = Union[
     str,
     bytes,
 ]
-RequestData = Mapping[str, Any]
+type RequestData = Mapping[str, Any]

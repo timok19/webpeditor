@@ -15,7 +15,7 @@ from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.types import Pair, Unit
+from webpeditor_app.types import Pair
 
 
 @final
@@ -75,13 +75,13 @@ class ImageFileUtility(ImageFileUtilityABC):
             self.__logger.exception(exception, f"Unable to get basename from the filename '{filename}'")
             return ContextResult[str].failure(ErrorContext.server_error())
 
-    def close_image(self, image: ImageFile) -> ContextResult[Unit]:
+    def close_image(self, image: ImageFile) -> ContextResult[None]:
         try:
             image.close()
-            return ContextResult[Unit].success(Unit())
+            return ContextResult.empty_success()
         except Exception as exception:
             self.__logger.exception(exception, f"Failed to close image file '{image}'")
-            return ContextResult[Unit].failure(ErrorContext.server_error())
+            return ContextResult.empty_failure(ErrorContext.server_error())
 
     def __get_filename_details(self, filename: Union[str, bytes]) -> ContextResult[ImageFileInfo.FilenameDetails]:
         return (

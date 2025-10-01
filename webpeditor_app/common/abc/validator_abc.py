@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, ConfigDict, Field
 
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.types import Unit
 
 
 class ValidationResult(BaseModel):
@@ -11,11 +10,11 @@ class ValidationResult(BaseModel):
 
     errors: list[str] = Field(default_factory=list[str])
 
-    def to_result(self) -> ContextResult[Unit]:
+    def to_result(self) -> ContextResult[None]:
         return (
-            ContextResult[Unit].failure(ErrorContext.bad_request("Request is invalid", self.errors))
+            ContextResult.empty_failure(ErrorContext.bad_request("Request is invalid", self.errors))
             if any(self.errors)
-            else ContextResult[Unit].success(Unit())
+            else ContextResult.empty_success()
         )
 
 

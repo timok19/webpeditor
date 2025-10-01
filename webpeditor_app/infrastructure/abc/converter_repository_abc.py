@@ -1,16 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
 
+from webpeditor_app.common.image_file.models.file_info import ImageFileInfo
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
     ConverterImageAsset,
     ConverterOriginalImageAssetFile,
 )
-
-if TYPE_CHECKING:
-    from webpeditor_app.common.image_file.models.file_info import ImageFileInfo
 
 
 class ConverterRepositoryABC(ABC):
@@ -28,14 +24,14 @@ class ConverterRepositoryABC(ABC):
 
     @abstractmethod
     @as_awaitable_result
-    async def adelete_asset(self, user_id: str) -> ContextResult[Unit]: ...
+    async def adelete_asset(self, user_id: str) -> ContextResult[None]: ...
 
     @abstractmethod
     @as_awaitable_result
     async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
         self,
         asset_file_type: type[T],
-        file_info: "ImageFileInfo",
+        file_info: ImageFileInfo,
         file_url: str,
         asset: ConverterImageAsset,
     ) -> ContextResult[T]: ...

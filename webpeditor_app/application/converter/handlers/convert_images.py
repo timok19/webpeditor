@@ -1,5 +1,5 @@
 import asyncio
-from typing import Annotated, Callable, Final, final, Awaitable
+from typing import Annotated, Final, final
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
@@ -20,7 +20,7 @@ from webpeditor_app.core.result import (
     as_awaitable_result,
     as_awaitable_enumerable_result,
 )
-from webpeditor_app.types import Pair, Unit
+from webpeditor_app.types import Pair
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,
@@ -64,7 +64,7 @@ class ConvertImages:
     ) -> EnumerableContextResult[ConversionResponse]:
         return await (
             self.__converter_repo.aasset_exists(user_id)
-            .abind(self.__delete_asset_and_files_if_exists(user_id))
+            .abind(lambda asset_exists: self.__acleanup_previous_assets(asset_exists, user_id))
             .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
             .map(lambda asset: Pair(Enumerable(request.files), asset))
             .map(
@@ -82,16 +82,13 @@ class ConvertImages:
             )
         )
 
-    def __delete_asset_and_files_if_exists(self, user_id: str) -> Callable[[bool], Awaitable[ContextResult[Unit]]]:
-        @as_awaitable_result
-        async def cleanup(asset_exists: bool) -> ContextResult[Unit]:
-            return (
-                await self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id))
-                if asset_exists
-                else ContextResult[Unit].success(Unit())
-            )
-
-        return cleanup
+    @as_awaitable_result
+    async def __acleanup_previous_assets(self, asset_exists: bool, user_id: str) -> ContextResult[None]:
+        return (
+            await self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id))
+            if asset_exists
+            else ContextResult.empty_success()
+        )
 
     @as_awaitable_result
     async def __aconvert_and_save(

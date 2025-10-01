@@ -5,7 +5,6 @@ from PIL.ImageFile import ImageFile
 
 from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.result import ContextResult
-from webpeditor_app.types import Unit
 
 
 class ImageFileUtilityABC(ABC):
@@ -31,4 +30,4 @@ class ImageFileUtilityABC(ABC):
     def get_basename(self, filename: str) -> ContextResult[str]: ...
 
     @abstractmethod
-    def close_image(self, image: ImageFile) -> ContextResult[Unit]: ...
+    def close_image(self, image: ImageFile) -> ContextResult[None]: ...

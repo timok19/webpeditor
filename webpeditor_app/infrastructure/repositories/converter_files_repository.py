@@ -5,7 +5,6 @@ from pydantic import HttpUrl
 from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.types import Unit
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 
 
@@ -28,12 +27,12 @@ class ConverterFilesRepository(FilesRepositoryABC):
         return await self.__cloudinary_client.agenerate_zip_archive(folder_path, zip_path).map(lambda response: response.secure_url)
 
     @as_awaitable_result
-    async def acleanup(self, user_id: str) -> ContextResult[Unit]:
+    async def acleanup(self, user_id: str) -> ContextResult[None]:
         root_folder_path = self._get_root_path(user_id)
         return await (
             self.__cloudinary_client.adelete_folder_recursively(root_folder_path)
             .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{root_folder_path}'", depth=5))
-            .to_unit()
+            .as_empty()
         )
 
     @staticmethod

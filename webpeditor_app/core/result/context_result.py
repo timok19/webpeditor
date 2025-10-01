@@ -5,7 +5,6 @@ from expression import Result
 from types_linq import Enumerable
 
 from webpeditor_app.core.result.error_context import ErrorContext
-from webpeditor_app.types import Unit
 
 
 P = ParamSpec("P")
@@ -35,10 +34,9 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def success(value: TOut) -> "ContextResult[TOut]":
         return ContextResult[TOut](tag="ok", ok=value)
 
-    @classmethod
-    @as_awaitable_result
-    async def asuccess(cls, value: TOut) -> "ContextResult[TOut]":
-        return cls.success(value)
+    @staticmethod
+    def empty_success() -> "ContextResult[None]":
+        return ContextResult[None].success(None)
 
     @staticmethod
     def failure(error: ErrorContext) -> "ContextResult[TOut]":
@@ -50,6 +48,10 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
                 reasons=error.reasons or [],
             ),
         )
+
+    @staticmethod
+    def empty_failure(error: ErrorContext) -> "ContextResult[None]":
+        return ContextResult[None].failure(error)
 
     @classmethod
     def failures(cls, *errors: ErrorContext) -> "EnumerableContextResult[TOut]":
@@ -203,8 +205,8 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
             case _:
                 raise TypeError(f"Unexpected result of type '{repr(self)}'")
 
-    def to_unit(self) -> "ContextResult[Unit]":
-        return self.map(lambda _: Unit())
+    def as_empty(self) -> "ContextResult[None]":
+        return self.map(lambda _: None)
 
 
 class AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
@@ -284,8 +286,8 @@ class AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
         return await (await self.__awaitable_result).aif_then_else(predicate, then_mapper, else_mapper)
 
     @as_awaitable_result
-    async def to_unit(self) -> ContextResult[Unit]:
-        return (await self.__awaitable_result).to_unit()
+    async def as_empty(self) -> ContextResult[None]:
+        return (await self.__awaitable_result).as_empty()
 
     @as_awaitable_result
     async def filter_with(self, predicate: Callable[[TOut], bool], default: Callable[[TOut], ErrorContext]) -> ContextResult[TOut]:

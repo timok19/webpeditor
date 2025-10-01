@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from pydantic import HttpUrl
 
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
-from webpeditor_app.types import Unit
 
 
 class FilesRepositoryABC(ABC):
@@ -17,7 +16,7 @@ class FilesRepositoryABC(ABC):
 
     @abstractmethod
     @as_awaitable_result
-    async def acleanup(self, user_id: str) -> ContextResult[Unit]: ...
+    async def acleanup(self, user_id: str) -> ContextResult[None]: ...
 
     @staticmethod
     @abstractmethod
