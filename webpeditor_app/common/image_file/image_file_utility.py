@@ -4,25 +4,24 @@ import re
 from decimal import ROUND_UP, Decimal
 from http import HTTPStatus
 from io import BytesIO
-from typing import ClassVar, Final, Optional, Union, final, Callable
+from typing import Callable, Final, Union, final
 
 import exifread
 from httpx import AsyncClient
 from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
-from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.types import Unit
+from webpeditor_app.types import Pair, Unit
 
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
-    __filename_regex: ClassVar[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
-    __max_filename_length: ClassVar[int] = 25
+    __filename_pattern: Final[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
+    __max_length: Final[int] = 25
 
     def __init__(self, logger: LoggerABC) -> None:
         self.__logger: Final[LoggerABC] = logger
@@ -53,18 +52,46 @@ class ImageFileUtility(ImageFileUtilityABC):
         return ContextResult[bytes].success(file_response.content)
 
     def get_file_info(self, image: ImageFile) -> ContextResult[ImageFileInfo]:
-        normalized_filename_result = self.normalize_filename(image.filename)
-        if normalized_filename_result.is_error():
-            return ContextResult[ImageFileInfo].failure(normalized_filename_result.error)
+        return self.__get_filename_details(image.filename).map2(self.__get_file_details(image), ImageFileInfo.create)
 
-        basename_result = self.get_basename(normalized_filename_result.ok)
-        if basename_result.is_error():
-            return ContextResult[ImageFileInfo].failure(basename_result.error)
+    def update_filename(self, image: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
+        return self.normalize_filename(new_filename).map(self.__update_filename(image))
 
-        trimmed_filename_result = self.trim_filename(image.filename, self.__max_filename_length)
-        if trimmed_filename_result.is_error():
-            return ContextResult[ImageFileInfo].failure(trimmed_filename_result.error)
+    def normalize_filename(self, filename: Union[str, bytes]) -> ContextResult[str]:
+        return (
+            self.__decode_filename(filename).bind(self.normalize_filename)
+            if isinstance(filename, bytes)
+            else ContextResult[str].success(re.sub(self.__filename_pattern, "_", filename))
+        )
 
+    def trim_filename(self, filename: Union[str, bytes], max_length: int) -> ContextResult[str]:
+        return self.normalize_filename(filename).bind(lambda normalized: self.__trim_filename(max_length, normalized))
+
+    def get_basename(self, filename: str) -> ContextResult[str]:
+        try:
+            basename, _ = os.path.splitext(filename)
+            return ContextResult[str].success(basename)
+        except Exception as exception:
+            self.__logger.exception(exception, f"Unable to get basename from the filename '{filename}'")
+            return ContextResult[str].failure(ErrorContext.server_error())
+
+    def close_image(self, image: ImageFile) -> ContextResult[Unit]:
+        try:
+            image.close()
+            return ContextResult[Unit].success(Unit())
+        except Exception as exception:
+            self.__logger.exception(exception, f"Failed to close image file '{image}'")
+            return ContextResult[Unit].failure(ErrorContext.server_error())
+
+    def __get_filename_details(self, filename: Union[str, bytes]) -> ContextResult[ImageFileInfo.FilenameDetails]:
+        return (
+            self.normalize_filename(filename)
+            .bind(lambda normalized: self.get_basename(normalized).map(lambda basename: Pair[str, str](item1=normalized, item2=basename)))
+            .bind(lambda pair: self.trim_filename(pair.item1, self.__max_length).map(lambda trimmed: (pair.item1, pair.item2, trimmed)))
+            .map(lambda result: ImageFileInfo.FilenameDetails.create(*result))
+        )
+
+    def __get_file_details(self, image: ImageFile) -> ContextResult[ImageFileInfo.FileDetails]:
         buffer = BytesIO()
 
         image.save(buffer, format=image.format)
@@ -77,67 +104,19 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         buffer.close()
 
-        return ContextResult[ImageFileInfo].success(
-            ImageFileInfo(
-                filename=normalized_filename_result.ok,
-                filename_shorter=trimmed_filename_result.ok,
-                file_basename=basename_result.ok,
-                file_format=image.format or "",
-                file_format_description=image.format_description or "",
-                content=content,
-                size=size,
-                width=width,
-                height=height,
-                aspect_ratio=aspect_ratio,
-                color_mode=image.mode,
-                exif_data=exif_data,
+        return ContextResult[ImageFileInfo.FileDetails].success(
+            ImageFileInfo.FileDetails.create(
+                image.format or "",
+                image.format_description or "",
+                content,
+                size,
+                width,
+                height,
+                aspect_ratio,
+                image.mode,
+                exif_data,
             )
         )
-
-    def update_filename(self, image: ImageFile, new_filename: Optional[str]) -> ContextResult[ImageFile]:
-        return self.normalize_filename(new_filename).map(self.__update_filename(image))
-
-    def normalize_filename(self, filename: Optional[Union[str, bytes]]) -> ContextResult[str]:
-        if filename is None or len(filename) == 0:
-            return ContextResult[str].failure(ErrorContext.bad_request("Filename must not be empty"))
-
-        if isinstance(filename, bytes):
-            return self.__decode_filename(filename).bind(self.normalize_filename)
-
-        if len(filename) > settings.FILENAME_MAX_SIZE:
-            message = f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})"
-            return ContextResult[str].failure(ErrorContext.bad_request(message))
-
-        basename, extension = os.path.splitext(filename)
-
-        if basename.upper() in settings.RESERVED_WINDOWS_FILENAMES:
-            return ContextResult[str].failure(
-                ErrorContext.bad_request(f"Filename '{filename}' is a reserved name that cannot be used as a file name")
-            )
-
-        if len(extension) == 0:
-            return ContextResult[str].failure(ErrorContext.bad_request(f"Filename '{filename}' has no extension"))
-
-        return ContextResult[str].success(re.sub(self.__filename_regex, "_", filename))
-
-    def trim_filename(self, filename: Optional[Union[str, bytes]], max_length: int) -> ContextResult[str]:
-        return self.normalize_filename(filename).bind(lambda normalized: self.__trim_filename(max_length, normalized))
-
-    def get_basename(self, filename: str) -> ContextResult[str]:
-        try:
-            basename, _ = os.path.splitext(filename)
-            return ContextResult[str].success(basename)
-        except Exception as exception:
-            self.__logger.exception(exception, f"Unable to get basename from the filename '{filename}'")
-            return ContextResult[str].failure(ErrorContext.server_error())
-
-    def close_file(self, image: ImageFile) -> ContextResult[Unit]:
-        try:
-            image.close()
-            return ContextResult[Unit].success(Unit())
-        except Exception as exception:
-            self.__logger.exception(exception, f"Failed to close image file '{image}'")
-            return ContextResult[Unit].failure(ErrorContext.server_error())
 
     @staticmethod
     def __get_aspect_ratio(width: int, height: int) -> Decimal:

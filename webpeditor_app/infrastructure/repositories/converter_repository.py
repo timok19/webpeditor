@@ -70,21 +70,21 @@ class ConverterRepository(ConverterRepositoryABC):
             return ContextResult[T].success(
                 await asset_file_type.objects.acreate(
                     file_url=file_url,
-                    filename=file_info.filename,
-                    filename_shorter=file_info.filename_shorter,
-                    content_type=f"image/{file_info.file_format.lower()}",
-                    format=file_info.file_format,
-                    format_description=file_info.file_format_description or "",
-                    size=file_info.size,
-                    width=file_info.width,
-                    height=file_info.height,
-                    aspect_ratio=file_info.aspect_ratio,
-                    color_mode=file_info.color_mode,
-                    exif_data=file_info.exif_data,
+                    filename=file_info.filename_details.fullname,
+                    filename_shorter=file_info.filename_details.short,
+                    content_type=f"image/{file_info.file_details.format.lower()}",
+                    format=file_info.file_details.format,
+                    format_description=file_info.file_details.format_description or "",
+                    size=file_info.file_details.size,
+                    width=file_info.file_details.width,
+                    height=file_info.file_details.height,
+                    aspect_ratio=file_info.file_details.aspect_ratio,
+                    color_mode=file_info.file_details.color_mode,
+                    exif_data=file_info.file_details.exif_data,
                     image_asset=asset,
                 )
             )
         except Exception as exception:
-            message = f"Failed to create '{T.__name__}' with filename '{file_info.filename}' for User '{asset.user_id}'"
+            message = f"Failed to create '{T.__name__}' with filename '{file_info.filename_details.fullname}' for User '{asset.user_id}'"
             self.__logger.exception(exception, message)
             return ContextResult[T].failure(ErrorContext.bad_request())

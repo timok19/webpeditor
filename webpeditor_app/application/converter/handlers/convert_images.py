@@ -109,21 +109,25 @@ class ConvertImages:
             .bind(self.__image_file_utility.get_file_info)
             .abind(lambda file_info: self.__aupload_converted(asset.user_id, file_info))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
-            .map2(self.__image_file_utility.close_file(image), lambda result, _: result),
-            lambda original, converted: ConversionResponse(
-                original_data=ConversionResponse.ImageData.from_asset_file(original),
-                converted_data=ConversionResponse.ImageData.from_asset_file(converted),
+            .map2(self.__image_file_utility.close_image(image), lambda result, _: result),
+            lambda original, converted: ConversionResponse.create(
+                ConversionResponse.ImageData.from_asset(original),
+                ConversionResponse.ImageData.from_asset(converted),
             ),
         )
 
     @as_awaitable_result
     async def __aupload_original(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_file(user_id, f"original/{file_info.filename}", file_info.content).map(
-            lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url))
+        return (
+            await self.__image_file_utility.get_basename(file_info.filename_details.fullname)
+            .abind(lambda base: self.__converter_files_repo.aupload_file(user_id, f"original/{base}", file_info.file_details.content))
+            .map(lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url)))
         )
 
     @as_awaitable_result
     async def __aupload_converted(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await self.__converter_files_repo.aupload_file(user_id, f"converted/{file_info.filename}", file_info.content).map(
-            lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url))
+        return (
+            await self.__image_file_utility.get_basename(file_info.filename_details.fullname)
+            .abind(lambda base: self.__converter_files_repo.aupload_file(user_id, f"converted/{base}", file_info.file_details.content))
+            .map(lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url)))
         )

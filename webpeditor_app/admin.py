@@ -29,31 +29,26 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
     readonly_fields = ("key_hash", "created_at")
 
     def get_urls(self) -> list[URLPattern]:
-        generate_api_key_url = path(
-            "generate-key/<int:api_key_id>/",
-            self.admin_site.admin_view(self.generate_new_key_view),
-            name="generate-api-key",
-        )
-        return [generate_api_key_url] + super().get_urls()
+        view = self.admin_site.admin_view(self.generate_new_key_view)
+        return [path("generate-key/<int:api_key_id>/", view, name="generate-api-key")] + super().get_urls()
 
     def save_model(self, request: HttpRequest, obj: APIKey, form: ModelForm, change: bool) -> None:
         if change:
             super().save_model(request, obj, form, change)
-        else:
-            api_key, key_hash = self.__create_api_key_and_hash()
-            obj.key_hash = key_hash
-            super().save_model(request, obj, form, change)
-            self.__notify_api_key_created(request, obj.email, api_key)
+            return None
+
+        api_key, key_hash = self.__create_api_key_and_hash()
+        obj.key_hash = key_hash
+        super().save_model(request, obj, form, change)
+        self.__notify_api_key_created(request, obj.email, api_key)
+        return None
 
     def generate_new_key_view(self, request: HttpRequest, api_key_id: int) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
         api_key, key_hash = self.__create_api_key_and_hash()
-
         api_key_obj = APIKey.objects.get(pk=api_key_id)
         api_key_obj.key_hash = key_hash
         api_key_obj.save()
-
         self.__notify_api_key_created(request, api_key_obj.email, api_key)
-
         return redirect("admin:webpeditor_app_apikey_changelist")
 
     @staticmethod
@@ -70,6 +65,7 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
     def __notify_api_key_created(request: HttpRequest, email: str, api_key: str) -> None:
         message = _("New API key generated for") + f' "{email}": {api_key} ' + _("(Save this key, it won't be shown again)")
         messages.success(request, message)
+        return None
 
 
 @admin.register(ConverterImageAsset)

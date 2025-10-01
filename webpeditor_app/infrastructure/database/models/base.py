@@ -31,11 +31,7 @@ class BaseImageAssetFile(models.Model):
     size: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
     width: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
     height: models.IntegerField[Optional[int]] = models.IntegerField(null=True)
-    aspect_ratio: models.DecimalField[Optional[Decimal]] = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        null=True,
-    )
+    aspect_ratio: models.DecimalField[Optional[Decimal]] = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     color_mode: models.CharField[str] = models.CharField(max_length=10)
     exif_data: models.JSONField[Any] = models.JSONField()
 

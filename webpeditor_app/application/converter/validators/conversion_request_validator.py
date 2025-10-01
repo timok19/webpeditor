@@ -1,10 +1,11 @@
-from typing import Final, Optional, final
+from typing import Final, Optional, final, Generator, Any
 
 from expression import Option
 from ninja import UploadedFile
 from PIL import Image, UnidentifiedImageError
 from types_linq import Enumerable
 
+from webpeditor import settings
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ImageConverterAllOutputFormats
@@ -25,19 +26,22 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         self.__logger: Final[LoggerABC] = logger
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
-        return ValidationResult(errors=self.__validate(value))
+        return ValidationResult(
+            errors=Enumerable[Option[str]](self.__validate(value))
+            .where(lambda result: result.is_some())
+            .select(lambda result: result.some)
+            .to_list()
+        )
 
-    def __validate(self, value: ConversionRequest) -> list[str]:
-        results: set[Option[str]] = set[Option[str]]()
-        results.add(self.__validate_file_count(value.files))
-        results.add(self.__validate_output_format(value.options.output_format))
-        results.add(self.__validate_quality(value.options.quality))
+    def __validate(self, value: ConversionRequest) -> Generator[Option[str], Any, None]:
+        yield self.__validate_file_count(value.files)
+        yield self.__validate_output_format(value.options.output_format)
+        yield self.__validate_quality(value.options.quality)
         for file in value.files:
-            results.add(self.__validate_file_integrity(file))
-            results.add(self.__validate_filename(file.name))
-            results.add(self.__validate_empty_file_size(file))
-            results.add(self.__validate_max_file_size(file))
-        return Enumerable(results).where(lambda result: result.is_some()).select(lambda result: result.some).to_list()
+            yield self.__validate_file_integrity(file)
+            yield self.__validate_filename(file.name)
+            yield self.__validate_empty_file_size(file)
+            yield self.__validate_max_file_size(file)
 
     def __validate_file_count(self, files: list[UploadedFile]) -> Option[str]:
         files_count = len(files)
@@ -48,7 +52,19 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         return Option[str].Nothing()
 
     def __validate_filename(self, filename: Optional[str]) -> Option[str]:
-        return self.__image_file_utility.normalize_filename(filename).swap().map(lambda error: error.message).to_option()
+        if filename is None or len(filename) == 0:
+            return Option[str].Some("Filename must not be empty")
+
+        if len(filename) > settings.FILENAME_MAX_SIZE:
+            return Option[str].Some(f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})")
+
+        if (basename_result := self.__image_file_utility.get_basename(filename)).is_error():
+            return basename_result.swap().map(lambda error: error.message).to_option()
+
+        if basename_result.ok.upper() in settings.RESERVED_WINDOWS_FILENAMES:
+            return Option[str].Some(f"Filename '{filename}' is a reserved name that cannot be used as a file name")
+
+        return Option[str].Nothing()
 
     @staticmethod
     def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
