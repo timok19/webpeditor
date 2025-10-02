@@ -244,5 +244,19 @@ LOGGING: dict[str, Any] = {
             "level": "DEBUG" if IS_DEVELOPMENT else "WARNING",
             "propagate": False,
         },
+        "django": {
+            "handlers": ["console_ninja_request"],
+            "level": "INFO" if IS_DEVELOPMENT else "WARNING",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console_ninja_request"],
+            "level": "INFO" if IS_DEVELOPMENT else "WARNING",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console_ninja_request"],
+        "level": "INFO" if IS_DEVELOPMENT else "WARNING",
     },
 }

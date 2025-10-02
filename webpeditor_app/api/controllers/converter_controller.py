@@ -8,12 +8,7 @@ from ninja_extra import api_controller, http_post, http_get  # pyright: ignore
 
 from webpeditor_app.application.converter.handlers.get_zip import GetZip
 from webpeditor_app.application.converter.handlers.convert_images import ConvertImages
-from webpeditor_app.application.converter.handlers.schemas import (
-    ConversionRequest,
-    ConversionResponse,
-    GetZipResponse,
-    ImageConverterAllOutputFormats,
-)
+from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from webpeditor_app.api.controllers.base import ControllerBase
 from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus
 from webpeditor_app.common.session.session_service_factory import SessionServiceFactory
@@ -35,9 +30,9 @@ class ConverterController(ControllerBase):
     async def aconvert_images(
         self,
         output_format: Annotated[
-            ImageConverterAllOutputFormats,
+            ConversionRequest.Options.OutputFormats,
             Form(
-                default=ImageConverterAllOutputFormats.WEBP,
+                default=ConversionRequest.Options.OutputFormats.WEBP,
                 title="Output format",
                 description="Choose image file format to convert",
             ),

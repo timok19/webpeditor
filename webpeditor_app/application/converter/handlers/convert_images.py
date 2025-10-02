@@ -1,4 +1,5 @@
 import asyncio
+from decimal import Decimal
 from typing import Annotated, Final, final
 
 from PIL import Image
@@ -6,6 +7,7 @@ from PIL.ImageFile import ImageFile
 from types_linq import Enumerable
 
 from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.infrastructure.database.models.base import BaseImageAssetFile
 from webpeditor_app.infrastructure.repositories.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
@@ -71,7 +73,7 @@ class ConvertImages:
                 lambda pair: pair.item1.select(
                     lambda file: self.__image_file_utility.normalize_filename(file.name)
                     .bind(lambda normalized: self.__image_file_utility.update_filename(Image.open(file), normalized))
-                    .abind(lambda updated_image: self.__aconvert_and_save(updated_image, pair.item2, request.options))
+                    .abind(lambda image: self.__aprocess(image, pair.item2, request.options))
                 ),
             )
             .amap(lambda results: asyncio.gather(*results))
@@ -91,26 +93,38 @@ class ConvertImages:
         )
 
     @as_awaitable_result
-    async def __aconvert_and_save(
+    async def __aprocess(
         self,
         image: ImageFile,
         asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConversionResponse]:
+        return await self.__aget_original_and_save(image, asset).amap2(self.__aconvert_and_save(image, asset, options), self.__to_response)
+
+    @as_awaitable_result
+    async def __aget_original_and_save(
+        self,
+        image: ImageFile,
+        asset: ConverterImageAsset,
+    ) -> ContextResult[ConverterOriginalImageAssetFile]:
         return await (
             self.__image_file_utility.get_file_info(image)
             .abind(lambda file_info: self.__aupload_original(asset.user_id, file_info))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.item1, pair.item2, asset))
-        ).amap2(
-            self.__converter_service.convert_image(image, options)
+        )
+
+    @as_awaitable_result
+    async def __aconvert_and_save(
+        self,
+        image: ImageFile,
+        asset: ConverterImageAsset,
+        options: ConversionRequest.Options,
+    ) -> ContextResult[ConverterConvertedImageAssetFile]:
+        return await (
+            self.__converter_service.aconvert_image(image, options)
             .bind(self.__image_file_utility.get_file_info)
             .abind(lambda file_info: self.__aupload_converted(asset.user_id, file_info))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
-            .map2(self.__image_file_utility.close_image(image), lambda result, _: result),
-            lambda original, converted: ConversionResponse.create(
-                ConversionResponse.ImageData.from_asset(original),
-                ConversionResponse.ImageData.from_asset(converted),
-            ),
         )
 
     @as_awaitable_result
@@ -127,4 +141,26 @@ class ConvertImages:
             await self.__image_file_utility.get_basename(file_info.filename_details.fullname)
             .abind(lambda base: self.__converter_files_repo.aupload_file(user_id, f"converted/{base}", file_info.file_details.content))
             .map(lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url)))
+        )
+
+    def __to_response(self, original: ConverterOriginalImageAssetFile, converted: ConverterConvertedImageAssetFile) -> ConversionResponse:
+        original_image_data = self.__to_image_data(original)
+        converted_image_data = self.__to_image_data(converted)
+        return ConversionResponse.create(original_image_data, converted_image_data)
+
+    @staticmethod
+    def __to_image_data(asset_file: BaseImageAssetFile) -> ConversionResponse.ImageData:
+        return ConversionResponse.ImageData(
+            url=asset_file.file_url,
+            filename=asset_file.filename,
+            filename_shorter=asset_file.filename_shorter,
+            content_type=asset_file.content_type,
+            format=asset_file.format,
+            format_description=asset_file.format_description,
+            size=asset_file.size or 0,
+            width=asset_file.width or 0,
+            height=asset_file.height or 0,
+            aspect_ratio=asset_file.aspect_ratio or Decimal(),
+            color_mode=asset_file.color_mode,
+            exif_data=asset_file.exif_data,
         )

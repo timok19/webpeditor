@@ -2,14 +2,12 @@ from typing import Annotated
 
 from anydi import Module, provider
 
-from webpeditor_app.application.converter.constants import ConverterConstants
 from webpeditor_app.application.converter.handlers.convert_images import ConvertImages
 from webpeditor_app.application.converter.handlers.get_zip import GetZip
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
-from webpeditor_app.application.editor.constants import EditorConstants
 from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.user_service_abc import UserServiceABC
@@ -36,22 +34,13 @@ class ApplicationModule(Module):
     ) -> Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]:
         return ConverterFilesRepository(cloudinary_client, logger)
 
-    @provider(scope="singleton")
-    def provide_converter_constants(self) -> ConverterConstants:
-        return ConverterConstants()
-
-    @provider(scope="singleton")
-    def provide_editor_constants(self) -> EditorConstants:
-        return EditorConstants()
-
     @provider(scope="request")
     def provide_conversion_request_validator(
         self,
         image_file_utility: ImageFileUtilityABC,
-        converter_settings: ConverterConstants,
         logger: LoggerABC,
     ) -> ValidatorABC[ConversionRequest]:
-        return ConversionRequestValidator(image_file_utility, converter_settings, logger)
+        return ConversionRequestValidator(image_file_utility, logger)
 
     @provider(scope="request")
     def provide_user_service(self, logger: LoggerABC) -> UserServiceABC:
