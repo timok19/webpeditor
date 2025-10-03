@@ -31,11 +31,11 @@ class Cache:
     MEMCACHED = ...
     def __new__(cls, cache_class: Type[BaseCache] = ..., **kwargs: Any) -> BaseCache:
         ...
-    
+
     @classmethod
     def get_scheme_class(cls, scheme: str) -> type[BaseCache]:
         ...
-    
+
     @classmethod
     def from_url(cls, url: str) -> BaseCache:
         """
@@ -60,14 +60,14 @@ class Cache:
         :param url: string identifying the resource uri of the cache to connect to
         """
         ...
-    
+
 
 
 class CacheHandler:
     _config: Dict[str, Dict[str, object]] = ...
     def __init__(self) -> None:
         ...
-    
+
     def add(self, alias: str, config: Dict[str, object]) -> None:
         """
         Add a cache to the current config. If the key already exists, it
@@ -84,7 +84,7 @@ class CacheHandler:
         :param config: Mapping containing the cache configuration
         """
         ...
-    
+
     def get(self, alias: str) -> BaseCache:
         """
         Retrieve cache identified by alias. Will return always the same instance
@@ -96,7 +96,7 @@ class CacheHandler:
         :return: cache instance
         """
         ...
-    
+
     def create(self, alias: str, **kwargs: Any) -> BaseCache:
         """Create a new cache.
 
@@ -106,16 +106,16 @@ class CacheHandler:
         :return: New cache instance
         """
         ...
-    
+
     def get_alias_config(self, alias: str) -> Dict[str, object]:
         ...
-    
+
     def get_config(self) -> Dict[str, Dict[str, object]]:
         """
         Return copy of current stored config
         """
         ...
-    
+
     def set_config(self, config: Dict[str, Dict[str, object]]) -> None:
         """
         Set (override) the default config for cache aliases from a dict-like structure.
@@ -163,7 +163,7 @@ class CacheHandler:
         If a config key already exists, it will be updated with the new values.
         """
         ...
-    
+
 
 
 caches = ...

@@ -10,13 +10,13 @@ class BaseSerializer:
     DEFAULT_ENCODING: Optional[str] = ...
     def __init__(self, *args: Any, encoding: Optional[str] = ..., **kwargs: Any) -> None:
         ...
-    
+
     def dumps(self, value: Any) -> Any:
         ...
-    
+
     def loads(self, value: Any) -> Any:
         ...
-    
+
 
 
 class NullSerializer(BaseSerializer):
@@ -40,13 +40,13 @@ class NullSerializer(BaseSerializer):
         Returns the same value
         """
         ...
-    
+
     def loads(self, value: Any) -> Any:
         """
         Returns the same value
         """
         ...
-    
+
 
 
 class StringSerializer(BaseSerializer):
@@ -68,13 +68,13 @@ class StringSerializer(BaseSerializer):
         :returns: str
         """
         ...
-    
+
     def loads(self, value: Any) -> str:
         """
         Returns value back without transformations
         """
         ...
-    
+
 
 
 class PickleSerializer(BaseSerializer):
@@ -84,7 +84,7 @@ class PickleSerializer(BaseSerializer):
     DEFAULT_ENCODING = ...
     def __init__(self, *args: Any, protocol: Optional[int] = ..., **kwargs: Any) -> None:
         ...
-    
+
     def dumps(self, value: Any) -> bytes:
         """
         Serialize the received value using ``pickle.dumps``.
@@ -93,7 +93,7 @@ class PickleSerializer(BaseSerializer):
         :returns: bytes
         """
         ...
-    
+
     def loads(self, value: Optional[bytes]) -> Any:
         """
         Deserialize value using ``pickle.loads``.
@@ -102,7 +102,7 @@ class PickleSerializer(BaseSerializer):
         :returns: obj
         """
         ...
-    
+
 
 
 class JsonSerializer(BaseSerializer):
@@ -123,7 +123,7 @@ class JsonSerializer(BaseSerializer):
         :returns: str
         """
         ...
-    
+
     def loads(self, value: Optional[str]) -> Any:
         """
         Deserialize value using ``json.loads``.
@@ -132,7 +132,7 @@ class JsonSerializer(BaseSerializer):
         :returns: output of ``json.loads``.
         """
         ...
-    
+
 
 
 class MsgPackSerializer(BaseSerializer):
@@ -147,7 +147,7 @@ class MsgPackSerializer(BaseSerializer):
     """
     def __init__(self, *args: Any, use_list: bool = ..., **kwargs: Any) -> None:
         ...
-    
+
     def dumps(self, value: Any) -> bytes:
         """
         Serialize the received value using ``msgpack.dumps``.
@@ -156,7 +156,7 @@ class MsgPackSerializer(BaseSerializer):
         :returns: bytes
         """
         ...
-    
+
     def loads(self, value: Optional[bytes]) -> Any:
         """
         Deserialize value using ``msgpack.loads``.
@@ -165,6 +165,3 @@ class MsgPackSerializer(BaseSerializer):
         :returns: obj
         """
         ...
-    
-
-

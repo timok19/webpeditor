@@ -8,7 +8,7 @@ from aiocache.base import BaseCache
 class MemcachedBackend(BaseCache):
     def __init__(self, endpoint: str = ..., port: int = ..., pool_size: int = ..., **kwargs: Any) -> None:
         ...
-    
+
 
 
 class MemcachedCache(MemcachedBackend):
@@ -32,13 +32,10 @@ class MemcachedCache(MemcachedBackend):
     NAME: str = ...
     def __init__(self, serializer: Any = ..., **kwargs: Any) -> None:
         ...
-    
+
     @classmethod
     def parse_uri_path(cls, path: str) -> Dict[str, Any]:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
-
-

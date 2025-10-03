@@ -13,10 +13,10 @@ class BasePlugin:
     @classmethod
     def add_hook(cls, func: Callable[..., Awaitable[Any]], hooks: Sequence[str]) -> None:
         ...
-    
+
     async def do_nothing(self, *args: Any, **kwargs: Any) -> None:
         ...
-    
+
 
 
 class TimingPlugin(BasePlugin):
@@ -28,7 +28,7 @@ class TimingPlugin(BasePlugin):
     @classmethod
     def save_time(cls, method: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[None]]:
         ...
-    
+
 
 
 class HitMissRatioPlugin(BasePlugin):
@@ -40,9 +40,6 @@ class HitMissRatioPlugin(BasePlugin):
     """
     async def post_get(self, client: BaseCache, key: str, took: float = ..., ret: Any = ..., **kwargs: Any) -> None:
         ...
-    
+
     async def post_multi_get(self, client: BaseCache, keys: Sequence[str], took: float = ..., ret: Sequence[Any] = ..., **kwargs: Any) -> None:
         ...
-    
-
-

@@ -11,4 +11,3 @@ class ImageConverterConstants(ImagePropertyConstants):
     MAX_FILES_LIMIT: Final[int] = 10
     MAX_IMAGE_DIMENSIONS: Final[int] = 4000
     SAFE_AREA: Final[int] = 1_000_000
-    

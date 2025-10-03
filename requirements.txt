@@ -82,7 +82,7 @@ dill==0.4.0
     # via
     #   reactpy-django
     #   webpeditor
-django==5.2.6
+django==5.2.7
     # via
     #   channels
     #   django-allauth
@@ -312,7 +312,7 @@ tzdata==2025.2 ; sys_platform == 'win32'
     # via django
 urllib3==2.5.0
     # via requests
-uuid-utils==0.11.0
+uuid-utils==0.11.1
     # via webpeditor
 whitenoise==6.11.0
     # via webpeditor

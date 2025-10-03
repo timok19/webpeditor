@@ -74,10 +74,10 @@ class cached:
         **kwargs: Any,
     ) -> None:
         ...
-    
+
     def __call__(self, f: F) -> F:
         ...
-    
+
     async def decorator(
         self,
         f: Callable[..., Awaitable[Any]],
@@ -88,16 +88,16 @@ class cached:
         **kwargs: Any,
     ) -> Any:
         ...
-    
+
     def get_cache_key(self, f: Callable[..., Any], args: Tuple[Any, ...], kwargs: Dict[str, Any]) -> str:
         ...
-    
+
     async def get_from_cache(self, key: str) -> Any:
         ...
-    
+
     async def set_in_cache(self, key: str, value: Any) -> None:
         ...
-    
+
 
 
 class cached_stampede(cached):
@@ -143,10 +143,10 @@ class cached_stampede(cached):
     """
     def __init__(self, lease: Optional[float] = ..., **kwargs: Any) -> None:
         ...
-    
+
     async def decorator(self, f: Callable[..., Awaitable[Any]], *args: Any, **kwargs: Any) -> Any:
         ...
-    
+
 
 
 class multi_cached:
@@ -225,10 +225,10 @@ class multi_cached:
         **kwargs: Any,
     ) -> None:
         ...
-    
+
     def __call__(self, f: Callable[..., Awaitable[Mapping[Any, Any]]]) -> Callable[..., Awaitable[Mapping[Any, Any]]]:
         ...
-    
+
     async def decorator(
         self,
         f: Callable[..., Awaitable[Mapping[Any, Any]]],
@@ -239,13 +239,13 @@ class multi_cached:
         **kwargs: Any,
     ) -> Mapping[Any, Any]:
         ...
-    
+
     def get_cache_keys(self, f: Callable[..., Any], args: Tuple[Any, ...], kwargs: Dict[str, Any]) -> Tuple[List[Any], List[Any], Any]:
         ...
-    
+
     async def get_from_cache(self, *keys: Any) -> List[Optional[Any]]:
         ...
-    
+
     async def set_in_cache(
         self,
         result: Mapping[Any, Any],
@@ -254,6 +254,3 @@ class multi_cached:
         fn_kwargs: Dict[str, Any],
     ) -> None:
         ...
-    
-
-
