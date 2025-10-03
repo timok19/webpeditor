@@ -78,6 +78,5 @@ class ApplicationModule(Module):
         self,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterRepositoryABC,
-        logger: LoggerABC,
     ) -> GetZip:
-        return GetZip(converter_files_repo, converter_repo, logger)
+        return GetZip(converter_files_repo, converter_repo)

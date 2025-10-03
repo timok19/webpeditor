@@ -6,7 +6,6 @@ from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
 from webpeditor_app.core.result.context_result import ContextResult, as_awaitable_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
-from webpeditor_app.core.logger import LoggerABC
 
 
 @final
@@ -15,11 +14,9 @@ class GetZip:
         self,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterRepositoryABC,
-        logger: LoggerABC,
     ) -> None:
         self.__converter_files_repo: Final[Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]] = converter_files_repo
         self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo
-        self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
     async def ahandle(self, session_service: SessionService) -> ContextResult[GetZipResponse]:

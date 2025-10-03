@@ -12,6 +12,7 @@ from webpeditor_app.application.converter.handlers.schemas import ConversionRequ
 from webpeditor_app.api.controllers.base import ControllerBase
 from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus
 from webpeditor_app.common.session.session_service_factory import SessionServiceFactory
+from webpeditor_app.domain.converter.constants import ImageConverterConstants
 
 
 @final
@@ -40,11 +41,11 @@ class ConverterController(ControllerBase):
         quality: Annotated[
             int,
             Form(
-                ge=5,
-                le=100,
+                ge=ImageConverterConstants.MIN_QUALITY,
+                le=ImageConverterConstants.MAX_QUALITY,
                 example=50,
                 title="Quality",
-                description="Set quality of output image. Must be >= 5 and <= 100",
+                description=f"Set quality of output image. Must be >= {ImageConverterConstants.MIN_QUALITY} and <= {ImageConverterConstants.MAX_QUALITY}",
             ),
         ],
         files: Annotated[

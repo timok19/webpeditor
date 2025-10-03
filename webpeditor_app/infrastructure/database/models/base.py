@@ -6,6 +6,8 @@ from typing import Optional, Any
 from django.db import models
 from django.utils import timezone
 
+from webpeditor_app.domain.common.constants import ImageFilePropertyConstants
+
 
 class BaseImageAsset(models.Model):
     id: models.UUIDField[uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -23,8 +25,8 @@ class BaseImageAsset(models.Model):
 class BaseImageAssetFile(models.Model):
     id: models.UUIDField[uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file_url: models.URLField[str] = models.URLField(blank=True)
-    filename: models.CharField[str] = models.CharField(max_length=120, blank=True)
-    filename_shorter: models.CharField[str] = models.CharField(max_length=30, blank=True)
+    filename: models.CharField[str] = models.CharField(max_length=ImageFilePropertyConstants.MAX_FILENAME_LENGTH, blank=True)
+    filename_shorter: models.CharField[str] = models.CharField(max_length=ImageFilePropertyConstants.SHORT_FILENAME_LENGTH, blank=True)
     content_type: models.CharField[str] = models.CharField(max_length=20)
     format: models.CharField[str] = models.CharField(max_length=10, blank=True)
     format_description: models.CharField[str] = models.CharField(max_length=50, blank=True)

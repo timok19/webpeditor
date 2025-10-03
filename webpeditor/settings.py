@@ -229,7 +229,7 @@ LOGGING: dict[str, Any] = {
     "disable_existing_loggers": True,
     "formatters": {
         "ninja_request": {
-            "()": "webpeditor.logging_formatters.ColorFormatter",
+            "()": "webpeditor_app.core.logging.formatters.ColorFormatter",
         },
     },
     "handlers": {
@@ -241,7 +241,7 @@ LOGGING: dict[str, Any] = {
     "loggers": {
         "django.request": {
             "handlers": ["console_ninja_request"],
-            "level": "DEBUG" if IS_DEVELOPMENT else "WARNING",
+            "level": "INFO" if IS_DEVELOPMENT else "WARNING",
             "propagate": False,
         },
         "django": {

@@ -1,10 +1,10 @@
 from typing import final, Final
 
-from webpeditor_app.domain.common.constants import ImagePropertyConstants
+from webpeditor_app.domain.common.constants import ImageFilePropertyConstants
 
 
 @final
-class ImageConverterConstants(ImagePropertyConstants):
+class ImageConverterConstants(ImageFilePropertyConstants):
     MIN_QUALITY: Final[int] = 5
     MAX_QUALITY: Final[int] = 100
     MAX_FILE_SIZE: Final[int] = 6_291_456

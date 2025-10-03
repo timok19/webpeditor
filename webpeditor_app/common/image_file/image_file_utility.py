@@ -15,6 +15,7 @@ from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.image_file.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
+from webpeditor_app.domain.common.constants import ImageFilePropertyConstants
 from webpeditor_app.types import Pair
 
 
@@ -146,7 +147,6 @@ class ImageFileUtility(ImageFileUtilityABC):
         basename, extension = os.path.splitext(filename)
 
         ellipsis_: Final[str] = "..."
-        min_length: Final[int] = 5
 
         filename_length = len(filename)
 
@@ -154,10 +154,10 @@ class ImageFileUtility(ImageFileUtilityABC):
             result = basename[: max_length - len(ellipsis_) - len(extension)] + ellipsis_ + extension
             return ContextResult[str].success(result)
 
-        if min_length <= filename_length <= max_length:
+        if ImageFilePropertyConstants.MIN_FILENAME_LENGTH <= filename_length <= max_length:
             return ContextResult[str].success(filename)
 
-        message = f"Filename '{filename}' is too short. Minimal length: {min_length}"
+        message = f"Filename '{filename}' is too short. Minimal length: {ImageFilePropertyConstants.MIN_FILENAME_LENGTH}"
         return ContextResult[str].failure(ErrorContext.bad_request(message))
 
     def __get_exif_data(self, buffer: BytesIO) -> dict[str, str]:
