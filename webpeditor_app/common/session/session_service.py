@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, ClassVar, Final, final, Optional
+from typing import Any, Final, final, Optional
 
 from asgiref.sync import sync_to_async
 from django.contrib.sessions.backends.db import SessionStore
@@ -17,9 +17,8 @@ from webpeditor_app.core.result import ContextResult, as_awaitable_result, Error
 
 @final
 class SessionService:
-    __user_id_key: ClassVar[str] = "USER_ID"
-    __session_expiry_set_key: ClassVar[str] = "SESSION_EXPIRY_SET"
-    __session_lifetime_in_seconds: ClassVar[int] = 15 * 60
+    __user_id_key: Final[str] = "USER_ID"
+    __session_expiry_set_key: Final[str] = "SESSION_EXPIRY_SET"
 
     def __init__(
         self,
@@ -32,7 +31,7 @@ class SessionService:
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def asynchronize(self) -> ContextResult[str]:
+    async def aget_user_id(self) -> ContextResult[str]:
         return await self.__aget_user_id() if not await self.__ais_expired() else await self.__acreate_user_id()
 
     @as_awaitable_result
@@ -55,7 +54,7 @@ class SessionService:
         )
 
     async def __arefresh_expiry(self, user_id: str) -> str:
-        await self.__aset_expiry(self.__session_lifetime_in_seconds)
+        await self.__aset_expiry(settings.SESSION_COOKIE_AGE)
 
         if settings.IS_DEVELOPMENT:
             expire_at = await self.__aget_expiry_date()

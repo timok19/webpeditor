@@ -8,6 +8,7 @@ from PIL import Image, ImageFile
 
 from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
+from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
@@ -16,19 +17,20 @@ from webpeditor_app.domain.converter.image_formats import RasterImageFormatsWith
 
 
 class ImageConverter(ImageConverterABC):
-    def __init__(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> None:
+    def __init__(self, image_file_utility: ImageFileUtilityABC, filename_utility: FilenameUtilityABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
+        self.__filename_utility: Final[FilenameUtilityABC] = filename_utility
         self.__logger: Final[LoggerABC] = logger
         self.__cache = SimpleMemoryCache()
         self.__try_enable_chunked_processing()
 
     @as_awaitable_result
-    async def aconvert_image(self, image: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
-        cached_image: Optional[ImageFile.ImageFile] = await self.__cache.get(self.__get_cache_key(image, options))
+    async def aconvert(self, file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
+        cached_image: Optional[ImageFile.ImageFile] = await self.__cache.get(self.__get_cache_key(file, options))
         return (
             self.__update_filename(cached_image, options)
             if cached_image is not None
-            else await self.__update_filename(image, options).abind(lambda updated_image: self.__aconvert_image(updated_image, options))
+            else await self.__update_filename(file, options).abind(lambda updated_image: self.__aconvert_image(updated_image, options))
         )
 
     def __update_filename(self, image: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
@@ -36,8 +38,8 @@ class ImageConverter(ImageConverterABC):
             Option[str]
             .of_optional(image.filename)
             .to_result(ErrorContext.server_error("Image file has no filename"))
-            .bind(self.__image_file_utility.normalize_filename)
-            .bind(self.__image_file_utility.get_basename)
+            .bind(self.__filename_utility.normalize)
+            .bind(self.__filename_utility.get_basename)
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
             .bind(lambda new_filename: self.__image_file_utility.update_filename(image, new_filename))
         )

@@ -20,7 +20,7 @@ class GetZip:
 
     @as_awaitable_result
     async def ahandle(self, session_service: SessionService) -> ContextResult[GetZipResponse]:
-        return await session_service.asynchronize().abind(self.__aget_zip)
+        return await session_service.aget_user_id().abind(self.__aget_zip)
 
     @as_awaitable_result
     async def __aget_zip(self, user_id: str) -> ContextResult[GetZipResponse]:

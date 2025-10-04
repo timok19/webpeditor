@@ -19,43 +19,36 @@ class Logger(LoggerABC):
             format="<green>{time:YYYY-MM-DD HH:mm:ss,SSS}</green> <level>{level: <8}</level> <cyan>{module}</cyan>:<yellow>{function}</yellow>:<white>{line}</white> - <level>{message}</level>",
         )
 
-    @staticmethod
-    def debug(message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(depth=depth).debug(message)
+    def debug(self, message: str) -> None:
+        return loguru.logger.opt(depth=1).debug(message)
 
-    @staticmethod
-    def info(message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(depth=depth).info(message)
+    def info(self, message: str) -> None:
+        return loguru.logger.opt(depth=1).info(message)
 
-    @staticmethod
-    def request_info(request: HttpRequest, message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(depth=depth).info(
+    def request_info(self, request: HttpRequest, message: str) -> None:
+        return loguru.logger.opt(depth=1).info(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
             message=message,
         )
 
-    @staticmethod
-    def request_error(request: HttpRequest, message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(depth=depth).error(
+    def request_error(self, request: HttpRequest, message: str) -> None:
+        return loguru.logger.opt(depth=1).error(
             "Request {method} {path} - {message}",
             method=request.method,
             path=request.path,
             message=message,
         )
 
-    @staticmethod
-    def error(message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(depth=depth).error(message)
+    def error(self, message: str) -> None:
+        return loguru.logger.opt(depth=1).error(message)
 
-    @staticmethod
-    def exception(exception: Exception, message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(exception=exception, depth=depth).exception(message)
+    def exception(self, exception: Exception, message: str) -> None:
+        return loguru.logger.opt(exception=exception, depth=1).exception(message)
 
-    @staticmethod
-    def request_exception(request: HttpRequest, exception: Exception, message: str, *, depth: int = 1) -> None:
-        return loguru.logger.opt(exception=exception, depth=depth).exception(
+    def request_exception(self, request: HttpRequest, exception: Exception, message: str) -> None:
+        return loguru.logger.opt(exception=exception, depth=1).exception(
             "Request {method} {path} - {message}, Exception:",
             method=request.method,
             path=request.path,

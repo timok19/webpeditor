@@ -11,20 +11,20 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def as_awaitable_result(func: Callable[P, Awaitable["ContextResult[T]"]]) -> Callable[P, "AwaitableContextResult[T]"]:
+def as_awaitable_result(func: Callable[P, Awaitable["ContextResult[T]"]]) -> Callable[P, "_AwaitableContextResult[T]"]:
     @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> "AwaitableContextResult[T]":
-        return AwaitableContextResult[T](func(*args, **kwargs))
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> "_AwaitableContextResult[T]":
+        return _AwaitableContextResult[T](func(*args, **kwargs))
 
     return wrapper
 
 
 def as_awaitable_enumerable_result(
     func: Callable[P, Awaitable["EnumerableContextResult[T]"]],
-) -> Callable[P, "AwaitableEnumerableContextResult[T]"]:
+) -> Callable[P, "_AwaitableEnumerableContextResult[T]"]:
     @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> "AwaitableEnumerableContextResult[T]":
-        return AwaitableEnumerableContextResult[T](func(*args, **kwargs))
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> "_AwaitableEnumerableContextResult[T]":
+        return _AwaitableEnumerableContextResult[T](func(*args, **kwargs))
 
     return wrapper
 
@@ -209,7 +209,7 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
         return self.map(lambda _: None)
 
 
-class AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
+class _AwaitableContextResult[TOut](Awaitable[ContextResult[TOut]]):
     def __init__(self, awaitable: Awaitable[ContextResult[TOut]]) -> None:
         self.__awaitable_result: Awaitable[ContextResult[TOut]] = awaitable
 
@@ -315,7 +315,7 @@ class EnumerableContextResult[TOut](Enumerable[ContextResult[TOut]]):
         return EnumerableContextResult[TOut](values.select(ContextResult[TOut].success))
 
 
-class AwaitableEnumerableContextResult[TOut](Awaitable[EnumerableContextResult[TOut]]):
+class _AwaitableEnumerableContextResult[TOut](Awaitable[EnumerableContextResult[TOut]]):
     def __init__(self, awaitable: Awaitable[EnumerableContextResult[TOut]]) -> None:
         self.__awaitable_results: Awaitable[EnumerableContextResult[TOut]] = awaitable
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from webpeditor_app.common.image_file.models.file_info import ImageFileInfo
+from webpeditor_app.common.utilities.models.file_info import ImageFileInfo
 from webpeditor_app.core.result import ContextResult, as_awaitable_result
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,

@@ -14,4 +14,4 @@ class SessionServiceFactory:
         self.__logger: Final[LoggerABC] = logger
 
     def create(self, request: HttpRequest) -> SessionService:
-        return SessionService(request=request, user_service=self.__user_service, logger=self.__logger)
+        return SessionService(request, self.__user_service, self.__logger)

@@ -4,10 +4,10 @@ from typing import Annotated, final
 from anydi.ext.django import container
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
-from ninja_extra import api_controller, http_post, http_get  # pyright: ignore
+from ninja_extra import api_controller, http_get, http_post  # pyright: ignore
 
-from webpeditor_app.application.converter.handlers.get_zip import GetZip
 from webpeditor_app.application.converter.handlers.convert_images import ConvertImages
+from webpeditor_app.application.converter.handlers.get_zip import GetZip
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from webpeditor_app.api.controllers.base import ControllerBase
 from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus

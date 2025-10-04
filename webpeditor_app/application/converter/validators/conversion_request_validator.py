@@ -2,10 +2,11 @@ from typing import Final, Optional, final, Generator, Any
 
 from expression import Option
 from ninja import UploadedFile
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 from types_linq import Enumerable
 
 from webpeditor import settings
+from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
@@ -15,8 +16,9 @@ from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 @final
 class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
-    def __init__(self, image_file_utility: ImageFileUtilityABC, logger: LoggerABC) -> None:
+    def __init__(self, image_file_utility: ImageFileUtilityABC, filename_utility: FilenameUtilityABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
+        self.__filename_utility: Final[FilenameUtilityABC] = filename_utility
         self.__logger: Final[LoggerABC] = logger
 
     def validate(self, value: ConversionRequest) -> ValidationResult:
@@ -31,11 +33,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         yield self.__validate_file_count(value.files)
         yield self.__validate_output_format(value.options.output_format)
         yield self.__validate_quality(value.options.quality)
-        for file in value.files:
-            yield self.__validate_file_integrity(file)
-            yield self.__validate_filename(file.name)
-            yield self.__validate_empty_file_size(file)
-            yield self.__validate_max_file_size(file)
+        for uploaded_file in value.files:
+            yield self.__validate_file_integrity(uploaded_file)
+            yield self.__validate_filename(uploaded_file.name)
+            yield self.__validate_empty_file_size(uploaded_file)
+            yield self.__validate_max_file_size(uploaded_file)
 
     @staticmethod
     def __validate_file_count(files: list[UploadedFile]) -> Option[str]:
@@ -53,40 +55,26 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         if len(filename) > settings.FILENAME_MAX_SIZE:
             return Option[str].Some(f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})")
 
-        if (basename_result := self.__image_file_utility.get_basename(filename)).is_error():
+        if (basename_result := self.__filename_utility.get_basename(filename)).is_error():
             return basename_result.swap().map(lambda error: error.message).to_option()
 
-        if basename_result.ok.upper() in settings.RESERVED_WINDOWS_FILENAMES:
+        if basename_result.ok in settings.RESERVED_WINDOWS_FILENAMES:
             return Option[str].Some(f"Filename '{filename}' is a reserved name that cannot be used as a file name")
 
         return Option[str].Nothing()
 
     @staticmethod
-    def __validate_empty_file_size(file: UploadedFile) -> Option[str]:
-        return Option[str].Some(f"File '{file.name}' does not have size") if file.size == 0 else Option[str].Nothing()
+    def __validate_empty_file_size(uploaded_file: UploadedFile) -> Option[str]:
+        return Option[str].Some(f"File '{uploaded_file.name}' does not have size") if uploaded_file.size == 0 else Option[str].Nothing()
 
     @staticmethod
-    def __validate_max_file_size(file: UploadedFile) -> Option[str]:
-        return (
-            Option[str].Some(
-                f"File '{file.name}' with size {file.size} exceeds the maximum allowed size {ImageConverterConstants.MAX_FILE_SIZE}"
-            )
-            if file.size > ImageConverterConstants.MAX_FILE_SIZE
-            else Option[str].Nothing()
-        )
+    def __validate_max_file_size(uploaded_file: UploadedFile) -> Option[str]:
+        message = f"File '{uploaded_file.name}' with size {uploaded_file.size} exceeds the maximum allowed size {ImageConverterConstants.MAX_FILE_SIZE}"
+        return Option[str].Some(message) if uploaded_file.size > ImageConverterConstants.MAX_FILE_SIZE else Option[str].Nothing()
 
-    def __validate_file_integrity(self, file: UploadedFile) -> Option[str]:
-        try:
-            Image.open(file).verify()
-            return Option[str].Nothing()
-        except UnidentifiedImageError:
-            message = f"File '{file.name}' cannot be processed. Incompatible file type '{file.content_type}'"
-            self.__logger.debug(message)
-            return Option[str].Some(message)
-        except Exception as exception:
-            message = f"File '{file.name}' cannot be processed. Corrupted or damaged file"
-            self.__logger.exception(exception, message)
-            return Option[str].Some(message)
+    def __validate_file_integrity(self, uploaded_file: UploadedFile) -> Option[str]:
+        with Image.open(uploaded_file) as file:
+            return self.__image_file_utility.validate_integrity(file).swap().map(lambda error: error.message).to_option()
 
     @staticmethod
     def __validate_output_format(output_format: str) -> Option[str]:

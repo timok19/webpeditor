@@ -138,8 +138,6 @@ email-validator==2.3.0
     # via pydantic
 exceptiongroup==1.3.0
     # via reactpy
-exifread==3.5.1
-    # via webpeditor
 expression==5.6.0
     # via
     #   aioreactive
@@ -225,7 +223,7 @@ pycodestyle==2.14.0
     # via webpeditor
 pycparser==2.23 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
-pydantic==2.11.9
+pydantic==2.11.10
     # via
     #   django-ninja
     #   expression

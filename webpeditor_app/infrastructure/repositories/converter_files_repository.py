@@ -31,7 +31,7 @@ class ConverterFilesRepository(FilesRepositoryABC):
         root_folder_path = self._get_root_folder(user_id)
         return await (
             self.__cloudinary_client.adelete_folder_recursively(root_folder_path)
-            .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{root_folder_path}'", depth=5))
+            .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{root_folder_path}'"))
             .as_empty()
         )
 
