@@ -2,7 +2,6 @@ from typing import Final, Optional, final, Generator, Any
 
 from expression import Option
 from ninja import UploadedFile
-from PIL import Image
 from types_linq import Enumerable
 
 from webpeditor import settings
@@ -12,6 +11,7 @@ from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorA
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
+from webpeditor_app.domain.converter.image_formats import ALL_RASTER_IMAGE_FORMAT_VALUES
 
 
 @final
@@ -34,7 +34,6 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         yield self.__validate_output_format(value.options.output_format)
         yield self.__validate_quality(value.options.quality)
         for uploaded_file in value.files:
-            yield self.__validate_file_integrity(uploaded_file)
             yield self.__validate_filename(uploaded_file.name)
             yield self.__validate_empty_file_size(uploaded_file)
             yield self.__validate_max_file_size(uploaded_file)
@@ -52,8 +51,8 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         if filename is None or len(filename) == 0:
             return Option[str].Some("Filename must not be empty")
 
-        if len(filename) > settings.FILENAME_MAX_SIZE:
-            return Option[str].Some(f"Filename '{filename}' is too long (max length: {settings.FILENAME_MAX_SIZE})")
+        if len(filename) > ImageConverterConstants.MAX_FILENAME_LENGTH:
+            return Option[str].Some(f"Filename '{filename}' is too long (max length: {ImageConverterConstants.MAX_FILENAME_LENGTH})")
 
         if (basename_result := self.__filename_utility.get_basename(filename)).is_error():
             return basename_result.swap().map(lambda error: error.message).to_option()
@@ -72,15 +71,11 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         message = f"File '{uploaded_file.name}' with size {uploaded_file.size} exceeds the maximum allowed size {ImageConverterConstants.MAX_FILE_SIZE}"
         return Option[str].Some(message) if uploaded_file.size > ImageConverterConstants.MAX_FILE_SIZE else Option[str].Nothing()
 
-    def __validate_file_integrity(self, uploaded_file: UploadedFile) -> Option[str]:
-        with Image.open(uploaded_file) as file:
-            return self.__image_file_utility.validate_integrity(file).swap().map(lambda error: error.message).to_option()
-
     @staticmethod
-    def __validate_output_format(output_format: str) -> Option[str]:
+    def __validate_output_format(output_format: ConversionRequest.Options.OutputFormats) -> Option[str]:
         return (
             Option[str].Some(f"Invalid output format '{output_format}'")
-            if output_format.strip().upper() not in ConversionRequest.Options.OutputFormats
+            if output_format not in ALL_RASTER_IMAGE_FORMAT_VALUES
             else Option[str].Nothing()
         )
 

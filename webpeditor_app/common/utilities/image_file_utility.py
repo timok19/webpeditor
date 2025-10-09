@@ -27,30 +27,25 @@ class ImageFileUtility(ImageFileUtilityABC):
     def update_filename(self, file: ImageFile, new_filename: str) -> ContextResult[ImageFile]:
         return self.__filename_utility.normalize(new_filename).map(lambda norm: self.__update_filename(file, norm))
 
-    def close(self, file: ImageFile) -> ContextResult[None]:
-        try:
-            file.close()
-            return ContextResult.empty_success()
-        except Exception as exception:
-            self.__logger.exception(exception, f"Failed to close image file '{file}'")
-            return ContextResult.empty_failure(ErrorContext.server_error())
-
-    def validate_integrity(self, file: ImageFile) -> ContextResult[None]:
-        if file.fp is None:
+    def verify_integrity(self, file: ImageFile) -> ContextResult[ImageFile]:
+        if file.fp is None or file.fp.closed:
             message = f"Unable to validate file integrity for '{file.filename}'. File is closed"
-            return ContextResult.empty_failure(ErrorContext.bad_request(message))
+            return ContextResult[ImageFile].failure(ErrorContext.server_error(message))
 
         try:
-            Image.open(file.fp).verify()
-            return ContextResult.empty_success()
+            file.fp.seek(0)
+            filename_copy = file.fp.name
+            file_copy = Image.open(file.fp)
+            file.verify()
+            return self.update_filename(file_copy, filename_copy)
         except UnidentifiedImageError:
             message = f"File '{file.filename}' cannot be processed. Incompatible file type"
             self.__logger.debug(message)
-            return ContextResult.empty_failure(ErrorContext.bad_request(message))
+            return ContextResult[ImageFile].failure(ErrorContext.bad_request(message))
         except Exception as exception:
             message = f"File '{file.filename}' cannot be processed. Corrupted or damaged file"
             self.__logger.exception(exception, message)
-            return ContextResult.empty_failure(ErrorContext.bad_request(message))
+            return ContextResult[ImageFile].failure(ErrorContext.bad_request(message))
 
     def __get_filename_details(self, filename: Union[str, bytes]) -> ContextResult[ImageFileInfo.FilenameDetails]:
         return (
@@ -65,9 +60,9 @@ class ImageFileUtility(ImageFileUtilityABC):
 
         file.save(buffer, format=file.format)
 
-        content = buffer.getvalue()
-        size = self.__get_file_size(buffer)
         width, height = file.size
+        content = self.__get_content(buffer)
+        size = self.__get_file_size(buffer)
         aspect_ratio = self.__get_aspect_ratio(width, height)
         exif_data = self.__get_exif_data(file)
 
@@ -98,17 +93,21 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     def __get_exif_data(self, file: ImageFile) -> dict[str, str]:
         try:
-            return {TAGS.get(tag_id, str(tag_id)): self.__try_decode_exif_value(value) for tag_id, value in file.getexif().items()}
+            return {TAGS.get(tag_id, str(tag_id)): self.__decode_exif_value(value) for tag_id, value in file.getexif().items()}
         except Exception as exception:
             self.__logger.exception(exception, "Unable to parse EXIF data")
             return {}
 
-    def __try_decode_exif_value(self, value: Any) -> str:
+    def __decode_exif_value(self, value: Any) -> str:
         try:
             return value.decode() if isinstance(value, bytes) else str(value)
         except Exception:
             self.__logger.debug("Unable to decode EXIF data")
             return "<UNPROCESSABLE_BYTES>"
+
+    @staticmethod
+    def __get_content(buffer: BytesIO) -> bytes:
+        return buffer.getvalue() if not buffer.closed else bytes()
 
     @staticmethod
     def __get_file_size(buffer: BytesIO) -> int:

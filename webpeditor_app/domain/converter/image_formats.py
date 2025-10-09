@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Union
+from typing import Final
 
 
 class RasterImageFormats(StrEnum):
@@ -15,4 +15,9 @@ class RasterImageFormatsWithAlphaChannel(StrEnum):
     ICO = "ICO"
 
 
-type AllRasterImageFormats = Union[RasterImageFormats, RasterImageFormatsWithAlphaChannel]
+ALL_RASTER_IMAGE_FORMAT_VALUES: Final[frozenset[str]] = frozenset[str](
+    {
+        *(image_format.value for image_format in RasterImageFormats),
+        *(image_format.value for image_format in RasterImageFormatsWithAlphaChannel),
+    }
+)

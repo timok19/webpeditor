@@ -215,13 +215,11 @@ CLOUDINARY_CLOUD_NAME: str = str(os.getenv("CLOUDINARY_CLOUD_NAME"))
 CLOUDINARY_API_KEY: str = str(os.getenv("CLOUDINARY_API_KEY"))
 CLOUDINARY_API_SECRET: str = str(os.getenv("CLOUDINARY_API_SECRET"))
 
-# Filename settings
-FILENAME_MAX_SIZE: int = 255
 RESERVED_WINDOWS_FILENAMES: list[str] = str(os.getenv("RESERVED_WINDOWS_FILENAMES")).split(",")
 
 # Application definition
 APP_VERSION: str = str(os.getenv("APP_VERSION"))
-APP_VERBOSE_NAME: str = f"{str(WebpeditorAppConfig.verbose_name)} - V{APP_VERSION}"
+APP_VERBOSE_NAME: str = f"{WebpeditorAppConfig.verbose_name} - V{APP_VERSION}"
 
 # Logging configuration
 LOGGING: dict[str, Any] = {

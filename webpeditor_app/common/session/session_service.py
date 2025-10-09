@@ -56,9 +56,8 @@ class SessionService:
     async def __arefresh_expiry(self, user_id: str) -> str:
         await self.__aset_expiry(settings.SESSION_COOKIE_AGE)
 
-        if settings.IS_DEVELOPMENT:
-            expire_at = await self.__aget_expiry_date()
-            self.__logger.debug(f"Session for User '{user_id}' will expire at {expire_at.time()} UTC.")
+        expire_at = await self.__aget_expiry_date()
+        self.__logger.debug(f"Session for User '{user_id}' will expire at {expire_at.time()} UTC.")
 
         await self.__aset(self.__session_expiry_set_key, True)
         return user_id

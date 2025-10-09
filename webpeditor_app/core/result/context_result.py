@@ -38,6 +38,11 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def empty_success() -> "ContextResult[None]":
         return ContextResult[None].success(None)
 
+    @classmethod
+    @as_awaitable_result
+    async def aempty_success(cls) -> "ContextResult[None]":
+        return cls.empty_success()
+
     @staticmethod
     def failure(error: ErrorContext) -> "ContextResult[TOut]":
         return ContextResult[TOut](
