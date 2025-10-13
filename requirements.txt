@@ -164,7 +164,7 @@ hyperlink==21.0.0
     # via
     #   autobahn
     #   twisted
-idna==3.10
+idna==3.11
     # via
     #   anyio
     #   email-validator
@@ -284,7 +284,7 @@ txaio==25.9.2
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20250915
+types-psycopg2==2.9.21.20251012
     # via django-types
 types-pyyaml==6.0.12.20250915
     # via django-stubs
