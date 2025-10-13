@@ -17,8 +17,8 @@ from webpeditor_app.core.result import ContextResult, as_awaitable_result, Error
 
 @final
 class SessionService:
-    __user_id_key: Final[str] = "USER_ID"
-    __session_expiry_set_key: Final[str] = "SESSION_EXPIRY_SET"
+    __USER_ID_KEY: Final[str] = "USER_ID"
+    __SESSION_EXPIRY_SET_KEY: Final[str] = "SESSION_EXPIRY_SET"
 
     def __init__(
         self,
@@ -38,7 +38,7 @@ class SessionService:
     async def __acreate_user_id(self) -> ContextResult[str]:
         user_id = self.__generate_id()
         signed_user_id = self.__user_service.sign_id(user_id)
-        await self.__aset(self.__user_id_key, signed_user_id)
+        await self.__aset(self.__USER_ID_KEY, signed_user_id)
         return await self.__aget_user_id()
 
     @as_awaitable_result
@@ -46,7 +46,7 @@ class SessionService:
         return await (
             ContextResult[str]
             .from_result(
-                Option.of_optional(await self.__aget(self.__user_id_key))
+                Option.of_optional(await self.__aget(self.__USER_ID_KEY))
                 .to_result(ErrorContext.not_found(f"Unable to find User in the {SessionStore.__name__}!"))
                 .bind(self.__user_service.unsign_id)
             )
@@ -59,11 +59,11 @@ class SessionService:
         expire_at = await self.__aget_expiry_date()
         self.__logger.debug(f"Session for User '{user_id}' will expire at {expire_at.time()} UTC.")
 
-        await self.__aset(self.__session_expiry_set_key, True)
+        await self.__aset(self.__SESSION_EXPIRY_SET_KEY, True)
         return user_id
 
     async def __ais_expired(self) -> bool:
-        is_expiry_set = await self.__aget(self.__session_expiry_set_key)
+        is_expiry_set = await self.__aget(self.__SESSION_EXPIRY_SET_KEY)
         expire_at = await self.__aget_expiry_date()
         return not is_expiry_set or timezone.now() > expire_at
 

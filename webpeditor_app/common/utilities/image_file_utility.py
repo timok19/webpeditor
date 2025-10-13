@@ -2,6 +2,7 @@ from decimal import ROUND_UP, Decimal
 from io import BytesIO
 from typing import Any, Final, Union, final
 
+from django.utils.translation import gettext_lazy as _
 from PIL.ExifTags import TAGS
 from PIL import Image, UnidentifiedImageError
 from PIL.ImageFile import ImageFile
@@ -16,10 +17,11 @@ from webpeditor_app.types import Pair
 
 @final
 class ImageFileUtility(ImageFileUtilityABC):
+    __MAX_LENGTH: Final[int] = 25
+
     def __init__(self, logger: LoggerABC, filename_utility: FilenameUtilityABC) -> None:
         self.__logger: Final[LoggerABC] = logger
         self.__filename_utility: Final[FilenameUtilityABC] = filename_utility
-        self.__max_length: Final[int] = 25
 
     def get_info(self, file: ImageFile) -> ContextResult[ImageFileInfo]:
         return self.__get_filename_details(file.filename).map2(self.__get_file_details(file), ImageFileInfo.create)
@@ -51,7 +53,7 @@ class ImageFileUtility(ImageFileUtilityABC):
         return (
             self.__filename_utility.normalize(filename)
             .bind(lambda norm: self.__filename_utility.get_basename(norm).map(lambda base: Pair[str, str](item1=norm, item2=base)))
-            .bind(lambda p: self.__filename_utility.trim(p.item1, self.__max_length).map(lambda trimmed: (p.item1, p.item2, trimmed)))
+            .bind(lambda p: self.__filename_utility.trim(p.item1, self.__MAX_LENGTH).map(lambda trimmed: (p.item1, p.item2, trimmed)))
             .map(lambda result: ImageFileInfo.FilenameDetails.create(*result))
         )
 
@@ -102,8 +104,9 @@ class ImageFileUtility(ImageFileUtilityABC):
         try:
             return value.decode() if isinstance(value, bytes) else str(value)
         except Exception:
-            self.__logger.debug("Unable to decode EXIF data")
-            return "<UNPROCESSABLE_BYTES>"
+            message = "Unable to decode EXIF data"
+            self.__logger.debug(message)
+            return _(message)
 
     @staticmethod
     def __get_content(buffer: BytesIO) -> bytes:

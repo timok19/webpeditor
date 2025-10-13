@@ -10,15 +10,17 @@ from webpeditor_app.domain.common.constants import ImageFilePropertyConstants
 
 @final
 class FilenameUtility(FilenameUtilityABC):
+    __FILENAME_PATTERN: Final[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
+    __ELLIPSIS: Final[str] = "..."
+
     def __init__(self, logger: LoggerABC) -> None:
         self.__logger: LoggerABC = logger
-        self.__filename_pattern: Final[re.Pattern[str]] = re.compile(r"[\s!@#%$&^*/{}\[\]+<>,?;:`~]+")
 
     def normalize(self, filename: Union[str, bytes]) -> ContextResult[str]:
         return (
             self.__decode_filename(filename).bind(self.normalize)
             if isinstance(filename, bytes)
-            else ContextResult[str].success(re.sub(self.__filename_pattern, "_", filename))
+            else ContextResult[str].success(re.sub(self.__FILENAME_PATTERN, "_", filename))
         )
 
     def trim(self, filename: Union[str, bytes], max_length: int) -> ContextResult[str]:
@@ -40,19 +42,16 @@ class FilenameUtility(FilenameUtilityABC):
             self.__logger.exception(exception, message)
             return ContextResult[str].failure(ErrorContext.server_error(message))
 
-    @staticmethod
-    def __trim_filename(max_length: int, filename: str) -> ContextResult[str]:
+    def __trim_filename(self, max_length: int, filename: str) -> ContextResult[str]:
         if max_length <= 0:
             raise ValueError(f"Maximum length must be greater than 0, got {max_length}")
 
         basename, extension = os.path.splitext(filename)
 
-        ellipsis_: Final[str] = "..."
-
         filename_length = len(filename)
 
         if filename_length > max_length:
-            result = basename[: max_length - len(ellipsis_) - len(extension)] + ellipsis_ + extension
+            result = basename[: max_length - len(self.__ELLIPSIS) - len(extension)] + self.__ELLIPSIS + extension
             return ContextResult[str].success(result)
 
         if ImageFilePropertyConstants.MIN_FILENAME_LENGTH <= filename_length <= max_length:
