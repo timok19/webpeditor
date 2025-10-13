@@ -1,3 +1,5 @@
+disable_logging = true
+
 interfaces = []
 exclude = [
     "**/*__pycache__",

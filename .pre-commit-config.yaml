@@ -26,6 +26,13 @@ repos:
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
       verbose: false
 
+- repo: https://github.com/gauge-sh/tach-pre-commit
+  rev: v0.29.0
+  hooks:
+    - id: tach
+      name: "validate modules dependencies"
+#    - id: tach-external
+
 #- repo: https://github.com/pypa/pip-audit
 #  rev: v2.9.0
 #  hooks:
