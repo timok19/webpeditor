@@ -31,12 +31,11 @@ class ErrorHandlingMiddleware:
         return Enumerable[int](codes_4xx).union(codes_5xx).any(lambda status_code: response.status_code == status_code)
 
     def __process(self, request: HttpRequest, response: HttpResponse) -> None:
-        validation_result = self.__validate_json(request, response)
-        if validation_result.is_none():
-            return None
-
-        self.__logger.request_error(request, validation_result.some.model_dump_json())
-        return None
+        return (
+            self.__validate_json(request, response)
+            .map(lambda error: self.__logger.request_error(request, error.model_dump_json()))
+            .to_optional()
+        )
 
     def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[HTTPResult[Any]]:
         try:

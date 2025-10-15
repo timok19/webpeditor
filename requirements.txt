@@ -10,9 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.52.0
-    # via anydi-django
-anydi-django==0.2.0
+anydi==0.50.0
     # via webpeditor
 anyio==4.11.0
     # via
@@ -86,7 +84,6 @@ dill==0.4.0
     #   webpeditor
 django==5.2.7
     # via
-    #   anydi-django
     #   channels
     #   django-allauth
     #   django-appconf
@@ -115,7 +112,6 @@ django-extensions==4.1
     # via webpeditor
 django-ninja==1.4.3
     # via
-    #   anydi-django
     #   django-ninja-extra
     #   webpeditor
 django-ninja-extra==0.30.1
@@ -128,7 +124,7 @@ django-stubs-ext==5.2.7
     #   webpeditor
 django-types==0.22.0
     # via webpeditor
-django-unfold==0.68.0
+django-unfold==0.67.0
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor

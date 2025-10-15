@@ -29,7 +29,7 @@ class HTTPResult[T: Schema](Schema):
 
     @classmethod
     def failure(cls, message: str, *, status_code: HTTPStatus) -> HTTPResultWithStatus[T]:
-        return status_code, cls(errors=[HTTPResult.HTTPError(message=message)])
+        return status_code, cls(errors=[HTTPResult.HTTPError(message=message, reasons=[])])
 
     @classmethod
     def from_result(cls, result: ContextResult[T]) -> HTTPResultWithStatus[T]:

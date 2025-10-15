@@ -4,7 +4,7 @@ from http import HTTPMethod
 from typing import Final, MutableMapping, Optional, final, Any
 from typing_extensions import ClassVar
 
-from httpx import AsyncClient, BasicAuth
+from httpx import AsyncClient, BasicAuth, Timeout
 from pydantic import BaseModel
 
 from webpeditor import settings
@@ -87,7 +87,7 @@ class CloudinaryClient:
         return hashlib.sha1(to_sign.encode()).hexdigest()
 
     @as_awaitable_result
-    async def __asend_request[TResponse: BaseModel](
+    async def __asend_request[T: BaseModel](
         self,
         method: HTTPMethod,
         url: str,
@@ -95,16 +95,16 @@ class CloudinaryClient:
         query_params: Optional[QueryParamTypes] = None,
         data: Optional[RequestData] = None,
         files: Optional[RequestFiles] = None,
-        response_type: type[TResponse],
-    ) -> ContextResult[TResponse]:
+        response_type: type[T],
+    ) -> ContextResult[T]:
         async with self.__get_client() as client:
             response = await client.request(method, url, params=query_params, data=data, files=files)
 
             if response.is_error:
                 self.__logger.error(f"Unexpected Cloudinary error occurred when calling {method} {response.url} {response.text}")
-                return ContextResult[TResponse].failure(ErrorContext.server_error())
+                return ContextResult[T].failure(ErrorContext.server_error())
 
-            return ContextResult[TResponse].success(response_type.model_validate(response.json()))
+            return ContextResult[T].success(response_type.model_validate(response.json()))
 
     @staticmethod
     def __get_client() -> AsyncClient:
@@ -113,5 +113,11 @@ class CloudinaryClient:
             auth=BasicAuth(
                 username=settings.CLOUDINARY_API_KEY,
                 password=settings.CLOUDINARY_API_SECRET,
+            ),
+            timeout=Timeout(
+                connect=10.0,
+                read=float(settings.CLOUDINARY_HTTP_TIMEOUT_SECONDS),
+                write=30.0,
+                pool=5.0,
             ),
         )
