@@ -63,7 +63,7 @@ INSTALLED_APPS: list[str] = [
     "compressor",
     "ninja_extra",
     "webpeditor_app",
-    "anydi.ext.django",
+    "anydi_django",
 ]
 
 ANYDI: dict[str, Any] = {
@@ -82,7 +82,7 @@ ANYDI: dict[str, Any] = {
 CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split(",")
 
 MIDDLEWARE: list[str] = [
-    "anydi.ext.django.middleware.request_scoped_middleware",
+    "anydi_django.middleware.request_scoped_middleware",
     "webpeditor_app.middlewares.error_handling.ErrorHandlingMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",

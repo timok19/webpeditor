@@ -1,6 +1,6 @@
 from typing import Any, Callable, Final, final
 
-from anydi.ext.django import container
+from anydi_django import container
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase
 from expression import Option

@@ -17,6 +17,7 @@ from webpeditor_app.views.image_not_found_view import ImageNotFoundView
 api = NinjaExtraAPI(title=settings.APP_VERBOSE_NAME, version=settings.APP_VERSION, auth=APIKeyAuthenticator())
 api.register_controllers(ConverterController)  # pyright: ignore
 
+
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
     # API
     path("api/", api.urls),

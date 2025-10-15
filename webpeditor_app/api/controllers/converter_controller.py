@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated, final
 
-from anydi.ext.django import container
+from anydi_django import container
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_get, http_post  # pyright: ignore
