@@ -1,13 +1,13 @@
 import math
 import os
 import time
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Final
 
 from webpeditor.settings import STATIC_ROOT
 
 
-def delete_static_files(folder_path: str, with_extension: str) -> int:
+def __delete_static_files(folder_path: str, with_extension: str) -> int:
     deleted_files_count = 0
     one_day_in_seconds: Final[int] = 86400
 
@@ -48,16 +48,16 @@ def delete_static_files(folder_path: str, with_extension: str) -> int:
 
 
 def main():
-    print(f"Starting cleanup of static cache files at {datetime.now(UTC)}")
+    print(f"Starting cleanup of static cache files at {datetime.now(timezone.utc)}")
 
     css_folder = os.path.join(STATIC_ROOT, "CACHE", "css")
     js_folder = os.path.join(STATIC_ROOT, "CACHE", "js")
 
     print(f"\nProcessing CSS files in {css_folder}")
-    css_deleted = delete_static_files(css_folder, "css")
+    css_deleted = __delete_static_files(css_folder, "css")
 
     print(f"\nProcessing JS files in {js_folder}")
-    js_deleted = delete_static_files(js_folder, "js")
+    js_deleted = __delete_static_files(js_folder, "js")
 
     deleted_files_total = css_deleted + js_deleted
 
@@ -65,7 +65,7 @@ def main():
     print(f"- CSS files deleted: {css_deleted}")
     print(f"- JS files deleted: {js_deleted}")
     print(f"- Total deleted static files: {deleted_files_total}")
-    print(f"\nCleanup completed at {datetime.now(UTC)}")
+    print(f"\nCleanup completed at {datetime.now(timezone.utc)}")
 
 
 if __name__ == "__main__":
