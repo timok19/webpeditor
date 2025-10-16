@@ -68,7 +68,7 @@ constantly==23.10.4
     # via twisted
 contextlib2==21.6.0
     # via django-ninja-extra
-cryptography==46.0.2
+cryptography==46.0.3
     # via
     #   autobahn
     #   fido2
