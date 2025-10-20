@@ -17,7 +17,7 @@ defusedxml==0.7.1
     # via py-serializable
 distlib==0.4.0
     # via virtualenv
-dtach==0.30.2
+dtach==0.31.0
 filelock==3.20.0
     # via
     #   cachecontrol
@@ -66,7 +66,7 @@ prompt-toolkit==3.0.52
     # via dtach
 py-serializable==2.1.0
     # via cyclonedx-python-lib
-pydot==3.0.4
+pydot==4.0.1
     # via dtach
 pygments==2.19.2
     # via rich
@@ -82,11 +82,11 @@ requests==2.32.5
     # via
     #   cachecontrol
     #   pip-audit
-rich==13.9.4
+rich==14.2.0
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.0
+ruff==0.14.1
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
