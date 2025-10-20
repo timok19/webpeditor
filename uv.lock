@@ -122,22 +122,22 @@ wheels = [
 
 [[package]]
 name = "autobahn"
-version = "25.9.1"
+version = "25.10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
     { name = "hyperlink" },
     { name = "txaio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1c/f6/f42554103f5807e89978f08a2d65d9e49b5b5543a2311684b9d04c5fd8ee/autobahn-25.9.1.tar.gz", hash = "sha256:01c4632b48f4fb2296ecd44eada9e584f76e9cab1f6d6f158393e7937c8a0e58", size = 364035, upload-time = "2025-10-15T17:43:04.591Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/3b/c0b4fa15135d094b621ed9791c7d5279de79bb5710a6002c8e4d0fbea45a/autobahn-25.10.1.tar.gz", hash = "sha256:81ffa321040533725806d8b1724226f45b4249afc0b86bbe3e0eff6f91e18646", size = 374166, upload-time = "2025-10-20T12:25:46.919Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/da/7a9533e7ada874c666562f8d46f0eee3c9c6e57f5fc6fa2ba35b48f1ff3a/autobahn-25.9.1-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:a0f406510d54a0594ecf681501023caa7d9be180b94f0071e70db852bc8b3f83", size = 500133, upload-time = "2025-10-15T17:42:47.437Z" },
-    { url = "https://files.pythonhosted.org/packages/29/24/cdb9ce70e4e2b3a866113f3ec26eae17dd11704daccbf67ab545f1dc0122/autobahn-25.9.1-cp313-cp313-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:4cfa4b67aeca5e4d07d0f415880b3cffc1833ef6bbd7d8f6fd915e2126cc4e57", size = 554065, upload-time = "2025-10-15T17:42:49.03Z" },
-    { url = "https://files.pythonhosted.org/packages/49/6d/1921436f70f60129e519bc974dd305ccde3a504b4f94610373b0d8a62a09/autobahn-25.9.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ac0571a231cdc7e56349d8e240c04379606ce622c0b789a01011135b4c570157", size = 528443, upload-time = "2025-10-15T17:42:51.312Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/d4/82f7e62b474bea8d056cda761ed3df575ec7bfc1231ae95df78778168fbd/autobahn-25.9.1-cp313-cp313-win_amd64.whl", hash = "sha256:29b9ef9abb505e2a95720aae6de05ce4fd6aafe84b36ff1a497aba35830c36ee", size = 508831, upload-time = "2025-10-15T17:42:53.086Z" },
-    { url = "https://files.pythonhosted.org/packages/06/d9/014b1c7b3e47f21aaa714ee9c4ce3a558bbbb65ff25c1697cf3a478280e2/autobahn-25.9.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:a971c0259a221a03223b76e8045ea3989a97f472ce00e32d7f2b2551c346e7f9", size = 500154, upload-time = "2025-10-15T17:42:54.323Z" },
-    { url = "https://files.pythonhosted.org/packages/ce/92/d7c569046b67b777d5520e8aa78dd64c9df4c3a1c7d9afc7ad6ae9ac959b/autobahn-25.9.1-cp314-cp314-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:eb64724bcc7b618fa01267ad47bd6b70ba9ccf62550e9b5196a92aaa8d3b6aa1", size = 554274, upload-time = "2025-10-15T17:42:55.539Z" },
-    { url = "https://files.pythonhosted.org/packages/e6/34/b22663adb73345b4f45331888bf05acc52ed0bd70b3a13d7231f519789aa/autobahn-25.9.1-cp314-cp314-win_amd64.whl", hash = "sha256:54b578d569805f129ce74348892784e17c6433185c9cb87dcf92f774be150d09", size = 509287, upload-time = "2025-10-15T17:42:56.966Z" },
+    { url = "https://files.pythonhosted.org/packages/36/17/cd0dd6cbffc7c43b9d88b3b1a4c95e39787bbadaa0a6217e5a1f84e1a90c/autobahn-25.10.1-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:4d4413a9af14282a69c9f3a503e107fa5f725769f0e546f5b576d4b477c6dc6c", size = 515578, upload-time = "2025-10-20T12:25:25.523Z" },
+    { url = "https://files.pythonhosted.org/packages/be/b1/f5eba6cd7be6b0ac70e9dbce23f73c29ebf99293a795658c25403755715c/autobahn-25.10.1-cp313-cp313-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:dc1d83b9b35be28b87b67507c353e2abe9cc164db552df445a5a62440dfd4413", size = 568361, upload-time = "2025-10-20T12:25:27.186Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/85/87a2d76a41ba7f9489b93b3327fd5590fe0ec90779b711f0650de576e0d8/autobahn-25.10.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b240273bc96201ee38b2d6bfb1b6d09a47bb909e3a63744b1dc453f93169d295", size = 544027, upload-time = "2025-10-20T12:25:29.224Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/68/924ace721f8d5b05b258e7b28b2eea87072350f95493c35caf32f02eaae6/autobahn-25.10.1-cp313-cp313-win_amd64.whl", hash = "sha256:a0491093122c55d42b6044b0f805d05adb8777c856a97e3253f771a37e370b67", size = 524401, upload-time = "2025-10-20T12:25:31.636Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/8b/d3cf0e2ede092fa14a264d87da2c90ee5816b67e7edeaa7ae8f985cd3886/autobahn-25.10.1-cp314-cp314-macosx_15_0_arm64.whl", hash = "sha256:ffac73aaa797cce9e44aacdacc8856dec04a9f62ea55809b2a6ea215123e535a", size = 515595, upload-time = "2025-10-20T12:25:33.593Z" },
+    { url = "https://files.pythonhosted.org/packages/70/5e/f9ed4d1c01c2bd3eb7654ab0ea12839856da27fa1ad270e1f2304998a468/autobahn-25.10.1-cp314-cp314-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:d3ee65c876436203b5cb378a372c40b2b14111d56d827a2b228cb23decae1f30", size = 568602, upload-time = "2025-10-20T12:25:35.502Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/ba/54329313660fbbc929814d2a779d9f412c25b2c9fe67713db1db60ec5408/autobahn-25.10.1-cp314-cp314-win_amd64.whl", hash = "sha256:109e30d1b35f33eec068cd10fc14874134cfb72d0c8e0cf4ec82309ddc43bc7a", size = 524866, upload-time = "2025-10-20T12:25:37.386Z" },
 ]
 
 [[package]]
@@ -593,20 +593,20 @@ wheels = [
 
 [[package]]
 name = "django-ninja"
-version = "1.4.3"
+version = "1.4.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/1a/f0d051f54375cfd2310f803925993fdc4172e41e627d63ece48194b07892/django_ninja-1.4.3.tar.gz", hash = "sha256:e46d477ca60c228d2a5eb3cc912094928ea830d364501f966661eeada67cb038", size = 3709571, upload-time = "2025-06-04T15:11:13.408Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/9a/558489e0e25173772fbd826306b7d1777e80285b02d69e0e1aaec41e3eec/django_ninja-1.4.5.tar.gz", hash = "sha256:aa1a2ee2b22c5f1c2f4bfbc004386be7074cbfaf133680c2b359a31221965503", size = 3710511, upload-time = "2025-10-19T18:28:02.362Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/ec/0cfa9b817f048cdec354354ae0569d7c0fd63907e5b1f927a7ee04a18635/django_ninja-1.4.3-py3-none-any.whl", hash = "sha256:f3204137a059437b95677049474220611f1cf9efedba9213556474b75168fa01", size = 2426185, upload-time = "2025-06-04T15:11:11.314Z" },
+    { url = "https://files.pythonhosted.org/packages/49/e3/168274a8def4b9a2fb2540319a68914e8e4e529cd7f7b5f1ba8939d011bc/django_ninja-1.4.5-py3-none-any.whl", hash = "sha256:d779702ddc6e17b10739049ddb075a6a1e6c6270bdc04e0b0429f6adbf670373", size = 2426449, upload-time = "2025-10-19T18:28:00.518Z" },
 ]
 
 [[package]]
 name = "django-ninja-extra"
-version = "0.30.1"
+version = "0.30.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
@@ -615,9 +615,9 @@ dependencies = [
     { name = "django-ninja" },
     { name = "injector" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9a/39/f04d538a3de88ffc31870e012c26ae4b03146fbbddae732363d49dd4aba2/django_ninja_extra-0.30.1.tar.gz", hash = "sha256:e7f452fdcd15738661ee9f4fc7376dd33545eb944c92e58efe5c0c008b2e9d54", size = 56460, upload-time = "2025-06-05T23:23:58.009Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/b3/2c4b3761e993857e819b23ffafa010f571e61c295474f7212803b20a5104/django_ninja_extra-0.30.2.tar.gz", hash = "sha256:f47928e6be4cabd2e81e8aeba886e1a5de113701af1647dd8cec6a5cc3ccac6a", size = 56098, upload-time = "2025-10-20T15:20:05.668Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/13/3fab25e603bc5d5f8fabe17ff455bcd03cb0583023713262a62b35333d41/django_ninja_extra-0.30.1-py3-none-any.whl", hash = "sha256:286241bd1a14b3257114014ec349f2a992f42dab76bfdf678d55029130ad7fbd", size = 76502, upload-time = "2025-06-05T23:23:56.368Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/42/f05f0b8c6c3f3f5a1309f96f4ea3adfb980daf0b4373ee5602779c56f46d/django_ninja_extra-0.30.2-py3-none-any.whl", hash = "sha256:4e39b31d5fc1357d2baae8a53bf32983202b1f19de4ae55249f5d80339cfb9c8", size = 75784, upload-time = "2025-10-20T15:20:04.551Z" },
 ]
 
 [[package]]

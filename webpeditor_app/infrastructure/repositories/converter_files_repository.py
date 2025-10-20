@@ -22,9 +22,9 @@ class ConverterFilesRepository(FilesRepositoryABC):
     @as_awaitable_result
     async def aget_zip_folder(self, user_id: str) -> ContextResult[HttpUrl]:
         root_folder_path = self._get_root_folder(user_id)
-        folder_path = f"{root_folder_path}/converter"
+        folder_path_to_save = f"{root_folder_path}/zip"
         zip_path = f"{root_folder_path}/webpeditor_converted.zip"
-        return await self.__cloudinary_client.agenerate_zip_archive(folder_path, zip_path).map(lambda response: response.secure_url)
+        return await self.__cloudinary_client.agenerate_zip_archive(folder_path_to_save, zip_path).map(lambda response: response.secure_url)
 
     @as_awaitable_result
     async def acleanup(self, user_id: str) -> ContextResult[None]:
