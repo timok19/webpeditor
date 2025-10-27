@@ -33,7 +33,7 @@ attrs==25.4.0
     # via
     #   service-identity
     #   twisted
-autobahn==25.10.1
+autobahn==25.10.2
     # via daphne
 automat==25.4.16
     # via twisted
@@ -128,7 +128,7 @@ django-stubs-ext==5.2.7
     #   webpeditor
 django-types==0.22.0
     # via webpeditor
-django-unfold==0.68.0
+django-unfold==0.69.0
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
@@ -204,7 +204,7 @@ numpy==2.3.4
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
-orjson==3.11.3
+orjson==3.11.4
     # via reactpy-django
 packaging==25.0
     # via
@@ -238,7 +238,7 @@ pyjwt==2.10.1
     # via django-allauth
 pyopenssl==25.3.0
     # via twisted
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via webpeditor
 pytz==2025.2
     # via webpeditor
