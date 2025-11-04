@@ -86,7 +86,7 @@ rich==14.2.0
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.2
+ruff==0.14.3
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
@@ -99,7 +99,7 @@ tomli-w==1.2.0
     # via dtach
 urllib3==2.5.0
     # via requests
-virtualenv==20.35.3
+virtualenv==20.35.4
     # via pre-commit
 wcwidth==0.2.14
     # via prompt-toolkit
