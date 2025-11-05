@@ -17,7 +17,7 @@ defusedxml==0.7.1
     # via py-serializable
 distlib==0.4.0
     # via virtualenv
-dtach==0.31.0
+dtach==0.31.1
 filelock==3.20.0
     # via
     #   cachecontrol
