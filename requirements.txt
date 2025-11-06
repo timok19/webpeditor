@@ -136,7 +136,7 @@ dnspython==2.8.0
     # via
     #   email-validator
     #   webpeditor
-docutils==0.22.2
+docutils==0.22.3
     # via webpeditor
 email-validator==2.3.0
     # via pydantic
@@ -248,7 +248,7 @@ qrcode==8.2
     #   webpeditor
 rcssmin==1.1.2
     # via django-compressor
-reactivex==4.0.4
+reactivex==4.1.0
     # via aioreactive
 reactpy==1.1.0
     # via
