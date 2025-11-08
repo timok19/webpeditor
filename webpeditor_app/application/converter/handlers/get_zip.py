@@ -1,6 +1,6 @@
 from typing import Annotated, final, Final
 
-from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.infrastructure.repositories.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
@@ -24,4 +24,4 @@ class GetZip:
 
     @as_awaitable_result
     async def __aget_zip(self, user_id: str) -> ContextResult[GetZipResponse]:
-        return await self.__converter_files_repo.aget_zip_folder(user_id).map(lambda zip_url: GetZipResponse(zip_url=str(zip_url)))
+        return await self.__converter_files_repo.aget_zip(user_id, "converted").map(lambda zip_url: GetZipResponse(zip_url=str(zip_url)))

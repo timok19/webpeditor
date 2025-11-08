@@ -1,4 +1,4 @@
-from typing import IO, Any, Mapping, Optional, Sequence, Union
+from typing import IO, Any, Mapping, MutableMapping, Optional, Sequence, Union
 
 from httpx import QueryParams
 
@@ -19,4 +19,4 @@ type QueryParamTypes = Union[
     str,
     bytes,
 ]
-type RequestData = Mapping[str, Any]
+type RequestData = MutableMapping[str, Any]

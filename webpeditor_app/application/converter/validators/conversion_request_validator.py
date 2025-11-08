@@ -11,7 +11,7 @@ from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorA
 from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
-from webpeditor_app.domain.converter.image_formats import ALL_RASTER_IMAGE_FORMAT_VALUES
+from webpeditor_app.domain.converter.image_formats import ALL_RASTER_IMAGE_FORMATS
 
 
 @final
@@ -75,7 +75,7 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
     def __validate_output_format(output_format: ConversionRequest.Options.OutputFormats) -> Option[str]:
         return (
             Option[str].Some(f"Invalid output format '{output_format}'")
-            if output_format not in ALL_RASTER_IMAGE_FORMAT_VALUES
+            if output_format not in ALL_RASTER_IMAGE_FORMATS
             else Option[str].Nothing()
         )
 

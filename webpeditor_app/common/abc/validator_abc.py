@@ -12,9 +12,9 @@ class ValidationResult(BaseModel):
 
     def to_result(self) -> ContextResult[None]:
         return (
-            ContextResult.empty_failure(ErrorContext.bad_request("Request is invalid", self.errors))
+            ContextResult[None].failure(ErrorContext.bad_request("Request is invalid", self.errors))
             if any(self.errors)
-            else ContextResult.empty_success()
+            else ContextResult[None].success(None)
         )
 
 

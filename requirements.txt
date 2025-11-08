@@ -192,6 +192,8 @@ lxml==6.0.2
     # via reactpy
 mccabe==0.7.0
     # via webpeditor
+multidict==6.7.0
+    # via webpeditor
 mypy-extensions==1.1.0
     # via reactpy
 names-generator==0.2.0

@@ -34,29 +34,14 @@ class ContextResult[TOut](Result[TOut, ErrorContext]):
     def success(value: TOut) -> "ContextResult[TOut]":
         return ContextResult[TOut](tag="ok", ok=value)
 
-    @staticmethod
-    def empty_success() -> "ContextResult[None]":
-        return ContextResult[None].success(None)
-
     @classmethod
     @as_awaitable_result
-    async def aempty_success(cls) -> "ContextResult[None]":
-        return cls.empty_success()
+    async def asuccess(cls, value: TOut) -> "ContextResult[TOut]":
+        return cls.success(value)
 
     @staticmethod
     def failure(error: ErrorContext) -> "ContextResult[TOut]":
-        return ContextResult[TOut](
-            tag="error",
-            error=ErrorContext(
-                error_code=error.error_code,
-                message=error.message or "",
-                reasons=error.reasons or [],
-            ),
-        )
-
-    @staticmethod
-    def empty_failure(error: ErrorContext) -> "ContextResult[None]":
-        return ContextResult[None].failure(error)
+        return ContextResult[TOut](tag="error", error=error)
 
     @classmethod
     def failures(cls, *errors: ErrorContext) -> "EnumerableContextResult[TOut]":

@@ -69,6 +69,7 @@ class ConverterController(ControllerBase):
         response={
             HTTPStatus.OK: HTTPResult[GetZipResponse],
             HTTPStatus.NOT_FOUND: HTTPResult[GetZipResponse],
+            HTTPStatus.BAD_REQUEST: HTTPResult[GetZipResponse],
             HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[GetZipResponse],
         },
         summary="Get converted images as zip",

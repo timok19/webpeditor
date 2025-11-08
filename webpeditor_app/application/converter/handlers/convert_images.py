@@ -8,7 +8,7 @@ from ninja import UploadedFile
 from types_linq import Enumerable
 
 from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
-from webpeditor_app.common.abc.files_repository_abc import FilesRepositoryABC
+from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.common.utilities.models import ImageFileInfo
 from webpeditor_app.infrastructure.database.models.base import BaseImageAssetFile
 from webpeditor_app.infrastructure.repositories.converter_files_repository import ConverterFilesRepository
@@ -62,7 +62,7 @@ class ConvertImages:
             .abind_many(
                 lambda user_id: self.__acleanup_previous_assets(user_id)
                 .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
-                .map(lambda asset: Enumerable(request.files).select(lambda file: self.__aprocess_request(file, asset, request.options)))
+                .map(lambda asset: Enumerable(request.files).select(lambda file: self.__aprocess(file, asset, request.options)))
                 .amap(lambda results: asyncio.gather(*results))
                 .bind_many(EnumerableContextResult[ConversionResponse].from_results)
                 .tap_either(
@@ -73,7 +73,7 @@ class ConvertImages:
         )
 
     @as_awaitable_result
-    async def __aprocess_request(
+    async def __aprocess(
         self,
         uploaded_file: UploadedFile,
         asset: ConverterImageAsset,
@@ -91,15 +91,17 @@ class ConvertImages:
     async def __acleanup_previous_assets(self, user_id: str) -> ContextResult[None]:
         return await self.__converter_repo.aasset_exists(user_id).aif_then_else(
             lambda asset_exists: asset_exists is True,
-            lambda _: self.__converter_repo.adelete_asset(user_id).abind(lambda _: self.__converter_files_repo.acleanup(user_id)),
-            lambda _: ContextResult.aempty_success(),
+            lambda _: self.__converter_repo.adelete_asset(user_id)
+            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "original"))
+            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "converted")),
+            lambda _: ContextResult[None].asuccess(None),
         )
 
     @as_awaitable_result
     async def __aget_original(self, file: ImageFile, asset: ConverterImageAsset) -> ContextResult[ConverterOriginalImageAssetFile]:
         return await (
             self.__image_file_utility.get_info(file)
-            .abind(lambda file_info: self.__aupload_original(asset.user_id, file_info))
+            .abind(lambda file_info: self.__aupload(asset.user_id, file_info, "original"))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.item1, pair.item2, asset))
         )
 
@@ -113,30 +115,22 @@ class ConvertImages:
         return await (
             self.__image_converter.aconvert(file, options)
             .bind(self.__image_file_utility.get_info)
-            .abind(lambda file_info: self.__aupload_converted(asset.user_id, file_info))
+            .abind(lambda file_info: self.__aupload(asset.user_id, file_info, "converted"))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
         )
 
     @as_awaitable_result
-    async def __aupload_original(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
+    async def __aupload(self, user_id: str, file_info: ImageFileInfo, relative_folder_path: str) -> ContextResult[Pair[ImageFileInfo, str]]:
+        content = file_info.file_details.content
+        fullname = file_info.filename_details.fullname
         return await (
-            self.__filename_utility.get_basename(file_info.filename_details.fullname)
-            .abind(lambda base: self.__converter_files_repo.aupload_file(user_id, f"original/{base}", file_info.file_details.content))
-            .map(lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url)))
-        )
-
-    @as_awaitable_result
-    async def __aupload_converted(self, user_id: str, file_info: ImageFileInfo) -> ContextResult[Pair[ImageFileInfo, str]]:
-        return await (
-            self.__filename_utility.get_basename(file_info.filename_details.fullname)
-            .abind(lambda base: self.__converter_files_repo.aupload_file(user_id, f"converted/{base}", file_info.file_details.content))
+            self.__filename_utility.get_basename(fullname)
+            .abind(lambda basename: self.__converter_files_repo.aupload_file(user_id, f"{relative_folder_path}/{basename}", content))
             .map(lambda file_url: Pair[ImageFileInfo, str](item1=file_info, item2=str(file_url)))
         )
 
     def __to_response(self, original: ConverterOriginalImageAssetFile, converted: ConverterConvertedImageAssetFile) -> ConversionResponse:
-        original_image_data = self.__to_image_data(original)
-        converted_image_data = self.__to_image_data(converted)
-        return ConversionResponse.create(original_image_data, converted_image_data)
+        return ConversionResponse.create(self.__to_image_data(original), self.__to_image_data(converted))
 
     @staticmethod
     def __to_image_data(asset_file: BaseImageAssetFile) -> ConversionResponse.ImageData:

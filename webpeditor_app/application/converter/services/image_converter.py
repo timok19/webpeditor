@@ -1,6 +1,6 @@
 from io import BytesIO
 import math
-from typing import Any, Final, Optional, cast
+from typing import Any, Final, cast
 
 from aiocache.backends.memory import SimpleMemoryCache
 from expression import Option
@@ -16,41 +16,63 @@ from webpeditor_app.domain.converter.constants import ImageConverterConstants
 from webpeditor_app.domain.converter.image_formats import RasterImageFormatsWithAlphaChannel, RasterImageFormats
 
 
+try:
+    import multiprocessing
+
+    # Enable truncated image processing for better memory usage
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+    # Enable chunked processing to reduce memory usage and improve performance
+    # Set PIL to use multiple cores when available
+    Image.core.set_alignment(32)
+    Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
+except (ImportError, AttributeError):
+    pass
+
+
 class ImageConverter(ImageConverterABC):
+    __CACHE: Final[SimpleMemoryCache] = SimpleMemoryCache()
+
     def __init__(self, image_file_utility: ImageFileUtilityABC, filename_utility: FilenameUtilityABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
         self.__filename_utility: Final[FilenameUtilityABC] = filename_utility
         self.__logger: Final[LoggerABC] = logger
-        self.__cache = SimpleMemoryCache()
-        self.__try_enable_chunked_processing()
 
     @as_awaitable_result
     async def aconvert(self, file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
-        cached_image: Optional[ImageFile.ImageFile] = await self.__cache.get(self.__get_cache_key(file, options))
+        result = self.__update_filename(file, options)
         return (
-            self.__update_filename(cached_image, options)
-            if cached_image is not None
-            else await self.__update_filename(file, options).abind(lambda updated_image: self.__aconvert_image(updated_image, options))
+            await result.bind(lambda image_file: self.__get_cache_key(image_file, options))
+            .amap(self.__CACHE.get)
+            .aif_then_else(
+                lambda cached: cached is not None,
+                ContextResult[ImageFile.ImageFile].asuccess,
+                lambda _: result.abind(lambda image_file: self.__aconvert_image(image_file, options)),
+            )
         )
 
-    def __update_filename(self, image: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
+    def __update_filename(self, image_file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
         return ContextResult[ImageFile.ImageFile].from_result(
             Option[str]
-            .of_optional(image.filename)
+            .of_optional(image_file.filename)
             .to_result(ErrorContext.server_error("Image file has no filename"))
             .bind(self.__filename_utility.normalize)
             .bind(self.__filename_utility.get_basename)
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
-            .bind(lambda new_filename: self.__image_file_utility.update_filename(image, new_filename))
+            .bind(lambda new_filename: self.__image_file_utility.update_filename(image_file, new_filename))
         )
 
     @as_awaitable_result
-    async def __aconvert_image(self, image: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
-        if image.format is None:
+    async def __aconvert_image(
+        self,
+        image_file: ImageFile.ImageFile,
+        options: ConversionRequest.Options,
+    ) -> ContextResult[ImageFile.ImageFile]:
+        if image_file.format is None:
             return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
         # Resize large images to improve performance
-        resized_image = self.__resize_image(image)
+        resized_image = self.__resize_image(image_file)
 
         source_has_alpha = self.__has_alpha(resized_image)
         target_has_alpha = options.output_format in RasterImageFormatsWithAlphaChannel
@@ -70,11 +92,13 @@ class ImageConverter(ImageConverterABC):
 
         # Save with optimized parameters for the target format
         converted_image = Image.open(self.__convert_format(resized_image, options))
-        converted_image.filename = image.filename
+        converted_image.filename = image_file.filename
 
-        await self.__cache.set(self.__get_cache_key(image, options), converted_image)
-
-        return ContextResult[ImageFile.ImageFile].success(converted_image)
+        return (
+            await self.__get_cache_key(image_file, options)
+            .amap(lambda key: self.__CACHE.set(key, converted_image))
+            .map(lambda _: converted_image)
+        )
 
     @staticmethod
     def __has_alpha(image: ImageFile.ImageFile) -> bool:
@@ -167,22 +191,7 @@ class ImageConverter(ImageConverterABC):
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(ImageConverterConstants.RGB_MODE)
 
-    @staticmethod
-    def __try_enable_chunked_processing() -> None:
-        try:
-            import multiprocessing
-
-            # Enable truncated image processing for better memory usage
-            ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-            # Enable chunked processing to reduce memory usage and improve performance
-            # Set PIL to use multiple cores when available
-            Image.core.set_alignment(32)
-            Image.core.set_blocks_max(multiprocessing.cpu_count() * 2)
-            return None
-        except (ImportError, AttributeError):
-            return None
-
-    @staticmethod
-    def __get_cache_key(image: ImageFile.ImageFile, options: ConversionRequest.Options) -> str:
-        return f"{image.format}, {options.output_format}, {options.quality}"
+    def __get_cache_key(self, image_file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[str]:
+        return self.__filename_utility.get_basename(str(image_file.filename)).map(
+            lambda basename: f"{basename}_{image_file.format}->{options.output_format}_{options.quality}"
+        )

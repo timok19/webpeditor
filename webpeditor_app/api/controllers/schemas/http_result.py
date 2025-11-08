@@ -50,8 +50,7 @@ class HTTPResult[T: Schema](Schema):
             http_errors = errors.select(lambda error: HTTPResult.HTTPError(message=error.message, reasons=error.reasons)).to_list()
             return cls.__map_status_code(error_code), cls(errors=http_errors)
 
-        values = results.select(lambda result: result.ok).to_list()
-        return HTTPStatus.OK, cls(values=values)
+        return HTTPStatus.OK, cls(values=results.select(lambda result: result.ok).to_list())
 
     @classmethod
     def no_content(cls) -> HTTPResultWithStatus[T]:

@@ -15,7 +15,7 @@ class RasterImageFormatsWithAlphaChannel(StrEnum):
     ICO = "ICO"
 
 
-ALL_RASTER_IMAGE_FORMAT_VALUES: Final[frozenset[str]] = frozenset[str](
+ALL_RASTER_IMAGE_FORMATS: Final[frozenset[str]] = frozenset[str](
     {
         *(image_format.value for image_format in RasterImageFormats),
         *(image_format.value for image_format in RasterImageFormatsWithAlphaChannel),

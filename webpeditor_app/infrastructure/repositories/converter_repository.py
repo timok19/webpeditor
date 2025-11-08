@@ -52,10 +52,10 @@ class ConverterRepository(ConverterRepositoryABC):
             for model, count in deleted_per_model.items():
                 self.__logger.debug(f"Deleted '{model}': {count} for User '{user_id}'")
 
-            return ContextResult.empty_success()
+            return ContextResult[None].success(None)
         except Exception as exception:
             self.__logger.exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")
-            return ContextResult.empty_failure(ErrorContext.bad_request())
+            return ContextResult[None].failure(ErrorContext.bad_request())
 
     @as_awaitable_result
     async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](

@@ -26,7 +26,7 @@ class ConversionRequest(Schema):
             ICO = "ICO"
 
     @classmethod
-    def create(cls, files: list[UploadedFile], output_format: Options.OutputFormats, quality: int) -> "ConversionRequest":
+    def create(cls, files: list[UploadedFile], output_format: Options.OutputFormats, quality: int) -> Self:
         return cls(files=files, options=cls.Options(output_format=output_format, quality=quality))
 
 

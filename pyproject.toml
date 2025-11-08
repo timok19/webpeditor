@@ -38,6 +38,7 @@ dependencies = [
     "lazy-object-proxy>=1.10.0",
     "loguru>=0.7.3",
     "mccabe>=0.7.0",
+    "multidict>=6.7.0",
     "names-generator>=0.2.0",
     "ninja-schema>=0.14.1",
     "numpy>=2.3.2",
