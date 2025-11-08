@@ -103,7 +103,7 @@ django==5.2.8
     #   webpeditor
 django-allauth==65.13.0
     # via webpeditor
-django-appconf==1.1.0
+django-appconf==1.2.0
     # via
     #   django-compressor
     #   webpeditor

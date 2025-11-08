@@ -61,7 +61,7 @@ platformdirs==4.5.0
     # via
     #   pip-audit
     #   virtualenv
-pre-commit==4.3.0
+pre-commit==4.4.0
 prompt-toolkit==3.0.52
     # via dtach
 py-serializable==2.1.0
