@@ -19,11 +19,11 @@ from webpeditor_app.domain.converter.constants import ImageConverterConstants
 @api_controller("/converter", tags="Image Converter")
 class ConverterController(ControllerBase):
     @http_post(
-        "/convert-images",
+        "/convert",
         response={
             HTTPStatus.OK: HTTPResult[ConversionResponse],
-            HTTPStatus.BAD_REQUEST: HTTPResult[ConversionResponse],
             HTTPStatus.NOT_FOUND: HTTPResult[ConversionResponse],
+            HTTPStatus.BAD_REQUEST: HTTPResult[ConversionResponse],
             HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[ConversionResponse],
         },
         summary="Convert images",
@@ -65,7 +65,7 @@ class ConverterController(ControllerBase):
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_get(
-        "/get-zip",
+        "/zip",
         response={
             HTTPStatus.OK: HTTPResult[GetZipResponse],
             HTTPStatus.NOT_FOUND: HTTPResult[GetZipResponse],
