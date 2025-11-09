@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import final
+from typing import final, Self, Optional
 
 from ninja import Schema, Field
 from pydantic import ConfigDict
@@ -23,21 +23,28 @@ class HTTPResult[T: Schema](Schema):
         message: str = Field(default_factory=str)
         reasons: list[str] = Field(default_factory=list[str])
 
+        @classmethod
+        def create(cls, message: str, reasons: Optional[list[str]] = None) -> Self:
+            return cls(message=message, reasons=reasons if reasons is not None else [])
+
     @classmethod
     def failure_500(cls, message: str) -> HTTPResultWithStatus[T]:
         return cls.failure(message, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @classmethod
     def failure(cls, message: str, *, status_code: HTTPStatus) -> HTTPResultWithStatus[T]:
-        return status_code, cls(errors=[HTTPResult.HTTPError(message=message, reasons=[])])
+        return cls.__response(status_code, cls(errors=[HTTPResult.HTTPError.create(message)]))
 
     @classmethod
     def from_result(cls, result: ContextResult[T]) -> HTTPResultWithStatus[T]:
-        if result.is_error():
-            http_error = HTTPResult.HTTPError(message=result.error.message, reasons=result.error.reasons)
-            return cls.__map_status_code(result.error.error_code), cls(errors=[http_error])
-
-        return HTTPStatus.OK, cls(values=[result.ok])
+        return (
+            cls.__response(HTTPStatus.OK, cls(values=[result.ok]))
+            if result.is_ok()
+            else cls.__response(
+                cls.__map_status_code(result.error.error_code),
+                cls(errors=[HTTPResult.HTTPError.create(result.error.message, result.error.reasons)]),
+            )
+        )
 
     @classmethod
     def from_results(cls, results: EnumerableContextResult[T]) -> HTTPResultWithStatus[T]:
@@ -47,14 +54,14 @@ class HTTPResult[T: Schema](Schema):
         if results.any(lambda result: result.is_error()):
             errors = results.where(lambda result: result.is_error()).select(lambda result: result.error)
             error_code = errors.select(lambda error: error.error_code).first()
-            http_errors = errors.select(lambda error: HTTPResult.HTTPError(message=error.message, reasons=error.reasons)).to_list()
-            return cls.__map_status_code(error_code), cls(errors=http_errors)
+            http_errors = errors.select(lambda error: HTTPResult.HTTPError.create(error.message, error.reasons)).to_list()
+            return cls.__response(cls.__map_status_code(error_code), cls(errors=http_errors))
 
-        return HTTPStatus.OK, cls(values=results.select(lambda result: result.ok).to_list())
+        return cls.__response(HTTPStatus.OK, cls(values=results.select(lambda result: result.ok).to_list()))
 
     @classmethod
     def no_content(cls) -> HTTPResultWithStatus[T]:
-        return HTTPStatus.NO_CONTENT, cls()
+        return cls.__response(HTTPStatus.NO_CONTENT, cls())
 
     @classmethod
     def __map_status_code(cls, error_code: ErrorContext.ErrorCode) -> HTTPStatus:
@@ -71,3 +78,7 @@ class HTTPResult[T: Schema](Schema):
                 return HTTPStatus.UNPROCESSABLE_ENTITY
             case _:
                 return HTTPStatus.INTERNAL_SERVER_ERROR
+
+    @staticmethod
+    def __response(status_code: HTTPStatus, result: "HTTPResult[T]") -> HTTPResultWithStatus[T]:
+        return status_code, result
