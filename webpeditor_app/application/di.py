@@ -20,7 +20,7 @@ from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
-from webpeditor_app.infrastructure.database.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.infrastructure.files.converter.converter_files_repository import ConverterFilesRepository
 
 
 class ApplicationModule(Module):
