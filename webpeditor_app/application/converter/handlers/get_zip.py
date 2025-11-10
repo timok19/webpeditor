@@ -1,7 +1,7 @@
 from typing import Annotated, final, Final
 
 from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
-from webpeditor_app.infrastructure.repositories.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.infrastructure.database.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
 from webpeditor_app.core.result.context_result import ContextResult, as_awaitable_result

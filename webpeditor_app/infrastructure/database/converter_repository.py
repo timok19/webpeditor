@@ -2,6 +2,7 @@ from typing import Final, final
 
 from expression import Option
 
+from webpeditor import settings
 from webpeditor_app.common.utilities.models import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
@@ -48,10 +49,9 @@ class ConverterRepository(ConverterRepositoryABC):
     async def adelete_asset(self, user_id: str) -> ContextResult[None]:
         try:
             _, deleted_per_model = await ConverterImageAsset.objects.filter(user_id=user_id).adelete()
-
-            for model, count in deleted_per_model.items():
-                self.__logger.debug(f"Deleted '{model}': {count} for User '{user_id}'")
-
+            if settings.IS_DEVELOPMENT:
+                for model, count in deleted_per_model.items():
+                    self.__logger.debug(f"Deleted '{model}': {count} for User '{user_id}'")
             return ContextResult[None].success(None)
         except Exception as exception:
             self.__logger.exception(exception, f"Failed to delete Converter Image Asset for User '{user_id}'")

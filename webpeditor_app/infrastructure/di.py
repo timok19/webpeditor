@@ -4,8 +4,8 @@ from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.abc.editor_repository_abc import EditorRepositoryABC
 from webpeditor_app.infrastructure.cloudinary.cloudinary_client import CloudinaryClient
-from webpeditor_app.infrastructure.repositories.converter_repository import ConverterRepository
-from webpeditor_app.infrastructure.repositories.editor_repository import EditorRepository
+from webpeditor_app.infrastructure.database.converter_repository import ConverterRepository
+from webpeditor_app.infrastructure.database.editor_repository import EditorRepository
 
 
 class InfrastructureModule(Module):

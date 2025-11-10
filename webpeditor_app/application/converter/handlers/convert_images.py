@@ -11,7 +11,7 @@ from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.common.utilities.models import ImageFileInfo
 from webpeditor_app.infrastructure.database.models.base import BaseImageAssetFile
-from webpeditor_app.infrastructure.repositories.converter_files_repository import ConverterFilesRepository
+from webpeditor_app.infrastructure.database.converter_files_repository import ConverterFilesRepository
 from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidatorABC
