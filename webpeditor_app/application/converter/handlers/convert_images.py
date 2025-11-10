@@ -24,7 +24,7 @@ from webpeditor_app.core.result import (
     as_awaitable_result,
     as_awaitable_enumerable_result,
 )
-from webpeditor_app.types import Pair
+from webpeditor_app.core.types import Pair
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 from webpeditor_app.infrastructure.database.models import (
     ConverterConvertedImageAssetFile,

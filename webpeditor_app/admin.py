@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 
-from webpeditor_app.types import Pair
+from webpeditor_app.core.types import Pair
 from webpeditor_app.infrastructure.database.models import (
     APIKey,
     ConverterConvertedImageAssetFile,

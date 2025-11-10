@@ -12,7 +12,7 @@ from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.utilities.models.file_info import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
-from webpeditor_app.types import Pair
+from webpeditor_app.core.types import Pair
 
 
 @final
