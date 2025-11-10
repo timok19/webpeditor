@@ -78,7 +78,7 @@ cryptography==46.0.3
     #   webpeditor
 daphne==4.2.1
     # via channels
-deptry==0.23.1
+deptry==0.24.0
     # via webpeditor
 dill==0.4.0
     # via
@@ -128,7 +128,7 @@ django-stubs-ext==5.2.7
     #   webpeditor
 django-types==0.22.0
     # via webpeditor
-django-unfold==0.69.0
+django-unfold==0.70.0
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
@@ -324,5 +324,5 @@ wrapt==1.17.3
     # via
     #   anydi
     #   webpeditor
-zope-interface==8.0.1
+zope-interface==8.1
     # via twisted
