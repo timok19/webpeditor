@@ -107,7 +107,7 @@ django-appconf==1.2.0
     # via
     #   django-compressor
     #   webpeditor
-django-compressor==4.5.1
+django-compressor==4.6.0
     # via webpeditor
 django-cors-headers==4.9.0
     # via webpeditor
@@ -248,7 +248,7 @@ qrcode==8.2
     # via
     #   django-allauth
     #   webpeditor
-rcssmin==1.1.2
+rcssmin==1.2.2
     # via django-compressor
 reactivex==4.1.0
     # via aioreactive
@@ -266,7 +266,7 @@ requests==2.32.5
     #   reactpy
 requirements-parser==0.13.0
     # via deptry
-rjsmin==1.2.2
+rjsmin==1.2.5
     # via django-compressor
 service-identity==24.2.0
     # via twisted
