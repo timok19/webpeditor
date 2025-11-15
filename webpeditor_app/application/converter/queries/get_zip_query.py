@@ -1,26 +1,30 @@
 from typing import Annotated, final, Final
 
+from django.http import HttpRequest
+
+from webpeditor_app.common.session.session_service_factory import SessionServiceFactory
 from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.infrastructure.files.converter.converter_files_repository import ConverterFilesRepository
-from webpeditor_app.common.session.session_service import SessionService
-from webpeditor_app.application.converter.handlers.schemas.download import GetZipResponse
+from webpeditor_app.application.converter.commands.schemas.download import GetZipResponse
 from webpeditor_app.core.result.context_result import ContextResult, as_awaitable_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
 
 
 @final
-class GetZip:
+class GetZipQuery:
     def __init__(
         self,
+        session_service_factory: SessionServiceFactory,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterRepositoryABC,
     ) -> None:
+        self.__session_service_factory: Final[SessionServiceFactory] = session_service_factory
         self.__converter_files_repo: Final[Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]] = converter_files_repo
         self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo
 
     @as_awaitable_result
-    async def ahandle(self, session_service: SessionService) -> ContextResult[GetZipResponse]:
-        return await session_service.aget_user_id().abind(self.__aget_zip)
+    async def ahandle(self, request: HttpRequest) -> ContextResult[GetZipResponse]:
+        return await self.__session_service_factory.create(request).aget_user_id().abind(self.__aget_zip)
 
     @as_awaitable_result
     async def __aget_zip(self, user_id: str) -> ContextResult[GetZipResponse]:

@@ -6,7 +6,7 @@ from aiocache.backends.memory import SimpleMemoryCache
 from expression import Option
 from PIL import Image, ImageFile
 
-from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.commands.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC

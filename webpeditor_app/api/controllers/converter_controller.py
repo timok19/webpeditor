@@ -6,12 +6,11 @@ from ninja import UploadedFile
 from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_get, http_post  # pyright: ignore
 
-from webpeditor_app.application.converter.handlers.convert_images import ConvertImages
-from webpeditor_app.application.converter.handlers.get_zip import GetZip
-from webpeditor_app.application.converter.handlers.schemas import ConversionRequest, ConversionResponse, GetZipResponse
+from webpeditor_app.application.converter.commands.convert_images_command import ConvertImagesCommand
+from webpeditor_app.application.converter.queries.get_zip_query import GetZipQuery
+from webpeditor_app.application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from webpeditor_app.api.controllers.base import ControllerBase
 from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus
-from webpeditor_app.common.session.session_service_factory import SessionServiceFactory
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 
 
@@ -57,11 +56,9 @@ class ConverterController(ControllerBase):
         ],
     ) -> HTTPResultWithStatus[ConversionResponse]:
         async with container.arequest_context():
-            session_service_factory = await container.aresolve(SessionServiceFactory)
-            convert_images = await container.aresolve(ConvertImages)
-            session_service = session_service_factory.create(self.request)
+            convert_images = await container.aresolve(ConvertImagesCommand)
             request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images.ahandle(request, session_service)
+            results = await convert_images.ahandle(self.request, request)
             return HTTPResult[ConversionResponse].from_results(results)
 
     @http_get(
@@ -76,8 +73,6 @@ class ConverterController(ControllerBase):
     )
     async def aget_zip(self) -> HTTPResultWithStatus[GetZipResponse]:
         async with container.arequest_context():
-            session_service_factory = await container.aresolve(SessionServiceFactory)
-            get_zip = await container.aresolve(GetZip)
-            session_service = session_service_factory.create(self.request)
-            result = await get_zip.ahandle(session_service)
+            get_zip = await container.aresolve(GetZipQuery)
+            result = await get_zip.ahandle(self.request)
             return HTTPResult[GetZipResponse].from_result(result)

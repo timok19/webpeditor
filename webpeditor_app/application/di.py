@@ -2,9 +2,9 @@ from typing import Annotated
 
 from anydi import Module, provider
 
-from webpeditor_app.application.converter.handlers.convert_images import ConvertImages
-from webpeditor_app.application.converter.handlers.get_zip import GetZip
-from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.commands.convert_images_command import ConvertImagesCommand
+from webpeditor_app.application.converter.commands.schemas.conversion import ConversionRequest
+from webpeditor_app.application.converter.queries.get_zip_query import GetZipQuery
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.application.converter.services.image_converter import ImageConverter
 from webpeditor_app.application.converter.validators.conversion_request_validator import ConversionRequestValidator
@@ -69,6 +69,7 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_convert_images_handler(
         self,
+        session_service_factory: SessionServiceFactory,
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         image_converter: ImageConverterABC,
@@ -76,8 +77,9 @@ class ApplicationModule(Module):
         filename_utility: FilenameUtilityABC,
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
-    ) -> ConvertImages:
-        return ConvertImages(
+    ) -> ConvertImagesCommand:
+        return ConvertImagesCommand(
+            session_service_factory,
             conversion_request_validator,
             converter_files_repo,
             image_converter,
@@ -90,7 +92,8 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_get_zip_handler(
         self,
+        session_service_factory: SessionServiceFactory,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterRepositoryABC,
-    ) -> GetZip:
-        return GetZip(converter_files_repo, converter_repo)
+    ) -> GetZipQuery:
+        return GetZipQuery(session_service_factory, converter_files_repo, converter_repo)

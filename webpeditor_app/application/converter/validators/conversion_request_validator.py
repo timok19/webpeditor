@@ -8,7 +8,7 @@ from webpeditor import settings
 from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
-from webpeditor_app.application.converter.handlers.schemas import ConversionRequest
+from webpeditor_app.application.converter.commands.schemas import ConversionRequest
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.domain.converter.image_formats import ALL_RASTER_IMAGE_FORMATS

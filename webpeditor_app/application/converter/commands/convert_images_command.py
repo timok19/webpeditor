@@ -4,18 +4,19 @@ from typing import Annotated, Final, final
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
+from django.http import HttpRequest
 from ninja import UploadedFile
 from types_linq import Enumerable
 
 from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
+from webpeditor_app.common.session.session_service_factory import SessionServiceFactory
 from webpeditor_app.infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from webpeditor_app.common.utilities.models import ImageFileInfo
 from webpeditor_app.infrastructure.database.models.base import BaseImageAssetFile
 from webpeditor_app.infrastructure.files.converter.converter_files_repository import ConverterFilesRepository
-from webpeditor_app.common.session.session_service import SessionService
 from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.common.abc.validator_abc import ValidatorABC
-from webpeditor_app.application.converter.handlers.schemas.conversion import ConversionRequest, ConversionResponse
+from webpeditor_app.application.converter.commands.schemas.conversion import ConversionRequest, ConversionResponse
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import (
@@ -34,9 +35,10 @@ from webpeditor_app.infrastructure.database.models import (
 
 
 @final
-class ConvertImages:
+class ConvertImagesCommand:
     def __init__(
         self,
+        session_service_factory: SessionServiceFactory,
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         image_converter: ImageConverterABC,
@@ -45,6 +47,7 @@ class ConvertImages:
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
     ) -> None:
+        self.__session_service_factory: Final[SessionServiceFactory] = session_service_factory
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
         self.__converter_files_repo: Final[Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]] = converter_files_repo
         self.__image_file_utility: Final[ImageFileUtilityABC] = image_file_utility
@@ -54,15 +57,19 @@ class ConvertImages:
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_enumerable_result
-    async def ahandle(self, request: ConversionRequest, session_service: SessionService) -> EnumerableContextResult[ConversionResponse]:
+    async def ahandle(self, request: HttpRequest, conversion_request: ConversionRequest) -> EnumerableContextResult[ConversionResponse]:
         return await (
-            self.__conversion_request_validator.validate(request)
+            self.__conversion_request_validator.validate(conversion_request)
             .to_result()
-            .abind(lambda _: session_service.aget_user_id())
+            .abind(lambda _: self.__session_service_factory.create(request).aget_user_id())
             .abind_many(
                 lambda user_id: self.__acleanup_previous_assets(user_id)
                 .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
-                .map(lambda asset: Enumerable(request.files).select(lambda file: self.__aprocess(file, asset, request.options)))
+                .map(
+                    lambda asset: Enumerable(conversion_request.files).select(
+                        lambda file: self.__aprocess(file, asset, conversion_request.options)
+                    )
+                )
                 .amap(lambda results: asyncio.gather(*results))
                 .bind_many(EnumerableContextResult[ConversionResponse].from_results)
                 .tap_either(
