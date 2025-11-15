@@ -54,7 +54,6 @@ dependencies = [
     "twisted[http2, tls]>=24.11.0",
     "types-linq>=1.2.1",
     "typing-extensions>=4.12.2",
-    "uuid-utils>=0.11.0",
     "whitenoise>=6.8.2",
     "wrapt>=1.17.2",
 ]

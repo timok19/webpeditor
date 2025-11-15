@@ -314,8 +314,6 @@ tzdata==2025.2 ; sys_platform == 'win32'
     # via django
 urllib3==2.5.0
     # via requests
-uuid-utils==0.11.1
-    # via webpeditor
 whitenoise==6.11.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'

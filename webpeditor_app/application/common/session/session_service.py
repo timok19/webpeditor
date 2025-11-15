@@ -7,7 +7,7 @@ from django.http.request import HttpRequest
 from django.utils import timezone
 from expression import Option
 from names_generator import generate_name
-from uuid_utils import uuid7
+from uuid import uuid4
 
 from webpeditor import settings
 from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
@@ -82,4 +82,4 @@ class SessionService:
 
     @staticmethod
     def __generate_id() -> str:
-        return f"{generate_name(style='hyphen')}-{uuid7()}"
+        return f"{generate_name(style='hyphen')}-{uuid4()}"
