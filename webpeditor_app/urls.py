@@ -6,7 +6,7 @@ from ninja_extra import NinjaExtraAPI
 
 from webpeditor import settings
 from webpeditor_app.api.authenticator import APIKeyAuthenticator
-from webpeditor_app.api.controllers.converter_controller import ConverterController
+from webpeditor_app.api.converter.converter_controller import ConverterController
 from webpeditor_app.views.about_view import AboutView
 from webpeditor_app.views.contact_view import ContactView
 from webpeditor_app.views.image_converter_view import ImageConverterView

@@ -8,8 +8,8 @@ from PIL import Image, ImageFile
 
 from webpeditor_app.application.converter.commands.schemas.conversion import ConversionRequest
 from webpeditor_app.application.converter.services.abc.image_converter_abc import ImageConverterABC
-from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.application.common.abc.filename_utility_abc import FilenameUtilityABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.domain.converter.constants import ImageConverterConstants

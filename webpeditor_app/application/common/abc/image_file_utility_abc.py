@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from PIL.ImageFile import ImageFile
 
-from webpeditor_app.common.utilities.models.file_info import ImageFileInfo
+from webpeditor_app.application.common.utilities.models.file_info import ImageFileInfo
 from webpeditor_app.core.result import ContextResult
 
 

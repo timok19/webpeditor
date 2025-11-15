@@ -1,15 +1,14 @@
 from decimal import ROUND_UP, Decimal
 from io import BytesIO
-from typing import Any, Final, Union, final
+from typing import Final, Union, final
 
-from django.utils.translation import gettext_lazy as _
 from PIL.ExifTags import TAGS
 from PIL import Image, UnidentifiedImageError
 from PIL.ImageFile import ImageFile
 
-from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.utilities.models.file_info import ImageFileInfo
+from webpeditor_app.application.common.abc.filename_utility_abc import FilenameUtilityABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.application.common.utilities.models.file_info import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.core.types import Pair
@@ -95,18 +94,13 @@ class ImageFileUtility(ImageFileUtilityABC):
 
     def __get_exif_data(self, file: ImageFile) -> dict[str, str]:
         try:
-            return {TAGS.get(tag_id, str(tag_id)): self.__decode_exif_value(value) for tag_id, value in file.getexif().items()}
+            return {
+                TAGS.get(tag_id, str(tag_id)): value.decode() if isinstance(value, bytes) else str(value)
+                for tag_id, value in file.getexif().items()
+            }
         except Exception as exception:
             self.__logger.exception(exception, "Unable to parse EXIF data")
             return {}
-
-    def __decode_exif_value(self, value: Any) -> str:
-        try:
-            return value.decode() if isinstance(value, bytes) else str(value)
-        except Exception:
-            message = "Unable to decode EXIF data"
-            self.__logger.debug(message)
-            return _(message)
 
     @staticmethod
     def __get_content(buffer: BytesIO) -> bytes:

@@ -10,7 +10,7 @@ from names_generator import generate_name
 from uuid_utils import uuid7
 
 from webpeditor import settings
-from webpeditor_app.common.abc.user_service_abc import UserServiceABC
+from webpeditor_app.application.common.abc.user_service_abc import UserServiceABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, as_awaitable_result, ErrorContext
 
@@ -22,11 +22,11 @@ class SessionService:
 
     def __init__(
         self,
-        request: HttpRequest,
+        http_request: HttpRequest,
         user_service: UserServiceABC,
         logger: LoggerABC,
     ) -> None:
-        self.__request: Final[HttpRequest] = request
+        self.__http_request: Final[HttpRequest] = http_request
         self.__user_service: Final[UserServiceABC] = user_service
         self.__logger: Final[LoggerABC] = logger
 
@@ -68,17 +68,17 @@ class SessionService:
         return not is_expiry_set or timezone.now() > expire_at
 
     async def __aget(self, key: str) -> Optional[Any]:
-        return await sync_to_async(self.__request.session.get)(key)
+        return await sync_to_async(self.__http_request.session.get)(key)
 
     async def __aset(self, key: str, value: Any) -> None:
-        await sync_to_async(self.__request.session.__setitem__)(key, value)
-        return await sync_to_async(self.__request.session.save)()
+        await sync_to_async(self.__http_request.session.__setitem__)(key, value)
+        return await sync_to_async(self.__http_request.session.save)()
 
     async def __aget_expiry_date(self) -> datetime:
-        return await sync_to_async(self.__request.session.get_expiry_date)()
+        return await sync_to_async(self.__http_request.session.get_expiry_date)()
 
     async def __aset_expiry(self, value: int) -> None:
-        return await sync_to_async(self.__request.session.set_expiry)(value)
+        return await sync_to_async(self.__http_request.session.set_expiry)(value)
 
     @staticmethod
     def __generate_id() -> str:

@@ -8,7 +8,7 @@ from ninja.responses import codes_4xx, codes_5xx
 from pydantic import ValidationError
 from types_linq import Enumerable
 
-from webpeditor_app.api.controllers.schemas import HTTPResult
+from webpeditor_app.api.action_result import ActionResult
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 
 
@@ -37,12 +37,12 @@ class ErrorHandlingMiddleware:
             .to_optional()
         )
 
-    def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[HTTPResult[Any]]:
+    def __validate_json(self, request: HttpRequest, response: HttpResponse) -> Option[ActionResult[Any]]:
         try:
-            return Option[HTTPResult[Any]].Some(HTTPResult[Any].model_validate_json(response.content))
+            return Option[ActionResult[Any]].Some(ActionResult[Any].model_validate_json(response.content))
         except ValidationError:
-            return Option[HTTPResult[Any]].Nothing()
+            return Option[ActionResult[Any]].Nothing()
         except Exception as exception:
             reason = response.content.decode(response.charset or "utf-8")
             self.__logger.request_exception(request, exception, f"Unhandled error. Reason: '{reason}'")
-            return Option[HTTPResult[Any]].Nothing()
+            return Option[ActionResult[Any]].Nothing()

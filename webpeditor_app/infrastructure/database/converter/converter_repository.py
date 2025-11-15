@@ -3,7 +3,7 @@ from typing import Final, final
 from expression import Option
 
 from webpeditor import settings
-from webpeditor_app.common.utilities.models import ImageFileInfo
+from webpeditor_app.application.common.utilities.models.file_info import ImageFileInfo
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor_app.infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
@@ -28,12 +28,10 @@ class ConverterRepository(ConverterRepositoryABC):
     @as_awaitable_result
     async def aget_or_create_asset(self, user_id: str) -> ContextResult[ConverterImageAsset]:
         try:
-            if asset := await ConverterImageAsset.objects.filter(user_id=user_id).afirst():
-                return ContextResult[ConverterImageAsset].success(asset)
-            new_asset = await ConverterImageAsset.objects.acreate(user_id=user_id)
-            return ContextResult[ConverterImageAsset].success(new_asset)
+            asset, _ = await ConverterImageAsset.objects.aget_or_create(user_id=user_id)
+            return ContextResult[ConverterImageAsset].success(asset)
         except Exception as exception:
-            self.__logger.exception(exception, f"Failed to create Converter Image Asset for User '{user_id}'")
+            self.__logger.exception(exception, f"Failed to get or create Converter Image Asset for User '{user_id}'")
             return ContextResult[ConverterImageAsset].failure(ErrorContext.bad_request())
 
     @as_awaitable_result

@@ -1,14 +1,16 @@
-from typing import Final, Optional, final, Generator, Any
+from typing import Final, Optional, cast, final, Generator, Any
 
 from expression import Option
 from ninja import UploadedFile
 from types_linq import Enumerable
 
 from webpeditor import settings
-from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
-from webpeditor_app.common.abc.image_file_utility_abc import ImageFileUtilityABC
-from webpeditor_app.common.abc.validator_abc import ValidationResult, ValidatorABC
+from webpeditor_app.application.common.abc.filename_utility_abc import FilenameUtilityABC
+from webpeditor_app.application.common.abc.image_file_utility_abc import ImageFileUtilityABC
+from webpeditor_app.application.common.abc.validator_abc import ValidatorABC
 from webpeditor_app.application.converter.commands.schemas import ConversionRequest
+from webpeditor_app.core.result import ContextResult
+from webpeditor_app.core.result.error_context import ErrorContext
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.domain.converter.image_formats import ALL_RASTER_IMAGE_FORMATS
@@ -21,15 +23,18 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         self.__filename_utility: Final[FilenameUtilityABC] = filename_utility
         self.__logger: Final[LoggerABC] = logger
 
-    def validate(self, value: ConversionRequest) -> ValidationResult:
-        return ValidationResult(
-            errors=Enumerable[Option[str]](self.__validate(value))
-            .where(lambda result: result.is_some())
-            .select(lambda result: result.some)
-            .to_list()
+    def validate(self, value: Optional[ConversionRequest]) -> ContextResult[ConversionRequest]:
+        reasons = Enumerable(self.__validate(value)).where(lambda error: error.is_some()).select(lambda error: error.some)
+        return (
+            ContextResult[ConversionRequest].failure(ErrorContext.bad_request("Invalid request", reasons.to_list()))
+            if reasons.any()
+            else ContextResult[ConversionRequest].success(cast(ConversionRequest, value))
         )
 
-    def __validate(self, value: ConversionRequest) -> Generator[Option[str], Any, None]:
+    def __validate(self, value: Optional[ConversionRequest]) -> Generator[Option[str], Any, None]:
+        if value is None:
+            yield Option[str].Some(f"{ConversionRequest.__name__} is empty")
+            return
         yield self.__validate_file_count(value.files)
         yield self.__validate_output_format(value.options.output_format)
         yield self.__validate_quality(value.options.quality)

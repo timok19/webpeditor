@@ -4,26 +4,25 @@ from typing import Annotated, final
 from anydi_django import container
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
-from ninja_extra import api_controller, http_get, http_post  # pyright: ignore
+from ninja_extra import api_controller, http_get, http_post, ControllerBase  # pyright: ignore
 
+from webpeditor_app.api.action_result import ActionResult, ActionResultWithStatus
 from webpeditor_app.application.converter.commands.convert_images_command import ConvertImagesCommand
-from webpeditor_app.application.converter.queries.get_zip_query import GetZipQuery
 from webpeditor_app.application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
-from webpeditor_app.api.controllers.base import ControllerBase
-from webpeditor_app.api.controllers.schemas import HTTPResult, HTTPResultWithStatus
+from webpeditor_app.application.converter.queries.get_zip_query import GetZipQuery
 from webpeditor_app.domain.converter.constants import ImageConverterConstants
 
 
 @final
-@api_controller("/converter", tags="Image Converter")
+@api_controller("converter", tags="Image Converter")
 class ConverterController(ControllerBase):
     @http_post(
-        "/convert",
+        "convert",
         response={
-            HTTPStatus.OK: HTTPResult[ConversionResponse],
-            HTTPStatus.NOT_FOUND: HTTPResult[ConversionResponse],
-            HTTPStatus.BAD_REQUEST: HTTPResult[ConversionResponse],
-            HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[ConversionResponse],
+            HTTPStatus.OK: ActionResult[ConversionResponse],
+            HTTPStatus.NOT_FOUND: ActionResult[ConversionResponse],
+            HTTPStatus.BAD_REQUEST: ActionResult[ConversionResponse],
+            HTTPStatus.INTERNAL_SERVER_ERROR: ActionResult[ConversionResponse],
         },
         summary="Convert images",
     )
@@ -54,25 +53,25 @@ class ConverterController(ControllerBase):
                 description="Upload files to be converted into different format",
             ),
         ],
-    ) -> HTTPResultWithStatus[ConversionResponse]:
+    ) -> ActionResultWithStatus[ConversionResponse]:
         async with container.arequest_context():
-            convert_images = await container.aresolve(ConvertImagesCommand)
-            request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images.ahandle(self.request, request)
-            return HTTPResult[ConversionResponse].from_results(results)
+            convert_images_command = await container.aresolve(ConvertImagesCommand)
+            conversion_request = ConversionRequest.create(files, output_format, quality)
+            results = await convert_images_command.ahandle(self.context, conversion_request)
+            return ActionResult[ConversionResponse].from_results(results)
 
     @http_get(
-        "/zip",
+        "zip",
         response={
-            HTTPStatus.OK: HTTPResult[GetZipResponse],
-            HTTPStatus.NOT_FOUND: HTTPResult[GetZipResponse],
-            HTTPStatus.BAD_REQUEST: HTTPResult[GetZipResponse],
-            HTTPStatus.INTERNAL_SERVER_ERROR: HTTPResult[GetZipResponse],
+            HTTPStatus.OK: ActionResult[GetZipResponse],
+            HTTPStatus.NOT_FOUND: ActionResult[GetZipResponse],
+            HTTPStatus.BAD_REQUEST: ActionResult[GetZipResponse],
+            HTTPStatus.INTERNAL_SERVER_ERROR: ActionResult[GetZipResponse],
         },
         summary="Get converted images as zip",
     )
-    async def aget_zip(self) -> HTTPResultWithStatus[GetZipResponse]:
+    async def aget_zip(self) -> ActionResultWithStatus[GetZipResponse]:
         async with container.arequest_context():
-            get_zip = await container.aresolve(GetZipQuery)
-            result = await get_zip.ahandle(self.request)
-            return HTTPResult[GetZipResponse].from_result(result)
+            get_zip_query = await container.aresolve(GetZipQuery)
+            result = await get_zip_query.ahandle(self.context)
+            return ActionResult[GetZipResponse].from_result(result)

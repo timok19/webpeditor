@@ -2,7 +2,7 @@ import os
 import re
 from typing import Union, Final, final
 
-from webpeditor_app.common.abc.filename_utility_abc import FilenameUtilityABC
+from webpeditor_app.application.common.abc.filename_utility_abc import FilenameUtilityABC
 from webpeditor_app.core.abc.logger_abc import LoggerABC
 from webpeditor_app.core.result import ContextResult, ErrorContext
 from webpeditor_app.domain.common.constants import ImageFilePropertyConstants
