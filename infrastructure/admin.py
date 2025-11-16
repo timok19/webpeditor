@@ -61,8 +61,8 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
 
     @staticmethod
     def __create_api_key_and_hash() -> Pair[str, str]:
-        api_key = APIKeyUtils.create_api_key()
-        api_key_hash = APIKeyUtils.hash_api_key(api_key)
+        api_key = APIKeyUtils.create()
+        api_key_hash = APIKeyUtils.hash(api_key)
         return Pair[str, str](api_key, api_key_hash)
 
     @staticmethod
