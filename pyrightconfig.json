@@ -1,7 +1,11 @@
 {
   "include": [
-    "webpeditor",
-    "webpeditor_app"
+    "api",
+    "converter",
+    "editor",
+    "jobs",
+    "common",
+    "webpeditor"
   ],
   "exclude": [
     "**/node_modules",

@@ -1,5 +1,6 @@
 from typing import Union
 
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import (
     LoginView,
@@ -11,14 +12,21 @@ from django.contrib.auth.views import (
 from django.urls import URLPattern, URLResolver, include, path, re_path
 from django.views.generic import TemplateView
 
-from webpeditor_app.views.content_not_found_view import ContentNotFoundView
+from views.about_view import AboutView
+from views.contact_view import ContactView
+from views.content_not_found_view import ContentNotFoundView
+from views.image_not_found_view import ImageNotFoundView
+from webpeditor import settings
 
+# Admin
 urlpatterns: list[Union[URLResolver, URLPattern]] = [
-    # Admin
     path("admin/doc/", include("django.contrib.admindocs.urls")),
     # TODO: Make dynamic URL Admin page access based on OTP code -> check out the perplexity chat
     path("admin/", admin.site.urls),
-    # Account reset
+]
+
+# Account reset
+urlpatterns += [
     path(
         "accounts/password_reset/",
         PasswordResetView.as_view(extra_context={"site_header": admin.site.site_header}),
@@ -45,8 +53,19 @@ urlpatterns: list[Union[URLResolver, URLPattern]] = [
         TemplateView.as_view(template_name="registration/profile.html", extra_context={"site_header": admin.site.site_header}),
         name="profile",
     ),
-    # WebP Editor
-    path("", include("webpeditor_app.urls")),
-    # For all non-existing (not allowed) urls
+]
+
+# Static files
+if settings.IS_DEVELOPMENT:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# WebP Editor App
+urlpatterns += [
+    path("image-not-found/", ImageNotFoundView.as_view(), name="image-not-found-view"),
+    path("about/", AboutView.as_view(), name="about-view"),
+    path("contact/", ContactView.as_view(), name="contact-view"),
+    path("api/", include("api.urls")),
+    path("converter/", include("converter.urls")),
+    path("editor/", include("editor.urls")),
     re_path(r"^.+$", ContentNotFoundView.as_view(), name="content-not-found-view"),
 ]

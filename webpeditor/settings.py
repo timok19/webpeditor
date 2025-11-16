@@ -14,8 +14,6 @@ from django.core.management.utils import get_random_secret_key
 from django_stubs_ext import monkeypatch
 from dotenv import load_dotenv
 
-from webpeditor_app.apps import WebpeditorAppConfig
-
 # Patching Django types. Allows running app with annotated types.
 monkeypatch()
 
@@ -62,7 +60,9 @@ INSTALLED_APPS: list[str] = [
     "corsheaders",
     "compressor",
     "ninja_extra",
-    "webpeditor_app",
+    "api",
+    "converter",
+    "editor",
     "anydi_django",
 ]
 
@@ -73,9 +73,12 @@ ANYDI: dict[str, Any] = {
     "REGISTER_SETTINGS": True,
     "MODULES": [
         # Should follow the order. Synchronous dependency resolution
-        "webpeditor_app.core.di.CoreModule",
-        "webpeditor_app.infrastructure.di.InfrastructureModule",
-        "webpeditor_app.application.di.ApplicationModule",
+        "common.core.di.CoreModule",
+        "common.infrastructure.di.InfrastructureModule",
+        "common.application.di.ApplicationModule",
+        "converter.infrastructure.di.InfrastructureModule",
+        "converter.application.di.ApplicationModule",
+        "editor.infrastructure.di.InfrastructureModule",
     ],
 }
 
@@ -83,7 +86,7 @@ CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split
 
 MIDDLEWARE: list[str] = [
     "anydi_django.middleware.request_scoped_middleware",
-    "webpeditor_app.middlewares.error_handling.ErrorHandlingMiddleware",
+    "api.middlewares.error_handling.ErrorHandlingMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -126,7 +129,11 @@ DATABASES: dict[str, Any] = {
 }
 
 # Path for future migrations
-MIGRATION_MODULES: dict[str, str] = {"webpeditor_app": "webpeditor_app.infrastructure.database.migrations"}
+MIGRATION_MODULES: dict[str, str] = {
+    "converter": "converter.infrastructure.database.migrations",
+    "editor": "editor.infrastructure.database.migrations",
+    "api": "api.infrastructure.database.migrations",
+}
 
 # Password validation
 
@@ -220,7 +227,7 @@ RESERVED_WINDOWS_FILENAMES: list[str] = str(os.getenv("RESERVED_WINDOWS_FILENAME
 
 # Application definition
 APP_VERSION: str = str(os.getenv("APP_VERSION"))
-APP_VERBOSE_NAME: str = f"{WebpeditorAppConfig.verbose_name} - V{APP_VERSION}"
+APP_VERBOSE_NAME: str = f"WebP Editor App - V{APP_VERSION}"
 
 # Logging configuration
 LOGGING: dict[str, Any] = {
@@ -228,7 +235,7 @@ LOGGING: dict[str, Any] = {
     "disable_existing_loggers": True,
     "formatters": {
         "ninja_request": {
-            "()": "webpeditor_app.core.logging.formatters.ColorFormatter",
+            "()": "common.core.logging.formatters.ColorFormatter",
         },
     },
     "handlers": {
