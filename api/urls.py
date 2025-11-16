@@ -1,7 +1,13 @@
 from typing import Union
-from django.urls import URLResolver, URLPattern, path
 
-from api import registration
+from django.urls import URLPattern, URLResolver, path
+from ninja_extra import NinjaExtraAPI
 
+from api.authenticator import APIKeyAuthenticator
+from api.controllers.converter_controller import ConverterController
+from webpeditor import settings
 
-urlpatterns: list[Union[URLResolver, URLPattern]] = [path("", registration.api.urls)]
+api = NinjaExtraAPI(title=settings.APP_VERBOSE_NAME, version=settings.APP_VERSION, auth=APIKeyAuthenticator())
+api.register_controllers(ConverterController)  # pyright: ignore
+
+urlpatterns: list[Union[URLResolver, URLPattern]] = [path("", api.urls)]

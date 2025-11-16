@@ -86,7 +86,7 @@ CORS_ORIGIN_WHITELIST: list[str] = str(os.getenv("CORS_ORIGIN_WHITELIST")).split
 
 MIDDLEWARE: list[str] = [
     "anydi_django.middleware.request_scoped_middleware",
-    "api.middlewares.error_handling.ErrorHandlingMiddleware",
+    "api.middlewares.ErrorHandlingMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -132,7 +132,7 @@ DATABASES: dict[str, Any] = {
 MIGRATION_MODULES: dict[str, str] = {
     "converter": "converter.infrastructure.database.migrations",
     "editor": "editor.infrastructure.database.migrations",
-    "api": "api.infrastructure.database.migrations",
+    "api": "api.migrations",
 }
 
 # Password validation
@@ -194,7 +194,6 @@ SECURE_CONTENT_TYPE_NOSNIFF: bool = True
 X_FRAME_OPTIONS: str = "SAMEORIGIN"
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STORAGES: dict[str, dict[str, str]] = {
     "staticfiles": {

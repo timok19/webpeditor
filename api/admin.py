@@ -8,7 +8,8 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 
-from api.infrastructure.database.models import APIKey
+from api.models import APIKey
+from api.utils import create_api_key, hash_api_key
 from common.core.types import Pair
 
 
@@ -48,8 +49,8 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
 
     @staticmethod
     def __create_api_key_and_hash() -> Pair[str, str]:
-        api_key = APIKey.create_api_key()
-        api_key_hash = APIKey.hash_api_key(api_key)
+        api_key = create_api_key()
+        api_key_hash = hash_api_key(api_key)
         return Pair[str, str](api_key, api_key_hash)
 
     @staticmethod

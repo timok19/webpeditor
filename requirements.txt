@@ -51,7 +51,7 @@ channels==4.3.1
     #   webpeditor
 charset-normalizer==3.4.4
     # via requests
-click==8.3.0
+click==8.3.1
     # via deptry
 cmdkit==2.7.7
     # via names-generator
