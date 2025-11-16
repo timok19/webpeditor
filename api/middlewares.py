@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from types_linq import Enumerable
 
 from api.action_result import ActionResult
-from common.core.abc.logger_abc import LoggerABC
+from core.abc.logger_abc import LoggerABC
 
 
 @final

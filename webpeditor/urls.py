@@ -15,6 +15,7 @@ from django.views.generic import TemplateView
 from views.about_view import AboutView
 from views.contact_view import ContactView
 from views.content_not_found_view import ContentNotFoundView
+from views.image_converter_view import ImageConverterView
 from views.image_not_found_view import ImageNotFoundView
 from webpeditor import settings
 
@@ -61,11 +62,13 @@ if settings.IS_DEVELOPMENT:
 
 # WebP Editor App
 urlpatterns += [
+    path("api/", include("api.urls")),
     path("image-not-found/", ImageNotFoundView.as_view(), name="image-not-found-view"),
     path("about/", AboutView.as_view(), name="about-view"),
     path("contact/", ContactView.as_view(), name="contact-view"),
-    path("api/", include("api.urls")),
-    path("converter/", include("converter.urls")),
-    path("editor/", include("editor.urls")),
+    # path("", image_upload_view, name="image-uploader-view"),
+    # path("info/", image_info_view, name="image-info-view"),
+    # path("editor/", image_edit_view, name="image-editor-view"),
+    path("converter/", ImageConverterView.as_view(), name="image-converter-view"),
     re_path(r"^.+$", ContentNotFoundView.as_view(), name="content-not-found-view"),
 ]

@@ -4,7 +4,7 @@ from typing import Union, final, Self, Optional
 from ninja import Schema, Field
 from pydantic import ConfigDict
 
-from common.core.result import EnumerableContextResult, ErrorContext, ContextResult
+from core.result import EnumerableContextResult, ErrorContext, ContextResult
 
 type ActionResultWithStatus[T: Schema] = tuple[HTTPStatus, ActionResult[T]]
 

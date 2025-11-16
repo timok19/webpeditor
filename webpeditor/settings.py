@@ -60,9 +60,7 @@ INSTALLED_APPS: list[str] = [
     "corsheaders",
     "compressor",
     "ninja_extra",
-    "api",
-    "converter",
-    "editor",
+    "infrastructure",
     "anydi_django",
 ]
 
@@ -73,12 +71,9 @@ ANYDI: dict[str, Any] = {
     "REGISTER_SETTINGS": True,
     "MODULES": [
         # Should follow the order. Synchronous dependency resolution
-        "common.core.di.CoreModule",
-        "common.infrastructure.di.InfrastructureModule",
-        "common.application.di.ApplicationModule",
-        "converter.infrastructure.di.InfrastructureModule",
-        "converter.application.di.ApplicationModule",
-        "editor.infrastructure.di.InfrastructureModule",
+        "core.di.CoreModule",
+        "infrastructure.di.InfrastructureModule",
+        "application.di.ApplicationModule",
     ],
 }
 
@@ -128,12 +123,9 @@ DATABASES: dict[str, Any] = {
     },
 }
 
-# Path for future migrations
-MIGRATION_MODULES: dict[str, str] = {
-    "converter": "converter.infrastructure.database.migrations",
-    "editor": "editor.infrastructure.database.migrations",
-    "api": "api.migrations",
-}
+MIGRATION_MODULES: dict[str, str] = {"infrastructure": "infrastructure.database.migrations"}
+
+DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 # Password validation
 
@@ -234,7 +226,7 @@ LOGGING: dict[str, Any] = {
     "disable_existing_loggers": True,
     "formatters": {
         "ninja_request": {
-            "()": "common.core.logging.formatters.ColorFormatter",
+            "()": "core.logging.formatters.ColorFormatter",
         },
     },
     "handlers": {

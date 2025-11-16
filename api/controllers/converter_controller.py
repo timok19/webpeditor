@@ -7,10 +7,10 @@ from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_get, http_post, ControllerBase  # pyright: ignore
 
 from api.action_result import ActionResult, ActionResultWithStatus
-from converter.application.commands.convert_images_command import ConvertImagesCommand
-from converter.application.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
-from converter.application.queries.get_zip_query import GetZipQuery
-from converter.domain.constants import ImageConverterConstants
+from application.converter.commands.convert_images_command import ConvertImagesCommand
+from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
+from application.converter.queries.get_zip_query import GetZipQuery
+from domain.converter.constants import ImageConverterConstants
 
 
 @final

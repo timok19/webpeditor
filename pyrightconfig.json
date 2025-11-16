@@ -1,10 +1,10 @@
 {
   "include": [
     "api",
-    "converter",
-    "editor",
+    "application",
+    "infrastructure",
+    "core",
     "jobs",
-    "common",
     "webpeditor"
   ],
   "exclude": [
