@@ -13,7 +13,8 @@ from application.converter.services.abc.image_converter_abc import ImageConverte
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from domain.converter.constants import ImageConverterConstants
-from domain.converter.image_formats import RasterImageFormats, RasterImageFormatsWithAlphaChannel
+from domain.converter.formats import RasterImageFormats, RasterImageFormatsWithAlphaChannel
+
 
 try:
     import multiprocessing

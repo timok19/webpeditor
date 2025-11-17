@@ -12,7 +12,7 @@ from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult
 from core.result.error_context import ErrorContext
 from domain.converter.constants import ImageConverterConstants
-from domain.converter.image_formats import ALL_RASTER_IMAGE_FORMATS
+from domain.converter.formats import ALL_RASTER_IMAGE_FORMATS
 from webpeditor import settings
 
 

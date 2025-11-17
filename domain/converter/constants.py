@@ -1,6 +1,6 @@
 from typing import final, Final
 
-from domain.constants import ImageFilePropertyConstants
+from domain.common.constants import ImageFilePropertyConstants
 
 
 @final
