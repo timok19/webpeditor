@@ -2,7 +2,6 @@ import math
 from io import BytesIO
 from typing import Any, Final, cast
 
-from aiocache.backends.memory import SimpleMemoryCache
 from expression import Option
 from PIL import Image, ImageFile
 
@@ -31,8 +30,6 @@ except (ImportError, AttributeError):
 
 
 class ImageConverter(ImageConverterABC):
-    __CACHE: Final[SimpleMemoryCache] = SimpleMemoryCache()
-
     def __init__(self, image_file_utility: ImageFileServiceABC, filename_utility: FilenameServiceABC, logger: LoggerABC) -> None:
         self.__image_file_utility: Final[ImageFileServiceABC] = image_file_utility
         self.__filename_utility: Final[FilenameServiceABC] = filename_utility
@@ -40,18 +37,13 @@ class ImageConverter(ImageConverterABC):
 
     @as_awaitable_result
     async def aconvert(self, file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
-        result = self.__update_filename(file, options)
-        return (
-            await result.bind(lambda image_file: self.__get_cache_key(image_file, options))
-            .amap(self.__CACHE.get)
-            .aif_then_else(
-                lambda cached: cached is not None,
-                ContextResult[ImageFile.ImageFile].asuccess,
-                lambda _: result.abind(lambda image_file: self.__aconvert_image(image_file, options)),
-            )
-        )
+        return await self.__add_filename_prefix(file, options).abind(lambda image_file: self.__aconvert_image(image_file, options))
 
-    def __update_filename(self, image_file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
+    def __add_filename_prefix(
+        self,
+        image_file: ImageFile.ImageFile,
+        options: ConversionRequest.Options,
+    ) -> ContextResult[ImageFile.ImageFile]:
         return ContextResult[ImageFile.ImageFile].from_result(
             Option[str]
             .of_optional(image_file.filename)
@@ -72,53 +64,40 @@ class ImageConverter(ImageConverterABC):
             return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
         # Resize large images to improve performance
-        resized_image = self.__resize_image(image_file)
+        resized = self.__resize_image(image_file)
 
-        source_has_alpha = self.__has_alpha(resized_image)
+        source_has_alpha = resized.mode == ImageConverterConstants.RGBA_MODE or resized.format in RasterImageFormatsWithAlphaChannel
         target_has_alpha = options.output_format in RasterImageFormatsWithAlphaChannel
 
         target_mode = ImageConverterConstants.RGBA_MODE if target_has_alpha else ImageConverterConstants.RGB_MODE
 
         # Optimize the color mode conversion
-        if resized_image.mode == ImageConverterConstants.PALETTE_MODE:
-            # For palette mode, convert directly to target mode
-            resized_image = resized_image.convert(target_mode)
+        if resized.mode == ImageConverterConstants.PALETTE_MODE:
+            resized = resized.convert(target_mode)
         elif source_has_alpha and not target_has_alpha:
-            # Source has alpha but target doesn't, convert to RGB with white background
-            resized_image = self.__to_rgb(resized_image)
-        elif resized_image.mode != target_mode:
-            # Convert to target mode if different
-            resized_image = resized_image.convert(target_mode)
+            resized = self.__to_rgb(resized)
+        elif resized.mode != target_mode:
+            resized = resized.convert(target_mode)
 
-        # Save with optimized parameters for the target format
-        converted_image = Image.open(self.__convert_format(resized_image, options))
-        converted_image.filename = image_file.filename
+        converted = Image.open(BytesIO(self.__convert_format(resized, options)))
+        # Force-load the image so the buffer can be released safely
+        converted.load()
+        converted.filename = image_file.filename
 
-        return (
-            await self.__get_cache_key(image_file, options)
-            .amap(lambda key: self.__CACHE.set(key, converted_image))
-            .map(lambda _: converted_image)
-        )
-
-    @staticmethod
-    def __has_alpha(image: ImageFile.ImageFile) -> bool:
-        image_format = (image.format or "").upper()
-        return (image.mode == ImageConverterConstants.RGBA_MODE) or (image_format in RasterImageFormatsWithAlphaChannel)
+        return ContextResult[ImageFile.ImageFile].success(converted)
 
     @staticmethod
     def __resize_image(image: ImageFile.ImageFile) -> ImageFile.ImageFile:
-        width, height = image.size
-
-        if width <= ImageConverterConstants.MAX_IMAGE_DIMENSIONS and height <= ImageConverterConstants.MAX_IMAGE_DIMENSIONS:
+        if image.width <= ImageConverterConstants.MAX_IMAGE_DIMENSIONS and image.height <= ImageConverterConstants.MAX_IMAGE_DIMENSIONS:
             return image
 
         # Calculate new dimensions while preserving an aspect ratio
-        if width > height:
+        if image.width > image.height:
             new_width = ImageConverterConstants.MAX_IMAGE_DIMENSIONS
-            new_height = math.ceil(height * (ImageConverterConstants.MAX_IMAGE_DIMENSIONS / width))
+            new_height = math.ceil(image.height * (ImageConverterConstants.MAX_IMAGE_DIMENSIONS / image.width))
         else:
             new_height = ImageConverterConstants.MAX_IMAGE_DIMENSIONS
-            new_width = math.ceil(width * (ImageConverterConstants.MAX_IMAGE_DIMENSIONS / height))
+            new_width = math.ceil(image.width * (ImageConverterConstants.MAX_IMAGE_DIMENSIONS / image.height))
 
         # Use BICUBIC instead of LANCZOS for faster resizing with acceptable quality
         # BICUBIC is about 30-40% faster than LANCZOS with minimal quality difference for downsampling
@@ -128,58 +107,46 @@ class ImageConverter(ImageConverterABC):
 
         return resized_image
 
-    @staticmethod
-    def __convert_format(image: Image.Image, options: ConversionRequest.Options) -> BytesIO:
-        save_args: dict[str, Any] = {"format": options.output_format, "optimize": True, "exif": image.getexif()}
+    def __convert_format(self, image: Image.Image, options: ConversionRequest.Options) -> bytes:
+        save_args: dict[str, Any] = {"quality": options.quality, "exif": image.getexif(), "optimize": True}
 
         if options.output_format == RasterImageFormats.JPEG:
-            width, height = image.size
-            is_large_image = width * height > ImageConverterConstants.SAFE_AREA  # Only use progressive for larger images
-
-            save_args.update(
-                {
-                    "quality": options.quality,
-                    "subsampling": 0 if options.quality >= 95 else 2,  # Better subsampling for high quality
-                    "progressive": is_large_image,  # Progressive only for large images for better performance
-                }
-            )
-
             # Ensure RGB mode for JPEG
             if image.mode != ImageConverterConstants.RGB_MODE:
                 image = image.convert(ImageConverterConstants.RGB_MODE)
 
+            save_args.update(
+                {
+                    "subsampling": 0 if options.quality >= 95 else 2,  # Better subsampling for high quality
+                    "progressive": self.__is_large_image(image),  # Progressive only for large images for better performance
+                }
+            )
+
         elif options.output_format == RasterImageFormatsWithAlphaChannel.PNG:
             # Adjust compression level based on image size
             # Higher compression for smaller images, lower for larger ones for better performance
-            width, height = image.size
-            compress_level = 9 if width * height < ImageConverterConstants.SAFE_AREA else 6
-            save_args.update({"compress_level": compress_level})
+            save_args.update({"compress_level": 6 if self.__is_large_image(image) else 9})
 
         elif options.output_format == RasterImageFormatsWithAlphaChannel.WEBP:
             save_args.update(
                 {
-                    "quality": options.quality,
-                    # Use a lower method value for faster encoding with acceptable quality
-                    # Method 4 is significantly faster than 6 with minimal quality difference
-                    "method": 4 if options.quality < 90 else 5,
-                    # Only use lossless for very high quality to improve performance
-                    "lossless": options.quality >= 98,
+                    "method": 4 if options.quality < 90 else 5,  # Method 4 is significantly faster than 6 with minimal quality difference
+                    "lossless": options.quality >= 98,  # Only use lossless for very high quality to improve performance
                 }
             )
 
         elif options.output_format == RasterImageFormats.TIFF:
-            save_args.update(
-                {
-                    "quality": options.quality,
-                    "compression": "jpeg" if image.mode == ImageConverterConstants.RGB_MODE else "tiff_deflate",
-                }
-            )
+            save_args.update({"compression": "jpeg" if image.mode == ImageConverterConstants.RGB_MODE else "tiff_deflate"})
 
         buffer = BytesIO()
-        image.save(buffer, **save_args)
-        buffer.seek(0)
 
-        return buffer
+        image.save(buffer, options.output_format, **save_args)
+
+        return buffer.getvalue()
+
+    @staticmethod
+    def __is_large_image(image: Image.Image) -> bool:
+        return image.width * image.height > ImageConverterConstants.SAFE_AREA
 
     @staticmethod
     def __to_rgb(rgba_image: Image.Image) -> Image.Image:
@@ -190,8 +157,3 @@ class ImageConverter(ImageConverterABC):
             rgba_image = rgba_image.convert(ImageConverterConstants.RGBA_MODE)
         # Merge RGBA into RGB with a white background
         return Image.alpha_composite(white_background, rgba_image).convert(ImageConverterConstants.RGB_MODE)
-
-    def __get_cache_key(self, image_file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[str]:
-        return self.__filename_utility.get_basename(str(image_file.filename)).map(
-            lambda basename: f"{basename}_{image_file.format}->{options.output_format}_{options.quality}"
-        )
