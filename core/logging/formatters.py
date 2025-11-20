@@ -41,20 +41,20 @@ class ColorFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         level_color = self.LEVEL_COLORS.get(record.levelno, _Colors.WHITE)
 
-        colorized_datetime = self.__colorize(_Colors.GREEN, self.formatTime(record, self.datefmt))
-        colorized_levelname = self.__colorize(level_color, f"{record.levelname:<8}")
-        colorized_name = self.__colorize(_Colors.CYAN, record.name)
-        colorized_message = self.__colorize(level_color, record.getMessage())
+        colorized_datetime = self.__colorize_or_default(_Colors.GREEN, self.formatTime(record, self.datefmt))
+        colorized_levelname = self.__colorize_or_default(level_color, f"{record.levelname:<8}")
+        colorized_name = self.__colorize_or_default(_Colors.CYAN, record.name)
+        colorized_message = self.__colorize_or_default(level_color, record.getMessage())
 
         result = f"{colorized_datetime} {colorized_levelname} {colorized_name} - {colorized_message}"
 
-        if record.exc_info:
+        if record.exc_info is not None:
             result = f"{result}\n{self.formatException(record.exc_info)}"
 
-        if record.stack_info:
+        if record.stack_info is not None:
             result = f"{result}\n{self.formatStack(record.stack_info)}"
 
         return result
 
-    def __colorize(self, level_color: str, text: str) -> str:
+    def __colorize_or_default(self, level_color: str, text: str) -> str:
         return f"{level_color}{text}{_Style.RESET}" if self.USE_COLOR else text
