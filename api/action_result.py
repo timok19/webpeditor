@@ -11,9 +11,9 @@ type ActionResultWithStatus[T: Schema] = tuple[HTTPStatus, ActionResult[T]]
 
 @final
 class ActionResult[T: Schema](Schema):
-    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(frozen=True, extra="forbid", arbitrary_types_allowed=True)
 
-    value: Optional[Union[T, list[T]]] = None
+    ok: Optional[Union[T, list[T]]] = None
     error: Optional[Union["ActionResult.Error", list["ActionResult.Error"]]] = None
 
     @final
@@ -30,7 +30,7 @@ class ActionResult[T: Schema](Schema):
     @classmethod
     def from_result(cls, result: ContextResult[T]) -> ActionResultWithStatus[T]:
         return (
-            cls.__response(HTTPStatus.OK, cls(value=result.ok))
+            cls.__response(HTTPStatus.OK, cls(ok=result.ok))
             if result.is_ok()
             else cls.__response(
                 cls.__map_status_code(result.error.error_code),
@@ -46,7 +46,7 @@ class ActionResult[T: Schema](Schema):
         return (
             cls.__response(cls.__map_status_code(error_code), cls(error=http_errors))
             if error_code is not None
-            else cls.__response(HTTPStatus.OK, cls(value=results.select(lambda result: result.ok).to_list()))
+            else cls.__response(HTTPStatus.OK, cls(ok=results.select(lambda result: result.ok).to_list()))
         )
 
     @classmethod
