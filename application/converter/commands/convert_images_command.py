@@ -85,6 +85,16 @@ class ConvertImagesCommand:
         )
 
     @as_awaitable_result
+    async def __acleanup_previous_assets(self, user_id: str) -> ContextResult[None]:
+        return await self.__converter_repo.aasset_exists(user_id).aif_then_else(
+            lambda asset_exists: asset_exists is True,
+            lambda _: self.__converter_repo.adelete_asset(user_id)
+            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "original"))
+            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "converted")),
+            lambda _: ContextResult[None].asuccess(None),
+        )
+
+    @as_awaitable_result
     async def __aprocess(
         self,
         uploaded_file: UploadedFile,
@@ -98,16 +108,6 @@ class ConvertImagesCommand:
                 .bind(self.__image_file_utility.verify_integrity)
                 .abind(lambda file: self.__aget_original(file, asset).amap2(self.__aconvert(file, asset, options), self.__to_response))
             )
-
-    @as_awaitable_result
-    async def __acleanup_previous_assets(self, user_id: str) -> ContextResult[None]:
-        return await self.__converter_repo.aasset_exists(user_id).aif_then_else(
-            lambda asset_exists: asset_exists is True,
-            lambda _: self.__converter_repo.adelete_asset(user_id)
-            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "original"))
-            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "converted")),
-            lambda _: ContextResult[None].asuccess(None),
-        )
 
     @as_awaitable_result
     async def __aget_original(self, file: ImageFile, asset: ConverterImageAsset) -> ContextResult[ConverterOriginalImageAssetFile]:
