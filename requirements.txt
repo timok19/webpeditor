@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.53.0
+anydi==0.54.1
     # via anydi-django
 anydi-django==0.2.0
     # via webpeditor
@@ -19,7 +19,7 @@ anyio==4.11.0
     #   anydi
     #   httpx
     #   reactpy
-asgiref==3.10.0
+asgiref==3.11.0
     # via
     #   channels
     #   daphne
