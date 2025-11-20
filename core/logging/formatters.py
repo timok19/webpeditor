@@ -1,7 +1,6 @@
 import logging
 import os
 from enum import StrEnum
-from http import HTTPMethod
 from typing import Final
 
 
@@ -38,15 +37,6 @@ class ColorFormatter(logging.Formatter):
         logging.ERROR: _Style.BOLD + _Colors.BRIGHT_RED,
         logging.CRITICAL: _Style.BOLD + _Colors.BRIGHT_RED,
     }
-    HTTP_METHOD_COLORS: Final[dict[HTTPMethod, str]] = {
-        HTTPMethod.GET: _Style.BOLD + _Colors.BLUE,
-        HTTPMethod.POST: _Style.BOLD + _Colors.GREEN,
-        HTTPMethod.PUT: _Style.BOLD + _Colors.YELLOW,
-        HTTPMethod.PATCH: _Style.BOLD + _Colors.YELLOW,
-        HTTPMethod.DELETE: _Style.BOLD + _Colors.RED,
-        HTTPMethod.OPTIONS: _Style.BOLD + _Colors.BLUE,
-        HTTPMethod.HEAD: _Style.BOLD + _Colors.BRIGHT_BLACK,
-    }
 
     def format(self, record: logging.LogRecord) -> str:
         level_color = self.LEVEL_COLORS.get(record.levelno, _Colors.WHITE)
@@ -66,9 +56,5 @@ class ColorFormatter(logging.Formatter):
 
         return result
 
-    def __colorize(self, color_code: str, text: str, bold: bool = False) -> str:
-        return (
-            f"{_Style.BOLD if bold and not color_code.startswith(_Style.BOLD) else ''}{color_code}{text}{_Style.RESET}"
-            if self.USE_COLOR
-            else text
-        )
+    def __colorize(self, level_color: str, text: str) -> str:
+        return f"{level_color}{text}{_Style.RESET}" if self.USE_COLOR else text

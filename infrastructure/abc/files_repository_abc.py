@@ -9,7 +9,7 @@ from infrastructure.cloudinary.schemas import GetFilesResponse
 class FilesRepositoryABC(ABC):
     @abstractmethod
     @as_awaitable_result
-    async def aupload_file(self, user_id: str, relative_file_path: str, content: bytes) -> ContextResult[HttpUrl]: ...
+    async def aupload_file(self, user_id: str, relative_folder_path: str, basename: str, content: bytes) -> ContextResult[HttpUrl]: ...
 
     @abstractmethod
     @as_awaitable_result

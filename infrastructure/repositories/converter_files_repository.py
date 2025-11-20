@@ -1,4 +1,3 @@
-import pathlib
 from typing import Final, final
 
 from pydantic import HttpUrl
@@ -18,12 +17,9 @@ class ConverterFilesRepository(FilesRepositoryABC):
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload_file(self, user_id: str, relative_file_path: str, content: bytes) -> ContextResult[HttpUrl]:
-        root = self._get_root_folder_path(user_id)
-        relative = pathlib.PurePosixPath(relative_file_path)
-        dirname = relative.parent.as_posix()
-        folder = f"{root}/{dirname}" if dirname and dirname != "." else root
-        public_id = f"{folder}/{relative.name}"
+    async def aupload_file(self, user_id: str, relative_folder_path: str, basename: str, content: bytes) -> ContextResult[HttpUrl]:
+        folder = f"{self._get_root_folder_path(user_id)}/{relative_folder_path}"
+        public_id = f"{folder}/{basename}"
         return await self.__cloudinary_client.aupload_file(folder, public_id, content).map(lambda response: response.secure_url)
 
     @as_awaitable_result

@@ -105,4 +105,10 @@ class ApplicationModule(Module):
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterRepositoryABC,
     ) -> GetZipQuery:
-        return GetZipQuery(route_context_validator, http_request_validator, session_service_factory, converter_files_repo, converter_repo)
+        return GetZipQuery(
+            route_context_validator,
+            http_request_validator,
+            session_service_factory,
+            converter_files_repo,
+            converter_repo,
+        )
