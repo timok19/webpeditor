@@ -10,7 +10,7 @@ from api.action_result import ActionResult, ActionResultWithStatus
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from application.converter.queries.get_zip_query import GetZipQuery
-from domain.converter.constants import ImageConverterConstants
+from domain.constants.converter_constants import ConverterConstants
 
 
 @final
@@ -39,11 +39,11 @@ class ConverterController(ControllerBase):
         quality: Annotated[
             int,
             Form(
-                ge=ImageConverterConstants.MIN_QUALITY,
-                le=ImageConverterConstants.MAX_QUALITY,
+                ge=ConverterConstants.MIN_QUALITY,
+                le=ConverterConstants.MAX_QUALITY,
                 example=50,
                 title="Quality",
-                description=f"Set quality of output image. Must be >= {ImageConverterConstants.MIN_QUALITY} and <= {ImageConverterConstants.MAX_QUALITY}",
+                description=f"Set quality of output image. Must be >= {ConverterConstants.MIN_QUALITY} and <= {ConverterConstants.MAX_QUALITY}",
             ),
         ],
         files: Annotated[

@@ -11,8 +11,7 @@ from application.converter.commands.schemas import ConversionRequest
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult
 from core.result.error_context import ErrorContext
-from domain.converter.constants import ImageConverterConstants
-from domain.converter.formats import ALL_RASTER_IMAGE_FORMATS
+from domain.constants.converter_constants import ConverterConstants
 from webpeditor import settings
 
 
@@ -48,16 +47,16 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         files_count = len(files)
         if files_count == 0:
             return Option[str].Some("No files uploaded")
-        if files_count > ImageConverterConstants.MAX_FILES_LIMIT:
-            return Option[str].Some(f"Too many files uploaded. Allowed {ImageConverterConstants.MAX_FILES_LIMIT} files to upload")
+        if files_count > ConverterConstants.MAX_FILES_LIMIT:
+            return Option[str].Some(f"Too many files uploaded. Allowed {ConverterConstants.MAX_FILES_LIMIT} files to upload")
         return Option[str].Nothing()
 
     def __validate_filename(self, filename: Optional[str]) -> Option[str]:
         if filename is None or len(filename) == 0:
             return Option[str].Some("Filename must not be empty")
 
-        if len(filename) > ImageConverterConstants.MAX_FILENAME_LENGTH:
-            return Option[str].Some(f"Filename '{filename}' is too long (max length: {ImageConverterConstants.MAX_FILENAME_LENGTH})")
+        if len(filename) > ConverterConstants.MAX_FILENAME_LENGTH:
+            return Option[str].Some(f"Filename '{filename}' is too long (max length: {ConverterConstants.MAX_FILENAME_LENGTH})")
 
         if (basename_result := self.__filename_utility.get_basename(filename)).is_error():
             return basename_result.swap().map(lambda error: error.message).to_option()
@@ -73,21 +72,21 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     @staticmethod
     def __validate_max_file_size(uploaded_file: UploadedFile) -> Option[str]:
-        message = f"File '{uploaded_file.name}' with size {uploaded_file.size} exceeds the maximum allowed size {ImageConverterConstants.MAX_FILE_SIZE}"
-        return Option[str].Some(message) if uploaded_file.size > ImageConverterConstants.MAX_FILE_SIZE else Option[str].Nothing()
+        message = f"File '{uploaded_file.name}' with size {uploaded_file.size} exceeds the maximum allowed size {ConverterConstants.MAX_FILE_SIZE}"
+        return Option[str].Some(message) if uploaded_file.size > ConverterConstants.MAX_FILE_SIZE else Option[str].Nothing()
 
     @staticmethod
     def __validate_output_format(output_format: ConversionRequest.Options.OutputFormats) -> Option[str]:
         return (
             Option[str].Some(f"Invalid output format '{output_format}'")
-            if output_format not in ALL_RASTER_IMAGE_FORMATS
+            if output_format not in ConverterConstants.ALL_IMAGE_FORMATS
             else Option[str].Nothing()
         )
 
     @staticmethod
     def __validate_quality(quality: int) -> Option[str]:
         return (
-            Option[str].Some(f"Quality must be between {ImageConverterConstants.MIN_QUALITY} and {ImageConverterConstants.MAX_QUALITY}")
-            if not (ImageConverterConstants.MIN_QUALITY <= quality <= ImageConverterConstants.MAX_QUALITY)
+            Option[str].Some(f"Quality must be between {ConverterConstants.MIN_QUALITY} and {ConverterConstants.MAX_QUALITY}")
+            if not (ConverterConstants.MIN_QUALITY <= quality <= ConverterConstants.MAX_QUALITY)
             else Option[str].Nothing()
         )

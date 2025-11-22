@@ -6,7 +6,7 @@ from typing import Optional, Any
 from django.db import models
 from django.utils import timezone
 
-from domain.common.constants import ImageFilePropertyConstants
+from domain.constants.image_file_property_constants import ImageFilePropertyConstants
 
 
 class BaseImageAsset(models.Model):

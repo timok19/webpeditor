@@ -5,7 +5,7 @@ from typing import Union, Final, final
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext
-from domain.common.constants import ImageFilePropertyConstants
+from domain.constants.image_file_property_constants import ImageFilePropertyConstants
 
 
 @final

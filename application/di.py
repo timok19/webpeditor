@@ -6,10 +6,10 @@ from ninja_extra.context import RouteContext
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC
-from application.common.abc.user_service_abc import UserServiceABC
+from application.common.abc.signing_service_abc import SigningServiceABC
 from application.common.abc.validator_abc import ValidatorABC
 from application.common.services.session_service_factory import SessionServiceFactory
-from application.common.services.user_service import UserService
+from application.common.services.signing_service import SigningService
 from application.common.services.filename_service import FilenameService
 from application.common.services.image_file_service import ImageFileService
 from application.common.validators.http_request_validator import HttpRequestValidator
@@ -44,12 +44,12 @@ class ApplicationModule(Module):
         return HttpRequestValidator()
 
     @provider(scope="request")
-    def provide_user_service(self, logger: LoggerABC) -> UserServiceABC:
-        return UserService(logger)
+    def provide_signing_service(self, logger: LoggerABC) -> SigningServiceABC:
+        return SigningService(logger)
 
     @provider(scope="request")
-    def provide_session_service_factory(self, user_service: UserServiceABC, logger: LoggerABC) -> SessionServiceFactory:
-        return SessionServiceFactory(user_service, logger)
+    def provide_session_service_factory(self, signing_service: SigningServiceABC, logger: LoggerABC) -> SessionServiceFactory:
+        return SessionServiceFactory(signing_service, logger)
 
     @provider(scope="request")
     def provide_conversion_request_validator(

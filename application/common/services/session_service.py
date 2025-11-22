@@ -9,7 +9,7 @@ from django.utils import timezone
 from expression import Option
 from names_generator import generate_name
 
-from application.common.abc.user_service_abc import UserServiceABC
+from application.common.abc.signing_service_abc import SigningServiceABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from webpeditor import settings
@@ -23,11 +23,11 @@ class SessionService:
     def __init__(
         self,
         http_request: HttpRequest,
-        user_service: UserServiceABC,
+        signing_service: SigningServiceABC,
         logger: LoggerABC,
     ) -> None:
         self.__http_request: Final[HttpRequest] = http_request
-        self.__user_service: Final[UserServiceABC] = user_service
+        self.__signing_service: Final[SigningServiceABC] = signing_service
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
@@ -36,8 +36,7 @@ class SessionService:
 
     @as_awaitable_result
     async def __acreate_user_id(self) -> ContextResult[str]:
-        user_id = self.__generate_id()
-        signed_user_id = self.__user_service.sign_id(user_id)
+        signed_user_id = self.__signing_service.sign(self.__generate_id())
         await self.__aset(self.__USER_ID_KEY, signed_user_id)
         return await self.__aget_user_id()
 
@@ -48,7 +47,7 @@ class SessionService:
             .from_result(
                 Option.of_optional(await self.__aget(self.__USER_ID_KEY))
                 .to_result(ErrorContext.not_found(f"Unable to find User in the {SessionStore.__name__}!"))
-                .bind(self.__user_service.unsign_id)
+                .bind(self.__signing_service.unsign)
             )
             .amap(self.__arefresh_expiry)
         )
