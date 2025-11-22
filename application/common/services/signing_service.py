@@ -1,4 +1,4 @@
-from typing import Final, final
+from typing import Any, Final, final
 
 from django.core import signing
 
@@ -13,7 +13,7 @@ class SigningService(SigningServiceABC):
     def __init__(self, logger: LoggerABC) -> None:
         self.__logger: Final[LoggerABC] = logger
 
-    def sign(self, value: str) -> str:
+    def sign(self, value: Any) -> str:
         return signing.dumps(value, salt=settings.WEBPEDITOR_SALT_KEY, compress=True)
 
     def unsign(self, signed_value: str) -> ContextResult[str]:
