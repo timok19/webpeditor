@@ -61,7 +61,7 @@ platformdirs==4.5.0
     # via
     #   pip-audit
     #   virtualenv
-pre-commit==4.4.0
+pre-commit==4.5.0
 prompt-toolkit==3.0.52
     # via dtach
 py-serializable==2.1.0
@@ -86,7 +86,7 @@ rich==14.2.0
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.5
+ruff==0.14.6
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
