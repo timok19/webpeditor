@@ -34,9 +34,6 @@ class GetZipQuery:
             await self.__route_context_validator.validate(context)
             .bind(lambda ctx: self.__http_request_validator.validate(ctx.request))
             .abind(lambda http_request: self.__session_service_factory.create(http_request).aget_user_id())
-            .abind(self.__aget_zip)
+            .abind(lambda user_id: self.__converter_files_repo.aget_zip(user_id, "converted"))
+            .map(lambda zip_url: GetZipResponse(zip_url=str(zip_url)))
         )
-
-    @as_awaitable_result
-    async def __aget_zip(self, user_id: str) -> ContextResult[GetZipResponse]:
-        return await self.__converter_files_repo.aget_zip(user_id, "converted").map(lambda zip_url: GetZipResponse(zip_url=str(zip_url)))
