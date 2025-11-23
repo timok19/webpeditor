@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Union
 
-from PIL.ImageFile import ImageFile
+from PIL import ImageFile
 
 from application.common.services.models.file_info import ImageFileInfo
 from core.result import ContextResult
@@ -8,10 +9,10 @@ from core.result import ContextResult
 
 class ImageFileServiceABC(ABC):
     @abstractmethod
-    def get_info(self, file: ImageFile) -> ContextResult[ImageFileInfo]: ...
+    def verify_integrity(self, file: ImageFile.ImageFile) -> ContextResult[ImageFile.ImageFile]: ...
 
     @abstractmethod
-    def update_filename(self, file: ImageFile, new_filename: str) -> ContextResult[ImageFile]: ...
+    def get_info(self, file: ImageFile.ImageFile) -> ContextResult[ImageFileInfo]: ...
 
     @abstractmethod
-    def verify_integrity(self, file: ImageFile) -> ContextResult[ImageFile]: ...
+    def set_filename(self, file: ImageFile.ImageFile, filename: Union[str, bytes]) -> ContextResult[ImageFile.ImageFile]: ...

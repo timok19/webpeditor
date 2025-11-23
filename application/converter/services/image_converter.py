@@ -15,9 +15,9 @@ from domain.constants.converter_constants import ConverterConstants
 
 
 class ImageConverter(ImageConverterABC):
-    def __init__(self, image_file_utility: ImageFileServiceABC, filename_utility: FilenameServiceABC, logger: LoggerABC) -> None:
-        self.__image_file_utility: Final[ImageFileServiceABC] = image_file_utility
-        self.__filename_utility: Final[FilenameServiceABC] = filename_utility
+    def __init__(self, image_file_service: ImageFileServiceABC, filename_service: FilenameServiceABC, logger: LoggerABC) -> None:
+        self.__image_file_service: Final[ImageFileServiceABC] = image_file_service
+        self.__filename_service: Final[FilenameServiceABC] = filename_service
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
@@ -25,10 +25,10 @@ class ImageConverter(ImageConverterABC):
         return await (
             ContextResult[Union[str, bytes]]
             .from_result(Option[str].of_optional(file.filename).to_result(ErrorContext.server_error("Image file has no filename")))
-            .bind(self.__filename_utility.normalize)
-            .bind(self.__filename_utility.get_basename)
+            .bind(self.__filename_service.normalize)
+            .bind(self.__filename_service.get_basename)
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
-            .bind(lambda new_filename: self.__image_file_utility.update_filename(file, new_filename))
+            .bind(lambda new_filename: self.__image_file_service.set_filename(file, new_filename))
             .abind(lambda updated_file: self.__aconvert(updated_file, options))
         )
 

@@ -37,28 +37,3 @@ class ImageFileInfo(BaseModel):
         aspect_ratio: Decimal
         color_mode: str
         exif_data: dict[str, str]
-
-        @classmethod
-        def create(
-            cls,
-            format_: str,
-            format_description: str,
-            content: bytes,
-            size: int,
-            width: int,
-            height: int,
-            aspect_ratio: Decimal,
-            color_mode: str,
-            exif_data: dict[str, str],
-        ) -> Self:
-            return cls(
-                format=format_,
-                format_description=format_description,
-                content=content,
-                size=size,
-                width=width,
-                height=height,
-                aspect_ratio=aspect_ratio,
-                color_mode=color_mode,
-                exif_data=exif_data,
-            )

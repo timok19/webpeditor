@@ -17,9 +17,9 @@ from webpeditor import settings
 
 @final
 class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
-    def __init__(self, image_file_utility: ImageFileServiceABC, filename_utility: FilenameServiceABC, logger: LoggerABC) -> None:
-        self.__image_file_utility: Final[ImageFileServiceABC] = image_file_utility
-        self.__filename_utility: Final[FilenameServiceABC] = filename_utility
+    def __init__(self, image_file_service: ImageFileServiceABC, filename_service: FilenameServiceABC, logger: LoggerABC) -> None:
+        self.__image_file_service: Final[ImageFileServiceABC] = image_file_service
+        self.__filename_service: Final[FilenameServiceABC] = filename_service
         self.__logger: Final[LoggerABC] = logger
 
     def validate(self, value: Optional[ConversionRequest]) -> ContextResult[ConversionRequest]:
@@ -58,7 +58,8 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         if len(filename) > ConverterConstants.MAX_FILENAME_LENGTH:
             return Option[str].Some(f"Filename '{filename}' is too long (max length: {ConverterConstants.MAX_FILENAME_LENGTH})")
 
-        if (basename_result := self.__filename_utility.get_basename(filename)).is_error():
+        basename_result = self.__filename_service.get_basename(filename)
+        if basename_result.is_error():
             return basename_result.swap().map(lambda error: error.message).to_option()
 
         if basename_result.ok in settings.RESERVED_WINDOWS_FILENAMES:

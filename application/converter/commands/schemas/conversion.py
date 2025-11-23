@@ -1,6 +1,7 @@
 from decimal import Decimal
 from enum import StrEnum
 from typing import Self
+from uuid import UUID
 
 from ninja import Schema, UploadedFile
 from pydantic import ConfigDict
@@ -43,6 +44,7 @@ class ConversionResponse(Schema):
     class ImageData(Schema):
         model_config = ConfigDict(frozen=True, strict=True, extra="forbid")
 
+        id: UUID
         url: str
         filename: str
         filename_shorter: str

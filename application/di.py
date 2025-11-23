@@ -28,12 +28,12 @@ from infrastructure.repositories.converter_files_repository import ConverterFile
 
 class ApplicationModule(Module):
     @provider(scope="request")
-    def provide_filename_utility(self, logger: LoggerABC) -> FilenameServiceABC:
+    def provide_filename_service(self, logger: LoggerABC) -> FilenameServiceABC:
         return FilenameService(logger)
 
     @provider(scope="request")
-    def provide_image_file_utility(self, logger: LoggerABC, filename_utility: FilenameServiceABC) -> ImageFileServiceABC:
-        return ImageFileService(logger, filename_utility)
+    def provide_image_file_service(self, logger: LoggerABC, filename_service: FilenameServiceABC) -> ImageFileServiceABC:
+        return ImageFileService(logger, filename_service)
 
     @provider(scope="request")
     def provide_route_context_validator(self) -> ValidatorABC[RouteContext]:
@@ -54,20 +54,20 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_conversion_request_validator(
         self,
-        image_file_utility: ImageFileServiceABC,
-        filename_utility: FilenameServiceABC,
+        image_file_service: ImageFileServiceABC,
+        filename_service: FilenameServiceABC,
         logger: LoggerABC,
     ) -> ValidatorABC[ConversionRequest]:
-        return ConversionRequestValidator(image_file_utility, filename_utility, logger)
+        return ConversionRequestValidator(image_file_service, filename_service, logger)
 
     @provider(scope="request")
     def provide_converter_service(
         self,
-        image_file_utility: ImageFileServiceABC,
-        filename_utility: FilenameServiceABC,
+        image_file_service: ImageFileServiceABC,
+        filename_service: FilenameServiceABC,
         logger: LoggerABC,
     ) -> ImageConverterABC:
-        return ImageConverter(image_file_utility, filename_utility, logger)
+        return ImageConverter(image_file_service, filename_service, logger)
 
     @provider(scope="request")
     def provide_convert_images_command(
@@ -78,8 +78,8 @@ class ApplicationModule(Module):
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         image_converter: ImageConverterABC,
-        image_file_utility: ImageFileServiceABC,
-        filename_utility: FilenameServiceABC,
+        image_file_service: ImageFileServiceABC,
+        filename_service: FilenameServiceABC,
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
     ) -> ConvertImagesCommand:
@@ -90,8 +90,8 @@ class ApplicationModule(Module):
             conversion_request_validator,
             converter_files_repo,
             image_converter,
-            image_file_utility,
-            filename_utility,
+            image_file_service,
+            filename_service,
             converter_repo,
             logger,
         )

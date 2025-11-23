@@ -4,6 +4,7 @@ from typing import Annotated, Final, final, Optional
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
+from aiocache.backends.memory import SimpleMemoryCache
 from django.http import HttpRequest
 from ninja import UploadedFile
 from ninja_extra.context import RouteContext
@@ -36,6 +37,8 @@ from infrastructure.database.models.converter import (
 
 @final
 class ConvertImagesCommand:
+    __CACHE: Final[SimpleMemoryCache] = SimpleMemoryCache()
+
     def __init__(
         self,
         route_context_validator: ValidatorABC[RouteContext],
@@ -44,8 +47,8 @@ class ConvertImagesCommand:
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         image_converter: ImageConverterABC,
-        image_file_utility: ImageFileServiceABC,
-        filename_utility: FilenameServiceABC,
+        image_file_service: ImageFileServiceABC,
+        filename_service: FilenameServiceABC,
         converter_repo: ConverterRepositoryABC,
         logger: LoggerABC,
     ) -> None:
@@ -54,8 +57,8 @@ class ConvertImagesCommand:
         self.__session_service_factory: Final[SessionServiceFactory] = session_service_factory
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
         self.__converter_files_repo: Final[Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]] = converter_files_repo
-        self.__image_file_utility: Final[ImageFileServiceABC] = image_file_utility
-        self.__filename_utility: Final[FilenameServiceABC] = filename_utility
+        self.__image_file_service: Final[ImageFileServiceABC] = image_file_service
+        self.__filename_service: Final[FilenameServiceABC] = filename_service
         self.__image_converter: Final[ImageConverterABC] = image_converter
         self.__converter_repo: Final[ConverterRepositoryABC] = converter_repo
         self.__logger: Final[LoggerABC] = logger
@@ -103,16 +106,16 @@ class ConvertImagesCommand:
     ) -> ContextResult[ConversionResponse]:
         with Image.open(uploaded_file) as image_file:
             return await (
-                self.__filename_utility.normalize(uploaded_file.name)
-                .bind(lambda normalized: self.__image_file_utility.update_filename(image_file, normalized))
-                .bind(self.__image_file_utility.verify_integrity)
+                self.__filename_service.normalize(uploaded_file.name)
+                .bind(lambda normalized: self.__image_file_service.set_filename(image_file, normalized))
+                .bind(self.__image_file_service.verify_integrity)
                 .abind(lambda file: self.__aget_original(file, asset).amap2(self.__aconvert(file, asset, options), self.__to_response))
             )
 
     @as_awaitable_result
     async def __aget_original(self, file: ImageFile, asset: ConverterImageAsset) -> ContextResult[ConverterOriginalImageAssetFile]:
         return await (
-            self.__image_file_utility.get_info(file)
+            self.__image_file_service.get_info(file)
             .abind(lambda file_info: self.__aupload(asset.user_id, "original", file_info))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterOriginalImageAssetFile, pair.item1, pair.item2, asset))
         )
@@ -126,7 +129,7 @@ class ConvertImagesCommand:
     ) -> ContextResult[ConverterConvertedImageAssetFile]:
         return await (
             self.__image_converter.aconvert(file, options)
-            .bind(self.__image_file_utility.get_info)
+            .bind(self.__image_file_service.get_info)
             .abind(lambda file_info: self.__aupload(asset.user_id, "converted", file_info))
             .abind(lambda pair: self.__converter_repo.acreate_asset_file(ConverterConvertedImageAssetFile, pair.item1, pair.item2, asset))
         )
@@ -146,6 +149,7 @@ class ConvertImagesCommand:
     @staticmethod
     def __to_image_data(asset_file: BaseImageAssetFile) -> ConversionResponse.ImageData:
         return ConversionResponse.ImageData(
+            id=asset_file.id,
             url=asset_file.file_url,
             filename=asset_file.filename,
             filename_shorter=asset_file.filename_shorter,
