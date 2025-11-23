@@ -25,3 +25,4 @@ yarn-error.log.DS_Store
 venv/
 .venv/
 docs/solid_audit.md
+.pip-audit-cache

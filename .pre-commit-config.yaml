@@ -30,12 +30,12 @@ repos:
   hooks:
   - id: pip-audit
     name: "Audit dependencies"
-    args: ["-r", "requirements.txt", "-l"]
+    args: ["-r", "requirements.txt", "-l", "--cache-dir", ".pip-audit-cache"]
     verbose: true
     files: ^requirements\.txt$
   - id: pip-audit
     name: "Audit dev dependencies"
-    args: ["-r", "requirements-dev.txt", "-l"]
+    args: ["-r", "requirements-dev.txt", "-l", "--cache-dir", ".pip-audit-cache"]
     verbose: true
     files: ^requirements-dev\.txt$
 
