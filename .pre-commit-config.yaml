@@ -11,7 +11,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.8
+  rev: 0.9.11
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
@@ -21,29 +21,23 @@ repos:
     - id: uv-export
       name: "export requirements.txt"
       args: [ "--frozen", "--no-dev", "--no-hashes", "-o", "requirements.txt" ]
-      verbose: false
     - id: uv-export
       name: "export requirements-dev.txt"
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
-      verbose: false
 
-#- repo: https://github.com/gauge-sh/tach-pre-commit
-#  rev: v0.29.0
-#  hooks:
-#    - id: tach
-#      name: "validate modules dependencies"
-#    - id: tach-external
+- repo: https://github.com/pypa/pip-audit
+  rev: v2.9.0
+  hooks:
+  - id: pip-audit
+    name: "Audit dependencies"
+    args: ["-r", "requirements.txt", "-l"]
+    verbose: true
+    files: ^requirements\.txt$
+  - id: pip-audit
+    name: "Audit dev dependencies"
+    args: ["-r", "requirements-dev.txt", "-l"]
+    verbose: true
+    files: ^requirements-dev\.txt$
 
-#- repo: https://github.com/pypa/pip-audit
-#  rev: v2.9.0
-#  hooks:
-#  - id: pip-audit
-#    name: "Audit dependencies"
-#    args: ["-r", "requirements.txt", "-l"]
-#    verbose: true
-#  - id: pip-audit
-#    name: "Audit dev dependencies"
-#    args: ["-r", "requirements-dev.txt", "-l"]
-#    verbose: true
-#ci:
-#  skip: [pip-audit]
+ci:
+  skip: [pip-audit]
