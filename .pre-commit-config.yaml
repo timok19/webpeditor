@@ -1,6 +1,5 @@
 default_install_hook_types:
   - pre-commit
-  - commit-msg
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -29,13 +28,13 @@ repos:
   rev: v2.9.0
   hooks:
   - id: pip-audit
-    name: "Audit dependencies"
-    args: ["-r", "requirements.txt", "-l", "--cache-dir", ".pip-audit-cache"]
+    name: "audit dependencies"
+    args: ["-r", "requirements.txt", "--local", "--cache-dir", ".pip-audit-cache"]
     verbose: true
     files: ^requirements\.txt$
   - id: pip-audit
-    name: "Audit dev dependencies"
-    args: ["-r", "requirements-dev.txt", "-l", "--cache-dir", ".pip-audit-cache"]
+    name: "audit dev dependencies"
+    args: ["-r", "requirements-dev.txt", "--local", "--cache-dir", ".pip-audit-cache-dev"]
     verbose: true
     files: ^requirements-dev\.txt$
 

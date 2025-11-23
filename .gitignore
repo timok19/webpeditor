@@ -26,3 +26,4 @@ venv/
 .venv/
 docs/solid_audit.md
 .pip-audit-cache
+.pip-audit-cache-dev
