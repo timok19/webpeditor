@@ -40,13 +40,14 @@ class ActionResult[T: Schema](Schema):
 
     @classmethod
     def from_results(cls, results: EnumerableContextResult[T]) -> ActionResultWithStatus[T]:
-        errors = results.where(lambda result: result.is_error()).select(lambda result: result.error).order_by(lambda e: e.error_code)
+        cached_results = results.as_cached()
+        errors = cached_results.where(lambda result: result.is_error()).select(lambda result: result.error).order_by(lambda e: e.error_code)
         error_code = errors.select(lambda error: error.error_code).first2(None)
         action_errors = errors.select(lambda error: ActionResult.Error.create(error.message, error.reasons)).to_list()
         return (
             cls.__response(cls.__map_status_code(error_code), cls(error=action_errors))
             if error_code is not None
-            else cls.__response(HTTPStatus.OK, cls(ok=results.select(lambda result: result.ok).to_list()))
+            else cls.__response(HTTPStatus.OK, cls(ok=cached_results.select(lambda result: result.ok).to_list()))
         )
 
     @classmethod

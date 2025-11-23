@@ -1,6 +1,7 @@
 import asyncio
+import hashlib
 from decimal import Decimal
-from typing import Annotated, Final, final, Optional
+from typing import Annotated, Final, cast, final, Optional
 
 from PIL import Image
 from PIL.ImageFile import ImageFile
@@ -75,26 +76,41 @@ class ConvertImagesCommand:
             .bind(lambda ctx: self.__http_request_validator.validate(ctx.request))
             .abind(lambda http_request: self.__session_service_factory.create(http_request).aget_user_id())
             .abind_many(
-                lambda user_id: self.__acleanup_previous_assets(user_id)
-                .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
-                .map(lambda asset: [self.__aprocess(uploaded_file, asset, request.options) for uploaded_file in request.files])
-                .amap(lambda results: asyncio.gather(*results))
-                .bind_many(EnumerableContextResult[ConversionResponse].from_results)
-                .tap_either(
-                    lambda values: self.__logger.info(f"Successfully converted {values.count()} image(s) for User '{user_id}'"),
-                    lambda errors: self.__logger.error(f"Failed to convert images for User '{user_id}'"),
+                lambda user_id: self.__aget_cache(user_id, request).aif_empty(
+                    self.__acleanup_previous_assets(user_id)
+                    .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
+                    .map(lambda asset: (self.__aprocess(uploaded_file, asset, request.options) for uploaded_file in request.files))
+                    .amap(lambda results: asyncio.gather(*results))
+                    .abind_many(lambda results: self.__set_cache(user_id, request, results))
+                    .tap_either(
+                        lambda values: self.__logger.info(f"Successfully converted {values.count()} image(s) for User '{user_id}'"),
+                        lambda errors: self.__logger.error(f"Failed to convert images for User '{user_id}'"),
+                    )
                 )
             )
         )
 
     @as_awaitable_result
     async def __acleanup_previous_assets(self, user_id: str) -> ContextResult[None]:
-        return await self.__converter_repo.aasset_exists(user_id).aif_then_else(
-            lambda asset_exists: asset_exists is True,
-            lambda _: self.__converter_repo.adelete_asset(user_id)
-            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "original"))
-            .abind(lambda _: self.__converter_files_repo.adelete_files(user_id, "converted")),
-            lambda _: ContextResult[None].asuccess(None),
+        asset_exists_result = await self.__converter_repo.aasset_exists(user_id)
+
+        if asset_exists_result.is_error():
+            return ContextResult[None].failure(asset_exists_result.error)
+
+        if asset_exists_result.ok is False:
+            return ContextResult[None].success(None)
+
+        results = await asyncio.gather(
+            self.__converter_repo.adelete_asset(user_id),
+            self.__converter_files_repo.adelete_files(user_id, "original"),
+            self.__converter_files_repo.adelete_files(user_id, "converted"),
+        )
+
+        return (
+            EnumerableContextResult[None]
+            .from_results(results)
+            .where(lambda result: result.is_error())
+            .first2(ContextResult[None].success(None))
         )
 
     @as_awaitable_result
@@ -106,8 +122,7 @@ class ConvertImagesCommand:
     ) -> ContextResult[ConversionResponse]:
         with Image.open(uploaded_file) as image_file:
             return await (
-                self.__filename_service.normalize(uploaded_file.name)
-                .bind(lambda normalized: self.__image_file_service.set_filename(image_file, normalized))
+                self.__image_file_service.set_filename(image_file, uploaded_file.name)
                 .bind(self.__image_file_service.verify_integrity)
                 .abind(lambda file: self.__aget_original(file, asset).amap2(self.__aconvert(file, asset, options), self.__to_response))
             )
@@ -141,7 +156,7 @@ class ConvertImagesCommand:
             relative_folder_path,
             file_info.filename_details.basename,
             file_info.file_details.content,
-        ).map(lambda file_url: Pair(item1=file_info, item2=str(file_url)))
+        ).map(lambda file_url: Pair(file_info, str(file_url)))
 
     def __to_response(self, original: ConverterOriginalImageAssetFile, converted: ConverterConvertedImageAssetFile) -> ConversionResponse:
         return ConversionResponse.create(self.__to_image_data(original), self.__to_image_data(converted))
@@ -163,3 +178,32 @@ class ConvertImagesCommand:
             color_mode=asset_file.color_mode,
             exif_data=asset_file.exif_data,
         )
+
+    @as_awaitable_enumerable_result
+    async def __aget_cache(self, user_id: str, request: ConversionRequest) -> EnumerableContextResult[ConversionResponse]:
+        results = cast(
+            Optional[EnumerableContextResult[ConversionResponse]],
+            await self.__CACHE.get(self.__get_cache_key(user_id, request)),
+        )
+        return results or EnumerableContextResult[ConversionResponse].empty()
+
+    @as_awaitable_enumerable_result
+    async def __set_cache(
+        self,
+        user_id: str,
+        request: ConversionRequest,
+        results: list[ContextResult[ConversionResponse]],
+    ) -> EnumerableContextResult[ConversionResponse]:
+        values = EnumerableContextResult[ConversionResponse].from_results(results)
+        await self.__CACHE.set(self.__get_cache_key(user_id, request), values)
+        return values
+
+    @staticmethod
+    def __get_cache_key(user_id: str, request: ConversionRequest) -> str:
+        hasher = hashlib.sha256()
+
+        for file in request.files:
+            for chunk in file.chunks():
+                hasher.update(chunk)
+
+        return f"{user_id}-{request.options.quality}-{request.options.output_format}-{hasher.hexdigest()}"
