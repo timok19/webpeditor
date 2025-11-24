@@ -7,6 +7,7 @@ from ninja.params.functions import File, Form
 from ninja_extra import api_controller, http_get, http_post, ControllerBase  # pyright: ignore
 
 from api.action_result import ActionResult, ActionResultWithStatus
+from api.throttling import Anonymous60MinutesRateThrottle, Anonymous100PerDayRateThrottle, Anonymous1000PerDayRateThrottle
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from application.converter.queries.get_zip_query import GetZipQuery
@@ -25,6 +26,7 @@ class ConverterController(ControllerBase):
             HTTPStatus.INTERNAL_SERVER_ERROR: ActionResult[ConversionResponse],
         },
         summary="Convert images",
+        throttle=[Anonymous60MinutesRateThrottle(), Anonymous1000PerDayRateThrottle()],
     )
     async def aconvert_images(
         self,
@@ -69,6 +71,7 @@ class ConverterController(ControllerBase):
             HTTPStatus.INTERNAL_SERVER_ERROR: ActionResult[GetZipResponse],
         },
         summary="Get converted images as zip",
+        throttle=[Anonymous60MinutesRateThrottle(), Anonymous100PerDayRateThrottle()],
     )
     async def aget_zip(self) -> ActionResultWithStatus[GetZipResponse]:
         async with container.arequest_context():
