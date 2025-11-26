@@ -10,11 +10,11 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.54.1
+anydi==0.56.0
     # via
     #   anydi-django
     #   webpeditor
-anydi-django==0.2.0
+anydi-django==0.3.0
     # via webpeditor
 anyio==4.11.0
     # via
@@ -330,7 +330,7 @@ whitenoise==6.11.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
     # via loguru
-wrapt==1.17.3
+wrapt==2.0.1
     # via
     #   anydi
     #   webpeditor
