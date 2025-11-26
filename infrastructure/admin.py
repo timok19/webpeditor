@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 
-from infrastructure.database.models.api import APIKey
+from infrastructure.database.models.api import APIKeyDo
 from infrastructure.utils import APIKeyUtils
 from core.types import Pair
 from infrastructure.database.models.converter import (
@@ -25,8 +25,8 @@ from infrastructure.database.models.editor import (
 )
 
 
-@admin.register(APIKey)
-class APIKeyAdmin(admin.ModelAdmin[APIKey]):
+@admin.register(APIKeyDo)
+class APIKeyAdmin(admin.ModelAdmin[APIKeyDo]):
     list_display = ("email", "key_hash", "created_at", "generate_new_key")
     list_filter = ("email", "created_at")
     date_hierarchy = "created_at"
@@ -36,7 +36,7 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
         view = self.admin_site.admin_view(self.generate_new_key_view)
         return [path("generate-key/<int:api_key_id>/", view, name="generate-api-key")] + super().get_urls()
 
-    def save_model(self, request: HttpRequest, obj: APIKey, form: ModelForm, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: APIKeyDo, form: ModelForm, change: bool) -> None:
         if change:
             super().save_model(request, obj, form, change)
             return None
@@ -49,15 +49,15 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
 
     def generate_new_key_view(self, request: HttpRequest, api_key_id: int) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
         api_key, key_hash = self.__create_api_key_and_hash()
-        api_key_obj = APIKey.objects.get(pk=api_key_id)
+        api_key_obj = APIKeyDo.objects.get(pk=api_key_id)
         api_key_obj.key_hash = key_hash
         api_key_obj.save()
         self.__notify_api_key_created(request, api_key_obj.email, api_key)
-        return redirect("admin:webpeditor_app_apikey_changelist")
+        return redirect("admin:infrastructure_apikeydo_changelist")
 
     @staticmethod
-    def generate_new_key(obj: APIKey) -> SafeText:
-        return format_html('<a class="button" href="/admin/webpeditor_app/apikey/generate-key/{}/">{}</a>', obj.pk, _("Generate New Key"))
+    def generate_new_key(obj: APIKeyDo) -> SafeText:
+        return format_html('<a class="button" href="/admin/infrastructure/apikeydo/generate-key/{}/">{}</a>', obj.pk, _("Generate New Key"))
 
     @staticmethod
     def __create_api_key_and_hash() -> Pair[str, str]:

@@ -10,12 +10,12 @@ from webpeditor import settings
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from core.utils import BoolUtils
-from infrastructure.cloudinary.schemas import (
+from infrastructure.cloudinary.models import (
     DeleteFileResponse,
     GetFilesResponse,
     UploadFileResponse,
+    GenerateZipResponse,
 )
-from infrastructure.cloudinary.schemas.zip import GenerateZipResponse
 from infrastructure.cloudinary.types import QueryParamTypes, RequestData, RequestFiles
 
 

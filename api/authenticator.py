@@ -3,7 +3,7 @@ from typing import Optional
 from django.http import HttpRequest
 from ninja_extra.security import AsyncAPIKeyHeader
 
-from infrastructure.database.models.api import APIKey
+from infrastructure.database.models.api import APIKeyDo
 from infrastructure.utils import APIKeyUtils
 
 
@@ -15,6 +15,6 @@ class APIKeyAuthenticator(AsyncAPIKeyHeader):
             return None
 
         hashed_key = APIKeyUtils.hash(key)
-        api_key_exist = await APIKey.objects.filter(key_hash=hashed_key).aexists()
+        api_key_exist = await APIKeyDo.objects.filter(key_hash=hashed_key).aexists()
 
         return key if api_key_exist else None

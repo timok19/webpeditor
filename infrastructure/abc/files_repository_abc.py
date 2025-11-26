@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pydantic import HttpUrl
 
 from core.result import ContextResult, as_awaitable_result
-from infrastructure.cloudinary.schemas import GetFilesResponse
+from infrastructure.cloudinary.models import GetFilesResponse
 from infrastructure.repositories.converter_files.models import UploadFileParams
 
 

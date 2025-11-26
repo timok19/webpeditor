@@ -7,7 +7,7 @@ from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, as_awaitable_result
 from infrastructure.cloudinary.cloudinary_client import CloudinaryClient
-from infrastructure.cloudinary.schemas import GetFilesResponse
+from infrastructure.cloudinary.models import GetFilesResponse
 from infrastructure.repositories.converter_files.models import UploadFileParams
 
 
