@@ -4,12 +4,13 @@ from pydantic import HttpUrl
 
 from core.result import ContextResult, as_awaitable_result
 from infrastructure.cloudinary.schemas import GetFilesResponse
+from infrastructure.repositories.converter_files.models import UploadFileParams
 
 
 class FilesRepositoryABC(ABC):
     @abstractmethod
     @as_awaitable_result
-    async def aupload_file(self, user_id: str, relative_folder_path: str, basename: str, content: bytes) -> ContextResult[HttpUrl]: ...
+    async def aupload_file(self, user_id: str, *, params: UploadFileParams) -> ContextResult[HttpUrl]: ...
 
     @abstractmethod
     @as_awaitable_result

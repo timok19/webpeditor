@@ -6,10 +6,10 @@ from typing import Optional, Any
 from django.db import models
 from django.utils import timezone
 
-from domain.constants.image_file_property_constants import ImageFilePropertyConstants
+from domain.common.constants import ImageFilePropertyConstants
 
 
-class BaseImageAsset(models.Model):
+class BaseImageAssetDo(models.Model):
     id: models.UUIDField[uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id: models.CharField[str] = models.CharField(max_length=100)
     created_at: models.DateTimeField[datetime] = models.DateTimeField(default=timezone.now)
@@ -22,7 +22,7 @@ class BaseImageAsset(models.Model):
         return str(self.id)
 
 
-class BaseImageAssetFile(models.Model):
+class BaseImageAssetFileDo(models.Model):
     id: models.UUIDField[uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file_url: models.URLField[str] = models.URLField(blank=True)
     filename: models.CharField[str] = models.CharField(max_length=ImageFilePropertyConstants.MAX_FILENAME_LENGTH, blank=True)

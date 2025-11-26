@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
 
-from application.common.services.models.file_info import ImageFileInfo
 from core.result import ContextResult, as_awaitable_result
-from infrastructure.database.models.converter import (
-    ConverterConvertedImageAssetFile,
-    ConverterImageAsset,
-    ConverterOriginalImageAssetFile,
-)
+from domain.common.models import ImageAssetFile
+from domain.converter.models import ConverterImageAsset
+from infrastructure.repositories.converter_image_assets.models import CreateAssetFileParams
 
 
-class ConverterRepositoryABC(ABC):
+class ConverterImageAssetsRepositoryABC(ABC):
     @abstractmethod
     @as_awaitable_result
     async def aget_asset(self, user_id: str) -> ContextResult[ConverterImageAsset]: ...
@@ -28,10 +25,4 @@ class ConverterRepositoryABC(ABC):
 
     @abstractmethod
     @as_awaitable_result
-    async def acreate_asset_file[T: (ConverterOriginalImageAssetFile, ConverterConvertedImageAssetFile)](
-        self,
-        asset_file_type: type[T],
-        file_info: ImageFileInfo,
-        file_url: str,
-        asset: ConverterImageAsset,
-    ) -> ContextResult[T]: ...
+    async def acreate_asset_file[T: ImageAssetFile](self, user_id: str, *, params: CreateAssetFileParams[T]) -> ContextResult[T]: ...

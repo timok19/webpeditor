@@ -21,9 +21,9 @@ from application.converter.services.abc.image_converter_abc import ImageConverte
 from application.converter.services.image_converter import ImageConverter
 from application.converter.validators.conversion_request_validator import ConversionRequestValidator
 from core.abc.logger_abc import LoggerABC
-from infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
+from infrastructure.abc.converter_image_assets_repository_abc import ConverterImageAssetsRepositoryABC
 from infrastructure.abc.files_repository_abc import FilesRepositoryABC
-from infrastructure.repositories.converter_files_repository import ConverterFilesRepository
+from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
 
 
 class ApplicationModule(Module):
@@ -80,7 +80,7 @@ class ApplicationModule(Module):
         image_converter: ImageConverterABC,
         image_file_service: ImageFileServiceABC,
         filename_service: FilenameServiceABC,
-        converter_repo: ConverterRepositoryABC,
+        converter_repo: ConverterImageAssetsRepositoryABC,
         logger: LoggerABC,
     ) -> ConvertImagesCommand:
         return ConvertImagesCommand(
@@ -103,7 +103,7 @@ class ApplicationModule(Module):
         http_request_validator: ValidatorABC[HttpRequest],
         session_service_factory: SessionServiceFactory,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
-        converter_repo: ConverterRepositoryABC,
+        converter_repo: ConverterImageAssetsRepositoryABC,
     ) -> GetZipQuery:
         return GetZipQuery(
             route_context_validator,

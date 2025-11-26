@@ -59,16 +59,16 @@ wheels = [
 
 [[package]]
 name = "anydi"
-version = "0.55.1"
+version = "0.54.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/91/e7a67e160fc71dd50ce3cbf14be4f4501fb077c63eb13980bf20e360d62b/anydi-0.55.1.tar.gz", hash = "sha256:0da58584ecdcc079a1465fa57a04807549986a0636680a6269d0e017c8f50750", size = 19600, upload-time = "2025-11-25T09:31:23.746Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/7e/4925824387979289112b5ef1dad83c3428872f507d90efdc08bd8ad649e6/anydi-0.54.1.tar.gz", hash = "sha256:b6e367d767a0322653f2f6d88f74230088947a7f5336dfb90ba8b8b6f3d2f084", size = 18061, upload-time = "2025-11-19T19:36:53.296Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/63/89/989af854bf2b2fccc73493440ad5bc8e2f9e66b4aef4abf8143337003145/anydi-0.55.1-py3-none-any.whl", hash = "sha256:f355108ed9de745273735c49bb9ab66481fb4d7fa866fbcf139eaa4ee888ffdd", size = 26065, upload-time = "2025-11-25T09:31:22.666Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/90/254340149c0a15ce2ad5920383209ad0b336b2dcc1ad07be0522c38550bf/anydi-0.54.1-py3-none-any.whl", hash = "sha256:c4a550fcdbe8bd9ead050f9ffad3f88c7633c865f4278c3f7c13f298ccd2685a", size = 24202, upload-time = "2025-11-19T19:36:51.947Z" },
 ]
 
 [[package]]
@@ -1675,7 +1675,7 @@ wheels = [
 
 [[package]]
 name = "pydantic"
-version = "2.12.4"
+version = "2.12.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-types" },
@@ -1683,9 +1683,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/ad/a17bc283d7d81837c061c49e3eaa27a45991759a1b7eae1031921c6bd924/pydantic-2.12.4.tar.gz", hash = "sha256:0f8cb9555000a4b5b617f66bfd2566264c4984b27589d3b845685983e8ea85ac", size = 821038, upload-time = "2025-11-05T10:50:08.59Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/44/36f1a6e523abc58ae5f928898e4aca2e0ea509b5aa6f6f392a5d882be928/pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49", size = 821591, upload-time = "2025-11-26T15:11:46.471Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/82/2f/e68750da9b04856e2a7ec56fc6f034a5a79775e9b9a81882252789873798/pydantic-2.12.4-py3-none-any.whl", hash = "sha256:92d3d202a745d46f9be6df459ac5a064fdaa3c1c4cd8adcfa332ccf3c05f871e", size = 463400, upload-time = "2025-11-05T10:50:06.732Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/87/b70ad306ebb6f9b585f114d0ac2137d792b48be34d732d60e597c2f8465a/pydantic-2.12.5-py3-none-any.whl", hash = "sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d", size = 463580, upload-time = "2025-11-26T15:11:44.605Z" },
 ]
 
 [package.optional-dependencies]
@@ -2365,6 +2365,7 @@ dependencies = [
     { name = "aiocache", extra = ["memcached"] },
     { name = "aiofiles" },
     { name = "aioreactive" },
+    { name = "anydi" },
     { name = "anydi-django", extra = ["ninja"] },
     { name = "asgiref" },
     { name = "certifi" },
@@ -2427,7 +2428,8 @@ requires-dist = [
     { name = "aiocache", extras = ["memcached"], specifier = ">=0.12.3" },
     { name = "aiofiles", specifier = ">=24.1.0" },
     { name = "aioreactive", specifier = ">=0.20.0" },
-    { name = "anydi-django", extras = ["ninja"], specifier = ">=0.2.0" },
+    { name = "anydi", specifier = "==0.54.1" },
+    { name = "anydi-django", extras = ["ninja"], specifier = "==0.2.0" },
     { name = "asgiref", specifier = ">=3.8.1" },
     { name = "certifi", specifier = ">=2024.12.14" },
     { name = "channels", extras = ["daphne"], specifier = ">=4.2.0" },

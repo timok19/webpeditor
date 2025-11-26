@@ -11,7 +11,7 @@ from application.converter.commands.schemas import ConversionRequest
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult
 from core.result.error_context import ErrorContext
-from domain.constants.converter_constants import ConverterConstants
+from domain.converter.constants import ConverterConstants
 from webpeditor import settings
 
 

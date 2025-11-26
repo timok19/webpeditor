@@ -8,6 +8,7 @@ from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, as_awaitable_result
 from infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 from infrastructure.cloudinary.schemas import GetFilesResponse
+from infrastructure.repositories.converter_files.models import UploadFileParams
 
 
 @final
@@ -17,10 +18,10 @@ class ConverterFilesRepository(FilesRepositoryABC):
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_result
-    async def aupload_file(self, user_id: str, relative_folder_path: str, basename: str, content: bytes) -> ContextResult[HttpUrl]:
-        folder = f"{self._get_root_folder_path(user_id)}/{relative_folder_path}"
-        public_id = f"{folder}/{basename}"
-        return await self.__cloudinary_client.aupload_file(folder, public_id, content).map(lambda response: response.secure_url)
+    async def aupload_file(self, user_id: str, *, params: UploadFileParams) -> ContextResult[HttpUrl]:
+        folder = f"{self._get_root_folder_path(user_id)}/{params.relative_folder_path}"
+        public_id = f"{folder}/{params.basename}"
+        return await self.__cloudinary_client.aupload_file(folder, public_id, params.content).map(lambda response: response.secure_url)
 
     @as_awaitable_result
     async def aget_zip(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]:

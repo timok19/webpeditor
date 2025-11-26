@@ -11,7 +11,7 @@ from application.converter.commands.schemas.conversion import ConversionRequest
 from application.converter.services.abc.image_converter_abc import ImageConverterABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
-from domain.constants.converter_constants import ConverterConstants
+from domain.converter.constants import ConverterConstants
 
 
 class ImageConverter(ImageConverterABC):

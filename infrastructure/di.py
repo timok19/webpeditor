@@ -5,11 +5,11 @@ from anydi import Module, provider
 from core.abc.logger_abc import LoggerABC
 from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from infrastructure.cloudinary.cloudinary_client import CloudinaryClient
-from infrastructure.repositories.editor_repository import EditorRepository
-from infrastructure.abc.converter_repository_abc import ConverterRepositoryABC
-from infrastructure.abc.editor_repository_abc import EditorRepositoryABC
-from infrastructure.repositories.converter_files_repository import ConverterFilesRepository
-from infrastructure.repositories.converter_repository import ConverterRepository
+from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
+from infrastructure.repositories.editor.editor_image_assets_repository import EditorImageAssetsRepository
+from infrastructure.abc.converter_image_assets_repository_abc import ConverterImageAssetsRepositoryABC
+from infrastructure.abc.editor_image_assets_repository_abc import EditorImageAssetsRepositoryABC
+from infrastructure.repositories.converter_image_assets.converter_image_assets_repository import ConverterImageAssetsRepository
 
 
 class InfrastructureModule(Module):
@@ -18,8 +18,8 @@ class InfrastructureModule(Module):
         return CloudinaryClient(logger)
 
     @provider(scope="request")
-    def provide_converter_repository(self, logger: LoggerABC) -> ConverterRepositoryABC:
-        return ConverterRepository(logger)
+    def provide_converter_image_assets_repository(self, logger: LoggerABC) -> ConverterImageAssetsRepositoryABC:
+        return ConverterImageAssetsRepository(logger)
 
     @provider(scope="singleton")
     def provide_converter_files_repository(
@@ -30,5 +30,5 @@ class InfrastructureModule(Module):
         return ConverterFilesRepository(cloudinary_client, logger)
 
     @provider(scope="request")
-    def provide_editor_repository(self) -> EditorRepositoryABC:
-        return EditorRepository()
+    def provide_editor_image_assets_repository(self) -> EditorImageAssetsRepositoryABC:
+        return EditorImageAssetsRepository()

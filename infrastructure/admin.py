@@ -13,15 +13,15 @@ from infrastructure.database.models.api import APIKey
 from infrastructure.utils import APIKeyUtils
 from core.types import Pair
 from infrastructure.database.models.converter import (
-    ConverterConvertedImageAssetFile,
-    ConverterImageAsset,
-    ConverterOriginalImageAssetFile,
+    ConverterConvertedImageAssetFileDo,
+    ConverterImageAssetDo,
+    ConverterOriginalImageAssetFileDo,
 )
 from infrastructure.database.models.editor import (
-    EditorEditedImageAsset,
-    EditorEditedImageAssetFile,
-    EditorOriginalImageAsset,
-    EditorOriginalImageAssetFile,
+    EditorEditedImageAssetDo,
+    EditorEditedImageAssetFileDo,
+    EditorOriginalImageAssetDo,
+    EditorOriginalImageAssetFileDo,
 )
 
 
@@ -72,13 +72,13 @@ class APIKeyAdmin(admin.ModelAdmin[APIKey]):
         return None
 
 
-@admin.register(ConverterImageAsset)
-class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
-    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFile]):
-        model = ConverterOriginalImageAssetFile
+@admin.register(ConverterImageAssetDo)
+class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAssetDo]):
+    class OriginalImageAssetFileInline(admin.TabularInline[ConverterOriginalImageAssetFileDo]):
+        model = ConverterOriginalImageAssetFileDo
 
-    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFile]):
-        model = ConverterConvertedImageAssetFile
+    class ConvertedImageAssetFileInline(admin.TabularInline[ConverterConvertedImageAssetFileDo]):
+        model = ConverterConvertedImageAssetFileDo
 
     list_display = ("id", "created_at", "user_id")
     list_filter = ("created_at", "user_id")
@@ -86,8 +86,8 @@ class ConverterImageAssetAdmin(admin.ModelAdmin[ConverterImageAsset]):
     inlines = [OriginalImageAssetFileInline, ConvertedImageAssetFileInline]
 
 
-@admin.register(ConverterOriginalImageAssetFile)
-class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalImageAssetFile]):
+@admin.register(ConverterOriginalImageAssetFileDo)
+class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalImageAssetFileDo]):
     list_display = (
         "id",
         "filename",
@@ -107,8 +107,8 @@ class ConverterOriginalImageAssetFileAdmin(admin.ModelAdmin[ConverterOriginalIma
     list_filter = ("image_asset",)
 
 
-@admin.register(ConverterConvertedImageAssetFile)
-class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedImageAssetFile]):
+@admin.register(ConverterConvertedImageAssetFileDo)
+class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedImageAssetFileDo]):
     list_display = (
         "id",
         "filename",
@@ -128,10 +128,10 @@ class ConverterConvertedImageAssetFileAdmin(admin.ModelAdmin[ConverterConvertedI
     list_filter = ("image_asset",)
 
 
-@admin.register(EditorOriginalImageAsset)
-class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
-    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFile]):
-        model = EditorOriginalImageAssetFile
+@admin.register(EditorOriginalImageAssetDo)
+class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAssetDo]):
+    class EditorOriginalImageAssetFileInline(admin.TabularInline[EditorOriginalImageAssetFileDo]):
+        model = EditorOriginalImageAssetFileDo
         extra = 1
 
     list_display = ("id", "created_at", "user_id")
@@ -140,8 +140,8 @@ class EditorOriginalImageAssetAdmin(admin.ModelAdmin[EditorOriginalImageAsset]):
     inlines = [EditorOriginalImageAssetFileInline]
 
 
-@admin.register(EditorOriginalImageAssetFile)
-class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAssetFile]):
+@admin.register(EditorOriginalImageAssetFileDo)
+class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAssetFileDo]):
     list_display = (
         "id",
         "filename",
@@ -161,10 +161,10 @@ class EditorOriginalImageAssetFileAdmin(admin.ModelAdmin[EditorOriginalImageAsse
     list_filter = ("original_image_asset",)
 
 
-@admin.register(EditorEditedImageAsset)
-class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
-    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFile]):
-        model = EditorEditedImageAssetFile
+@admin.register(EditorEditedImageAssetDo)
+class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAssetDo]):
+    class EditorEditedImageAssetFileInline(admin.TabularInline[EditorEditedImageAssetFileDo]):
+        model = EditorEditedImageAssetFileDo
         extra = 1
 
     list_display = ("id", "created_at", "user_id", "original_image_asset")
@@ -173,8 +173,8 @@ class EditorEditedImageAssetAdmin(admin.ModelAdmin[EditorEditedImageAsset]):
     inlines = [EditorEditedImageAssetFileInline]
 
 
-@admin.register(EditorEditedImageAssetFile)
-class EditorEditedImageAssetFileAdmin(admin.ModelAdmin[EditorEditedImageAssetFile]):
+@admin.register(EditorEditedImageAssetFileDo)
+class EditorEditedImageAssetFileAdmin(admin.ModelAdmin[EditorEditedImageAssetFileDo]):
     list_display = (
         "id",
         "filename",

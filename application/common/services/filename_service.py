@@ -6,7 +6,7 @@ from application.common.abc.filename_service_abc import FilenameServiceABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext
 from core.types import Pair
-from domain.constants.image_file_property_constants import ImageFilePropertyConstants
+from domain.common.constants import ImageFilePropertyConstants
 
 
 @final

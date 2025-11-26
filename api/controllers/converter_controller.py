@@ -11,7 +11,7 @@ from api.throttling import Anonymous60MinutesRateThrottle, Anonymous100PerDayRat
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
 from application.converter.queries.get_zip_query import GetZipQuery
-from domain.constants.converter_constants import ConverterConstants
+from domain.converter.constants import ConverterConstants
 
 
 @final

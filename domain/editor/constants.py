@@ -1,6 +1,6 @@
 from typing import final, Final
 
-from domain.constants.image_file_property_constants import ImageFilePropertyConstants
+from domain.common.constants import ImageFilePropertyConstants
 from enum import StrEnum
 
 
