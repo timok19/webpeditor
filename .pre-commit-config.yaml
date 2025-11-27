@@ -15,18 +15,18 @@ repos:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
       args: [ "--locked", "--all-packages" ]
-      stages: [ commit ]
+      stages: [ pre-commit ]
     - id: uv-lock
       name: "ensure uv.lock file is up-to-date"
-      stages: [ commit ]
+      stages: [ pre-commit ]
     - id: uv-export
       name: "export requirements.txt"
       args: [ "--frozen", "--no-dev", "--no-hashes", "-o", "requirements.txt" ]
-      stages: [ commit ]
+      stages: [ pre-commit ]
     - id: uv-export
       name: "export requirements-dev.txt"
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
-      stages: [ commit ]
+      stages: [ pre-commit ]
 
 #- repo: https://github.com/pypa/pip-audit
 #  rev: v2.9.0
