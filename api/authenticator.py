@@ -14,7 +14,7 @@ class APIKeyAuthenticator(AsyncAPIKeyHeader):
         if key is None:
             return None
 
-        hashed_key = APIKeyUtils.hash(key)
-        api_key_exist = await APIKeyDo.objects.filter(key_hash=hashed_key).aexists()
+        key_hash = APIKeyUtils.hash(key)
+        api_key_exist = await APIKeyDo.objects.filter(key_hash=key_hash).aexists()
 
         return key if api_key_exist else None

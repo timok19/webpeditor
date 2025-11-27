@@ -4,6 +4,7 @@
     "application",
     "infrastructure",
     "core",
+    "tests",
     "webpeditor"
   ],
   "exclude": [

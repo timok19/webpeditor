@@ -21,9 +21,11 @@ yarn-error.log.DS_Store
 .env.dev
 .vercel
 *.sqlite3
+.coverage
 
 venv/
 .venv/
-docs/solid_audit.md
-.pip-audit-cache
-.pip-audit-cache-dev
+.pip-audit-cache/
+.pip-audit-cache-dev/
+.nox/
+htmlcov/
