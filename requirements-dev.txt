@@ -43,6 +43,7 @@ gitpython==3.1.45
     # via dtach
 humanize==4.14.0
     # via nox
+hypothesis==6.148.3
 identify==2.6.15
     # via pre-commit
 idna==3.11
@@ -120,7 +121,9 @@ ruff==0.14.6
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
-    # via cyclonedx-python-lib
+    # via
+    #   cyclonedx-python-lib
+    #   hypothesis
 toml==0.10.2
     # via pip-audit
 tomli==2.3.0
