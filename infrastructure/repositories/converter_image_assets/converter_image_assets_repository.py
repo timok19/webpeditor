@@ -71,7 +71,7 @@ class ConverterImageAssetsRepository(ConverterImageAssetsRepositoryABC):
             return ContextResult[None].failure(ErrorContext.bad_request())
 
     @as_awaitable_result
-    async def acreate_asset_file[T: ImageAssetFile](self, user_id: str, *, params: CreateAssetFileParams[T]) -> ContextResult[T]:
+    async def aget_or_create_asset_file[T: ImageAssetFile](self, user_id: str, *, params: CreateAssetFileParams[T]) -> ContextResult[T]:
         asset_file_type = self.__map_file_type(params.file_type)
         return await (
             self.__aget_or_create_asset(user_id)

@@ -16,7 +16,7 @@ from application.common.abc.validator_abc import ValidatorABC
 from application.common.services.session_service_factory import SessionServiceFactory
 from core.types import Pair
 from domain.common.models import ImageAssetFile
-from domain.converter.models import ConverterConvertedImageAssetFile, ConverterImageAsset, ConverterOriginalImageAssetFile
+from domain.converter.models import ConverterConvertedImageAssetFile, ConverterOriginalImageAssetFile
 from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from application.common.services.models.file_info import ImageFileInfo
 from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
@@ -71,7 +71,7 @@ class ConvertImagesCommand:
                 lambda user_id: self.__aget_cache(user_id, request).aif_empty(
                     self.__acleanup_previous_assets(user_id)
                     .abind(lambda _: self.__converter_repo.aget_or_create_asset(user_id))
-                    .map(lambda asset: (self.__aprocess(uploaded_file, asset, request.options) for uploaded_file in request.files))
+                    .map(lambda _: (self.__aprocess(user_id, uploaded_file, request.options) for uploaded_file in request.files))
                     .amap(lambda results: asyncio.gather(*results))
                     .abind_many(lambda results: self.__set_cache(user_id, request, results))
                     .tap_either(
@@ -108,26 +108,26 @@ class ConvertImagesCommand:
     @as_awaitable_result
     async def __aprocess(
         self,
+        user_id: str,
         uploaded_file: UploadedFile,
-        asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConversionResponse]:
         with Image.open(uploaded_file) as image_file:
             return await (
                 self.__image_file_service.verify_integrity(image_file)
                 .bind(lambda file: self.__image_file_service.set_filename(file, uploaded_file.name))
-                .abind(lambda file: self.__aget_original(file, asset).amap2(self.__aconvert(file, asset, options), self.__to_response))
+                .abind(lambda file: self.__aget_original(user_id, file).amap2(self.__aconvert(user_id, file, options), self.__to_response))
             )
 
     @as_awaitable_result
-    async def __aget_original(self, file: ImageFile, asset: ConverterImageAsset) -> ContextResult[ConverterOriginalImageAssetFile]:
+    async def __aget_original(self, user_id: str, file: ImageFile) -> ContextResult[ConverterOriginalImageAssetFile]:
         return await (
             self.__image_file_service.get_info(file)
-            .abind(lambda file_info: self.__aupload(asset.user_id, "original", file_info).map(lambda url: (url, file_info)))
+            .abind(lambda file_info: self.__aupload(user_id, "original", file_info).map(lambda url: (url, file_info)))
             .map(Pair[HttpUrl, ImageFileInfo].from_tuple)
             .abind(
-                lambda pair: self.__converter_repo.acreate_asset_file(
-                    asset.user_id,
+                lambda pair: self.__converter_repo.aget_or_create_asset_file(
+                    user_id,
                     params=CreateAssetFileParams(
                         file_url=str(pair.item1),
                         file_info=pair.item2,
@@ -140,18 +140,18 @@ class ConvertImagesCommand:
     @as_awaitable_result
     async def __aconvert(
         self,
+        user_id: str,
         file: ImageFile,
-        asset: ConverterImageAsset,
         options: ConversionRequest.Options,
     ) -> ContextResult[ConverterConvertedImageAssetFile]:
         return await (
             self.__image_converter.aconvert(file, options)
             .bind(self.__image_file_service.get_info)
-            .abind(lambda file_info: self.__aupload(asset.user_id, "converted", file_info).map(lambda url: (url, file_info)))
+            .abind(lambda file_info: self.__aupload(user_id, "converted", file_info).map(lambda url: (url, file_info)))
             .map(Pair[HttpUrl, ImageFileInfo].from_tuple)
             .abind(
-                lambda pair: self.__converter_repo.acreate_asset_file(
-                    asset.user_id,
+                lambda pair: self.__converter_repo.aget_or_create_asset_file(
+                    user_id,
                     params=CreateAssetFileParams(
                         file_url=str(pair.item1),
                         file_info=pair.item2,
