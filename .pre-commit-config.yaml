@@ -24,19 +24,13 @@ repos:
       name: "export requirements-dev.txt"
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
 
-#- repo: https://github.com/pypa/pip-audit
-#  rev: v2.9.0
-#  hooks:
-#  - id: pip-audit
-#    name: "audit dependencies"
-#    args: ["-r", "requirements.txt", "--local", "--cache-dir", ".pip-audit-cache"]
-#    verbose: true
-#    files: ^requirements\.txt$
-#  - id: pip-audit
-#    name: "audit dev dependencies"
-#    args: ["-r", "requirements-dev.txt", "--local", "--cache-dir", ".pip-audit-cache-dev"]
-#    verbose: true
-#    files: ^requirements-dev\.txt$
+- repo: https://github.com/pypa/pip-audit
+  rev: v2.9.0
+  hooks:
+  - id: pip-audit
+    name: "audit dependencies"
+    args: ["--local", "--cache-dir", ".pip-audit"]
+    verbose: true
 
-#ci:
-#  skip: [pip-audit]
+ci:
+  skip: [ pip-audit ]
