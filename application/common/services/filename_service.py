@@ -29,11 +29,7 @@ class FilenameService(FilenameServiceABC):
 
     def get_basename(self, filename: Union[str, bytes]) -> ContextResult[str]:
         try:
-            return (
-                self.normalize(filename)
-                .map(lambda normalized: Pair[str, str].from_tuple(os.path.splitext(normalized)))
-                .map(lambda pair: pair.item1)
-            )
+            return self.normalize(filename).map(os.path.splitext).map(Pair[str, str].from_tuple).map(lambda pair: pair.item1)
         except Exception as exception:
             self.__logger.exception(exception, f"Unable to get basename from the filename '{filename}'")
             return ContextResult[str].failure(ErrorContext.server_error())

@@ -7,7 +7,6 @@ from PIL.ImageFile import ImageFile
 from aiocache.backends.memory import SimpleMemoryCache
 from django.http import HttpRequest
 from ninja import UploadedFile
-from ninja_extra.context import RouteContext
 from pydantic import HttpUrl
 from types_linq import Enumerable
 
@@ -22,7 +21,7 @@ from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from application.common.services.models.file_info import ImageFileInfo
 from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
 from application.converter.commands.schemas.conversion import ConversionRequest, ConversionResponse
-from application.converter.services.abc.image_converter_abc import ImageConverterABC
+from application.converter.services.abc.image_file_converter_abc import ImageFileConverterABC
 from core.abc.logger_abc import LoggerABC
 from core.result import (
     ContextResult,
@@ -41,39 +40,33 @@ class ConvertImagesCommand:
 
     def __init__(
         self,
-        route_context_validator: ValidatorABC[RouteContext],
-        http_request_validator: ValidatorABC[HttpRequest],
         session_service_factory: SessionServiceFactory,
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
-        image_converter: ImageConverterABC,
+        image_converter: ImageFileConverterABC,
         image_file_service: ImageFileServiceABC,
         filename_service: FilenameServiceABC,
         converter_repo: ConverterImageAssetsRepositoryABC,
         logger: LoggerABC,
     ) -> None:
-        self.__route_context_validator: Final[ValidatorABC[RouteContext]] = route_context_validator
-        self.__http_request_validator: Final[ValidatorABC[HttpRequest]] = http_request_validator
         self.__session_service_factory: Final[SessionServiceFactory] = session_service_factory
         self.__conversion_request_validator: Final[ValidatorABC[ConversionRequest]] = conversion_request_validator
         self.__converter_files_repo: Final[Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__]] = converter_files_repo
         self.__image_file_service: Final[ImageFileServiceABC] = image_file_service
         self.__filename_service: Final[FilenameServiceABC] = filename_service
-        self.__image_converter: Final[ImageConverterABC] = image_converter
+        self.__image_converter: Final[ImageFileConverterABC] = image_converter
         self.__converter_repo: Final[ConverterImageAssetsRepositoryABC] = converter_repo
         self.__logger: Final[LoggerABC] = logger
 
     @as_awaitable_enumerable_result
     async def ahandle(
         self,
-        context: Optional[RouteContext],
+        http_request: HttpRequest,
         request: ConversionRequest,
     ) -> EnumerableContextResult[ConversionResponse]:
         return await (
             self.__conversion_request_validator.validate(request)
-            .bind(lambda _: self.__route_context_validator.validate(context))
-            .bind(lambda ctx: self.__http_request_validator.validate(ctx.request))
-            .abind(lambda http_request: self.__session_service_factory.create(http_request).aget_user_id())
+            .abind(lambda _: self.__session_service_factory.create(http_request).aget_user_id())
             .abind_many(
                 lambda user_id: self.__aget_cache(user_id, request).aif_empty(
                     self.__acleanup_previous_assets(user_id)

@@ -1,4 +1,4 @@
-from typing import IO, Any, Mapping, MutableMapping, Optional, Sequence, Union
+from typing import IO, Any, Mapping, Optional, Sequence, Union, MutableMapping
 
 from httpx import QueryParams
 

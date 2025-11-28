@@ -1,8 +1,6 @@
 from typing import Annotated
 
 from anydi import Module, provider
-from django.http import HttpRequest
-from ninja_extra.context import RouteContext
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC
@@ -12,13 +10,11 @@ from application.common.services.session_service_factory import SessionServiceFa
 from application.common.services.signing_service import SigningService
 from application.common.services.filename_service import FilenameService
 from application.common.services.image_file_service import ImageFileService
-from application.common.validators.http_request_validator import HttpRequestValidator
-from application.common.validators.route_context_validator import RouteContextValidator
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest
 from application.converter.queries.get_zip_query import GetZipQuery
-from application.converter.services.abc.image_converter_abc import ImageConverterABC
-from application.converter.services.image_converter import ImageConverter
+from application.converter.services.abc.image_file_converter_abc import ImageFileConverterABC
+from application.converter.services.image_file_converter import ImageFileConverter
 from application.converter.validators.conversion_request_validator import ConversionRequestValidator
 from core.abc.logger_abc import LoggerABC
 from infrastructure.abc.converter_image_assets_repository_abc import ConverterImageAssetsRepositoryABC
@@ -34,14 +30,6 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_image_file_service(self, logger: LoggerABC, filename_service: FilenameServiceABC) -> ImageFileServiceABC:
         return ImageFileService(logger, filename_service)
-
-    @provider(scope="request")
-    def provide_route_context_validator(self) -> ValidatorABC[RouteContext]:
-        return RouteContextValidator()
-
-    @provider(scope="request")
-    def provide_http_request_validator(self) -> ValidatorABC[HttpRequest]:
-        return HttpRequestValidator()
 
     @provider(scope="request")
     def provide_signing_service(self, logger: LoggerABC) -> SigningServiceABC:
@@ -66,26 +54,22 @@ class ApplicationModule(Module):
         image_file_service: ImageFileServiceABC,
         filename_service: FilenameServiceABC,
         logger: LoggerABC,
-    ) -> ImageConverterABC:
-        return ImageConverter(image_file_service, filename_service, logger)
+    ) -> ImageFileConverterABC:
+        return ImageFileConverter(image_file_service, filename_service, logger)
 
     @provider(scope="request")
     def provide_convert_images_command(
         self,
-        route_context_validator: ValidatorABC[RouteContext],
-        http_request_validator: ValidatorABC[HttpRequest],
         session_service_factory: SessionServiceFactory,
         conversion_request_validator: ValidatorABC[ConversionRequest],
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
-        image_converter: ImageConverterABC,
+        image_converter: ImageFileConverterABC,
         image_file_service: ImageFileServiceABC,
         filename_service: FilenameServiceABC,
         converter_repo: ConverterImageAssetsRepositoryABC,
         logger: LoggerABC,
     ) -> ConvertImagesCommand:
         return ConvertImagesCommand(
-            route_context_validator,
-            http_request_validator,
             session_service_factory,
             conversion_request_validator,
             converter_files_repo,
@@ -99,16 +83,8 @@ class ApplicationModule(Module):
     @provider(scope="request")
     def provide_get_zip_query(
         self,
-        route_context_validator: ValidatorABC[RouteContext],
-        http_request_validator: ValidatorABC[HttpRequest],
         session_service_factory: SessionServiceFactory,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterImageAssetsRepositoryABC,
     ) -> GetZipQuery:
-        return GetZipQuery(
-            route_context_validator,
-            http_request_validator,
-            session_service_factory,
-            converter_files_repo,
-            converter_repo,
-        )
+        return GetZipQuery(session_service_factory, converter_files_repo, converter_repo)

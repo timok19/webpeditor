@@ -4,9 +4,10 @@ from typing import Annotated, final
 from anydi_django import container
 from ninja import UploadedFile
 from ninja.params.functions import File, Form
-from ninja_extra import api_controller, http_get, http_post, ControllerBase  # pyright: ignore
+from ninja_extra import api_controller, http_get, http_post  # pyright: ignore
 
 from api.action_result import ActionResult, ActionResultWithStatus
+from api.controllers.controller_base import ControllerBase
 from api.throttling import Anonymous60MinutesRateThrottle, Anonymous100PerDayRateThrottle, Anonymous1000PerDayRateThrottle
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
@@ -59,7 +60,7 @@ class ConverterController(ControllerBase):
         async with container.arequest_context():
             convert_images_command = await container.aresolve(ConvertImagesCommand)
             conversion_request = ConversionRequest.create(files, output_format, quality)
-            results = await convert_images_command.ahandle(self.context, conversion_request)
+            results = await convert_images_command.ahandle(self.http_request, conversion_request)
             return ActionResult[ConversionResponse].from_results(results)
 
     @http_get(
@@ -76,5 +77,5 @@ class ConverterController(ControllerBase):
     async def aget_zip(self) -> ActionResultWithStatus[GetZipResponse]:
         async with container.arequest_context():
             get_zip_query = await container.aresolve(GetZipQuery)
-            result = await get_zip_query.ahandle(self.context)
+            result = await get_zip_query.ahandle(self.http_request)
             return ActionResult[GetZipResponse].from_result(result)

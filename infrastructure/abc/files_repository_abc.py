@@ -14,7 +14,7 @@ class FilesRepositoryABC(ABC):
 
     @abstractmethod
     @as_awaitable_result
-    async def aget_zip(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]: ...
+    async def azip_folder(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]: ...
 
     @abstractmethod
     @as_awaitable_result

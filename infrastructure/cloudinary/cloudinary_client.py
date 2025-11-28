@@ -1,7 +1,7 @@
 import hashlib
 from datetime import datetime, timezone
 from http import HTTPMethod
-from typing import Final, MutableMapping, Optional, final, Collection
+from typing import Final, Optional, final, Collection, MutableMapping
 
 from httpx import AsyncClient, BasicAuth, Timeout
 from pydantic import BaseModel
@@ -61,11 +61,15 @@ class CloudinaryClient:
 
     @as_awaitable_result
     async def adelete_files(self, public_ids: Collection[str]) -> ContextResult[DeleteFileResponse]:
-        return await self.__asend_request(
-            HTTPMethod.DELETE,
-            "resources/image/upload",
-            query_params="&".join(f"public_ids[]={public_id}" for public_id in public_ids),
-            response_type=DeleteFileResponse,
+        return (
+            await self.__asend_request(
+                HTTPMethod.DELETE,
+                "resources/image/upload",
+                query_params="&".join(f"public_ids[]={public_id}" for public_id in public_ids),
+                response_type=DeleteFileResponse,
+            )
+            if len(public_ids) > 0
+            else ContextResult[DeleteFileResponse].success(DeleteFileResponse(deleted={}))
         )
 
     @as_awaitable_result

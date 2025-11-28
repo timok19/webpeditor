@@ -24,7 +24,7 @@ class ConverterFilesRepository(FilesRepositoryABC):
         return await self.__cloudinary_client.aupload_file(folder, public_id, params.content).map(lambda response: response.secure_url)
 
     @as_awaitable_result
-    async def aget_zip(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]:
+    async def azip_folder(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]:
         zip_file_path = f"{self._get_root_folder_path(user_id)}/webpeditor_{relative_folder_path.replace('/', '_')}.zip"
         return (
             await self.aget_files(user_id, relative_folder_path)
@@ -36,10 +36,15 @@ class ConverterFilesRepository(FilesRepositoryABC):
     @as_awaitable_result
     async def adelete_files(self, user_id: str, relative_folder_path: str) -> ContextResult[None]:
         folder_path = f"{self._get_root_folder_path(user_id)}/{relative_folder_path}"
+
+        get_files_response_result = await self.aget_files(user_id, relative_folder_path)
+        if get_files_response_result.is_error():
+            self.__logger.debug(f"No files to delete at {folder_path}")
+            return ContextResult[None].success(None)
+
+        public_ids = Enumerable(get_files_response_result.ok.files).select(lambda file: file.public_id).to_list()
         return await (
-            self.aget_files(user_id, relative_folder_path)
-            .map(lambda response: Enumerable(response.files).select(lambda file: file.public_id))
-            .abind(self.__cloudinary_client.adelete_files)
+            self.__cloudinary_client.adelete_files(public_ids)
             .map(lambda response: self.__logger.info(f"Deleted {len(response.deleted.values())} files from '{folder_path}'"))
             .as_empty()
         )
@@ -52,23 +57,3 @@ class ConverterFilesRepository(FilesRepositoryABC):
     @staticmethod
     def _get_root_folder_path(user_id: str) -> str:
         return f"{user_id}/converter"
-
-    # async def adelete_all_folders(self) -> None:
-    #       users_folders: list[str] = self.get_all_users_folders()
-    #
-    #       total_deleted_folders: int = 0
-    #
-    #       for i, user_folder in enumerate(users_folders):
-    #           await self.adelete_editor_images(user_folder)
-    #           await self.adelete_converted_images(user_folder)
-    #           self.delete_user_folder(user_folder)
-    #
-    #           total_deleted_folders += i + 1
-    #
-    #       self.__logger.log_info(f"Deleted {total_deleted_folders} user folders in Cloudinary storage")
-    #       raise NotImplementedError()
-
-    # def get_all_users_folders(self) -> list[str]:
-    #       response: Response = cloudinary.api.root_folders()
-    #       return [folder["path"] for folder in response["folders"]]
-    #       raise NotImplementedError()

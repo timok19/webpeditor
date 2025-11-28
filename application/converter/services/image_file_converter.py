@@ -1,6 +1,5 @@
-import math
 from io import BytesIO
-from typing import Any, Final, cast, Union
+from typing import Any, Final, Union, cast
 
 from expression import Option
 from PIL import Image, ImageFile
@@ -8,13 +7,16 @@ from PIL import Image, ImageFile
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC
 from application.converter.commands.schemas.conversion import ConversionRequest
-from application.converter.services.abc.image_converter_abc import ImageConverterABC
+from application.converter.services.abc.image_file_converter_abc import ImageFileConverterABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from domain.converter.constants import ConverterConstants
 
 
-class ImageConverter(ImageConverterABC):
+type _StrOrBytes = Union[str, bytes]
+
+
+class ImageFileConverter(ImageFileConverterABC):
     def __init__(self, image_file_service: ImageFileServiceABC, filename_service: FilenameServiceABC, logger: LoggerABC) -> None:
         self.__image_file_service: Final[ImageFileServiceABC] = image_file_service
         self.__filename_service: Final[FilenameServiceABC] = filename_service
@@ -23,9 +25,8 @@ class ImageConverter(ImageConverterABC):
     @as_awaitable_result
     async def aconvert(self, file: ImageFile.ImageFile, options: ConversionRequest.Options) -> ContextResult[ImageFile.ImageFile]:
         return await (
-            ContextResult[Union[str, bytes]]
-            .from_result(Option[str].of_optional(file.filename).to_result(ErrorContext.server_error("Image file has no filename")))
-            .bind(self.__filename_service.normalize)
+            ContextResult[_StrOrBytes]
+            .from_result(Option[_StrOrBytes].of_optional(file.filename).to_result(ErrorContext.server_error("Image file has no filename")))
             .bind(self.__filename_service.get_basename)
             .map(lambda basename: f"webpeditor_{basename}.{options.output_format.lower()}")
             .bind(lambda new_filename: self.__image_file_service.set_filename(file, new_filename))
@@ -41,49 +42,29 @@ class ImageConverter(ImageConverterABC):
         if file.format is None:
             return ContextResult[ImageFile.ImageFile].failure(ErrorContext.server_error("Unable to convert image. Invalid image format"))
 
-        # Resize large images to improve performance
-        resized = self.__resize_image(file)
+        filename = file.filename
 
-        source_has_alpha = resized.mode == ConverterConstants.RGBA_MODE or resized.format in ConverterConstants.ImageFormatsWithAlphaChannel
+        source_has_alpha = file.mode == ConverterConstants.RGBA_MODE or file.format in ConverterConstants.ImageFormatsWithAlphaChannel
         target_has_alpha = options.output_format in ConverterConstants.ImageFormatsWithAlphaChannel
 
         target_mode = ConverterConstants.RGBA_MODE if target_has_alpha else ConverterConstants.RGB_MODE
 
         # Optimize the color mode conversion
-        if resized.mode == ConverterConstants.PALETTE_MODE:
-            resized = resized.convert(target_mode)
+        if file.mode != target_mode or file.mode == ConverterConstants.PALETTE_MODE:
+            file = cast(ImageFile.ImageFile, file.convert(target_mode))
         elif source_has_alpha and not target_has_alpha:
-            resized = self.__to_rgb(resized)
-        elif resized.mode != target_mode:
-            resized = resized.convert(target_mode)
+            file = cast(ImageFile.ImageFile, self.__to_rgb(file))
 
-        converted = Image.open(BytesIO(self.__convert_format(resized, options)))
+        file_bytes = self.__convert_format(file, options)
+        buffered_file = BytesIO(file_bytes)
+
+        converted = Image.open(buffered_file)
         # Force-load the image so the buffer can be released safely
         converted.load()
-        converted.filename = file.filename
+        converted.filename = filename
+        buffered_file.close()
 
         return ContextResult[ImageFile.ImageFile].success(converted)
-
-    @staticmethod
-    def __resize_image(file: ImageFile.ImageFile) -> ImageFile.ImageFile:
-        if file.width <= ConverterConstants.MAX_IMAGE_DIMENSIONS and file.height <= ConverterConstants.MAX_IMAGE_DIMENSIONS:
-            return file
-
-        # Calculate new dimensions while preserving an aspect ratio
-        if file.width > file.height:
-            new_width = ConverterConstants.MAX_IMAGE_DIMENSIONS
-            new_height = math.ceil(file.height * (ConverterConstants.MAX_IMAGE_DIMENSIONS / file.width))
-        else:
-            new_height = ConverterConstants.MAX_IMAGE_DIMENSIONS
-            new_width = math.ceil(file.width * (ConverterConstants.MAX_IMAGE_DIMENSIONS / file.height))
-
-        # Use BICUBIC instead of LANCZOS for faster resizing with acceptable quality
-        # BICUBIC is about 30-40% faster than LANCZOS with minimal quality difference for downsampling
-        resized_image = cast(ImageFile.ImageFile, file.resize((new_width, new_height), Image.Resampling.BICUBIC))
-        resized_image.format = file.format
-        resized_image.filename = file.filename
-
-        return resized_image
 
     def __convert_format(self, image: Image.Image, options: ConversionRequest.Options) -> bytes:
         save_args: dict[str, Any] = {"quality": options.quality, "exif": image.getexif(), "optimize": True}
@@ -99,11 +80,9 @@ class ImageConverter(ImageConverterABC):
         elif options.output_format == ConverterConstants.ImageFormats.TIFF:
             save_args.update({"compression": "jpeg" if image.mode == ConverterConstants.RGB_MODE else "tiff_deflate"})
 
-        buffer = BytesIO()
-
-        image.save(buffer, options.output_format, **save_args)
-
-        return buffer.getvalue()
+        with BytesIO() as buffer:
+            image.save(buffer, options.output_format, **save_args)
+            return buffer.getvalue()
 
     @staticmethod
     def __is_large_image(image: Image.Image) -> bool:
