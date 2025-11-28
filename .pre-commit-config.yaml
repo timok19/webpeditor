@@ -29,7 +29,7 @@ repos:
   hooks:
   - id: pip-audit
     name: "audit dependencies"
-    args: ["--local", "--cache-dir", ".pip-audit"]
+    args: ["-r", "requirements.txt", "--local", "--cache-dir", ".pip-audit"]
     verbose: true
 
 ci:
