@@ -9,6 +9,7 @@ from django.http import HttpRequest
 from ninja import UploadedFile
 from ninja_extra.context import RouteContext
 from pydantic import HttpUrl
+from types_linq import Enumerable
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC
@@ -129,7 +130,8 @@ class ConvertImagesCommand:
     async def __aget_original(self, file: ImageFile, asset: ConverterImageAsset) -> ContextResult[ConverterOriginalImageAssetFile]:
         return await (
             self.__image_file_service.get_info(file)
-            .abind(lambda file_info: self.__aupload(asset.user_id, "original", file_info).map(lambda url: Pair(url, file_info)))
+            .abind(lambda file_info: self.__aupload(asset.user_id, "original", file_info).map(lambda url: (url, file_info)))
+            .map(Pair[HttpUrl, ImageFileInfo].from_tuple)
             .abind(
                 lambda pair: self.__converter_repo.acreate_asset_file(
                     asset.user_id,
@@ -152,7 +154,8 @@ class ConvertImagesCommand:
         return await (
             self.__image_converter.aconvert(file, options)
             .bind(self.__image_file_service.get_info)
-            .abind(lambda file_info: self.__aupload(asset.user_id, "converted", file_info).map(lambda url: Pair(url, file_info)))
+            .abind(lambda file_info: self.__aupload(asset.user_id, "converted", file_info).map(lambda url: (url, file_info)))
+            .map(Pair[HttpUrl, ImageFileInfo].from_tuple)
             .abind(
                 lambda pair: self.__converter_repo.acreate_asset_file(
                     asset.user_id,
@@ -205,11 +208,8 @@ class ConvertImagesCommand:
 
     @as_awaitable_enumerable_result
     async def __aget_cache(self, user_id: str, request: ConversionRequest) -> EnumerableContextResult[ConversionResponse]:
-        results = cast(
-            Optional[EnumerableContextResult[ConversionResponse]],
-            await self.__CACHE.get(self.__get_cache_key(user_id, request)),
-        )
-        return results or EnumerableContextResult[ConversionResponse].empty()
+        results = await self.__CACHE.get(self.__get_cache_key(user_id, request))
+        return cast(Optional[EnumerableContextResult[ConversionResponse]], results) or EnumerableContextResult[ConversionResponse].empty()
 
     @as_awaitable_enumerable_result
     async def __set_cache(
@@ -225,9 +225,5 @@ class ConvertImagesCommand:
     @staticmethod
     def __get_cache_key(user_id: str, request: ConversionRequest) -> str:
         hasher = hashlib.sha256()
-
-        for file in request.files:
-            for chunk in file.chunks():
-                hasher.update(chunk)
-
+        Enumerable(request.files).select_many(lambda file: file.chunks()).as_more().for_each(hasher.update)
         return f"{user_id}-{request.options.quality}-{request.options.output_format}-{hasher.hexdigest()}"
