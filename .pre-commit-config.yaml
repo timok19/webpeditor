@@ -10,7 +10,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.12
+  rev: 0.9.13
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
