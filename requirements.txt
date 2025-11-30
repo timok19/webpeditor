@@ -10,13 +10,13 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.56.0
+anydi==0.57.0
     # via
     #   anydi-django
     #   webpeditor
-anydi-django==0.3.0
+anydi-django==0.4.0
     # via webpeditor
-anyio==4.11.0
+anyio==4.12.0
     # via
     #   anydi
     #   httpx
@@ -281,8 +281,6 @@ service-identity==24.2.0
     # via twisted
 shortuuid==1.0.13
     # via webpeditor
-sniffio==1.3.1
-    # via anyio
 sqlparse==0.5.4
     # via
     #   django
