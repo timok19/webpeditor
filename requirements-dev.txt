@@ -22,7 +22,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
 colorlog==6.10.1
     # via nox
 coverage==7.12.0
-cyclonedx-python-lib==9.1.0
+cyclonedx-python-lib==11.6.0
     # via pip-audit
 defusedxml==0.7.1
     # via py-serializable
@@ -43,7 +43,7 @@ gitpython==3.1.45
     # via dtach
 humanize==4.14.0
     # via nox
-hypothesis==6.148.3
+hypothesis==6.148.5
 identify==2.6.15
     # via pre-commit
 idna==3.11
@@ -78,7 +78,7 @@ pip==25.3
     # via pip-api
 pip-api==0.0.34
     # via pip-audit
-pip-audit==2.9.0
+pip-audit==2.10.0
 pip-requirements-parser==32.0.1
     # via pip-audit
 platformdirs==4.5.0
@@ -124,15 +124,17 @@ sortedcontainers==2.4.0
     # via
     #   cyclonedx-python-lib
     #   hypothesis
-toml==0.10.2
-    # via pip-audit
 tomli==2.3.0
-    # via dtach
+    # via
+    #   dtach
+    #   pip-audit
 tomli-w==1.2.0
-    # via dtach
+    # via
+    #   dtach
+    #   pip-audit
 urllib3==2.5.0
     # via requests
-uv==0.9.13
+uv==0.9.14
     # via nox
 virtualenv==20.35.4
     # via

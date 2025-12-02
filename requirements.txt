@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.57.0
+anydi==0.59.0
     # via
     #   anydi-django
     #   webpeditor
@@ -88,7 +88,7 @@ dill==0.4.0
     # via
     #   reactpy-django
     #   webpeditor
-django==5.2.8
+django==5.2.9
     # via
     #   anydi-django
     #   channels
@@ -124,9 +124,9 @@ django-ninja==1.5.0
     #   webpeditor
 django-ninja-extra==0.30.6
     # via webpeditor
-django-stubs==5.2.7
+django-stubs==5.2.8
     # via webpeditor
-django-stubs-ext==5.2.7
+django-stubs-ext==5.2.8
     # via
     #   django-stubs
     #   webpeditor
@@ -182,7 +182,7 @@ idna==3.11
     #   twisted
 incremental==24.11.0
     # via twisted
-injector==0.22.0
+injector==0.23.0
     # via django-ninja-extra
 jsonpatch==1.33
     # via reactpy

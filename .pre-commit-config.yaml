@@ -10,7 +10,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.13
+  rev: 0.9.14
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
@@ -25,7 +25,7 @@ repos:
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
 
 - repo: https://github.com/pypa/pip-audit
-  rev: v2.9.0
+  rev: v2.10.0
   hooks:
   - id: pip-audit
     name: "audit dependencies"
