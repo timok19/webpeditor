@@ -3,9 +3,9 @@ from typing import Final, final
 from pydantic import HttpUrl
 from types_linq import Enumerable
 
-from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, as_awaitable_result
+from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from infrastructure.cloudinary.cloudinary_client import CloudinaryClient
 from infrastructure.cloudinary.models import GetFilesResponse
 from infrastructure.repositories.converter_files.models import UploadFileParams
@@ -26,8 +26,8 @@ class ConverterFilesRepository(FilesRepositoryABC):
     @as_awaitable_result
     async def azip_folder(self, user_id: str, relative_folder_path: str) -> ContextResult[HttpUrl]:
         zip_file_path = f"{self._get_root_folder_path(user_id)}/webpeditor_{relative_folder_path.replace('/', '_')}.zip"
-        return (
-            await self.aget_files(user_id, relative_folder_path)
+        return await (
+            self.aget_files(user_id, relative_folder_path)
             .map(lambda response: Enumerable(response.files).select(lambda resource: resource.public_id))
             .abind(lambda public_ids: self.__cloudinary_client.agenerate_zip_archive(public_ids, zip_file_path))
             .map(lambda response: response.secure_url)
