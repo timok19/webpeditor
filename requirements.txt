@@ -19,8 +19,12 @@ anydi-django==0.4.0
 anyio==4.12.0
     # via
     #   anydi
+    #   anysqlite
+    #   hishel
     #   httpx
     #   reactpy
+anysqlite==0.0.5
+    # via hishel
 asgiref==3.11.0
     # via
     #   channels
@@ -39,6 +43,8 @@ autobahn==25.11.1
     # via daphne
 automat==25.4.16
     # via twisted
+bitmath==1.3.3.1
+    # via webpeditor
 cbor2==5.7.1
     # via autobahn
 certifi==2025.11.12
@@ -160,12 +166,16 @@ h11==0.16.0
     # via httpcore
 h2==4.3.0
     # via twisted
+hishel==1.1.7
+    # via webpeditor
 hpack==4.1.0
     # via h2
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via webpeditor
+    # via
+    #   hishel
+    #   webpeditor
 hyperframe==6.1.0
     # via h2
 hyperlink==21.0.0
@@ -196,8 +206,10 @@ lxml==6.0.2
     # via reactpy
 mccabe==0.7.0
     # via webpeditor
-msgpack==1.1.2 ; platform_python_implementation == 'CPython'
-    # via autobahn
+msgpack==1.1.2
+    # via
+    #   autobahn
+    #   hishel
 multidict==6.7.0
     # via webpeditor
 mypy-extensions==1.1.0
@@ -304,6 +316,7 @@ typing-extensions==4.15.0
     #   django-stubs
     #   django-stubs-ext
     #   expression
+    #   hishel
     #   pydantic
     #   pydantic-core
     #   reactivex

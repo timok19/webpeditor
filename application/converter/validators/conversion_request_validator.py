@@ -1,5 +1,6 @@
-from typing import Any, Final, Generator, Optional, cast, final
+from typing import Final, Optional, final
 
+import bitmath
 from expression import Option
 from ninja import UploadedFile
 from types_linq import Enumerable
@@ -22,25 +23,43 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
         self.__filename_service: Final[FilenameServiceABC] = filename_service
         self.__logger: Final[LoggerABC] = logger
 
-    def validate(self, value: Optional[ConversionRequest]) -> ContextResult[ConversionRequest]:
-        reasons = Enumerable(self.__validate(value)).where(lambda error: error.is_some()).select(lambda error: error.some)
+    def validate(self, value: ConversionRequest) -> ContextResult[ConversionRequest]:
+        reasons = self.__validate(value)
         return (
             ContextResult[ConversionRequest].failure(ErrorContext.bad_request("Invalid request", reasons.to_list()))
             if reasons.any()
-            else ContextResult[ConversionRequest].success(cast(ConversionRequest, value))
+            else ContextResult[ConversionRequest].success(value)
         )
 
-    def __validate(self, value: Optional[ConversionRequest]) -> Generator[Option[str], Any, None]:
-        if value is None:
-            yield Option[str].Some(f"{ConversionRequest.__name__} is empty")
-            return
-        yield self.__validate_file_count(value.files)
-        yield self.__validate_output_format(value.options.output_format)
-        yield self.__validate_quality(value.options.quality)
-        for uploaded_file in value.files:
-            yield self.__validate_filename(uploaded_file.name)
-            yield self.__validate_empty_file_size(uploaded_file)
-            yield self.__validate_max_file_size(uploaded_file)
+    def __validate(self, value: ConversionRequest) -> Enumerable[str]:
+        return (
+            self.__validate_parameters(value)
+            .concat(self.__validate_files(value.files))
+            .where(lambda error: error.is_some())
+            .select(lambda error: error.some)
+        )
+
+    def __validate_parameters(self, value: ConversionRequest) -> Enumerable[Option[str]]:
+        return (
+            Enumerable[Option[str]]
+            .empty()
+            .append(self.__validate_file_count(value.files))
+            .append(self.__validate_output_format(value.options.output_format))
+            .append(self.__validate_quality(value.options.quality))
+        )
+
+    def __validate_files(self, files: list[UploadedFile]) -> Enumerable[Option[str]]:
+        return (
+            Enumerable[UploadedFile](files)
+            .select_many(
+                lambda uploaded_file: Enumerable[Option[str]]
+                .empty()
+                .append(self.__validate_filename(uploaded_file.name))
+                .append(self.__validate_empty_file_size(uploaded_file))
+                .append(self.__validate_max_file_size(uploaded_file))
+            )
+            .cast(Option[str])
+        )
 
     @staticmethod
     def __validate_file_count(files: list[UploadedFile]) -> Option[str]:
@@ -73,8 +92,15 @@ class ConversionRequestValidator(ValidatorABC[ConversionRequest]):
 
     @staticmethod
     def __validate_max_file_size(uploaded_file: UploadedFile) -> Option[str]:
-        message = f"File '{uploaded_file.name}' with size {uploaded_file.size} exceeds the maximum allowed size {ConverterConstants.MAX_FILE_SIZE}"
-        return Option[str].Some(message) if uploaded_file.size > ConverterConstants.MAX_FILE_SIZE else Option[str].Nothing()
+        size = bitmath.Byte(uploaded_file.size or 0).to_MiB()
+        max_size = bitmath.Byte(ConverterConstants.MAX_FILE_SIZE).to_MiB()
+        filename = uploaded_file.name or ""
+        fmt = "{value:.1f} {unit}"
+        return (
+            Option[str].Some(f"File '{filename}' with size {size.format(fmt)} exceeds the maximum allowed size {max_size.format(fmt)}")  # pyright: ignore
+            if size > max_size
+            else Option[str].Nothing()
+        )
 
     @staticmethod
     def __validate_output_format(output_format: ConversionRequest.Options.OutputFormats) -> Option[str]:

@@ -3,7 +3,9 @@ from datetime import datetime, timezone
 from http import HTTPMethod
 from typing import Final, Optional, final, Collection, MutableMapping
 
-from httpx import AsyncClient, BasicAuth, Timeout
+from hishel import AsyncSqliteStorage, SpecificationPolicy
+from hishel.httpx import AsyncCacheTransport
+from httpx import AsyncHTTPTransport, BasicAuth, Timeout, AsyncClient
 from pydantic import BaseModel
 
 from webpeditor import settings
@@ -16,6 +18,7 @@ from infrastructure.cloudinary.models import (
     UploadFileResponse,
     GenerateZipResponse,
 )
+
 from infrastructure.cloudinary.types import QueryParamTypes, RequestData, RequestFiles
 
 
@@ -141,6 +144,8 @@ class CloudinaryClient:
 
     @staticmethod
     def __get_client() -> AsyncClient:
+        policy = SpecificationPolicy()
+        policy.use_body_key = True
         return AsyncClient(
             base_url=f"{settings.CLOUDINARY_BASE_URL}/v1_1/{settings.CLOUDINARY_CLOUD_NAME}/",
             auth=BasicAuth(
@@ -152,5 +157,10 @@ class CloudinaryClient:
                 read=float(settings.CLOUDINARY_HTTP_TIMEOUT_SECONDS),
                 write=30.0,
                 pool=5.0,
+            ),
+            transport=AsyncCacheTransport(
+                next_transport=AsyncHTTPTransport(),
+                storage=AsyncSqliteStorage(database_path=f"{CloudinaryClient.__name__}.db", default_ttl=3600),
+                policy=policy,
             ),
         )

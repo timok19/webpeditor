@@ -102,6 +102,18 @@ wheels = [
 ]
 
 [[package]]
+name = "anysqlite"
+version = "0.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0f/4b/cd5d66b9f87e773bc71344a368b9472987e33514e6627e28342b9c3e7c43/anysqlite-0.0.5.tar.gz", hash = "sha256:9dfcf87baf6b93426ad1d9118088c41dbf24ef01b445eea4a5d486bac2755cce", size = 3432, upload-time = "2023-10-02T13:49:25.135Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/31/349eae2bc9d9331dd8951684cf94528d91efaa71129dc30822ac111dfc66/anysqlite-0.0.5-py3-none-any.whl", hash = "sha256:cb345dc4f76f6b37f768d7a0b3e9cf5c700dfcb7a6356af8ab46a11f666edbe7", size = 3907, upload-time = "2023-10-02T13:49:26.943Z" },
+]
+
+[[package]]
 name = "argcomplete"
 version = "3.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -173,6 +185,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/e1/97/45805d2432221d3b8
 wheels = [
     { url = "https://files.pythonhosted.org/packages/91/b0/5d33b280b787bd972895e7c42f08dfd8cd960e680f386e3a950ccce411ad/basedpyright-1.35.0-py3-none-any.whl", hash = "sha256:4f4f84023df5a0cd4ee154916ba698596682ac98bacfa22c941ed6aaf07bba4e", size = 11872872, upload-time = "2025-12-03T14:17:09.749Z" },
 ]
+
+[[package]]
+name = "bitmath"
+version = "1.3.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/ec/808245570e00df2e1fe8252903da309f18eb58768f44fecc0215dafbc386/bitmath-1.3.3.1.tar.gz", hash = "sha256:293325f01e65defe966853111df11d39215eb705a967cb115851da8c4cfa3eb8", size = 88519, upload-time = "2018-08-23T16:23:53.031Z" }
 
 [[package]]
 name = "boolean-py"
@@ -975,6 +993,26 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1d/17/afa56379f94ad0fe8defd37d6eb3f89a25404ffc71d4d848893d270325fc/h2-4.3.0.tar.gz", hash = "sha256:6c59efe4323fa18b47a632221a1888bd7fde6249819beda254aeca909f221bf1", size = 2152026, upload-time = "2025-08-23T18:12:19.778Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/69/b2/119f6e6dcbd96f9069ce9a2665e0146588dc9f88f29549711853645e736a/h2-4.3.0-py3-none-any.whl", hash = "sha256:c438f029a25f7945c69e0ccf0fb951dc3f73a5f6412981daee861431b70e2bdd", size = 61779, upload-time = "2025-08-23T18:12:17.779Z" },
+]
+
+[[package]]
+name = "hishel"
+version = "1.1.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "msgpack" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/cf/4e1d09cc81c48ff7498398fd82c87fb21800c85e631d03831703d8594506/hishel-1.1.7.tar.gz", hash = "sha256:32c625be581e94dc50b773a8cfb9a65cba487660561950fe976ae49945455179", size = 61473, upload-time = "2025-12-03T09:32:28.524Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0c/2a/8134de761e4fd9d0a3b301b897b8c5ce9ccb17af7f846d66c676d8c03fd8/hishel-1.1.7-py3-none-any.whl", hash = "sha256:436c2a5a62d705528e581cbeba85b10d130c47c861906b21262a07ac02463a9f", size = 70569, upload-time = "2025-12-03T09:32:27.144Z" },
+]
+
+[package.optional-dependencies]
+httpx = [
+    { name = "anyio" },
+    { name = "anysqlite" },
+    { name = "httpx" },
 ]
 
 [[package]]
@@ -2549,6 +2587,7 @@ dependencies = [
     { name = "anydi" },
     { name = "anydi-django", extra = ["ninja"] },
     { name = "asgiref" },
+    { name = "bitmath" },
     { name = "certifi" },
     { name = "channels", extra = ["daphne"] },
     { name = "cryptography" },
@@ -2571,6 +2610,7 @@ dependencies = [
     { name = "docutils" },
     { name = "expression", extra = ["pydantic"] },
     { name = "gunicorn" },
+    { name = "hishel", extra = ["httpx"] },
     { name = "httpx" },
     { name = "lazy-object-proxy" },
     { name = "loguru" },
@@ -2617,6 +2657,7 @@ requires-dist = [
     { name = "anydi", specifier = ">=0.54.1" },
     { name = "anydi-django", extras = ["ninja"], specifier = ">=0.2.0" },
     { name = "asgiref", specifier = ">=3.8.1" },
+    { name = "bitmath", specifier = ">=1.3.3.1" },
     { name = "certifi", specifier = ">=2024.12.14" },
     { name = "channels", extras = ["daphne"], specifier = ">=4.2.0" },
     { name = "cryptography", specifier = ">=43.0.3" },
@@ -2639,6 +2680,7 @@ requires-dist = [
     { name = "docutils", specifier = ">=0.21.2" },
     { name = "expression", extras = ["pydantic"], specifier = ">=5.6.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "hishel", extras = ["httpx"], specifier = ">=1.1.7" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "lazy-object-proxy", specifier = ">=1.10.0" },
     { name = "loguru", specifier = ">=0.7.3" },
