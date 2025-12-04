@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.59.0
+anydi==0.61.0
     # via
     #   anydi-django
     #   webpeditor
@@ -301,7 +301,7 @@ twisted==25.5.0
     # via
     #   daphne
     #   webpeditor
-txaio==25.9.2
+txaio==25.12.1
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
