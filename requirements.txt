@@ -234,7 +234,7 @@ packaging==25.0
     #   requirements-parser
 pillow==12.0.0
     # via webpeditor
-platformdirs==4.5.0
+platformdirs==4.5.1
     # via webpeditor
 priority==1.3.0
     # via twisted
@@ -334,7 +334,7 @@ u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
 ujson==5.11.0
     # via autobahn
-urllib3==2.5.0
+urllib3==2.6.0
     # via requests
 whitenoise==6.11.0
     # via webpeditor

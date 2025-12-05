@@ -43,7 +43,7 @@ gitpython==3.1.45
     # via dtach
 humanize==4.14.0
     # via nox
-hypothesis==6.148.6
+hypothesis==6.148.7
 identify==2.6.15
     # via pre-commit
 idna==3.11
@@ -81,7 +81,7 @@ pip-api==0.0.34
 pip-audit==2.10.0
 pip-requirements-parser==32.0.1
     # via pip-audit
-platformdirs==4.5.0
+platformdirs==4.5.1
     # via
     #   pip-audit
     #   virtualenv
@@ -132,7 +132,7 @@ tomli-w==1.2.0
     # via
     #   dtach
     #   pip-audit
-urllib3==2.5.0
+urllib3==2.6.0
     # via requests
 uv==0.9.15
     # via nox
