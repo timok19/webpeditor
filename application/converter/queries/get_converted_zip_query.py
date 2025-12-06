@@ -11,7 +11,7 @@ from infrastructure.repositories.converter_files.converter_files_repository impo
 
 
 @final
-class GetZipQuery:
+class GetConvertedZipQuery:
     def __init__(
         self,
         session_service_factory: SessionServiceFactory,

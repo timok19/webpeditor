@@ -10,7 +10,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.15
+  rev: 0.9.16
   hooks:
     - id: uv-sync
       name: "synchronize pyproject.toml dependencies"
@@ -27,10 +27,15 @@ repos:
 - repo: https://github.com/pypa/pip-audit
   rev: v2.10.0
   hooks:
-  - id: pip-audit
-    name: "audit dependencies"
-    args: ["--local", "--cache-dir", ".pip-audit"]
-    verbose: true
+    - id: pip-audit
+      name: "audit dependencies"
+      args:
+        - "-r"
+        - "requirements.txt"
+        - "-r"
+        - "requirements-dev.txt"
+        - "--cache-dir"
+        - ".pip-audit"
 
 ci:
   skip: [ pip-audit ]

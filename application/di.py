@@ -12,7 +12,7 @@ from application.common.services.filename_service import FilenameService
 from application.common.services.image_file_service import ImageFileService
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest
-from application.converter.queries.get_zip_query import GetZipQuery
+from application.converter.queries.get_converted_zip_query import GetConvertedZipQuery
 from application.converter.services.abc.image_file_converter_abc import ImageFileConverterABC
 from application.converter.services.image_file_converter import ImageFileConverter
 from application.converter.validators.conversion_request_validator import ConversionRequestValidator
@@ -86,5 +86,5 @@ class ApplicationModule(Module):
         session_service_factory: SessionServiceFactory,
         converter_files_repo: Annotated[FilesRepositoryABC, ConverterFilesRepository.__name__],
         converter_repo: ConverterImageAssetsRepositoryABC,
-    ) -> GetZipQuery:
-        return GetZipQuery(session_service_factory, converter_files_repo, converter_repo)
+    ) -> GetConvertedZipQuery:
+        return GetConvertedZipQuery(session_service_factory, converter_files_repo, converter_repo)

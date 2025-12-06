@@ -11,7 +11,7 @@ from api.controllers.controller_base import ControllerBase
 from api.throttling import Anonymous60MinutesRateThrottle, Anonymous100PerDayRateThrottle, Anonymous1000PerDayRateThrottle
 from application.converter.commands.convert_images_command import ConvertImagesCommand
 from application.converter.commands.schemas import ConversionRequest, ConversionResponse, GetZipResponse
-from application.converter.queries.get_zip_query import GetZipQuery
+from application.converter.queries.get_converted_zip_query import GetConvertedZipQuery
 from domain.converter.constants import ConverterConstants
 
 
@@ -76,6 +76,6 @@ class ConverterController(ControllerBase):
     )
     async def aget_zip(self) -> ActionResultWithStatus[GetZipResponse]:
         async with container.arequest_context():
-            get_zip_query = await container.aresolve(GetZipQuery)
-            result = await get_zip_query.ahandle(self.http_request)
+            get_converted_zip_query = await container.aresolve(GetConvertedZipQuery)
+            result = await get_converted_zip_query.ahandle(self.http_request)
             return ActionResult[GetZipResponse].from_result(result)

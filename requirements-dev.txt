@@ -134,7 +134,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.0
     # via requests
-uv==0.9.15
+uv==0.9.16
     # via nox
 virtualenv==20.35.4
     # via
