@@ -12,7 +12,6 @@ from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from domain.converter.constants import ConverterConstants
 
-
 type _StrOrBytes = Union[str, bytes]
 
 

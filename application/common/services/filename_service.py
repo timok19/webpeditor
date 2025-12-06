@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Union, Final, final
+from typing import Final, Union, final
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from core.abc.logger_abc import LoggerABC

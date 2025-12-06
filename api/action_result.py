@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from typing import Union, final, Self, Optional
+from typing import Optional, Self, Union, final
 
-from ninja import Schema, Field
+from ninja import Field, Schema
 from pydantic import ConfigDict
 
-from core.result import EnumerableContextResult, ErrorContext, ContextResult
+from core.result import ContextResult, EnumerableContextResult, ErrorContext
 
 type ActionResultWithStatus[T: Schema] = tuple[HTTPStatus, ActionResult[T]]
 

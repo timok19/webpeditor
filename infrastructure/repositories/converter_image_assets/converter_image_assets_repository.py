@@ -1,24 +1,23 @@
 from decimal import Decimal
-from typing import Final, final, cast
+from typing import Final, cast, final
 
 from pydantic import HttpUrl
 
-from core.types import Pair
-from domain.common.models import ImageAssetFile
-from domain.converter.models import ConverterConvertedImageAssetFile, ConverterImageAsset
-from infrastructure.database.models.base import BaseImageAssetFileDo
-from infrastructure.repositories.converter_image_assets.models import CreateAssetFileParams
-
-from webpeditor import settings
 from application.common.services.models.file_info import ImageFileInfo
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext, as_awaitable_result
+from core.types import Pair
+from domain.common.models import ImageAssetFile
+from domain.converter.models import ConverterConvertedImageAssetFile, ConverterImageAsset
 from infrastructure.abc.converter_image_assets_repository_abc import ConverterImageAssetsRepositoryABC
+from infrastructure.database.models.base import BaseImageAssetFileDo
 from infrastructure.database.models.converter import (
     ConverterConvertedImageAssetFileDo,
     ConverterImageAssetDo,
     ConverterOriginalImageAssetFileDo,
 )
+from infrastructure.repositories.converter_image_assets.models import CreateAssetFileParams
+from webpeditor import settings
 
 
 @final

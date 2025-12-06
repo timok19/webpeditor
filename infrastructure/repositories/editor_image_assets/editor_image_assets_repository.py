@@ -4,7 +4,7 @@ from expression import Option
 
 from core.result import ContextResult, ErrorContext, as_awaitable_result
 from infrastructure.abc.editor_image_assets_repository_abc import EditorImageAssetsRepositoryABC
-from infrastructure.database.models.editor import EditorOriginalImageAssetDo, EditorEditedImageAssetDo
+from infrastructure.database.models.editor import EditorEditedImageAssetDo, EditorOriginalImageAssetDo
 
 
 @final

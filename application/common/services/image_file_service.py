@@ -2,9 +2,8 @@ from decimal import ROUND_UP, Decimal
 from io import BytesIO
 from typing import Final, Union, final
 
-from PIL import Image, UnidentifiedImageError, ImageFile, ExifTags
+from PIL import ExifTags, Image, ImageFile, UnidentifiedImageError
 from types_linq import Enumerable
-
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC

@@ -1,5 +1,6 @@
 from http.client import HTTPException
 from typing import Optional
+
 from django.http import HttpRequest
 from ninja_extra import ControllerBase as NinjaControllerBase
 from ninja_extra.context import RouteContext

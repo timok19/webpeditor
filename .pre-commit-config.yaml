@@ -24,12 +24,26 @@ repos:
       name: "export requirements-dev.txt"
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
 
+- repo: https://github.com/pycqa/isort
+  rev: 7.0.0
+  hooks:
+    - id: isort
+      name: "sort imports"
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.14.8
+  hooks:
+    - id: ruff-check
+      name: "ruff linter (with fixes)"
+      args: [ "--fix", "--show-fixes" ]
+    - id: ruff-format
+
 - repo: https://github.com/pypa/pip-audit
   rev: v2.10.0
   hooks:
     - id: pip-audit
       name: "audit dependencies"
-      args: [ "-r", "requirements.txt", "-r", "requirements-dev.txt", "--cache-dir", ".pip-audit" ]
+      args: [ "-r", "requirements.txt", "-r", "requirements-dev.txt" ]
 
 ci:
   skip: [ pip-audit ]

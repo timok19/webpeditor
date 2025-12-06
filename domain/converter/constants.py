@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import final, Final
+from typing import Final, final
 
 from domain.common.constants import ImageFilePropertyConstants
 

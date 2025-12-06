@@ -9,9 +9,8 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 
-from infrastructure.database.models.api import APIKeyDo
-from infrastructure.utils import APIKeyUtils
 from core.types import Pair
+from infrastructure.database.models.api import APIKeyDo
 from infrastructure.database.models.converter import (
     ConverterConvertedImageAssetFileDo,
     ConverterImageAssetDo,
@@ -23,6 +22,7 @@ from infrastructure.database.models.editor import (
     EditorOriginalImageAssetDo,
     EditorOriginalImageAssetFileDo,
 )
+from infrastructure.utils import APIKeyUtils
 
 
 @admin.register(APIKeyDo)

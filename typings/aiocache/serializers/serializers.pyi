@@ -6,18 +6,12 @@ from typing import Any, Optional
 
 logger = ...
 _NOT_SET = ...
+
 class BaseSerializer:
     DEFAULT_ENCODING: Optional[str] = ...
-    def __init__(self, *args: Any, encoding: Optional[str] = ..., **kwargs: Any) -> None:
-        ...
-
-    def dumps(self, value: Any) -> Any:
-        ...
-
-    def loads(self, value: Any) -> Any:
-        ...
-
-
+    def __init__(self, *args: Any, encoding: Optional[str] = ..., **kwargs: Any) -> None: ...
+    def dumps(self, value: Any) -> Any: ...
+    def loads(self, value: Any) -> Any: ...
 
 class NullSerializer(BaseSerializer):
     """
@@ -47,8 +41,6 @@ class NullSerializer(BaseSerializer):
         """
         ...
 
-
-
 class StringSerializer(BaseSerializer):
     """
     Converts all input values to str. All return values are also str. Be
@@ -75,16 +67,13 @@ class StringSerializer(BaseSerializer):
         """
         ...
 
-
-
 class PickleSerializer(BaseSerializer):
     """
     Transform data to bytes using pickle.dumps and pickle.loads to retrieve it back.
     """
-    DEFAULT_ENCODING = ...
-    def __init__(self, *args: Any, protocol: Optional[int] = ..., **kwargs: Any) -> None:
-        ...
 
+    DEFAULT_ENCODING = ...
+    def __init__(self, *args: Any, protocol: Optional[int] = ..., **kwargs: Any) -> None: ...
     def dumps(self, value: Any) -> bytes:
         """
         Serialize the received value using ``pickle.dumps``.
@@ -102,8 +91,6 @@ class PickleSerializer(BaseSerializer):
         :returns: obj
         """
         ...
-
-
 
 class JsonSerializer(BaseSerializer):
     """
@@ -133,8 +120,6 @@ class JsonSerializer(BaseSerializer):
         """
         ...
 
-
-
 class MsgPackSerializer(BaseSerializer):
     """
     Transform data to bytes using msgpack.dumps and msgpack.loads to retrieve it back. You need
@@ -145,9 +130,7 @@ class MsgPackSerializer(BaseSerializer):
     :param use_list: bool. Can be used to change use_list param for ``msgpack.loads`` method.
         Default is True.
     """
-    def __init__(self, *args: Any, use_list: bool = ..., **kwargs: Any) -> None:
-        ...
-
+    def __init__(self, *args: Any, use_list: bool = ..., **kwargs: Any) -> None: ...
     def dumps(self, value: Any) -> bytes:
         """
         Serialize the received value using ``msgpack.dumps``.

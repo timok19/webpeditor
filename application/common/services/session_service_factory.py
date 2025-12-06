@@ -1,4 +1,4 @@
-from typing import final, Final
+from typing import Final, final
 
 from django.http import HttpRequest
 

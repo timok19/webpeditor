@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import Any
+
 from django.http import HttpRequest, HttpResponse
 from django.views.generic import TemplateView
 

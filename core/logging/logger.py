@@ -4,8 +4,8 @@ from typing import final
 import loguru
 from django.http.request import HttpRequest
 
-from webpeditor import settings
 from core.abc.logger_abc import LoggerABC
+from webpeditor import settings
 
 
 @final

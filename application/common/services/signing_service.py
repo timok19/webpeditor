@@ -2,10 +2,10 @@ from typing import Any, Final, final
 
 from django.core import signing
 
-from webpeditor import settings
 from application.common.abc.signing_service_abc import SigningServiceABC
 from core.abc.logger_abc import LoggerABC
 from core.result import ContextResult, ErrorContext
+from webpeditor import settings
 
 
 @final

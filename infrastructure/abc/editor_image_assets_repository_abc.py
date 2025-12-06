@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from core.result import ContextResult, as_awaitable_result
-from infrastructure.database.models.editor import EditorOriginalImageAssetDo, EditorEditedImageAssetDo
+from infrastructure.database.models.editor import EditorEditedImageAssetDo, EditorOriginalImageAssetDo
 
 
 class EditorImageAssetsRepositoryABC(ABC):

@@ -1,4 +1,5 @@
 from typing import Optional, override
+
 from django.http import HttpRequest
 from ninja_extra.throttling import SimpleRateThrottle
 

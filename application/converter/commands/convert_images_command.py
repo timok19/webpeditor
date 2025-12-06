@@ -1,35 +1,30 @@
 import asyncio
 import hashlib
-from typing import Annotated, Final, cast, final, Optional
+from typing import Annotated, Final, Optional, cast, final
 
-from PIL import Image
-from PIL.ImageFile import ImageFile
 from aiocache.backends.memory import SimpleMemoryCache
 from django.http import HttpRequest
 from ninja import UploadedFile
+from PIL import Image
+from PIL.ImageFile import ImageFile
 from pydantic import HttpUrl
 from types_linq import Enumerable
 
 from application.common.abc.filename_service_abc import FilenameServiceABC
 from application.common.abc.image_file_service_abc import ImageFileServiceABC
 from application.common.abc.validator_abc import ValidatorABC
-from application.common.services.session_service_factory import SessionServiceFactory
-from core.types import Pair
-from domain.common.models import ImageAssetFile
-from domain.converter.models import ConverterConvertedImageAssetFile, ConverterOriginalImageAssetFile
-from infrastructure.abc.files_repository_abc import FilesRepositoryABC
 from application.common.services.models.file_info import ImageFileInfo
-from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
+from application.common.services.session_service_factory import SessionServiceFactory
 from application.converter.commands.schemas.conversion import ConversionRequest, ConversionResponse
 from application.converter.services.abc.image_file_converter_abc import ImageFileConverterABC
 from core.abc.logger_abc import LoggerABC
-from core.result import (
-    ContextResult,
-    EnumerableContextResult,
-    as_awaitable_result,
-    as_awaitable_enumerable_result,
-)
+from core.result import ContextResult, EnumerableContextResult, as_awaitable_enumerable_result, as_awaitable_result
+from core.types import Pair
+from domain.common.models import ImageAssetFile
+from domain.converter.models import ConverterConvertedImageAssetFile, ConverterOriginalImageAssetFile
 from infrastructure.abc.converter_image_assets_repository_abc import ConverterImageAssetsRepositoryABC
+from infrastructure.abc.files_repository_abc import FilesRepositoryABC
+from infrastructure.repositories.converter_files.converter_files_repository import ConverterFilesRepository
 from infrastructure.repositories.converter_files.models import UploadFileParams
 from infrastructure.repositories.converter_image_assets.models import CreateAssetFileParams
 
