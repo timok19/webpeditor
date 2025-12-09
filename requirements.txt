@@ -138,7 +138,7 @@ django-stubs-ext==5.2.8
     #   webpeditor
 django-types==0.22.0
     # via webpeditor
-django-unfold==0.72.0
+django-unfold==0.73.1
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
@@ -301,7 +301,7 @@ twisted==25.5.0
     # via
     #   daphne
     #   webpeditor
-txaio==25.12.1
+txaio==25.12.2
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
@@ -334,7 +334,7 @@ u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
 ujson==5.11.0
     # via autobahn
-urllib3==2.6.0
+urllib3==2.6.1
     # via
     #   requests
     #   webpeditor

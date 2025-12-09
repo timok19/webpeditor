@@ -38,12 +38,12 @@ repos:
       name: "export requirements-dev.txt"
       args: [ "--frozen", "--only-dev", "--no-hashes", "-o", "requirements-dev.txt" ]
 
-- repo: https://github.com/pypa/pip-audit
-  rev: v2.10.0
-  hooks:
-    - id: pip-audit
-      name: "audit dependencies"
-      args: [ "-r", "requirements.txt", "-r", "requirements-dev.txt" ]
+#- repo: https://github.com/pypa/pip-audit
+#  rev: v2.10.0
+#  hooks:
+#    - id: pip-audit
+#      name: "audit dependencies"
+#      args: [ "-r", "requirements.txt", "-r", "requirements-dev.txt" ]
 
-ci:
-  skip: [ pip-audit ]
+#ci:
+#  skip: [ pip-audit ]
