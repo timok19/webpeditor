@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==25.4.0
     # via nox
-basedpyright==1.36.0
+basedpyright==1.36.1
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -62,7 +62,7 @@ networkx==3.6.1
     # via dtach
 nodeenv==1.9.1
     # via pre-commit
-nodejs-wheel-binaries==24.11.1
+nodejs-wheel-binaries==24.12.0
     # via basedpyright
 nox==2025.11.12
 packageurl-python==0.17.6
@@ -117,7 +117,7 @@ rich==14.2.0
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.8
+ruff==0.14.9
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
@@ -132,9 +132,9 @@ tomli-w==1.2.0
     # via
     #   dtach
     #   pip-audit
-urllib3==2.6.1
+urllib3==2.6.2
     # via requests
-uv==0.9.16
+uv==0.9.17
     # via nox
 virtualenv==20.35.4
     # via

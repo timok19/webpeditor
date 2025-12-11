@@ -39,7 +39,7 @@ attrs==25.4.0
     # via
     #   service-identity
     #   twisted
-autobahn==25.11.1
+autobahn==25.12.1
     # via daphne
 automat==25.4.16
     # via twisted
@@ -53,8 +53,10 @@ certifi==2025.11.12
     #   httpx
     #   requests
     #   webpeditor
-cffi==2.0.0 ; platform_python_implementation != 'PyPy'
-    # via cryptography
+cffi==2.0.0
+    # via
+    #   autobahn
+    #   cryptography
 channels==4.3.2
     # via
     #   reactpy-django
@@ -248,7 +250,7 @@ pyasn1-modules==0.4.2
     # via service-identity
 pycodestyle==2.14.0
     # via webpeditor
-pycparser==2.23 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
+pycparser==2.23 ; implementation_name != 'PyPy'
     # via cffi
 pydantic==2.12.5
     # via
@@ -334,7 +336,7 @@ u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
 ujson==5.11.0
     # via autobahn
-urllib3==2.6.1
+urllib3==2.6.2
     # via
     #   requests
     #   webpeditor
