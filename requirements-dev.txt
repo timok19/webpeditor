@@ -87,7 +87,7 @@ platformdirs==4.5.1
     #   virtualenv
 pluggy==1.6.0
     # via pytest
-pre-commit==4.5.0
+pre-commit==4.5.1
 prompt-toolkit==3.0.52
     # via dtach
 py-serializable==2.1.0
@@ -134,7 +134,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.2
     # via requests
-uv==0.9.17
+uv==0.9.18
     # via nox
 virtualenv==20.35.4
     # via
