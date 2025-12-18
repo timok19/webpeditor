@@ -117,7 +117,7 @@ rich==14.2.0
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.9
+ruff==0.14.10
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0

@@ -148,7 +148,7 @@ dnspython==2.8.0
     # via
     #   email-validator
     #   webpeditor
-docutils==0.22.3
+docutils==0.22.4
     # via webpeditor
 email-validator==2.3.0
     # via pydantic
@@ -305,6 +305,8 @@ twisted==25.5.0
     #   webpeditor
 txaio==25.12.2
     # via autobahn
+ty==0.0.3
+    # via webpeditor
 types-linq==1.2.1
     # via webpeditor
 types-psycopg2==2.9.21.20251012

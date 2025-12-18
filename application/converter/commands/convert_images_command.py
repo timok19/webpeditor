@@ -1,6 +1,6 @@
 import asyncio
 import hashlib
-from typing import Annotated, Final, Optional, cast, final
+from typing import Annotated, Final, final
 
 from aiocache.backends.memory import SimpleMemoryCache
 from django.http import HttpRequest
@@ -197,7 +197,7 @@ class ConvertImagesCommand:
     @as_awaitable_enumerable_result
     async def __aget_cache(self, user_id: str, request: ConversionRequest) -> EnumerableContextResult[ConversionResponse]:
         results = await self.__CACHE.get(self.__get_cache_key(user_id, request))
-        return cast(Optional[EnumerableContextResult[ConversionResponse]], results) or EnumerableContextResult[ConversionResponse].empty()
+        return results or EnumerableContextResult[ConversionResponse].empty()
 
     @as_awaitable_enumerable_result
     async def __set_cache(
