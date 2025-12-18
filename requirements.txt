@@ -125,12 +125,12 @@ django-cors-headers==4.9.0
     # via webpeditor
 django-extensions==4.1
     # via webpeditor
-django-ninja==1.4.5
+django-ninja==1.5.1
     # via
     #   anydi-django
     #   django-ninja-extra
     #   webpeditor
-django-ninja-extra==0.30.2
+django-ninja-extra==0.30.8
     # via webpeditor
 django-stubs==5.2.8
     # via webpeditor
