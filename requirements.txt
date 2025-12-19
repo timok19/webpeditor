@@ -295,7 +295,7 @@ service-identity==24.2.0
     # via twisted
 shortuuid==1.0.13
     # via webpeditor
-sqlparse==0.5.4
+sqlparse==0.5.5
     # via
     #   django
     #   webpeditor
@@ -305,8 +305,6 @@ twisted==25.5.0
     #   webpeditor
 txaio==25.12.2
     # via autobahn
-ty==0.0.3
-    # via webpeditor
 types-linq==1.2.1
     # via webpeditor
 types-psycopg2==2.9.21.20251012

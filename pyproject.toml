@@ -55,7 +55,6 @@ dependencies = [
     "shortuuid>=1.0.13",
     "sqlparse>=0.5.3",
     "twisted[http2, tls]>=24.11.0",
-    "ty>=0.0.3",
     "types-linq>=1.2.1",
     "typing-extensions>=4.12.2",
     "urllib3>=2.6.0",
