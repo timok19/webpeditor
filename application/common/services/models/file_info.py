@@ -19,11 +19,11 @@ class ImageFileInfo(BaseModel):
 
         fullname: str
         basename: str
-        short: str
+        shortname: str
 
         @classmethod
-        def create(cls, fullname: str, basename: str, short: str) -> Self:
-            return cls(fullname=fullname, basename=basename, short=short)
+        def create(cls, fullname: str, basename: str, shortname: str) -> Self:
+            return cls(fullname=fullname, basename=basename, shortname=shortname)
 
     class FileDetails(BaseModel):
         model_config = ConfigDict(frozen=True, strict=True, extra="forbid")

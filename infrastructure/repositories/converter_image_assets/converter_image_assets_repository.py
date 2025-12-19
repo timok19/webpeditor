@@ -101,7 +101,7 @@ class ConverterImageAssetsRepository(ConverterImageAssetsRepositoryABC):
             value, _ = await asset_file_type.objects.aget_or_create(
                 file_url=file_url,
                 filename=file_info.filename_details.fullname,
-                filename_shorter=file_info.filename_details.short,
+                filename_shorter=file_info.filename_details.shortname,
                 content_type=f"image/{file_info.file_details.format.lower()}",
                 format=file_info.file_details.format,
                 format_description=file_info.file_details.format_description or "",

@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 description = ""
 license = "MIT License"
 readme = "README.md"
-authors = [{name = "Temirkhan Amanzhanov", email = "tima1199@gmail.com"}]
+authors = [{ name = "Temirkhan Amanzhanov", email = "tima1199@gmail.com" }]
 dependencies = [
     "aiocache[memcached]>=0.12.3",
     "aiofiles>=24.1.0",
@@ -110,7 +110,7 @@ exclude = [
 ]
 line-length = 140
 indent-width = 4
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "B", "S"]
