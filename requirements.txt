@@ -336,7 +336,7 @@ u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
 ujson==5.11.0
     # via autobahn
-urllib3==2.6.2
+urllib3==2.6.3
     # via
     #   requests
     #   webpeditor
