@@ -33,7 +33,7 @@ distlib==0.4.0
 dtach==0.31.2
 execnet==2.1.2
     # via pytest-xdist
-filelock==3.20.2
+filelock==3.20.3
     # via
     #   cachecontrol
     #   virtualenv
