@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.65.0
+anydi==0.67.1
     # via
     #   anydi-django
     #   webpeditor
@@ -168,7 +168,7 @@ h11==0.16.0
     # via httpcore
 h2==4.3.0
     # via twisted
-hishel==1.1.7
+hishel==1.1.8
     # via webpeditor
 hpack==4.1.0
     # via h2
@@ -194,7 +194,7 @@ idna==3.11
     #   twisted
 incremental==24.11.0
     # via twisted
-injector==0.23.0
+injector==0.24.0
     # via django-ninja-extra
 jsonpatch==1.33
     # via reactpy
@@ -222,7 +222,7 @@ nest-asyncio==1.6.0
     # via reactpy-django
 ninja-schema==0.14.3
     # via webpeditor
-numpy==2.4.0
+numpy==2.4.1
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
@@ -336,7 +336,7 @@ u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
 ujson==5.11.0
     # via autobahn
-urllib3==2.6.2
+urllib3==2.6.3
     # via
     #   requests
     #   webpeditor
@@ -348,5 +348,5 @@ wrapt==2.0.1
     # via
     #   anydi
     #   webpeditor
-zope-interface==8.1.1
+zope-interface==8.2
     # via twisted
