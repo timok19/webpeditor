@@ -242,7 +242,7 @@ priority==1.3.0
     # via twisted
 py-ubjson==0.16.1
     # via autobahn
-pyasn1==0.6.1
+pyasn1==0.6.2
     # via
     #   pyasn1-modules
     #   service-identity
