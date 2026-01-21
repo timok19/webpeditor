@@ -132,9 +132,9 @@ django-ninja==1.5.1
     #   webpeditor
 django-ninja-extra==0.30.8
     # via webpeditor
-django-stubs==5.2.8
+django-stubs==5.2.9
     # via webpeditor
-django-stubs-ext==5.2.8
+django-stubs-ext==5.2.9
     # via
     #   django-stubs
     #   webpeditor
