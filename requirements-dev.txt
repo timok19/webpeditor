@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==25.4.0
     # via nox
-basedpyright==1.37.1
+basedpyright==1.37.3
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -21,7 +21,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   pytest
 colorlog==6.10.1
     # via nox
-coverage==7.13.1
+coverage==7.13.2
 cyclonedx-python-lib==11.6.0
     # via pip-audit
 defusedxml==0.7.1
@@ -43,7 +43,7 @@ gitpython==3.1.46
     # via dtach
 humanize==4.15.0
     # via nox
-hypothesis==6.150.2
+hypothesis==6.151.4
 identify==2.6.16
     # via pre-commit
 idna==3.11
@@ -67,14 +67,14 @@ nodejs-wheel-binaries==24.13.0
 nox==2025.11.12
 packageurl-python==0.17.6
     # via cyclonedx-python-lib
-packaging==25.0
+packaging==26.0
     # via
     #   dependency-groups
     #   nox
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
-pip==25.3
+pip==26.0
     # via pip-api
 pip-api==0.0.34
     # via pip-audit
@@ -113,11 +113,11 @@ requests==2.32.5
     # via
     #   cachecontrol
     #   pip-audit
-rich==14.2.0
+rich==14.3.2
     # via
     #   dtach
     #   pip-audit
-ruff==0.14.13
+ruff==0.14.14
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
@@ -134,11 +134,11 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.9.26
+uv==0.9.28
     # via nox
 virtualenv==20.36.1
     # via
     #   nox
     #   pre-commit
-wcwidth==0.2.14
+wcwidth==0.5.3
     # via prompt-toolkit
