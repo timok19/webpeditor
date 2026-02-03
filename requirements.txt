@@ -96,7 +96,7 @@ dill==0.4.1
     # via
     #   reactpy-django
     #   webpeditor
-django==6.0.1
+django==6.0.2
     # via
     #   anydi-django
     #   channels
