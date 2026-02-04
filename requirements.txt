@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.71.0
+anydi==0.72.0
     # via
     #   anydi-django
     #   webpeditor
@@ -25,7 +25,7 @@ anyio==4.12.1
     #   reactpy
 anysqlite==0.0.5
     # via hishel
-asgiref==3.11.0
+asgiref==3.11.1
     # via
     #   channels
     #   daphne
@@ -96,7 +96,7 @@ dill==0.4.1
     # via
     #   reactpy-django
     #   webpeditor
-django==6.0.1
+django==6.0.2
     # via
     #   anydi-django
     #   channels
@@ -138,9 +138,9 @@ django-stubs-ext==5.2.9
     # via
     #   django-stubs
     #   webpeditor
-django-types==0.22.0
+django-types==0.23.0
     # via webpeditor
-django-unfold==0.78.0
+django-unfold==0.78.1
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
@@ -226,7 +226,7 @@ numpy==2.4.2
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
-orjson==3.11.6
+orjson==3.11.7
     # via reactpy-django
 packaging==26.0
     # via
@@ -344,7 +344,7 @@ whitenoise==6.11.0
     # via webpeditor
 win32-setctime==1.2.0 ; sys_platform == 'win32'
     # via loguru
-wrapt==2.1.0
+wrapt==2.1.1
     # via
     #   anydi
     #   webpeditor
