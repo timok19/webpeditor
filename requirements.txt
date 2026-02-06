@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.72.0
+anydi==0.73.0
     # via
     #   anydi-django
     #   webpeditor
@@ -168,7 +168,7 @@ h11==0.16.0
     # via httpcore
 h2==4.3.0
     # via twisted
-hishel==1.1.8
+hishel==1.1.9
     # via webpeditor
 hpack==4.1.0
     # via h2
