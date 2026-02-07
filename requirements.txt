@@ -162,7 +162,7 @@ fastjsonschema==2.21.2
     # via reactpy
 fido2==2.1.1
     # via django-allauth
-gunicorn==25.0.1
+gunicorn==25.0.2
     # via webpeditor
 h11==0.16.0
     # via httpcore
