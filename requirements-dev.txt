@@ -21,7 +21,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   pytest
 colorlog==6.10.1
     # via nox
-coverage==7.13.3
+coverage==7.13.4
 cyclonedx-python-lib==11.6.0
     # via pip-audit
 defusedxml==0.7.1
