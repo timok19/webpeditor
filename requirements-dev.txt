@@ -33,7 +33,7 @@ distlib==0.4.0
 dtach==0.31.2
 execnet==2.1.2
     # via pytest-xdist
-filelock==3.24.0
+filelock==3.24.2
     # via
     #   cachecontrol
     #   virtualenv
@@ -43,7 +43,7 @@ gitpython==3.1.46
     # via dtach
 humanize==4.15.0
     # via nox
-hypothesis==6.151.6
+hypothesis==6.151.8
 identify==2.6.16
     # via pre-commit
 idna==3.11
@@ -81,7 +81,7 @@ pip-api==0.0.34
 pip-audit==2.10.0
 pip-requirements-parser==32.0.1
     # via pip-audit
-platformdirs==4.9.1
+platformdirs==4.9.2
     # via
     #   pip-audit
     #   virtualenv
@@ -134,7 +134,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.2
+uv==0.10.3
     # via nox
 virtualenv==20.36.1
     # via
