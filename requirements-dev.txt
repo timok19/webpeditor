@@ -43,7 +43,7 @@ gitpython==3.1.46
     # via dtach
 humanize==4.15.0
     # via nox
-hypothesis==6.151.8
+hypothesis==6.151.9
 identify==2.6.16
     # via pre-commit
 idna==3.11

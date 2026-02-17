@@ -140,7 +140,7 @@ django-stubs-ext==5.2.9
     #   webpeditor
 django-types==0.23.0
     # via webpeditor
-django-unfold==0.80.0
+django-unfold==0.80.1
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
