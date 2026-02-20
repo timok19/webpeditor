@@ -113,11 +113,11 @@ requests==2.32.5
     # via
     #   cachecontrol
     #   pip-audit
-rich==14.3.2
+rich==14.3.3
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.1
+ruff==0.15.2
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
