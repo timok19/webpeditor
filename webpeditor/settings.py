@@ -155,12 +155,12 @@ USE_I18N: bool = True
 USE_TZ: bool = True
 
 EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = str(os.getenv("EMAIL_HOST"))
-EMAIL_PORT = int(str(os.getenv("EMAIL_PORT", "587")))
-EMAIL_USE_TLS = bool(int(str(os.getenv("EMAIL_USE_TLS", "1"))))
-EMAIL_HOST_USER = str(os.getenv("EMAIL_HOST_USER"))
-EMAIL_HOST_PASSWORD = str(os.getenv("EMAIL_HOST_PASSWORD"))
-DEFAULT_FROM_EMAIL = str(os.getenv("DEFAULT_FROM_EMAIL"))
+EMAIL_HOST: str = str(os.getenv("EMAIL_HOST"))
+EMAIL_PORT: int = int(str(os.getenv("EMAIL_PORT", "587")))
+EMAIL_USE_TLS: bool = bool(int(str(os.getenv("EMAIL_USE_TLS", "1"))))
+EMAIL_HOST_USER: str = str(os.getenv("EMAIL_HOST_USER"))
+EMAIL_HOST_PASSWORD: str = str(os.getenv("EMAIL_HOST_PASSWORD"))
+DEFAULT_FROM_EMAIL: str = str(os.getenv("DEFAULT_FROM_EMAIL"))
 
 # Session handling
 SESSION_ENGINE: str = "django.contrib.sessions.backends.db"
@@ -212,7 +212,7 @@ CLOUDINARY_BASE_URL: str = str(os.getenv("CLOUDINARY_BASE_URL"))
 CLOUDINARY_CLOUD_NAME: str = str(os.getenv("CLOUDINARY_CLOUD_NAME"))
 CLOUDINARY_API_KEY: str = str(os.getenv("CLOUDINARY_API_KEY"))
 CLOUDINARY_API_SECRET: str = str(os.getenv("CLOUDINARY_API_SECRET"))
-CLOUDINARY_HTTP_TIMEOUT_SECONDS: int = 120  # In seconds
+CLOUDINARY_HTTP_TIMEOUT_SECONDS: int = 120
 
 RESERVED_WINDOWS_FILENAMES: list[str] = str(os.getenv("RESERVED_WINDOWS_FILENAMES")).split(",")
 
