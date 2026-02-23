@@ -10,7 +10,7 @@ aioreactive==0.20.0
     # via webpeditor
 annotated-types==0.7.0
     # via pydantic
-anydi==0.74.1
+anydi==0.74.2
     # via
     #   anydi-django
     #   webpeditor
@@ -307,7 +307,7 @@ txaio==25.12.2
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20251012
+types-psycopg2==2.9.21.20260223
     # via django-types
 types-pyyaml==6.0.12.20250915
     # via django-stubs
