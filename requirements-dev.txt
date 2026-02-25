@@ -9,7 +9,7 @@ boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
     # via pip-audit
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
@@ -134,9 +134,9 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.4
+uv==0.10.6
     # via nox
-virtualenv==20.38.0
+virtualenv==20.39.0
     # via
     #   nox
     #   pre-commit

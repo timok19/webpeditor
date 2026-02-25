@@ -47,7 +47,7 @@ bitmath==1.3.3.1
     # via webpeditor
 cbor2==5.8.0
     # via autobahn
-certifi==2026.1.4
+certifi==2026.2.25
     # via
     #   httpcore
     #   httpx
@@ -140,7 +140,7 @@ django-stubs-ext==5.2.9
     #   webpeditor
 django-types==0.23.0
     # via webpeditor
-django-unfold==0.80.2
+django-unfold==0.81.0
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
