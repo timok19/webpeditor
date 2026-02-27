@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==25.4.0
     # via nox
-basedpyright==1.38.1
+basedpyright==1.38.2
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -36,6 +36,7 @@ execnet==2.1.2
 filelock==3.24.3
     # via
     #   cachecontrol
+    #   python-discovery
     #   virtualenv
 gitdb==4.0.12
     # via gitpython
@@ -62,7 +63,7 @@ networkx==3.6.1
     # via dtach
 nodeenv==1.10.0
     # via pre-commit
-nodejs-wheel-binaries==24.13.1
+nodejs-wheel-binaries==24.14.0
     # via basedpyright
 nox==2026.2.9
 packageurl-python==0.17.6
@@ -84,6 +85,7 @@ pip-requirements-parser==32.0.1
 platformdirs==4.9.2
     # via
     #   pip-audit
+    #   python-discovery
     #   virtualenv
 pluggy==1.6.0
     # via pytest
@@ -105,6 +107,8 @@ pyparsing==3.3.2
 pytest==9.0.2
     # via pytest-xdist
 pytest-xdist==3.8.0
+python-discovery==1.1.0
+    # via virtualenv
 pyyaml==6.0.3
     # via
     #   dtach
@@ -117,7 +121,7 @@ rich==14.3.3
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.2
+ruff==0.15.4
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
@@ -134,9 +138,9 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.6
+uv==0.10.7
     # via nox
-virtualenv==20.39.0
+virtualenv==21.1.0
     # via
     #   nox
     #   pre-commit
