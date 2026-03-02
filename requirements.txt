@@ -263,7 +263,7 @@ pyjwt==2.11.0
     # via django-allauth
 pyopenssl==25.3.0
     # via twisted
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via webpeditor
 pytz==2025.2
     # via webpeditor

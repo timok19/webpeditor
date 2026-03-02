@@ -33,7 +33,7 @@ distlib==0.4.0
 dtach==0.31.2
 execnet==2.1.2
     # via pytest-xdist
-filelock==3.24.3
+filelock==3.25.0
     # via
     #   cachecontrol
     #   python-discovery
@@ -45,7 +45,7 @@ gitpython==3.1.46
 humanize==4.15.0
     # via nox
 hypothesis==6.151.9
-identify==2.6.16
+identify==2.6.17
     # via pre-commit
 idna==3.11
     # via requests
