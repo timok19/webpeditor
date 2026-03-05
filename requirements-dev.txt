@@ -82,7 +82,7 @@ pip-api==0.0.34
 pip-audit==2.10.0
 pip-requirements-parser==32.0.1
     # via pip-audit
-platformdirs==4.9.2
+platformdirs==4.9.4
     # via
     #   pip-audit
     #   python-discovery
@@ -121,7 +121,7 @@ rich==14.3.3
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.4
+ruff==0.15.5
 smmap==5.0.2
     # via gitdb
 sortedcontainers==2.4.0
@@ -138,7 +138,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.7
+uv==0.10.8
     # via nox
 virtualenv==21.1.0
     # via
