@@ -259,7 +259,7 @@ pydantic==2.12.5
     #   ninja-schema
 pydantic-core==2.41.5
     # via pydantic
-pyjwt==2.11.0
+pyjwt==2.12.0
     # via django-allauth
 pyopenssl==25.3.0
     # via twisted
