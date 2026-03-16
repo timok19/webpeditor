@@ -13,7 +13,7 @@ certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.5
+charset-normalizer==3.4.6
     # via requests
 colorama==0.4.6 ; sys_platform == 'win32'
     # via
@@ -45,7 +45,7 @@ gitpython==3.1.46
 humanize==4.15.0
     # via nox
 hypothesis==6.151.9
-identify==2.6.17
+identify==2.6.18
     # via pre-commit
 idna==3.11
     # via requests
@@ -121,7 +121,7 @@ rich==14.3.3
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.5
+ruff==0.15.6
 smmap==5.0.3
     # via gitdb
 sortedcontainers==2.4.0
@@ -138,7 +138,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.9
+uv==0.10.10
     # via nox
 virtualenv==21.2.0
     # via
