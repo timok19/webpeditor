@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==25.4.0
     # via nox
-basedpyright==1.38.2
+basedpyright==1.38.3
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -21,8 +21,8 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   pytest
 colorlog==6.10.1
     # via nox
-coverage==7.13.4
-cyclonedx-python-lib==11.6.0
+coverage==7.13.5
+cyclonedx-python-lib==11.7.0
     # via pip-audit
 defusedxml==0.7.1
     # via py-serializable
@@ -138,7 +138,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.10
+uv==0.10.11
     # via nox
 virtualenv==21.2.0
     # via
