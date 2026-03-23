@@ -2,7 +2,7 @@
 #    uv export --frozen --only-dev --no-hashes -o requirements-dev.txt
 argcomplete==3.6.3
     # via nox
-attrs==25.4.0
+attrs==26.1.0
     # via nox
 basedpyright==1.38.3
 boolean-py==5.0
@@ -121,7 +121,7 @@ rich==14.3.3
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.6
+ruff==0.15.7
 smmap==5.0.3
     # via gitdb
 sortedcontainers==2.4.0
@@ -138,7 +138,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.11
+uv==0.10.12
     # via nox
 virtualenv==21.2.0
     # via
