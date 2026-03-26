@@ -142,7 +142,7 @@ django-types==0.23.0
     # via webpeditor
 django-unfold==0.87.0
     # via webpeditor
-djhtml==3.0.10
+djhtml==3.0.11
     # via webpeditor
 dnspython==2.8.0
     # via
