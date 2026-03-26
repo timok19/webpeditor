@@ -16,7 +16,7 @@ anydi==0.74.2
     #   webpeditor
 anydi-django==0.6.0
     # via webpeditor
-anyio==4.12.1
+anyio==4.13.0
     # via
     #   anydi
     #   anysqlite
@@ -80,7 +80,7 @@ constantly==23.10.4
     # via twisted
 contextlib2==21.6.0
     # via django-ninja-extra
-cryptography==46.0.5
+cryptography==46.0.6
     # via
     #   autobahn
     #   fido2
@@ -140,7 +140,7 @@ django-stubs-ext==6.0.1
     #   webpeditor
 django-types==0.23.0
     # via webpeditor
-django-unfold==0.86.1
+django-unfold==0.87.0
     # via webpeditor
 djhtml==3.0.10
     # via webpeditor
@@ -162,7 +162,7 @@ fastjsonschema==2.21.2
     # via reactpy
 fido2==2.1.1
     # via django-allauth
-gunicorn==25.1.0
+gunicorn==25.2.0
     # via webpeditor
 h11==0.16.0
     # via httpcore
@@ -198,7 +198,7 @@ injector==0.24.0
     # via django-ninja-extra
 jsonpatch==1.33
     # via reactpy
-jsonpointer==3.1.0
+jsonpointer==3.1.1
     # via jsonpatch
 lazy-object-proxy==1.12.0
     # via webpeditor
@@ -283,7 +283,7 @@ reactpy-django==5.2.1
     # via webpeditor
 reactpy-router==1.0.3
     # via reactpy-django
-requests==2.32.5
+requests==2.33.0
     # via
     #   django-allauth
     #   reactpy
@@ -299,7 +299,7 @@ sqlparse==0.5.5
     # via
     #   django
     #   webpeditor
-tomli==2.4.0 ; python_full_version < '3.15'
+tomli==2.4.1 ; python_full_version < '3.15'
     # via deptry
 twisted==25.5.0
     # via

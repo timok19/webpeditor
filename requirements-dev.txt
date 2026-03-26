@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==26.1.0
     # via nox
-basedpyright==1.38.3
+basedpyright==1.38.4
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -113,7 +113,7 @@ pyyaml==6.0.3
     # via
     #   dtach
     #   pre-commit
-requests==2.32.5
+requests==2.33.0
     # via
     #   cachecontrol
     #   pip-audit
@@ -128,7 +128,7 @@ sortedcontainers==2.4.0
     # via
     #   cyclonedx-python-lib
     #   hypothesis
-tomli==2.4.0
+tomli==2.4.1
     # via
     #   dtach
     #   pip-audit
@@ -138,7 +138,7 @@ tomli-w==1.2.0
     #   pip-audit
 urllib3==2.6.3
     # via requests
-uv==0.10.12
+uv==0.11.1
     # via nox
 virtualenv==21.2.0
     # via
