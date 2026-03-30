@@ -96,7 +96,7 @@ py-serializable==2.1.0
     # via cyclonedx-python-lib
 pydot==4.0.1
     # via dtach
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   pytest
     #   rich
