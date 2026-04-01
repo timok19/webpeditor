@@ -130,11 +130,11 @@ django-ninja==1.6.2
     #   anydi-django
     #   django-ninja-extra
     #   webpeditor
-django-ninja-extra==0.31.3
+django-ninja-extra==0.31.4
     # via webpeditor
-django-stubs==6.0.1
+django-stubs==6.0.2
     # via webpeditor
-django-stubs-ext==6.0.1
+django-stubs-ext==6.0.2
     # via
     #   django-stubs
     #   webpeditor
@@ -162,7 +162,7 @@ fastjsonschema==2.21.2
     # via reactpy
 fido2==2.1.1
     # via django-allauth
-gunicorn==25.2.0
+gunicorn==25.3.0
     # via webpeditor
 h11==0.16.0
     # via httpcore
@@ -222,11 +222,11 @@ nest-asyncio==1.6.0
     # via reactpy-django
 ninja-schema==0.14.3
     # via webpeditor
-numpy==2.4.3
+numpy==2.4.4
     # via webpeditor
 oauthlib==3.3.1
     # via django-allauth
-orjson==3.11.7
+orjson==3.11.8
     # via reactpy-django
 packaging==26.0
     # via
@@ -234,7 +234,7 @@ packaging==26.0
     #   gunicorn
     #   incremental
     #   requirements-parser
-pillow==12.1.1
+pillow==12.2.0
     # via webpeditor
 platformdirs==4.9.4
     # via webpeditor
@@ -283,7 +283,7 @@ reactpy-django==5.2.1
     # via webpeditor
 reactpy-router==1.0.3
     # via reactpy-django
-requests==2.33.0
+requests==2.33.1
     # via
     #   django-allauth
     #   reactpy
