@@ -96,7 +96,7 @@ dill==0.4.1
     # via
     #   reactpy-django
     #   webpeditor
-django==6.0.3
+django==6.0.4
     # via
     #   anydi-django
     #   channels
@@ -140,7 +140,7 @@ django-stubs-ext==6.0.2
     #   webpeditor
 django-types==0.23.0
     # via webpeditor
-django-unfold==0.87.0
+django-unfold==0.88.0
     # via webpeditor
 djhtml==3.0.11
     # via webpeditor

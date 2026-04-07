@@ -104,10 +104,10 @@ pyparsing==3.3.2
     # via
     #   pip-requirements-parser
     #   pydot
-pytest==9.0.2
+pytest==9.0.3
     # via pytest-xdist
 pytest-xdist==3.8.0
-python-discovery==1.2.1
+python-discovery==1.2.2
     # via virtualenv
 pyyaml==6.0.3
     # via
