@@ -44,7 +44,7 @@ gitpython==3.1.46
     # via dtach
 humanize==4.15.0
     # via nox
-hypothesis==6.151.13
+hypothesis==6.152.0
 identify==2.6.18
     # via pre-commit
 idna==3.11
@@ -140,7 +140,7 @@ urllib3==2.6.3
     # via requests
 uv==0.11.6
     # via nox
-virtualenv==21.2.1
+virtualenv==21.2.3
     # via
     #   nox
     #   pre-commit

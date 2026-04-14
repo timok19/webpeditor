@@ -113,7 +113,7 @@ django==6.0.4
     #   ninja-schema
     #   reactpy-django
     #   webpeditor
-django-allauth==65.15.1
+django-allauth==65.16.0
     # via webpeditor
 django-appconf==1.2.0
     # via
@@ -252,12 +252,12 @@ pycodestyle==2.14.0
     # via webpeditor
 pycparser==3.0 ; implementation_name != 'PyPy'
     # via cffi
-pydantic==2.12.5
+pydantic==2.13.0
     # via
     #   django-ninja
     #   expression
     #   ninja-schema
-pydantic-core==2.41.5
+pydantic-core==2.46.0
     # via pydantic
 pyjwt==2.12.1
     # via django-allauth
