@@ -160,7 +160,7 @@ expression==5.6.0
     #   webpeditor
 fastjsonschema==2.21.2
     # via reactpy
-fido2==2.1.1
+fido2==2.2.0
     # via django-allauth
 gunicorn==25.3.0
     # via webpeditor
@@ -228,7 +228,7 @@ oauthlib==3.3.1
     # via django-allauth
 orjson==3.11.8
     # via reactpy-django
-packaging==26.0
+packaging==26.1
     # via
     #   deptry
     #   gunicorn
