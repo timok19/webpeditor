@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==26.1.0
     # via nox
-basedpyright==1.39.2
+basedpyright==1.39.3
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4

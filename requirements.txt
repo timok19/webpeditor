@@ -252,12 +252,12 @@ pycodestyle==2.14.0
     # via webpeditor
 pycparser==3.0 ; implementation_name != 'PyPy'
     # via cffi
-pydantic==2.13.2
+pydantic==2.13.3
     # via
     #   django-ninja
     #   expression
     #   ninja-schema
-pydantic-core==2.46.2
+pydantic-core==2.46.3
     # via pydantic
 pyjwt==2.12.1
     # via django-allauth
