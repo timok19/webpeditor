@@ -4,7 +4,7 @@ argcomplete==3.6.3
     # via nox
 attrs==26.1.0
     # via nox
-basedpyright==1.39.0
+basedpyright==1.39.2
 boolean-py==5.0
     # via license-expression
 cachecontrol==0.14.4
@@ -33,7 +33,7 @@ distlib==0.4.0
 dtach==0.31.2
 execnet==2.1.2
     # via pytest-xdist
-filelock==3.28.0
+filelock==3.29.0
     # via
     #   cachecontrol
     #   python-discovery
@@ -45,7 +45,7 @@ gitpython==3.1.46
 humanize==4.15.0
     # via nox
 hypothesis==6.152.1
-identify==2.6.18
+identify==2.6.19
     # via pre-commit
 idna==3.11
     # via requests
@@ -63,7 +63,7 @@ networkx==3.6.1
     # via dtach
 nodeenv==1.10.0
     # via pre-commit
-nodejs-wheel-binaries==24.14.1
+nodejs-wheel-binaries==24.15.0
     # via basedpyright
 nox==2026.4.10
 packageurl-python==0.17.6
@@ -121,7 +121,7 @@ rich==14.3.4
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.10
+ruff==0.15.11
 smmap==5.0.3
     # via gitdb
 sortedcontainers==2.4.0
