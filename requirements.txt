@@ -47,7 +47,7 @@ bitmath==1.4.0.1
     # via webpeditor
 cbor2==5.9.0
     # via autobahn
-certifi==2026.2.25
+certifi==2026.4.22
     # via
     #   httpcore
     #   httpx
@@ -184,7 +184,7 @@ hyperlink==21.0.0
     # via
     #   autobahn
     #   twisted
-idna==3.11
+idna==3.12
     # via
     #   anyio
     #   email-validator
@@ -309,7 +309,7 @@ txaio==25.12.2
     # via autobahn
 types-linq==1.2.1
     # via webpeditor
-types-psycopg2==2.9.21.20260408
+types-psycopg2==2.9.21.20260422
     # via django-types
 types-pyyaml==6.0.12.20260408
     # via django-stubs
