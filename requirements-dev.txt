@@ -47,7 +47,7 @@ humanize==4.15.0
 hypothesis==6.152.1
 identify==2.6.19
     # via pre-commit
-idna==3.12
+idna==3.13
     # via requests
 iniconfig==2.3.0
     # via pytest

@@ -63,7 +63,7 @@ channels==4.3.2
     #   webpeditor
 charset-normalizer==3.4.7
     # via requests
-click==8.3.2
+click==8.3.3
     # via deptry
 cmdkit==2.7.7
     # via names-generator
@@ -138,7 +138,7 @@ django-stubs-ext==6.0.3
     # via
     #   django-stubs
     #   webpeditor
-django-types==0.23.0
+django-types==0.24.0
     # via webpeditor
 django-unfold==0.90.0
     # via webpeditor
@@ -184,7 +184,7 @@ hyperlink==21.0.0
     # via
     #   autobahn
     #   twisted
-idna==3.12
+idna==3.13
     # via
     #   anyio
     #   email-validator
