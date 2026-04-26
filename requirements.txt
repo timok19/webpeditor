@@ -43,7 +43,7 @@ autobahn==25.12.2
     # via daphne
 automat==25.4.16
     # via twisted
-bitmath==1.4.0.1
+bitmath==2.0.0
     # via webpeditor
 cbor2==5.9.0
     # via autobahn
@@ -80,7 +80,7 @@ constantly==23.10.4
     # via twisted
 contextlib2==21.6.0
     # via django-ninja-extra
-cryptography==46.0.7
+cryptography==47.0.0
     # via
     #   autobahn
     #   fido2
@@ -168,7 +168,7 @@ h11==0.16.0
     # via httpcore
 h2==4.3.0
     # via twisted
-hishel==1.1.10
+hishel==1.2.0
     # via webpeditor
 hpack==4.1.0
     # via h2
@@ -228,7 +228,7 @@ oauthlib==3.3.1
     # via django-allauth
 orjson==3.11.8
     # via reactpy-django
-packaging==26.1
+packaging==26.2
     # via
     #   deptry
     #   gunicorn
@@ -261,7 +261,7 @@ pydantic-core==2.46.3
     # via pydantic
 pyjwt==2.12.1
     # via django-allauth
-pyopenssl==26.0.0
+pyopenssl==26.1.0
     # via twisted
 python-dotenv==1.2.2
     # via webpeditor
@@ -332,7 +332,7 @@ typing-extensions==4.15.0
     #   webpeditor
 typing-inspection==0.4.2
     # via pydantic
-tzdata==2026.1 ; sys_platform == 'win32'
+tzdata==2026.2 ; sys_platform == 'win32'
     # via django
 u-msgpack-python==2.8.0 ; platform_python_implementation != 'CPython'
     # via autobahn
@@ -350,5 +350,5 @@ wrapt==2.1.2
     # via
     #   anydi
     #   webpeditor
-zope-interface==8.3
+zope-interface==8.4
     # via twisted

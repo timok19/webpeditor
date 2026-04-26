@@ -44,7 +44,7 @@ gitpython==3.1.47
     # via dtach
 humanize==4.15.0
     # via nox
-hypothesis==6.152.1
+hypothesis==6.152.2
 identify==2.6.19
     # via pre-commit
 idna==3.13
@@ -68,7 +68,7 @@ nodejs-wheel-binaries==24.15.0
 nox==2026.4.10
 packageurl-python==0.17.6
     # via cyclonedx-python-lib
-packaging==26.1
+packaging==26.2
     # via
     #   dependency-groups
     #   nox
@@ -121,7 +121,7 @@ rich==14.3.4
     # via
     #   dtach
     #   pip-audit
-ruff==0.15.11
+ruff==0.15.12
 smmap==5.0.3
     # via gitdb
 sortedcontainers==2.4.0
